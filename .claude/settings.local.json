@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(pip install *)",
+      "Bash(python -c \"import fitz; print\\(fitz.__doc__\\)\")",
+      "Bash(python -)",
+      "Bash(mkdir -p prototype/assets/fonts prototype/assets/img)",
+      "Bash(cp \"Brand/Assets/Font/OTF/29LTIdris-SharpExtraBold.otf\" prototype/assets/fonts/)",
+      "Bash(cp \"Brand/Assets/Font/OTF/29LTIdris-FlatMedium.otf\" prototype/assets/fonts/)",
+      "Bash(cp \"Brand/Assets/Font/OTF/29LTIdris-FlatRegular.otf\" prototype/assets/fonts/)",
+      "Bash(cp \"Brand/Assets/Font/OTF/29LTIdris-FlatBold.otf\" prototype/assets/fonts/)",
+      "Bash(python -c \"import playwright; print\\('py-playwright ok'\\)\")",
+      "Bash(npx --no-install playwright --version)",
+      "Bash(python patch_css.py)",
+      "Bash(python append_css.py)",
+      "Bash(python patch_pages.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c ' *)",
+      "Bash(python patch2.py)",
+      "Bash(python fix_svc.py)",
+      "Bash(python revert.py)",
+      "Bash(python revert_js.py)"
+    ]
+  }
+}

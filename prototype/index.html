@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ألِف — استوديو إبداعي</title>
+<link rel="icon" href="assets/img/HalfAliph-Icon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="index">
+
+<div class="curtain" id="curtain" aria-hidden="true">
+  <img src="assets/img/Aliph-Icon-cream.svg" alt="">
+</div>
+
+<button class="menu-btn" id="menuBtn" aria-label="القائمة" aria-expanded="false">
+  <span class="bars"><span></span><span></span></span>
+</button>
+
+<div class="nav-overlay" id="navOverlay">
+  <a class="nav-brand" href="index.html"><img src="assets/img/Aliph-Logo-Main-cream.svg" alt="ألِف ALIPH"></a>
+  <nav class="nav-big" aria-label="التنقّل الرئيسي">
+    <a href="index.html" class="nav-item is-current" data-i18n="navHome">الرئيسيّة</a>
+    <a href="library.html" class="nav-item" data-i18n="navWork">الأعمال</a>
+    <a href="about.html" class="nav-item" data-i18n="navAbout">من نحن</a>
+  </nav>
+  <div class="nav-foot">
+    <div class="nav-socials latin" lang="en">
+      <a href="#">INSTAGRAM</a><span>·</span>
+      <a href="#">BEHANCE</a><span>·</span>
+      <a href="#">LINKEDIN</a>
+    </div>
+    <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
+      <span class="ls-knob" aria-hidden="true"></span>
+      <span class="ls-opt" data-l="ar">ع</span>
+      <span class="ls-opt" data-l="en">EN</span>
+    </div>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
+      <span class="ls-knob" aria-hidden="true"></span>
+      <span class="ls-opt" data-l="ar">ع</span>
+      <span class="ls-opt" data-l="en">EN</span>
+    </div>
+    <a class="masthead-logo" href="index.html" aria-label="ألِف — الرئيسية">
+      <img src="assets/img/Aliph-Logo-Main.svg" alt="ألِف ALIPH">
+    </a>
+  </div>
+  <div class="rule-double"></div>
+</header>
+
+<main>
+
+<!-- ══════════ HERO — FILM SLIDESHOW + GLASS PANEL ══════════ -->
+<section class="hero">
+  <div class="filmstrip" id="filmstrip" aria-hidden="true">
+    <div class="film-track" id="filmTrack">
+      <figure class="film-frame">
+        <img src="https://picsum.photos/seed/aliphf1/900/1200" alt="">
+        <span class="frame-no">01A</span>
+        <figcaption data-i18n="fr1">البلدة القديمة — تصوير</figcaption>
+      </figure>
+      <figure class="film-frame">
+        <img src="https://picsum.photos/seed/aliphf2/900/1200" alt="">
+        <span class="frame-no">02A</span>
+        <figcaption data-i18n="fr2">مواسم الزيتون</figcaption>
+      </figure>
+      <figure class="film-frame">
+        <img src="https://picsum.photos/seed/aliphf3/900/1200" alt="">
+        <span class="frame-no">03A</span>
+        <figcaption data-i18n="fr3">ليالي رمضان — فعاليّة</figcaption>
+      </figure>
+      <figure class="film-frame">
+        <img src="https://picsum.photos/seed/aliphf4/900/1200" alt="">
+        <span class="frame-no">04A</span>
+        <figcaption data-i18n="fr4">ورشة الخط</figcaption>
+      </figure>
+      <figure class="film-frame">
+        <img src="https://picsum.photos/seed/aliphf5/900/1200" alt="">
+        <span class="frame-no">05A</span>
+        <figcaption data-i18n="fr5">سوق البلدة — حملة</figcaption>
+      </figure>
+      <figure class="film-frame">
+        <img src="https://picsum.photos/seed/aliphf6/900/1200" alt="">
+        <span class="frame-no">06A</span>
+        <figcaption data-i18n="fr6">جبل الزيتون</figcaption>
+      </figure>
+    </div>
+    <div class="perf-strip perf-top"></div>
+    <div class="perf-strip perf-bottom"></div>
+  </div>
+  <div class="film-grain" aria-hidden="true"></div>
+  <div class="film-vignette" aria-hidden="true"></div>
+
+  <div class="hero-overlay">
+    <div class="hero-panel">
+      <p class="hero-eyebrow" data-i18n="heroEyebrow">استوديو إبداعي — القدس، جبل الزيتون</p>
+      <h1 class="hero-title">
+        <span class="line-mask"><span class="line" data-i18n="hero1">نبدأ من حيث</span></span>
+        <span class="line-mask"><span class="line" data-i18n="hero2">تبدأ الأشياء.</span></span>
+      </h1>
+      <div class="hero-rule" aria-hidden="true"></div>
+      <div class="dropcap-block">
+        <span class="dropcap">
+          <img src="assets/img/Aliph-Icon.svg" alt="أ">
+          <span class="dc-en" lang="en" aria-hidden="true">A</span>
+        </span>
+        <p data-i18n="heroPara">لِف استوديو يبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، ثم رسم النظام كاملًا منها: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم. نصنع الهويّات والمحتوى والحملات والفعاليّات — من الألِف إلى الياء.</p>
+      </div>
+      <div class="hero-meta">
+        <span data-i18n="heroMeta1">منذ ٢٠٢٤</span>
+        <span class="dot">·</span>
+        <span data-i18n="heroMeta2">١٩ مشروعًا</span>
+        <span class="dot">·</span>
+        <span data-i18n="heroMeta3">هويّات · محتوى · تسويق · فعاليّات</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ INTERACTIVE MARQUEE ══════════ -->
+<div class="marquee" id="marquee">
+  <div class="marquee-track" id="marqueeTrack"></div>
+</div>
+
+<!-- ══════════ WHAT WE DO ══════════ -->
+<div class="banner"><h2 data-i18n="svcBanner">ماذا نفعل؟</h2></div>
+
+<section class="services" id="services">
+  <div class="services-strip" role="tablist" aria-label="الخدمات">
+    <button class="service-cell is-active" role="tab" aria-selected="true" data-service="identity">
+      <span>
+        <span class="sc-label" data-i18n="svc1Label">IDENTITY</span>
+        <span class="sc-name" data-i18n="svc1">هويّات بصريّة</span>
+      </span>
+      <span class="sc-num" data-num="12">١٢</span>
+    </button>
+    <button class="service-cell" role="tab" aria-selected="false" data-service="content">
+      <span>
+        <span class="sc-label" data-i18n="svc2Label">CONTENT</span>
+        <span class="sc-name" data-i18n="svc2">صناعة محتوى</span>
+      </span>
+      <span class="sc-num" data-num="87">٨٧</span>
+    </button>
+    <button class="service-cell" role="tab" aria-selected="false" data-service="marketing">
+      <span>
+        <span class="sc-label" data-i18n="svc3Label">MARKETING</span>
+        <span class="sc-name" data-i18n="svc3">تسويق مبتكر</span>
+      </span>
+      <span class="sc-num" data-num="24">٢٤</span>
+    </button>
+    <button class="service-cell" role="tab" aria-selected="false" data-service="events">
+      <span>
+        <span class="sc-label" data-i18n="svc4Label">EVENTS</span>
+        <span class="sc-name" data-i18n="svc4">تنظيم فعاليّات</span>
+      </span>
+      <span class="sc-num" data-num="15">١٥</span>
+    </button>
+  </div>
+
+  <div class="service-example" id="serviceExample">
+    <div class="example-text">
+      <p class="example-kicker" id="exampleKicker">مثال — هويّة بصريّة</p>
+      <h3 class="example-title" id="exampleTitle">مؤسّسة بنيان بحلّتها الجديدة</h3>
+      <p class="example-desc" id="exampleDesc">حضورٌ أوضح وأكثر حداثة، مع الحفاظ على روح العلامة القريبة والمألوفة: شعار، ألوان، تغليف، وظهور يومي.</p>
+    </div>
+    <div class="example-media" id="exampleMedia">
+      <img src="assets/img/DoubleAliph-Icon-cream.svg" alt="" aria-hidden="true">
+    </div>
+  </div>
+
+  <div class="svc-cta-wrap">
+    <a class="oval-btn" href="library.html">
+      <span class="oval-swap">
+        <span class="ob-face ob-label" data-i18n="btnWork">كل الأعمال</span>
+        <span class="ob-face ob-arrow" aria-hidden="true">
+          <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+          </svg>
+        </span>
+      </span>
+    </a>
+  </div>
+</section>
+
+<!-- ══════════ STORY — sticky stacked panels ══════════ -->
+<div class="banner"><h2 data-i18n="storyBanner">لماذا ألِف؟</h2></div>
+
+<section class="story" id="story">
+
+  <article class="story-panel">
+    <div class="story-text">
+      <p class="story-index">٠١</p>
+      <p class="story-eyebrow" data-i18n="st1Eyebrow">الاسم</p>
+      <h3 class="story-title" data-i18n="st1Title">صوت واحد، حرفان، ولغتان.</h3>
+      <p class="story-para" data-i18n="st1Para">يستمدّ ألِف اسمه من الألف: أوّل حروف الأبجدية العربية، والنقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف. ويحمل الاسم معنًى ثانيًا: أَلِفَ، أي اعتاد واطمأنّ واقترب. لذلك يقف الاستوديو عند المعنيين معًا: ثقة الخطوة الأولى، ودفء الشيء المألوف.</p>
+      <span class="story-pull" data-i18n="st1Pull">بداية، وسطر أساس، في الوقت نفسه.</span>
+    </div>
+    <div class="scatter" data-scatter>
+      <figure class="scatter-card sc-a" data-depth="1.4">
+        <img src="https://picsum.photos/seed/aliphs1/800/600" alt="">
+        <figcaption data-i18n="st1Cap1">دفتر الهويّة — الصفحة الأولى</figcaption>
+      </figure>
+      <figure class="scatter-card sc-b" data-depth="2.2">
+        <img src="https://picsum.photos/seed/aliphs2/800/600" alt="">
+        <figcaption data-i18n="st1Cap2">تجارب الخط</figcaption>
+      </figure>
+      <figure class="scatter-card sc-c" data-depth="3">
+        <img src="https://picsum.photos/seed/aliphs3/800/600" alt="">
+        <figcaption data-i18n="st1Cap3">الحرف الأوّل</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <article class="story-panel ink">
+    <div class="story-text">
+      <p class="story-index">٠٢</p>
+      <p class="story-eyebrow" data-i18n="st2Eyebrow">الطريقة</p>
+      <h3 class="story-title" data-i18n="st2Title">نبحث عن النقطة، ثم نرسم النظام.</h3>
+      <p class="story-para" data-i18n="st2Para">لكل علامة نقطة أصل تُبنى منها وتعود إليها. عملنا هو العثور على تلك النقطة أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها: الشعار، والألوان، والخط، والصوت، وطريقة الظهور اليوميّة. لا نبدأ من الشكل، بل ننتهي إليه.</p>
+      <span class="story-pull" data-i18n="st2Pull">من الألِف إلى الياء.</span>
+    </div>
+    <div class="scatter" data-scatter>
+      <figure class="scatter-card sc-a" data-depth="2.6">
+        <img src="https://picsum.photos/seed/aliphs4/800/600" alt="">
+        <figcaption data-i18n="st2Cap1">جلسة عمل — الاستوديو</figcaption>
+      </figure>
+      <figure class="scatter-card sc-b" data-depth="1.5">
+        <img src="https://picsum.photos/seed/aliphs5/800/600" alt="">
+        <figcaption data-i18n="st2Cap2">مسوّدات أوّليّة</figcaption>
+      </figure>
+      <figure class="scatter-card sc-c" data-depth="3.4">
+        <img src="https://picsum.photos/seed/aliphs6/800/600" alt="">
+        <figcaption data-i18n="st2Cap3">اختبار على الورق</figcaption>
+      </figure>
+      <img class="scatter-mark" src="assets/img/HalfAliph-Stamp-cream.svg" alt="" aria-hidden="true">
+    </div>
+  </article>
+
+  <article class="story-panel">
+    <div class="story-text">
+      <p class="story-index">٠٣</p>
+      <p class="story-eyebrow" data-i18n="st3Eyebrow">النظام</p>
+      <h3 class="story-title" data-i18n="st3Title">ألوان من التراب، لا من الصخب.</h3>
+      <p class="story-para" data-i18n="st3Para">حبر أزرق عميق يثبّت النظام البصري، وكريمي دافئ يمنحه مساحة للتنفّس. وحول هذين اللونين تأتي درجات طبيعيّة من الطين والزيتون. الخطّ من عائلة Idris: قسوة حادّة للعناوين، وقسوة مسطّحة للنصوص. والنتيجة نظام مدروس، هادئ، ملموس، وواضح الانتماء إلى ألِف.</p>
+      <span class="story-pull" data-i18n="st3Pull">تعبير قوي في الأعلى، وهدوء مقروء تحته.</span>
+    </div>
+    <div class="scatter" data-scatter>
+      <figure class="scatter-card sc-a" data-depth="1.8">
+        <img src="https://picsum.photos/seed/aliphs7/800/600" alt="">
+        <figcaption data-i18n="st3Cap1">القرطاسيّة</figcaption>
+      </figure>
+      <figure class="scatter-card sc-b" data-depth="3.2">
+        <img src="https://picsum.photos/seed/aliphs8/800/600" alt="">
+        <figcaption data-i18n="st3Cap2">المطبوعات</figcaption>
+      </figure>
+      <figure class="scatter-card sc-c" data-depth="2">
+        <img src="https://picsum.photos/seed/aliphs9/800/600" alt="">
+        <figcaption data-i18n="st3Cap3">لوحة الألوان</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <article class="story-panel ink">
+    <div class="story-text">
+      <p class="story-index">٠٤</p>
+      <p class="story-eyebrow" data-i18n="st4Eyebrow">الوعد</p>
+      <h3 class="story-title" data-i18n="st4Title">أن تبدو النتيجة حتميّة.</h3>
+      <p class="story-para" data-i18n="st4Para">لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف: في المطبوع، وعلى الشاشة، وفي الشارع، وبين يديّ من يستعمله كل يوم. وحين ينتهي العمل، يُختم بختم الاستوديو — علامة ملكيّة صغيرة تقول إن هذا العمل خرج من هنا.</p>
+      <span class="story-pull" data-i18n="st4Pull">راسخة، مدروسة، لا تُخطئها العين.</span>
+      <div class="hero-actions story-cta">
+        <a class="oval-btn" href="about.html">
+          <span class="oval-swap">
+            <span class="ob-face ob-label" data-i18n="btnAbout">تعرّف على ألِف</span>
+            <span class="ob-face ob-arrow" aria-hidden="true">
+              <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+              </svg>
+            </span>
+          </span>
+        </a>
+      </div>
+    </div>
+    <div class="scatter" data-scatter>
+      <figure class="scatter-card sc-a" data-depth="2.4">
+        <img src="https://picsum.photos/seed/aliphs10/800/600" alt="">
+        <figcaption data-i18n="st4Cap1">تسليم مشروع</figcaption>
+      </figure>
+      <figure class="scatter-card sc-b" data-depth="1.6">
+        <img src="https://picsum.photos/seed/aliphs11/800/600" alt="">
+        <figcaption data-i18n="st4Cap2">الختم على العمل</figcaption>
+      </figure>
+      <figure class="scatter-card sc-c" data-depth="3.1">
+        <img src="https://picsum.photos/seed/aliphs12/800/600" alt="">
+        <figcaption data-i18n="st4Cap3">في الشارع</figcaption>
+      </figure>
+    </div>
+  </article>
+
+</section>
+
+</main>
+
+<!-- ══════════ CONTACT FOOTER ══════════ -->
+<footer class="footer" id="contact">
+  <a class="contact-band" href="mailto:info@aliphcreative.com" aria-label="راسلنا">
+    <div class="cb-track" id="contactBandTrack"></div>
+  </a>
+
+  <div class="contact-grid">
+    <div class="contact-lines">
+      <div class="contact-row">
+        <span class="contact-label" data-i18n="cLabelMail">للمشاريع والتعاون</span>
+        <a class="contact-value" href="mailto:info@aliphcreative.com" lang="en" dir="ltr">
+          <span class="cv-swap">
+            <span class="cv-real">info@aliphcreative.com</span>
+            <span class="cv-ghost" aria-hidden="true">info@aliphcreative.com</span>
+          </span>
+        </a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-label" data-i18n="cLabelPhone">هاتف / واتساب</span>
+        <a class="contact-value" href="tel:+972528745090" lang="en" dir="ltr">
+          <span class="cv-swap">
+            <span class="cv-real">+972 52 8745 090</span>
+            <span class="cv-ghost" aria-hidden="true">+972 52 8745 090</span>
+          </span>
+        </a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-label" data-i18n="cLabelPlace">الاستوديو</span>
+        <span class="contact-value" data-i18n="cPlace">القدس — جبل الزيتون</span>
+      </div>
+    </div>
+
+    <div class="contact-side">
+      <img class="contact-stamp" src="assets/img/HalfAliph-Stamp-cream.svg" alt="ختم ألِف">
+      <p class="contact-clock">
+        <span id="clockTime">—</span>
+        <small data-i18n="cClock">بتوقيت القدس</small>
+      </p>
+      <nav class="contact-socials latin" lang="en" aria-label="Social">
+        <a href="#">INSTAGRAM</a>
+        <a href="#">BEHANCE</a>
+        <a href="#">LINKEDIN</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="rule-cream"></div>
+  <div class="footer-legal">
+    <span data-i18n="legal">ألِف © ٢٠٢٦ — جميع الحقوق محفوظة</span>
+    <span class="latin" lang="en">ALIPH CREATIVE</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

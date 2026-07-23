@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الأعمال — ألِف</title>
+<link rel="icon" href="assets/img/HalfAliph-Icon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="library">
+
+<div class="curtain" id="curtain" aria-hidden="true">
+  <img src="assets/img/Aliph-Icon-cream.svg" alt="">
+</div>
+
+<button class="menu-btn" id="menuBtn" aria-label="القائمة" aria-expanded="false">
+  <span class="bars"><span></span><span></span></span>
+</button>
+
+<div class="nav-overlay" id="navOverlay">
+  <a class="nav-brand" href="index.html"><img src="assets/img/Aliph-Logo-Main-cream.svg" alt="ألِف ALIPH"></a>
+  <nav class="nav-big" aria-label="التنقّل الرئيسي">
+    <a href="index.html" class="nav-item" data-i18n="navHome">الرئيسيّة</a>
+    <a href="library.html" class="nav-item is-current" data-i18n="navWork">الأعمال</a>
+    <a href="about.html" class="nav-item" data-i18n="navAbout">من نحن</a>
+  </nav>
+  <div class="nav-foot">
+    <div class="nav-socials latin" lang="en">
+      <a href="#">INSTAGRAM</a><span>·</span>
+      <a href="#">BEHANCE</a><span>·</span>
+      <a href="#">LINKEDIN</a>
+    </div>
+    <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
+      <span class="ls-knob" aria-hidden="true"></span>
+      <span class="ls-opt" data-l="ar">ع</span>
+      <span class="ls-opt" data-l="en">EN</span>
+    </div>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
+      <span class="ls-knob" aria-hidden="true"></span>
+      <span class="ls-opt" data-l="ar">ع</span>
+      <span class="ls-opt" data-l="en">EN</span>
+    </div>
+    <a class="masthead-logo" href="index.html" aria-label="ألِف">
+      <img src="assets/img/Aliph-Logo-Main.svg" alt="ألِف ALIPH">
+    </a>
+  </div>
+  <div class="rule-double"></div>
+</header>
+
+<!-- archive bar: title, stats, view toggle -->
+<div class="lib-bar">
+  <span class="lib-title" data-i18n="libTitle">الأرشيف</span>
+  <span class="lib-stats" data-i18n="libStats">٣ سنوات / ١٩ مشروعًا</span>
+  <span class="lib-toggle" role="group" aria-label="طريقة العرض">
+    <button id="viewIndex" data-i18n="libIndex">فهرس</button>
+    <span class="sep">/</span>
+    <button id="viewPhoto" class="on" data-i18n="libGallery">معرض</button>
+  </span>
+  <a href="about.html" data-i18n="navAbout">من نحن</a>
+</div>
+
+<!-- category accordion — rendered by main.js -->
+<main>
+  <div class="acc" id="accRoot"></div>
+</main>
+
+<footer class="footer">
+  <div class="rule-cream"></div>
+  <div class="footer-legal">
+    <span data-i18n="legal">ألِف © ٢٠٢٦ — جميع الحقوق محفوظة</span>
+    <a class="footer-mail latin" href="mailto:info@aliphcreative.com" lang="en" style="font-size:0.8rem">info@aliphcreative.com</a>
+    <span class="latin" lang="en">ALIPH CREATIVE</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
