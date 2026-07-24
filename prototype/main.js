@@ -5,9 +5,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ══════════ i18n ══════════ */
 const I18N = {
-  navHome:   { ar: "الرئيسيّة", en: "Home" },
-  navWork:   { ar: "الأعمال", en: "Work" },
-  navAbout:  { ar: "من نحن", en: "About" },
+  navHome: { ar: "الرئيسيّة", en: "Home" },
+  navWork: { ar: "الأعمال", en: "Work" },
+  navAbout: { ar: "من نحن", en: "About" },
   metaPlace: { ar: "القدس، جبل الزيتون", en: "Jerusalem, Mount of Olives" },
   metaIssue: { ar: "العدد ٠١ — حزيران ٢٠٢٦", en: "Issue 01 — June 2026" },
 
@@ -134,33 +134,33 @@ const I18N = {
 };
 
 const CATS = [
-  { id: "all",       ar: "الكل", en: "All" },
-  { id: "identity",  ar: "هويّات بصريّة", en: "Identities" },
-  { id: "content",   ar: "صناعة محتوى", en: "Content" },
+  { id: "all", ar: "الكل", en: "All" },
+  { id: "identity", ar: "هويّات بصريّة", en: "Identities" },
+  { id: "content", ar: "صناعة محتوى", en: "Content" },
   { id: "marketing", ar: "تسويق مبتكر", en: "Marketing" },
-  { id: "events",    ar: "تنظيم فعاليّات", en: "Events" },
+  { id: "events", ar: "تنظيم فعاليّات", en: "Events" },
 ];
 
 const PROJECTS = [
-  { ar: "مؤسّسة بنيان",   en: "Bunyan Foundation",    year: 2026, count: 32, cat: "identity",  seed: "aliph01" },
-  { ar: "مواسم الزيتون",  en: "Olive Seasons",        year: 2026, count: 47, cat: "content",   seed: "aliph02" },
-  { ar: "ورشة الخط",      en: "Calligraphy Workshop", year: 2026, count: 15, cat: "events",    seed: "aliph03" },
-  { ar: "حارة النصارى",   en: "Christian Quarter",    year: 2026, count: 22, cat: "content",   seed: "aliph04" },
-  { ar: "مقهى الجبل",     en: "Mountain Café",        year: 2026, count: 18, cat: "identity",  seed: "aliph05" },
-  { ar: "معرض التراث",    en: "Heritage Fair",        year: 2026, count: 26, cat: "events",    seed: "aliph06" },
-  { ar: "سوق البلدة",     en: "Old Town Market",      year: 2026, count: 21, cat: "marketing", seed: "aliph07" },
-  { ar: "جبل الزيتون",    en: "Mount of Olives",      year: 2026, count: 12, cat: "content",   seed: "aliph08" },
-  { ar: "ليالي رمضان",    en: "Ramadan Nights",       year: 2025, count: 64, cat: "events",    seed: "aliph09" },
-  { ar: "البلدة القديمة", en: "The Old City",         year: 2025, count: 33, cat: "content",   seed: "aliph10" },
-  { ar: "مهرجان الصيف",   en: "Summer Festival",      year: 2025, count: 41, cat: "events",    seed: "aliph11" },
-  { ar: "دار الأيتام",    en: "Orphanage Campaign",   year: 2025, count: 17, cat: "marketing", seed: "aliph12" },
-  { ar: "مطعم الديوان",   en: "Al-Diwan Restaurant",  year: 2025, count: 25, cat: "identity",  seed: "aliph13" },
-  { ar: "أسبوع التصميم",  en: "Design Week",          year: 2025, count: 19, cat: "events",    seed: "aliph14" },
-  { ar: "افتتاح المكتبة", en: "Library Opening",      year: 2024, count: 29, cat: "events",    seed: "aliph15" },
-  { ar: "حملة التخرّج",   en: "Graduation Campaign",  year: 2024, count: 36, cat: "marketing", seed: "aliph16" },
-  { ar: "بيت الشباب",     en: "Youth House",          year: 2024, count: 14, cat: "identity",  seed: "aliph17" },
-  { ar: "نادي القراءة",   en: "Reading Club",         year: 2024, count: 11, cat: "content",   seed: "aliph18" },
-  { ar: "عرس فلسطيني",    en: "Palestinian Wedding",  year: 2024, count: 53, cat: "content",   seed: "aliph19" },
+  { ar: "مؤسّسة بنيان", en: "Bunyan Foundation", year: 2026, count: 32, cat: "identity", seed: "aliph01" },
+  { ar: "مواسم الزيتون", en: "Olive Seasons", year: 2026, count: 47, cat: "content", seed: "aliph02" },
+  { ar: "ورشة الخط", en: "Calligraphy Workshop", year: 2026, count: 15, cat: "events", seed: "aliph03" },
+  { ar: "حارة النصارى", en: "Christian Quarter", year: 2026, count: 22, cat: "content", seed: "aliph04" },
+  { ar: "مقهى الجبل", en: "Mountain Café", year: 2026, count: 18, cat: "identity", seed: "aliph05" },
+  { ar: "معرض التراث", en: "Heritage Fair", year: 2026, count: 26, cat: "events", seed: "aliph06" },
+  { ar: "سوق البلدة", en: "Old Town Market", year: 2026, count: 21, cat: "marketing", seed: "aliph07" },
+  { ar: "جبل الزيتون", en: "Mount of Olives", year: 2026, count: 12, cat: "content", seed: "aliph08" },
+  { ar: "ليالي رمضان", en: "Ramadan Nights", year: 2025, count: 64, cat: "events", seed: "aliph09" },
+  { ar: "البلدة القديمة", en: "The Old City", year: 2025, count: 33, cat: "content", seed: "aliph10" },
+  { ar: "مهرجان الصيف", en: "Summer Festival", year: 2025, count: 41, cat: "events", seed: "aliph11" },
+  { ar: "دار الأيتام", en: "Orphanage Campaign", year: 2025, count: 17, cat: "marketing", seed: "aliph12" },
+  { ar: "مطعم الديوان", en: "Al-Diwan Restaurant", year: 2025, count: 25, cat: "identity", seed: "aliph13" },
+  { ar: "أسبوع التصميم", en: "Design Week", year: 2025, count: 19, cat: "events", seed: "aliph14" },
+  { ar: "افتتاح المكتبة", en: "Library Opening", year: 2024, count: 29, cat: "events", seed: "aliph15" },
+  { ar: "حملة التخرّج", en: "Graduation Campaign", year: 2024, count: 36, cat: "marketing", seed: "aliph16" },
+  { ar: "بيت الشباب", en: "Youth House", year: 2024, count: 14, cat: "identity", seed: "aliph17" },
+  { ar: "نادي القراءة", en: "Reading Club", year: 2024, count: 11, cat: "content", seed: "aliph18" },
+  { ar: "عرس فلسطيني", en: "Palestinian Wedding", year: 2024, count: 53, cat: "content", seed: "aliph19" },
 ];
 
 /* marquee items — the four services link to the services section */
@@ -212,7 +212,7 @@ const TESTIMONIALS = [
 
 let lang = localStorage.getItem("aliph-lang") === "en" ? "en" : "ar";
 
-const AR_DIGITS = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
+const AR_DIGITS = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
 function num(n) {
   const s = String(n);
   return lang === "ar" ? s.replace(/[0-9]/g, (d) => AR_DIGITS[+d]) : s;
@@ -230,9 +230,8 @@ function makeLoop(track, speed) {
 
   const group = document.createElement("div");
   group.className = "loop-group";
-  group.style.cssText = `display:flex;align-items:center;flex:0 0 auto;column-gap:${gap}px;height:${
-    track.classList.contains("film-track") ? "100%" : "auto"
-  };`;
+  group.style.cssText = `display:flex;align-items:center;flex:0 0 auto;column-gap:${gap}px;height:${track.classList.contains("film-track") ? "100%" : "auto"
+    };`;
   while (track.firstChild) group.appendChild(track.firstChild);
   track.appendChild(group);
 
@@ -253,9 +252,9 @@ function makeLoop(track, speed) {
   });
 }
 
-const FILM_SPEED = 30;      /* px per second */
-const MQ_SPEED = 135;
-const BAND_SPEED = 95;
+const FILM_SPEED = 40;      /* px per second */
+const MQ_SPEED = 40;
+const BAND_SPEED = 40;
 
 let mqTween = null, bandTween = null, filmTween = null, perfTween = null;
 const filmTrack = document.getElementById("filmTrack");
@@ -298,7 +297,7 @@ function startPerf() {
   perfs.forEach((el) => gsap.set(el, { backgroundPositionX: "0px" }));
   perfTween = gsap.to(perfs, {
     backgroundPositionX: dirSign() * tileW,
-    duration: tileW / (FILM_SPEED * 5.6),    /* perfs are denser; tuned to feel synced */
+    duration: tileW / (FILM_SPEED * 1),    /* perfs are denser; tuned to feel synced */
     ease: "none",
     repeat: -1,
     modifiers: {
