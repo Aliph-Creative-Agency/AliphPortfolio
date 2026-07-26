@@ -220,9 +220,10 @@ function num(n) {
 const dirSign = () => (document.documentElement.dir === "rtl" ? 1 : -1);
 
 /* ══════════ seamless infinite loop helper ══════════
-   Wraps a track's children into one group, clones it until the track
-   is wider than 2 viewports, then translates by exactly one group
-   period with a modulo modifier — so the wrap point is invisible. */
+   Wraps a track's children into one group and clones it until the track is
+   wider than the host plus two periods. The tween then travels exactly one
+   period and repeats: shifting periodic content by one period is pixel-
+   identical, so the restart is invisible — no modifier needed. */
 function makeLoop(track, speed) {
   if (!track || prefersReduced) return null;
   const cs = getComputedStyle(track);
@@ -230,8 +231,7 @@ function makeLoop(track, speed) {
 
   const group = document.createElement("div");
   group.className = "loop-group";
-  group.style.cssText = `display:flex;align-items:center;flex:0 0 auto;column-gap:${gap}px;height:${track.classList.contains("film-track") ? "100%" : "auto"
-    };`;
+  group.style.cssText = `display:flex;align-items:center;flex:0 0 auto;column-gap:${gap}px;`;
   while (track.firstChild) group.appendChild(track.firstChild);
   track.appendChild(group);
 
@@ -239,26 +239,63 @@ function makeLoop(track, speed) {
   if (!groupW) return null;
   const period = groupW + gap;
 
-  const copies = Math.ceil((window.innerWidth * 2) / period) + 1;
+  /* the content must stay wider than the host plus the full travel range */
+  const host = track.parentElement;
+  const viewW = host ? host.getBoundingClientRect().width : window.innerWidth;
+  const copies = Math.ceil(viewW / period) + 2;
   for (let i = 0; i < copies; i++) track.appendChild(group.cloneNode(true));
 
+  /* a max-content track is right-aligned under RTL, so measure its natural
+     offset and seed one period before the host's start edge */
   gsap.set(track, { x: 0 });
+  const baseLeft = track.getBoundingClientRect().left - host.getBoundingClientRect().left;
+  const from = -baseLeft - period;
+
+  gsap.set(track, { x: from });
   return gsap.to(track, {
-    x: dirSign() * period,
+    x: from + dirSign() * period,
     duration: period / speed,
     ease: "none",
     repeat: -1,
-    modifiers: { x: gsap.utils.unitize((v) => parseFloat(v) % period) },
   });
 }
 
-const FILM_SPEED = 40;      /* px per second */
 const MQ_SPEED = 40;
 const BAND_SPEED = 40;
 
-let mqTween = null, bandTween = null, filmTween = null, perfTween = null;
-const filmTrack = document.getElementById("filmTrack");
-const filmSource = filmTrack ? filmTrack.innerHTML : "";
+let mqTween = null, bandTween = null;
+
+/* 4 hero film frames — one per service, in service order */
+const FILM_FRAMES = [
+  { seed: "aliphf1", svc: "identity",  cap: { ar: "مؤسّسة بنيان — هويّة", en: "Bunyan — identity" } },
+  { seed: "aliphf3", svc: "content",   cap: { ar: "مواسم الزيتون — محتوى", en: "Olive Seasons — content" } },
+  { seed: "aliphf5", svc: "marketing", cap: { ar: "سوق البلدة — حملة", en: "Old Town Market — campaign" } },
+  { seed: "aliphf7", svc: "events",    cap: { ar: "ليالي رمضان — فعاليّة", en: "Ramadan Nights — event" } },
+];
+const SERVICE_FRAMES = { identity: 0, content: 1, marketing: 2, events: 3 };
+const filmScroll = document.getElementById("filmScroll");
+
+/* One group = the 4 frames. The group is cloned across the strip and the film
+   background tile is sized to exactly one group width, so the sprocket pattern
+   repeats in lockstep with the frames and the loop has no seam. */
+function buildFilm() {
+  if (!filmScroll) return;
+  filmScroll.innerHTML = "";
+  const group = document.createElement("div");
+  group.className = "film-group";
+  FILM_FRAMES.forEach((fr, i) => {
+    const fig = document.createElement("figure");
+    fig.className = "film-frame";
+    fig.dataset.frame = i;
+    fig.dataset.service = fr.svc;
+    fig.innerHTML =
+      `<img src="https://picsum.photos/seed/${fr.seed}/1200/800" alt="">` +
+      `<figcaption>${fr.cap[lang]}</figcaption>`;
+    group.appendChild(fig);
+  });
+  filmScroll.appendChild(group);
+  return group;
+}
 
 function buildMarqueeSource() {
   const track = document.getElementById("marqueeTrack");
@@ -289,30 +326,100 @@ function buildBandSource() {
   }
 }
 
-/* perforation bars: scroll the real film tile in lockstep with the frames */
-function startPerf() {
-  const perfs = document.querySelectorAll(".perf-strip");
-  if (!perfs.length || prefersReduced) return;
-  const tileW = (4322 / 508) * 508;         /* native tile width at 508px height */
-  perfs.forEach((el) => gsap.set(el, { backgroundPositionX: "0px" }));
-  perfTween = gsap.to(perfs, {
-    backgroundPositionX: dirSign() * tileW,
-    duration: tileW / (FILM_SPEED * 1),    /* perfs are denser; tuned to feel synced */
-    ease: "none",
-    repeat: -1,
-    modifiers: {
-      backgroundPositionX: gsap.utils.unitize((v) => (parseFloat(v) % tileW), "px"),
-    },
-  });
-}
-
 function rebuildLoops() {
-  [mqTween, bandTween, filmTween, perfTween].forEach((t) => t && t.kill());
-  filmTween = makeLoop(filmTrack, FILM_SPEED);
+  [mqTween, bandTween].forEach((t) => t && t.kill());
   mqTween = makeLoop(document.getElementById("marqueeTrack"), MQ_SPEED);
   bandTween = makeLoop(document.getElementById("contactBandTrack"), BAND_SPEED);
-  startPerf();
 }
+
+/* ══════════ hero film strip: seamless loop + hover-to-service sync ══════════
+   the strip runs continuously in ONE direction at a CONSTANT speed. one group
+   of 4 frames is cloned across the strip and the film background tile is sized
+   to exactly one group, so translating by one period is pixel-identical — the
+   tween restart is invisible. hovering a service glides to its frame and stops. */
+const filmLoop = (() => {
+  const SPEED = 34;               // px per second, constant
+  let tween = null, period = 0, first = [], ready = false;
+
+  function windowCenter() {
+    const hero = document.querySelector(".hero");
+    const panel = document.querySelector(".hero-panel");
+    if (!hero) return 0;
+    const h = hero.getBoundingClientRect();
+    if (!panel) return h.width / 2;
+    const p = panel.getBoundingClientRect();
+    /* the ink panel hugs one side; the film window is the opposite side */
+    const [ws, we] = (p.left - h.left) >= (h.right - p.right)
+      ? [h.left, p.left] : [p.right, h.right];
+    return (ws + we) / 2 - h.left;
+  }
+
+  /* layout x of the strip's origin, independent of the current translation */
+  function originX() {
+    const hero = document.querySelector(".hero").getBoundingClientRect();
+    const cur = gsap.getProperty(filmScroll, "x") || 0;
+    return filmScroll.getBoundingClientRect().left - hero.left - cur;
+  }
+
+  /* nearest x that centers frame i in the film window (period-aware) */
+  function xForFrame(i) {
+    const f = first[i];
+    const want = windowCenter() - (originX() + f.offsetLeft + f.offsetWidth / 2);
+    const cur = gsap.getProperty(filmScroll, "x") || 0;
+    return want + Math.round((cur - want) / period) * period;
+  }
+
+  function run() {
+    if (tween) tween.kill();
+    if (prefersReduced || !ready) return;
+    const from = gsap.getProperty(filmScroll, "x") || 0;
+    tween = gsap.fromTo(filmScroll,
+      { x: from },
+      { x: from + dirSign() * period, duration: period / SPEED, ease: "none", repeat: -1 }
+    );
+  }
+
+  return {
+    rebuild() {
+      if (tween) tween.kill();
+      ready = false;
+      const group = buildFilm();
+      if (!group) return;
+      gsap.set(filmScroll, { x: 0 });
+      period = group.getBoundingClientRect().width;
+      if (!period) return;
+      /* one scanned film tile per group, so the sprocket run repeats in step
+         with the frames and the loop stays seamless. the frame slot is 1/4 of
+         the tile's own aspect, so the scan is shown unstretched */
+      filmScroll.style.setProperty("--pitch", period + "px");
+      /* cover the window for every x the loop and focus jumps can reach */
+      const viewW = document.querySelector(".hero").getBoundingClientRect().width;
+      const copies = Math.ceil(viewW / period) + 4;
+      for (let i = 0; i < copies; i++) filmScroll.appendChild(group.cloneNode(true));
+      first = Array.from(group.children);
+      ready = true;
+      gsap.set(filmScroll, { x: xForFrame(0) });
+      run();
+    },
+    focus(id) {
+      const i = SERVICE_FRAMES[id];
+      if (i == null || !ready) return;
+      if (tween) tween.kill();
+      if (!prefersReduced) {
+        gsap.to(filmScroll, { x: xForFrame(i), duration: 0.85, ease: "power3.inOut", overwrite: true });
+      }
+      filmScroll.classList.add("has-pop");
+      filmScroll.querySelectorAll(".film-frame").forEach((f) => {
+        f.classList.toggle("pop", +f.dataset.frame === i);
+      });
+    },
+    blur() {
+      filmScroll.classList.remove("has-pop");
+      filmScroll.querySelectorAll(".film-frame.pop").forEach((f) => f.classList.remove("pop"));
+      run();
+    },
+  };
+})();
 
 function tickClock() {
   const el = document.getElementById("clockTime");
@@ -329,8 +436,6 @@ function applyI18n() {
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
 
-  /* restore untranslated film frames before translating, so clones stay clean */
-  if (filmTrack) filmTrack.innerHTML = filmSource;
   buildMarqueeSource();
   buildBandSource();
 
@@ -348,6 +453,7 @@ function applyI18n() {
   renderExample(currentService);
   renderLibrary();
   rebuildLoops();
+  filmLoop.rebuild();
   initScatter();
   tickClock();
 }
@@ -508,31 +614,31 @@ function activateService(id, scroll) {
 
 document.querySelectorAll(".service-cell").forEach((btn) => {
   btn.addEventListener("click", () => activateService(btn.dataset.service, false));
+  /* hovering a service drives the hero film strip to its two frames */
+  btn.addEventListener("mouseenter", () => filmLoop.focus(btn.dataset.service));
+  btn.addEventListener("mouseleave", () => filmLoop.blur());
 });
 
-/* marquee: hover pauses the loop, click jumps to that service */
+/* marquee: hover pauses the loop + syncs the film, click jumps to that service */
 const marquee = document.getElementById("marquee");
 if (marquee) {
   marquee.addEventListener("mouseenter", () => mqTween && mqTween.pause());
   marquee.addEventListener("mouseleave", () => mqTween && mqTween.resume());
+  marquee.addEventListener("mouseover", (e) => {
+    const item = e.target.closest(".mq-item[data-target]");
+    if (item) filmLoop.focus(item.dataset.target);
+  });
+  marquee.addEventListener("mouseout", (e) => {
+    const item = e.target.closest(".mq-item[data-target]");
+    const to = e.relatedTarget && e.relatedTarget.closest(".mq-item[data-target]");
+    if (item && !to) filmLoop.blur();
+  });
   marquee.addEventListener("click", (e) => {
     const item = e.target.closest(".mq-item[data-target]");
     if (item) activateService(item.dataset.target, true);
   });
 }
 
-/* hero film + contact band: pause on hover */
-const filmstrip = document.getElementById("filmstrip");
-if (filmstrip) {
-  filmstrip.addEventListener("mouseenter", () => {
-    filmTween && filmTween.pause();
-    perfTween && perfTween.pause();
-  });
-  filmstrip.addEventListener("mouseleave", () => {
-    filmTween && filmTween.resume();
-    perfTween && perfTween.resume();
-  });
-}
 const band = document.querySelector(".contact-band");
 if (band) {
   band.addEventListener("mouseenter", () => bandTween && bandTween.pause());
@@ -573,6 +679,77 @@ function initScatter() {
         gsap.to(c, { x: 0, y: 0, rotation: c._base, duration: 0.8, ease: "power3.out" })
       );
     });
+  });
+}
+
+/* ══════════ hero dropcap: layered torn-paper cutout ══════════
+   the paper artwork is stacked as three layers; each rests at its own offset
+   and rotation, drifts on its own timing, and separates further on hover */
+function initPaperCap() {
+  const cap = document.querySelector(".dropcap[data-paper]");
+  if (!cap || cap.dataset.bound) return;
+  cap.dataset.bound = "1";
+
+  /* rest pose per layer: [x, y, rotation, hover multiplier] */
+  const POSE = [
+    [".pl-back", -9, 11, -4.2, 2.3],
+    [".pl-mid", -4.5, 5.5, -2.0, 1.7],
+    [".pl-front", 0, 0, 1.1, 1.0],
+  ];
+  const layers = POSE.map(([sel, x, y, rot, mul]) => {
+    const el = cap.querySelector(sel);
+    if (!el) return null;
+    el._pose = { x, y, rot, mul };
+    gsap.set(el, { x, y, rotation: rot });
+    return el;
+  }).filter(Boolean);
+
+  const letter = cap.querySelector(".dc-tile");
+  const grain = cap.querySelector(".paper-grain");
+  if (grain) gsap.set(grain, { rotation: 1.1 });
+  if (prefersReduced) return;
+
+  const idle = (el) => {
+    if (el._idle) el._idle.kill();
+    const p = el._pose;
+    el._idle = gsap.to(el, {
+      x: p.x + gsap.utils.random(-2.5, 2.5),
+      y: p.y + gsap.utils.random(-3.5, 3.5),
+      rotation: p.rot + gsap.utils.random(-1.6, 1.6),
+      duration: gsap.utils.random(3, 4.6),
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true,
+    });
+  };
+
+  /* entrance: layers settle into place, back to front */
+  gsap.from(layers, {
+    y: 26, opacity: 0, duration: 0.85, stagger: 0.1, delay: 0.7,
+    ease: "power3.out", onComplete: () => layers.forEach(idle),
+  });
+
+  cap.addEventListener("mouseenter", () => {
+    layers.forEach((el) => {
+      if (el._idle) el._idle.kill();
+      const p = el._pose;
+      gsap.to(el, {
+        x: p.x * p.mul, y: p.y * p.mul, rotation: p.rot * p.mul,
+        duration: 0.5, ease: "power3.out", overwrite: true,
+      });
+    });
+    gsap.to(letter, { y: -5, scale: 1.06, duration: 0.5, ease: "power3.out", overwrite: true });
+  });
+
+  cap.addEventListener("mouseleave", () => {
+    layers.forEach((el) => {
+      const p = el._pose;
+      gsap.to(el, {
+        x: p.x, y: p.y, rotation: p.rot, duration: 0.7,
+        ease: "power3.out", overwrite: true, onComplete: () => idle(el),
+      });
+    });
+    gsap.to(letter, { y: 0, scale: 1, duration: 0.7, ease: "power3.out", overwrite: true });
   });
 }
 
@@ -701,17 +878,27 @@ if (page === "about" && !prefersReduced) {
       scrollTrigger: { trigger: el, start: "top 92%" },
     });
   });
-  gsap.from(".footer-title .line", {
-    yPercent: 110, duration: 1, stagger: 0.1, ease: "power4.out",
-    scrollTrigger: { trigger: ".footer", start: "top 75%" },
-  });
 }
 
 /* ══════════ boot ══════════ */
 applyI18n();
+initPaperCap();
 setInterval(tickClock, 20000);
+
+/* widths measured before the Idris fonts land are wrong, which leaves a gap in
+   the loops — remeasure once the fonts are actually applied */
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    rebuildLoops();
+    filmLoop.rebuild();
+  });
+}
+
 let resizeTimer;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(rebuildLoops, 250);
+  resizeTimer = setTimeout(() => {
+    rebuildLoops();
+    filmLoop.rebuild();
+  }, 250);
 });

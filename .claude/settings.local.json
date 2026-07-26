@@ -19,7 +19,9 @@
       "Bash(python patch2.py)",
       "Bash(python fix_svc.py)",
       "Bash(python revert.py)",
-      "Bash(python revert_js.py)"
+      "Bash(python revert_js.py)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

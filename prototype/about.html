@@ -113,30 +113,55 @@
 
 </main>
 
+<!-- ══════════ CONTACT FOOTER (shared) ══════════ -->
 <footer class="footer" id="contact">
-  <div class="footer-inner">
-    <div class="footer-main">
-      <h2 class="footer-title">
-        <span class="line-mask"><span class="line" data-i18n="foot1">لنبدأ من</span></span>
-        <span class="line-mask"><span class="line" data-i18n="foot2">الألِف.</span></span>
-      </h2>
-      <a class="footer-mail latin" href="mailto:info@aliphcreative.com" lang="en">info@aliphcreative.com</a>
-      <div class="footer-contacts">
-        <a href="tel:+972528745090" class="latin" dir="ltr">+972 52 8745 090</a>
-        <a href="tel:+972594097725" class="latin" dir="ltr">+972 59 4097 725</a>
-        <span data-i18n="metaPlace">القدس، جبل الزيتون</span>
+  <a class="contact-band" href="mailto:info@aliphcreative.com" aria-label="راسلنا">
+    <div class="cb-track" id="contactBandTrack"></div>
+  </a>
+
+  <div class="contact-grid">
+    <div class="contact-lines">
+      <div class="contact-row">
+        <span class="contact-label" data-i18n="cLabelMail">للمشاريع والتعاون</span>
+        <a class="contact-value" href="mailto:info@aliphcreative.com" lang="en" dir="ltr">
+          <span class="cv-swap">
+            <span class="cv-real">info@aliphcreative.com</span>
+            <span class="cv-ghost" aria-hidden="true">info@aliphcreative.com</span>
+          </span>
+        </a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-label" data-i18n="cLabelPhone">هاتف / واتساب</span>
+        <a class="contact-value" href="tel:+972528745090" lang="en" dir="ltr">
+          <span class="cv-swap">
+            <span class="cv-real">+972 52 8745 090</span>
+            <span class="cv-ghost" aria-hidden="true">+972 52 8745 090</span>
+          </span>
+        </a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-label" data-i18n="cLabelPlace">الاستوديو</span>
+        <span class="contact-value" data-i18n="cPlace">القدس — جبل الزيتون</span>
       </div>
     </div>
-    <img class="footer-stamp" src="assets/img/HalfAliph-Stamp-cream.svg" alt="ختم ألِف">
+
+    <div class="contact-side">
+      <img class="contact-stamp" src="assets/img/HalfAliph-Stamp-cream.svg" alt="ختم ألِف">
+      <p class="contact-clock">
+        <span id="clockTime">—</span>
+        <small data-i18n="cClock">بتوقيت القدس</small>
+      </p>
+      <nav class="contact-socials latin" lang="en" aria-label="Social">
+        <a href="#">INSTAGRAM</a>
+        <a href="#">BEHANCE</a>
+        <a href="#">LINKEDIN</a>
+      </nav>
+    </div>
   </div>
+
   <div class="rule-cream"></div>
   <div class="footer-legal">
     <span data-i18n="legal">ألِف © ٢٠٢٦ — جميع الحقوق محفوظة</span>
-    <nav class="footer-social latin" lang="en" aria-label="Social">
-      <a href="#">INSTAGRAM</a><span>·</span>
-      <a href="#">BEHANCE</a><span>·</span>
-      <a href="#">LINKEDIN</a>
-    </nav>
     <span class="latin" lang="en">ALIPH CREATIVE</span>
   </div>
 </footer>

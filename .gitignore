@@ -1,0 +1,8 @@
+# superseded prototype snapshots kept locally for reference only
+old/
+old prototype/
+
+# OS / editor cruft
+Thumbs.db
+desktop.ini
+.DS_Store

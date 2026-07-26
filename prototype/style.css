@@ -300,96 +300,125 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
   line-height: 1.25;
   color: var(--cream);
   text-align: center;
-  padding: 0.05em 0.2em 0.12em;
+  padding: 0.22em 0.2em 0.14em;
   white-space: nowrap;
 }
 
-/* -- hero: real film strip bg + glass side panel -- */
+/* -- hero: film strip on a cream/linen field + solid ink side panel -- */
 .hero {
+  --hero-h: clamp(560px, 88vh, 940px);
   position: relative;
-  height: clamp(560px, 88vh, 940px);
-  background: var(--ink);
+  height: var(--hero-h);
+  background: var(--cream);          /* shows through the sprocket holes */
   overflow: hidden;
   border-bottom: 3px solid var(--ink);
 }
-.filmstrip { position: absolute; inset: 0; overflow: hidden; }
-.film-track {
+.filmstrip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
   display: flex;
-  gap: 12px;
-  height: 100%;
-  padding: 46px 0;
+  align-items: center;
+}
+/* the horizontally-panning strip. ready.png (film.png) supplies the perforated
+   film base; its transparent sprocket holes let the cream field show through */
+.film-scroll {
+  /* the hero's 3px border sits inside its height, so the strip is that much
+     shorter — subtract it or the tile ends up fractionally stretched */
+  --fh: calc(var(--hero-h) - 3px);
+  --fgap: calc(var(--fh) * 0.035);
+  position: relative;
+  direction: ltr;                    /* left-to-right frame indexing */
+  height: 100%;                      /* the film fills the hero, edge to edge */
+  display: flex;
+  align-items: center;
   width: max-content;
+  /* the user's 4x-upscaled film scan, cropped to exactly 22 perforation
+     pitches so it repeats with no rhythm break. --pitch is set from JS to one
+     group width, so one film tile spans one group and the loop has no seam */
+  background-image: url("assets/img/film.webp");
+  background-repeat: repeat-x;
+  background-size: var(--pitch, 100%) 100%;
   will-change: transform;
 }
+/* the film sits just above the cream, so it casts a shadow that is only visible
+   THROUGH the sprocket holes. baked from the film's own silhouette (offset +
+   blurred), so there is no runtime filter on a 16000px-wide element. the
+   negative z-index puts it under the film image but above the hero's cream. */
+.film-scroll::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("assets/img/film-shadow.webp");
+  background-repeat: repeat-x;
+  background-size: var(--pitch, 100%) 100%;
+}
+.film-group {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 100%;
+}
+/* each media frame sits on the film's central window band. the slot width is
+   1/4 of the film tile's own aspect (5697/1641 = 3.4717), so one group spans
+   exactly one tile and the scan is displayed with no horizontal stretch */
 .film-frame {
   position: relative;
   flex: 0 0 auto;
-  width: clamp(240px, 25vw, 400px);
-  height: 100%;
-  background: #05090d;
+  width: calc(var(--fh) * 0.8679 - var(--fgap) * 2);
+  height: 62%;
+  margin-inline: var(--fgap);
+  margin-top: calc(var(--fh) * 0.021);   /* nudge onto the window band's center */
   overflow: hidden;
-  border-inline: 2px solid rgba(5, 9, 13, 0.9);
+  transform-origin: center;
+  /* seated into the film: hairline rebate, soft cast onto the base, and the
+     emulsion darkening that a real frame picks up at its edges */
+  box-shadow:
+    0 0 0 1px rgba(5, 9, 13, 0.95),
+    0 14px 30px -10px rgba(5, 9, 13, 0.8),
+    inset 0 0 30px rgba(5, 9, 13, 0.5);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.film-frame img,
-.film-frame video {
+.film-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.12) brightness(0.9);
+  filter: grayscale(1) contrast(1.08) brightness(0.92) sepia(0.12);
+  transition: filter 0.55s, opacity 0.55s;
+}
+/* vignette only — no linen here. the woven grain read as fabric over the
+   photos rather than emulsion, so it is kept off the strip entirely */
+.film-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: inset 0 0 44px rgba(5, 9, 13, 0.55);
 }
 .film-frame figcaption {
   position: absolute;
-  inset-inline-start: 0.55rem;
-  bottom: 0.45rem;
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
-  color: rgba(217, 217, 206, 0.8);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.75);
-  z-index: 2;
+  inset-inline-start: 0.6rem;
+  bottom: 0.5rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(217, 217, 206, 0.94);
+  text-shadow: 0 1px 4px rgba(5, 9, 13, 0.9);
+  opacity: 0;
+  transition: opacity 0.4s;
 }
-.film-frame .frame-no {
-  position: absolute;
-  inset-inline-end: 0.5rem;
-  top: 0.45rem;
-  font-family: var(--font-latin);
-  font-size: 0.58rem;
-  letter-spacing: 0.18em;
-  color: rgba(217, 217, 206, 0.6);
-  z-index: 2;
-}
-/* real-film sprocket bars over the whole track (top + bottom) */
-.perf-strip {
-  position: absolute;
-  left: 0; right: 0;
-  height: 46px;
+/* 3D pop for the hovered service's frame; the rest recede */
+.film-frame.pop {
+  transform: perspective(900px) translateY(-16px) translateZ(38px) rotateX(5deg) scale(1.05);
+  box-shadow: 0 34px 58px -16px rgba(5, 9, 13, 0.65);
   z-index: 3;
-  background-image: url("assets/img/film-strip.png");
-  background-repeat: repeat-x;
-  background-size: auto 508px;      /* native tile height, so only the perfs show */
-  will-change: background-position;
 }
-.perf-top { top: 0; background-position: 0 0; }
-.perf-bottom { bottom: 0; background-position: 0 -462px; }
-.film-grain {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: url("assets/img/Fabric.jpg");
-  background-size: 620px;
-  mix-blend-mode: overlay;
-  opacity: 0.16;
-}
-.film-vignette {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background:
-    linear-gradient(var(--panel-fade-dir, 90deg), rgba(5,9,13,0.55), transparent 55%),
-    radial-gradient(ellipse at center, transparent 55%, rgba(5,9,13,0.45) 100%);
-}
-html[dir="ltr"] .film-vignette { --panel-fade-dir: 270deg; }
+.film-frame.pop img { filter: grayscale(1) contrast(1.16) brightness(1.05); }
+.film-frame.pop figcaption { opacity: 1; }
+.film-scroll.has-pop .film-frame:not(.pop) img { opacity: 0.45; }
 
 .hero-overlay {
   position: relative;
@@ -398,7 +427,7 @@ html[dir="ltr"] .film-vignette { --panel-fade-dir: 270deg; }
   display: flex;
   align-items: stretch;
 }
-/* glass panel pinned completely to the start side, film visible behind */
+/* solid ink panel pinned to the start side, film strip visible beside it */
 .hero-panel {
   width: min(40rem, 46vw);
   height: 100%;
@@ -406,17 +435,11 @@ html[dir="ltr"] .film-vignette { --panel-fade-dir: 270deg; }
   flex-direction: column;
   justify-content: center;
   padding: clamp(1.5rem, 3vw, 3rem) var(--pad);
-  background: linear-gradient(var(--panel-dir, 90deg),
-    rgba(15, 24, 32, 0.30) 0%,
-    rgba(15, 24, 32, 0.14) 82%,
-    rgba(15, 24, 32, 0) 100%);
-  -webkit-backdrop-filter: blur(9px);
-  backdrop-filter: blur(9px);
+  background: var(--ink);
   color: var(--cream);
   border-inline-end: 1px solid rgba(217, 217, 206, 0.22);
-  box-shadow: 24px 0 60px -20px rgba(5, 9, 13, 0.6);
+  box-shadow: 24px 0 60px -24px rgba(5, 9, 13, 0.7);
 }
-html[dir="ltr"] .hero-panel { --panel-dir: 270deg; }
 
 .hero-eyebrow {
   font-size: 0.72rem;
@@ -431,16 +454,18 @@ html[dir="ltr"] .hero-panel { --panel-dir: 270deg; }
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(2.4rem, 6vw, 4.6rem);
-  line-height: 1.22;
+  line-height: 1.32;
   color: var(--cream);
   text-shadow: 0 2px 20px rgba(5, 9, 13, 0.5);
 }
 html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
+/* pad the mask on all sides (esp. the top) so Arabic hamza/alef tips aren't
+   clipped, with matching negative margins so line spacing is unchanged */
 .hero-title .line-mask {
   display: block;
   overflow: hidden;
-  padding-bottom: 0.14em;
-  margin-bottom: -0.14em;
+  padding: 0.3em 0.06em 0.16em;
+  margin: -0.26em -0.06em -0.16em;
 }
 .hero-title .line { display: block; }
 .hero-rule {
@@ -460,17 +485,66 @@ html[dir="ltr"] .hero-rule {
   font-weight: 500;
   color: rgba(217, 217, 206, 0.92);
 }
+/* torn-paper cutout standing in for the letter tile: stacked paper layers
+   (from the brand's torn-paper artwork) with linen grain and cast shadows */
 .dropcap {
   float: inline-start;
-  width: clamp(66px, 6.5vw, 96px);
-  aspect-ratio: 3 / 4;
-  background: var(--cream);
-  margin-inline-end: 1rem;
-  margin-bottom: 0.35rem;
+  position: relative;
+  height: clamp(116px, 15vh, 176px);
+  aspect-ratio: 671 / 1437;
+  margin-inline: 0.15rem 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.paper { position: absolute; inset: 0; }
+.paper-l {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  will-change: transform;
+}
+.pl-back {
+  background-image: url("assets/img/paper-back.png");
+  filter: brightness(0.42) saturate(0.5)
+          drop-shadow(0 12px 16px rgba(5, 9, 13, 0.55));
+}
+.pl-mid {
+  background-image: url("assets/img/paper-back.png");
+  filter: brightness(0.72) saturate(0.7)
+          drop-shadow(0 8px 12px rgba(5, 9, 13, 0.45));
+}
+.pl-front {
+  background-image: url("assets/img/paper-front.png");
+  filter: drop-shadow(0 10px 20px rgba(5, 9, 13, 0.6));
+}
+/* linen grain, clipped to the paper silhouette */
+.paper-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: url("assets/img/Fabric.jpg");
+  background-size: 170px;
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+  -webkit-mask-image: url("assets/img/paper-front.png");
+  mask-image: url("assets/img/paper-front.png");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  pointer-events: none;
+}
+/* the letter riding on the paper */
+.dc-tile {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
   display: grid;
   place-items: center;
+  will-change: transform;
 }
-.dropcap img { height: 82%; }
+.dropcap img { height: 46%; }
 .dropcap .dc-en {
   display: none;
   font-family: var(--font-latin);
@@ -482,6 +556,7 @@ html[dir="ltr"] .hero-rule {
 html[lang="en"] .dropcap img { display: none; filter: invert(1); }
 html[lang="en"] .dropcap .dc-en { display: block; }
 html[lang="en"] .dropcap img { display: none; }
+
 
 .hero-meta {
   display: flex;
