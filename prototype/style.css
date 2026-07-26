@@ -125,6 +125,9 @@ html[lang="en"] .footer-title { letter-spacing: 0.02em; }
 }
 .menu-btn .bars span:nth-child(1) { top: 0; }
 .menu-btn .bars span:nth-child(2) { top: 12px; }
+/* the button floats over both cream and ink sections; JS sets .on-dark
+   from whatever is actually under it so the bars never disappear */
+.menu-btn.on-dark .bars span { background: var(--cream); }
 body.nav-open .menu-btn .bars span { background: var(--cream); }
 body.nav-open .menu-btn .bars span:nth-child(1) { top: 6px; transform: rotate(45deg); }
 body.nav-open .menu-btn .bars span:nth-child(2) { top: 6px; transform: rotate(-45deg); }
@@ -232,12 +235,11 @@ body.nav-open .nav-overlay { visibility: visible; }
 }
 .masthead-logo img { height: 58px; width: auto; }
 
-/* language switch - segmented pill with sliding ink knob */
+/* language switch - segmented pill with sliding ink knob.
+   sits in normal flow by default (it is a flex child in the nav overlay);
+   only the masthead copy is pinned to the corner */
 .lang-switch {
-  position: absolute;
-  left: var(--pad);
-  top: 50%;
-  transform: translateY(-50%);
+  position: relative;
   direction: ltr;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -279,6 +281,25 @@ html[lang="en"] .ls-knob { left: 50%; }
 html[lang="ar"] .ls-opt[data-l="ar"],
 html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
 .lang-switch:hover { background: var(--cream-warm); }
+
+/* masthead copy is pinned to the corner opposite the burger. this one is
+   physically left in both directions — the burger is physically right, so
+   an inset-inline-start here would stack the two on top of each other in RTL */
+.masthead .lang-switch {
+  position: absolute;
+  left: var(--pad);
+  right: auto;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* overlay copy sits on ink, so the whole pill inverts */
+.nav-overlay .lang-switch { border-color: var(--cream); flex: 0 0 auto; }
+.nav-overlay .ls-knob { background: var(--cream); }
+.nav-overlay .ls-opt { color: var(--cream); }
+html[lang="ar"] .nav-overlay .ls-opt[data-l="ar"],
+html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
+.nav-overlay .lang-switch:hover { background: rgba(217, 217, 206, 0.12); }
 
 .rule-double {
   height: 4px;
@@ -427,36 +448,51 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
   display: flex;
   align-items: stretch;
 }
-/* solid ink panel pinned to the start side, film strip visible beside it */
+/* cream panel pinned to the start side, film strip visible beside it.
+   inverted from the original ink panel — cream field, ink type */
 .hero-panel {
+  position: relative;
   width: min(40rem, 46vw);
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: clamp(1.5rem, 3vw, 3rem) var(--pad);
-  background: var(--ink);
-  color: var(--cream);
-  border-inline-end: 1px solid rgba(217, 217, 206, 0.22);
-  box-shadow: 24px 0 60px -24px rgba(5, 9, 13, 0.7);
+  background: var(--cream);
+  color: var(--ink);
+  border-inline-end: 3px solid var(--ink);
+  box-shadow: 24px 0 60px -24px rgba(5, 9, 13, 0.55);
 }
+/* linen over the panel so it doesn't read as a flat cream block against
+   the film beside it */
+.hero-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: url("assets/img/Fabric.jpg");
+  background-size: 900px;
+  mix-blend-mode: multiply;
+  opacity: 0.14;
+}
+.hero-panel > * { position: relative; z-index: 1; }
 
 .hero-eyebrow {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: rgba(217, 217, 206, 0.85);
+  color: rgba(15, 24, 32, 0.7);
   padding-bottom: 0.5rem;
   margin-bottom: 0.9rem;
-  border-bottom: 1px solid rgba(217, 217, 206, 0.35);
+  border-bottom: 1px solid rgba(15, 24, 32, 0.35);
 }
 .hero-title {
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(2.4rem, 6vw, 4.6rem);
   line-height: 1.32;
-  color: var(--cream);
-  text-shadow: 0 2px 20px rgba(5, 9, 13, 0.5);
+  color: var(--ink);
 }
 html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
 /* pad the mask on all sides (esp. the top) so Arabic hamza/alef tips aren't
@@ -470,7 +506,7 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
 .hero-title .line { display: block; }
 .hero-rule {
   height: 3px;
-  background: var(--cream);
+  background: var(--ink);
   margin: 1rem 0 1.1rem;
   transform-origin: right center;
   clip-path: polygon(0 0, 100% 0, 100% 100%, 2% 100%);
@@ -483,79 +519,134 @@ html[dir="ltr"] .hero-rule {
   font-size: clamp(0.9rem, 1.35vw, 1.05rem);
   line-height: 1.9;
   font-weight: 500;
-  color: rgba(217, 217, 206, 0.92);
+  color: rgba(15, 24, 32, 0.82);
 }
-/* torn-paper cutout standing in for the letter tile: stacked paper layers
-   (from the brand's torn-paper artwork) with linen grain and cast shadows */
+/* ── torn-paper dropcap ───────────────────────────────────────────────
+   The brand's two torn deckle-edge sheets. Each sheet is drawn twice —
+   once clipped to its top half, once to its bottom half — over a shared
+   crease line, so the two halves can swing on rotateX and the sheet
+   literally unfolds. Both halves carry the identical background at the
+   identical size, so at rotateX(0) the seam is invisible.
+   The letter is centred on the FRONT sheet's measured alpha centroid
+   (51.7% / 48.3%), not on the box, so it reads as centred in the paper. */
 .dropcap {
+  --cap-h: clamp(124px, 16vh, 188px);
   float: inline-start;
   position: relative;
-  height: clamp(116px, 15vh, 176px);
+  height: var(--cap-h);
   aspect-ratio: 671 / 1437;
-  margin-inline: 0.15rem 1.25rem;
+  margin-inline: 0.15rem 1.35rem;
   margin-bottom: 0.5rem;
+  perspective: 760px;
+  perspective-origin: 50% 48.3%;
 }
-.paper { position: absolute; inset: 0; }
-.paper-l {
+.paper-stack {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.sheet {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+/* the back sheet peeks out to the start side and sits a touch lower,
+   matching the reference artwork's two-sheet offset */
+.sheet-back {
+  transform: translate(-6.5%, 1.4%) rotate(-3.2deg);
+  filter: brightness(0.86) saturate(0.75)
+          drop-shadow(0 10px 14px rgba(5, 9, 13, 0.5));
+}
+.sheet-front {
+  filter: drop-shadow(0 12px 22px rgba(5, 9, 13, 0.55));
+}
+.half {
   position: absolute;
   inset: 0;
   background-repeat: no-repeat;
-  background-position: center;
   background-size: 100% 100%;
+  backface-visibility: hidden;
   will-change: transform;
 }
-.pl-back {
-  background-image: url("assets/img/paper-back.png");
-  filter: brightness(0.42) saturate(0.5)
-          drop-shadow(0 12px 16px rgba(5, 9, 13, 0.55));
-}
-.pl-mid {
-  background-image: url("assets/img/paper-back.png");
-  filter: brightness(0.72) saturate(0.7)
-          drop-shadow(0 8px 12px rgba(5, 9, 13, 0.45));
-}
-.pl-front {
-  background-image: url("assets/img/paper-front.png");
-  filter: drop-shadow(0 10px 20px rgba(5, 9, 13, 0.6));
-}
-/* linen grain, clipped to the paper silhouette */
-.paper-grain {
+.sheet-back .half { background-image: url("assets/img/paper-back.png"); }
+.sheet-front .half { background-image: url("assets/img/paper-front.png"); }
+/* the fold line is the box's horizontal midline for both halves */
+.half-t { clip-path: inset(0 0 50% 0); transform-origin: 50% 50%; }
+.half-b { clip-path: inset(50% 0 0 0); transform-origin: 50% 50%; }
+/* linen grain travelling with the paper, clipped to its own silhouette */
+.half::after {
+  content: "";
   position: absolute;
   inset: 0;
-  z-index: 2;
   background: url("assets/img/Fabric.jpg");
-  background-size: 170px;
+  background-size: 150px;
   mix-blend-mode: multiply;
-  opacity: 0.4;
-  -webkit-mask-image: url("assets/img/paper-front.png");
-  mask-image: url("assets/img/paper-front.png");
+  opacity: 0.34;
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   pointer-events: none;
 }
-/* the letter riding on the paper */
-.dc-tile {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  will-change: transform;
+.sheet-back .half::after {
+  -webkit-mask-image: url("assets/img/paper-back.png");
+  mask-image: url("assets/img/paper-back.png");
 }
-.dropcap img { height: 46%; }
-.dropcap .dc-en {
+.sheet-front .half::after {
+  -webkit-mask-image: url("assets/img/paper-front.png");
+  mask-image: url("assets/img/paper-front.png");
+}
+/* the shadow the fold casts on itself — fades out as the sheet flattens */
+.crease {
+  position: absolute;
+  inset-inline: 4%;
+  top: 50%;
+  height: 26%;
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 9, 13, 0) 0%,
+    rgba(5, 9, 13, 0.42) 46%,
+    rgba(5, 9, 13, 0.5) 50%,
+    rgba(5, 9, 13, 0.28) 56%,
+    rgba(5, 9, 13, 0) 100%);
+  -webkit-mask-image: url("assets/img/paper-front.png");
+  mask-image: url("assets/img/paper-front.png");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+/* the letter, pinned to the front sheet's optical centre */
+.dc-letter {
+  position: absolute;
+  left: 51.7%;
+  top: 48.3%;
+  width: 0;
+  height: 0;
+  z-index: 3;
+}
+.dc-letter img,
+.dc-letter .dc-en {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+.dc-letter img { height: calc(var(--cap-h) * 0.46); width: auto; max-width: none; }
+.dc-letter .dc-en {
   display: none;
   font-family: var(--font-latin);
   font-weight: 700;
-  font-size: clamp(2.2rem, 4vw, 3.3rem);
+  font-size: calc(var(--cap-h) * 0.34);
   line-height: 1;
   color: var(--ink);
 }
-html[lang="en"] .dropcap img { display: none; filter: invert(1); }
-html[lang="en"] .dropcap .dc-en { display: block; }
-html[lang="en"] .dropcap img { display: none; }
+html[lang="en"] .dc-letter img { display: none; }
+html[lang="en"] .dc-letter .dc-en { display: block; }
 
 
 .hero-meta {
@@ -564,10 +655,10 @@ html[lang="en"] .dropcap img { display: none; }
   gap: 0.4rem 1rem;
   margin-top: 1.1rem;
   padding-top: 0.85rem;
-  border-top: 1px solid rgba(217, 217, 206, 0.3);
+  border-top: 1px solid rgba(15, 24, 32, 0.3);
   font-size: 0.76rem;
   font-weight: 500;
-  color: rgba(217, 217, 206, 0.78);
+  color: rgba(15, 24, 32, 0.68);
 }
 .hero-meta .dot { opacity: 0.5; }
 
@@ -612,8 +703,6 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 .oval-btn:hover .ob-label { transform: translateY(-115%); }
 .oval-btn:hover .ob-arrow { transform: translateY(0); }
 
-/* keep a section-level wrapper so the What-We-Do button sits nicely */
-.svc-cta-wrap { display: flex; padding: clamp(1.2rem, 3vh, 2.2rem) var(--pad) 0; }
 .story-cta { margin-top: 1.4rem; }
 
 /* -- marquee (interactive services bar) ------ */
@@ -703,49 +792,242 @@ html[lang="en"] .service-cell .sc-label { font-family: var(--font-body); letter-
 .service-cell.is-active { background: var(--ink); color: var(--cream); }
 .service-cell.is-active .sc-label { color: rgba(217, 217, 206, 0.65); }
 
-.service-example {
+/* ── latest work in the service being viewed ────────────────────────
+   The row stretches to the stage's min-height and the text column's
+   footer is pushed down with margin-top:auto, so the "all work" button
+   lands exactly on the stage's bottom edge — no dead space either side. */
+.svc-latest {
   display: grid;
   grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
   gap: clamp(1.4rem, 3vw, 2.6rem);
-  padding: clamp(2rem, 4.5vh, 3rem) 0 clamp(1rem, 2vh, 1.6rem);
-  align-items: center;
+  padding: clamp(1.8rem, 4vh, 2.8rem) 0 clamp(1rem, 2vh, 1.6rem);
+  align-items: stretch;
 }
-.example-text {
+.sl-text {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   border-inline-end: var(--hair);
   padding-inline-end: clamp(1.2rem, 2.4vw, 2.2rem);
 }
-.example-kicker { font-size: 0.8rem; font-weight: 500; color: rgba(15,24,32,0.6); margin-bottom: 0.6rem; }
-.example-title {
+.sl-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(15, 24, 32, 0.6);
+  padding-bottom: 0.55rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 2px solid var(--ink);
+}
+.sl-title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.5rem, 2.8vw, 2.2rem);
-  line-height: 1.45;
-  margin-bottom: 0.9rem;
+  font-size: clamp(1.7rem, 3.1vw, 2.6rem);
+  line-height: 1.35;
 }
-.example-desc { color: rgba(15, 24, 32, 0.75); margin-bottom: 1.6rem; font-size: 0.95rem; }
-.example-media {
-  position: relative;
-  background: var(--ink);
-  border: var(--hair);
-  height: clamp(340px, 50vh, 560px);
+.sl-title .line-mask {
+  display: block;
   overflow: hidden;
+  padding: 0.26em 0.06em 0.14em;
+  margin: -0.24em -0.06em -0.14em;
+}
+.sl-title .line { display: block; }
+.sl-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(15, 24, 32, 0.62);
+}
+.sl-meta .sl-sep { opacity: 0.5; }
+.sl-desc {
+  margin-top: 0.9rem;
+  font-size: 0.93rem;
+  line-height: 1.9;
+  color: rgba(15, 24, 32, 0.78);
+  max-width: 26rem;
+}
+/* pinned to the bottom of the column, level with the stage's bottom */
+.sl-foot {
+  margin-top: auto;
+  padding-top: clamp(1.2rem, 3vh, 2rem);
+}
+.sl-nav {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 1rem;
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.9rem;
+  border-bottom: var(--hair);
 }
-.example-media::after {
+.sl-arrow {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 1.7rem;
+  color: rgba(15, 24, 32, 0.55);
+  transition: color 0.3s, transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.sl-arrow svg { width: 100%; height: auto; }
+/* "previous" points back toward the start of the reading direction */
+html[dir="rtl"] .sl-arrow svg { transform: scaleX(-1); }
+.sl-arrow:hover { color: var(--ink); }
+.sl-arrow#slPrev:hover { transform: translateX(-4px); }
+.sl-arrow#slNext:hover { transform: translateX(4px); }
+html[dir="rtl"] .sl-arrow#slPrev:hover { transform: translateX(4px); }
+html[dir="rtl"] .sl-arrow#slNext:hover { transform: translateX(-4px); }
+/* counter leads, the two arrows sit together at the far end */
+.sl-index {
+  order: -1;
+  direction: ltr;
+  display: flex;
+  align-items: baseline;
+  gap: 0.18rem;
+  margin-inline-end: auto;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+}
+.sl-index b { font-size: 1.5rem; }
+.sl-index i { font-style: normal; opacity: 0.4; font-size: 1rem; }
+.sl-index span { font-size: 1rem; opacity: 0.55; }
+.sl-foot .oval-btn { min-width: clamp(150px, 15vw, 200px); }
+
+/* -- the stage ------------------------------------------------------ */
+.sl-stage {
+  position: relative;
+  min-height: clamp(400px, 58vh, 640px);
+  background: var(--ink);
+  border: var(--hair);
+  overflow: hidden;
+}
+.sl-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: url("assets/img/Fabric.jpg");
+  background-size: 800px;
+  mix-blend-mode: overlay;
+  opacity: 0.16;
+}
+.sl-slides { position: absolute; inset: 0; }
+.sl-slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  will-change: clip-path;
+}
+.sl-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.1) brightness(0.94);
+  will-change: transform;
+}
+/* vignette so the plate and stamp stay legible over any photograph */
+.sl-slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(5, 9, 13, 0.72) 0%, rgba(5, 9, 13, 0) 38%),
+    linear-gradient(to bottom, rgba(5, 9, 13, 0.5) 0%, rgba(5, 9, 13, 0) 34%);
+}
+
+/* the press wipe: an ink bar sweeps the stage and the plate changes
+   behind it, like a sheet coming off the press */
+.sl-wipe {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+.sl-wipe::after {
   content: "";
   position: absolute;
   inset: 0;
   background: url("assets/img/Fabric.jpg");
-  background-size: 800px;
+  background-size: 700px;
   mix-blend-mode: overlay;
-  opacity: 0.18;
+  opacity: 0.2;
 }
-.example-media img { height: 72%; opacity: 0.5; }
+
+/* newspaper "stamp" calling out the newest piece */
+.sl-stamp {
+  position: absolute;
+  z-index: 5;
+  top: clamp(1rem, 2.4vw, 1.9rem);
+  inset-inline-start: clamp(1rem, 2.4vw, 1.9rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.16rem;
+  padding: 0.5rem 0.95rem 0.42rem;
+  background: var(--cream);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: 0 0 0 1px var(--cream), 0 0 0 3px var(--ink),
+              0 10px 22px -8px rgba(5, 9, 13, 0.8);
+  transform: rotate(-7deg);
+  transform-origin: center;
+  pointer-events: none;
+}
+html[dir="ltr"] .sl-stamp { transform: rotate(7deg); }
+.sl-stamp .st-word {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(0.95rem, 1.7vw, 1.35rem);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.sl-stamp .st-sub { font-size: 0.5rem; line-height: 1; opacity: 0.65; }
+.sl-stamp .st-rule { width: 100%; height: 1px; background: var(--ink); opacity: 0.45; }
+/* only the newest piece in the category wears it */
+.sl-stamp:not(.on) { opacity: 0; visibility: hidden; }
+
+/* the caption plate — a press photo credit line */
+.sl-plate {
+  position: absolute;
+  z-index: 5;
+  inset-inline: 0;
+  bottom: 3px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem clamp(1rem, 2.4vw, 1.9rem) 0.8rem;
+  color: var(--cream);
+}
+.sl-plate-cap {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1rem, 1.9vw, 1.5rem);
+  line-height: 1.3;
+}
+.sl-plate-tag { font-size: 0.58rem; opacity: 0.7; white-space: nowrap; }
+
+.sl-progress {
+  position: absolute;
+  z-index: 5;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(217, 217, 206, 0.22);
+}
+.sl-progress span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--cream);
+  transform-origin: inline-start;
+  transition: width 0.55s cubic-bezier(0.65, 0, 0.35, 1);
+}
 
 /* ═══════════════════════════════════════════
    STORY — sticky stacked panels (about Aliph)
@@ -782,12 +1064,18 @@ html[lang="en"] .service-cell .sc-label { font-family: var(--font-body); letter-
 .story-panel.ink::after { mix-blend-mode: overlay; opacity: 0.14; }
 
 .story-text { position: relative; z-index: 2; }
+/* the panel number is a section marker, not a watermark — it reads at
+   full strength with a short rule under it */
 .story-index {
+  display: inline-block;
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(2.4rem, 5vw, 4rem);
-  line-height: 1;
-  opacity: 0.28;
+  line-height: 1.1;
+  color: currentColor;
+  opacity: 1;
+  border-bottom: 3px solid currentColor;
+  padding-bottom: 0.08em;
 }
 .story-eyebrow {
   font-size: 0.72rem;
@@ -1131,6 +1419,9 @@ body.lib-index .lib-list { display: block; }
   overflow: hidden;
   margin-top: clamp(1.5rem, 4vh, 2.5rem);
 }
+/* the home page ends on the last story panel, which already butts up
+   against the contact band — the gap just read as a stray cream strip */
+body[data-page="index"] .footer { margin-top: 0; }
 .footer::after {
   content: "";
   position: absolute;
@@ -1324,11 +1615,40 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
 
 /* responsive additions */
 @media (max-width: 900px) {
-  /* index hero / story */
-  .hero { height: auto; }
-  .hero-overlay { padding: 0; position: relative; }
-  .hero-panel { max-width: none; margin: 3.2rem var(--pad); }
-  .filmstrip { position: absolute; inset: 0; }
+  /* index hero — stacked: text on top, film strip underneath, so the
+     film and the marquee below it read as two connected strips */
+  .hero {
+    --film-h: clamp(190px, 40vw, 300px);
+    height: auto;
+    display: flex;
+    flex-direction: column-reverse;   /* DOM order is strip → overlay */
+    border-bottom: none;
+  }
+  .hero-overlay { height: auto; }
+  .hero-panel {
+    width: 100%;
+    height: auto;
+    padding: clamp(1.5rem, 5vw, 2.4rem) var(--pad) clamp(1.7rem, 5vw, 2.6rem);
+    border-inline-end: none;
+    box-shadow: none;
+  }
+  .filmstrip {
+    position: relative;
+    inset: auto;
+    height: var(--film-h);
+    border-top: 3px solid var(--ink);
+    border-bottom: 3px solid var(--ink);
+  }
+  /* the strip's own borders sit inside its height */
+  .film-scroll { --fh: calc(var(--film-h) - 6px); }
+
+  /* latest-work slider stacks; the stage keeps a usable height */
+  .svc-latest { grid-template-columns: 1fr; }
+  .sl-text { border-inline-end: none; padding-inline-end: 0; }
+  .sl-foot { margin-top: 1.6rem; }
+  .sl-stage { min-height: clamp(300px, 62vw, 420px); order: -1; }
+  .sl-desc { max-width: none; }
+
   .story-panel {
     grid-template-columns: 1fr;
     min-height: auto;
@@ -1341,8 +1661,6 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .contact-socials { justify-content: flex-start; }
 
   /* services */
-  .service-example { grid-template-columns: 1fr; }
-  .example-text { border: none; padding: 0; }
   .services-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .service-cell { padding: 1rem 0.9rem; }
   .service-cell .sc-name { white-space: normal; font-size: 1.1rem; }

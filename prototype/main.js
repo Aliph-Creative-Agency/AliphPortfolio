@@ -50,6 +50,11 @@ const I18N = {
   svc4Label: { ar: "EVENTS", en: "تنظيم فعاليّات" },
   svcCta: { ar: "كل الأعمال في الأرشيف", en: "All work in the archive" },
 
+  /* latest-work slider */
+  slLatest: { ar: "أحدث الأعمال", en: "Latest work" },
+  slPieces: { ar: "قطعة", en: "pieces" },
+  stampNew: { ar: "مؤخّرًا", en: "Latest" },
+
   /* story */
   storyBanner: { ar: "لماذا ألِف؟", en: "Why Aliph?" },
   st1Eyebrow: { ar: "الاسم", en: "The Name" },
@@ -141,26 +146,66 @@ const CATS = [
   { id: "events", ar: "تنظيم فعاليّات", en: "Events" },
 ];
 
+/* every project carries a one-line brief so the "latest work" slider on the
+   home page can speak about whichever piece is on screen (placeholder copy) */
 const PROJECTS = [
-  { ar: "مؤسّسة بنيان", en: "Bunyan Foundation", year: 2026, count: 32, cat: "identity", seed: "aliph01" },
-  { ar: "مواسم الزيتون", en: "Olive Seasons", year: 2026, count: 47, cat: "content", seed: "aliph02" },
-  { ar: "ورشة الخط", en: "Calligraphy Workshop", year: 2026, count: 15, cat: "events", seed: "aliph03" },
-  { ar: "حارة النصارى", en: "Christian Quarter", year: 2026, count: 22, cat: "content", seed: "aliph04" },
-  { ar: "مقهى الجبل", en: "Mountain Café", year: 2026, count: 18, cat: "identity", seed: "aliph05" },
-  { ar: "معرض التراث", en: "Heritage Fair", year: 2026, count: 26, cat: "events", seed: "aliph06" },
-  { ar: "سوق البلدة", en: "Old Town Market", year: 2026, count: 21, cat: "marketing", seed: "aliph07" },
-  { ar: "جبل الزيتون", en: "Mount of Olives", year: 2026, count: 12, cat: "content", seed: "aliph08" },
-  { ar: "ليالي رمضان", en: "Ramadan Nights", year: 2025, count: 64, cat: "events", seed: "aliph09" },
-  { ar: "البلدة القديمة", en: "The Old City", year: 2025, count: 33, cat: "content", seed: "aliph10" },
-  { ar: "مهرجان الصيف", en: "Summer Festival", year: 2025, count: 41, cat: "events", seed: "aliph11" },
-  { ar: "دار الأيتام", en: "Orphanage Campaign", year: 2025, count: 17, cat: "marketing", seed: "aliph12" },
-  { ar: "مطعم الديوان", en: "Al-Diwan Restaurant", year: 2025, count: 25, cat: "identity", seed: "aliph13" },
-  { ar: "أسبوع التصميم", en: "Design Week", year: 2025, count: 19, cat: "events", seed: "aliph14" },
-  { ar: "افتتاح المكتبة", en: "Library Opening", year: 2024, count: 29, cat: "events", seed: "aliph15" },
-  { ar: "حملة التخرّج", en: "Graduation Campaign", year: 2024, count: 36, cat: "marketing", seed: "aliph16" },
-  { ar: "بيت الشباب", en: "Youth House", year: 2024, count: 14, cat: "identity", seed: "aliph17" },
-  { ar: "نادي القراءة", en: "Reading Club", year: 2024, count: 11, cat: "content", seed: "aliph18" },
-  { ar: "عرس فلسطيني", en: "Palestinian Wedding", year: 2024, count: 53, cat: "content", seed: "aliph19" },
+  { ar: "مؤسّسة بنيان", en: "Bunyan Foundation", year: 2026, count: 32, cat: "identity", seed: "aliph01",
+    desc: { ar: "حضورٌ أوضح وأكثر حداثة، مع الحفاظ على روح العلامة المألوفة: شعار، ألوان، تغليف، وظهور يومي.",
+            en: "A clearer, more modern presence that keeps the brand's familiar spirit: mark, colors, packaging, and daily touchpoints." } },
+  { ar: "مواسم الزيتون", en: "Olive Seasons", year: 2026, count: 47, cat: "content", seed: "aliph02",
+    desc: { ar: "توثيق بصري لموسم القطف من الحقل إلى المعصرة، بهويّة لونيّة واحدة وقصص يوميّة.",
+            en: "A visual record of the harvest from field to press — one tonal identity and daily stories." } },
+  { ar: "ورشة الخط", en: "Calligraphy Workshop", year: 2026, count: 15, cat: "events", seed: "aliph03",
+    desc: { ar: "ورشة مفتوحة في الاستوديو: برنامج، مطبوعات، وتغطية كاملة لليومين.",
+            en: "An open workshop at the studio: program, printed matter, and full two-day coverage." } },
+  { ar: "حارة النصارى", en: "Christian Quarter", year: 2026, count: 22, cat: "content", seed: "aliph04",
+    desc: { ar: "سلسلة مصوّرة عن تفاصيل الحارة ووجوهها، بالأبيض والأسود.",
+            en: "A photographed series on the quarter's details and faces, in black and white." } },
+  { ar: "مقهى الجبل", en: "Mountain Café", year: 2026, count: 18, cat: "identity", seed: "aliph05",
+    desc: { ar: "هويّة كاملة لمقهى صغير: اسم، شعار، قائمة، ولوحة واجهة.",
+            en: "A complete identity for a small café: name, mark, menu, and shopfront." } },
+  { ar: "معرض التراث", en: "Heritage Fair", year: 2026, count: 26, cat: "events", seed: "aliph06",
+    desc: { ar: "تنظيم معرض ثلاثة أيام: توزيع المساحة، لافتات، وتوثيق مصوّر.",
+            en: "A three-day fair: spatial layout, signage, and photographic documentation." } },
+  { ar: "سوق البلدة", en: "Old Town Market", year: 2026, count: 21, cat: "marketing", seed: "aliph07",
+    desc: { ar: "حملة إعلانيّة كاملة لإحياء السوق القديم: مفهوم، تصوير، وإدارة منصّات لثلاثة أشهر.",
+            en: "A full campaign to revive the old market: concept, photography, and three months of channel management." } },
+  { ar: "جبل الزيتون", en: "Mount of Olives", year: 2026, count: 12, cat: "content", seed: "aliph08",
+    desc: { ar: "لقطات من الجبل عند الفجر — مادّة أساس لمكتبة الصور.",
+            en: "Shots from the mount at first light — base material for the image library." } },
+  { ar: "ليالي رمضان", en: "Ramadan Nights", year: 2025, count: 64, cat: "events", seed: "aliph09",
+    desc: { ar: "فعاليّة مجتمعيّة على مدار الشهر: برنامج، هويّة للفعاليّة، وتغطية يوميّة.",
+            en: "A month-long community event: program, event identity, and daily coverage." } },
+  { ar: "البلدة القديمة", en: "The Old City", year: 2025, count: 33, cat: "content", seed: "aliph10",
+    desc: { ar: "أرشيف مصوّر للأزقّة والأبواب، صُوّر على مدار فصلين.",
+            en: "A photographic archive of alleys and doorways, shot across two seasons." } },
+  { ar: "مهرجان الصيف", en: "Summer Festival", year: 2025, count: 41, cat: "events", seed: "aliph11",
+    desc: { ar: "مهرجان مفتوح: هويّة بصريّة، لافتات موقع، وتوثيق مباشر.",
+            en: "An open-air festival: visual identity, site signage, and live documentation." } },
+  { ar: "دار الأيتام", en: "Orphanage Campaign", year: 2025, count: 17, cat: "marketing", seed: "aliph12",
+    desc: { ar: "حملة تبرّعات هادئة تعتمد على الحكاية لا على الصخب.",
+            en: "A quiet fundraising campaign built on story rather than volume." } },
+  { ar: "مطعم الديوان", en: "Al-Diwan Restaurant", year: 2025, count: 25, cat: "identity", seed: "aliph13",
+    desc: { ar: "هويّة مطعم: شعار، قوائم، قرطاسيّة، ونظام لافتات.",
+            en: "A restaurant identity: mark, menus, stationery, and a signage system." } },
+  { ar: "أسبوع التصميم", en: "Design Week", year: 2025, count: 19, cat: "events", seed: "aliph14",
+    desc: { ar: "برنامج أسبوع كامل: جدول، مطبوعات، وتغطية للجلسات.",
+            en: "A week-long program: schedule, printed matter, and session coverage." } },
+  { ar: "افتتاح المكتبة", en: "Library Opening", year: 2024, count: 29, cat: "events", seed: "aliph15",
+    desc: { ar: "افتتاح مكتبة الحيّ: دعوات، لافتات، وتوثيق الليلة.",
+            en: "A neighbourhood library opening: invitations, signage, and coverage of the night." } },
+  { ar: "حملة التخرّج", en: "Graduation Campaign", year: 2024, count: 36, cat: "marketing", seed: "aliph16",
+    desc: { ar: "حملة موسميّة للجامعات: مفهوم، تصوير، ونشر على المنصّات.",
+            en: "A seasonal campaign for universities: concept, photography, and channel rollout." } },
+  { ar: "بيت الشباب", en: "Youth House", year: 2024, count: 14, cat: "identity", seed: "aliph17",
+    desc: { ar: "هويّة مرنة لمركز شبابي، تتحمّل أيدي كثيرة وتظلّ متماسكة.",
+            en: "A flexible identity for a youth centre — it survives many hands and stays coherent." } },
+  { ar: "نادي القراءة", en: "Reading Club", year: 2024, count: 11, cat: "content", seed: "aliph18",
+    desc: { ar: "محتوى شهري لنادي قراءة: أغلفة، اقتباسات، ومنشورات.",
+            en: "Monthly content for a reading club: covers, pull quotes, and posts." } },
+  { ar: "عرس فلسطيني", en: "Palestinian Wedding", year: 2024, count: 53, cat: "content", seed: "aliph19",
+    desc: { ar: "توثيق عرس كامل من التحضير إلى آخر رقصة.",
+            en: "A full wedding documented from preparation to the last dance." } },
 ];
 
 /* marquee items — the four services link to the services section */
@@ -341,32 +386,64 @@ const filmLoop = (() => {
   const SPEED = 34;               // px per second, constant
   let tween = null, period = 0, first = [], ready = false;
 
+  const strip = () => document.querySelector(".filmstrip");
+
+  /* the visible film window, measured against the strip itself so this works
+     whether the panel sits beside the film (desktop) or above it (mobile) */
   function windowCenter() {
-    const hero = document.querySelector(".hero");
+    const el = strip();
     const panel = document.querySelector(".hero-panel");
-    if (!hero) return 0;
-    const h = hero.getBoundingClientRect();
-    if (!panel) return h.width / 2;
+    if (!el) return 0;
+    const s = el.getBoundingClientRect();
+    if (!panel) return s.width / 2;
     const p = panel.getBoundingClientRect();
-    /* the ink panel hugs one side; the film window is the opposite side */
-    const [ws, we] = (p.left - h.left) >= (h.right - p.right)
-      ? [h.left, p.left] : [p.right, h.right];
-    return (ws + we) / 2 - h.left;
+    /* stacked: the panel is above the strip, so the whole strip is window */
+    if (p.bottom <= s.top + 1 || p.top >= s.bottom - 1) return s.width / 2;
+    /* side by side: the panel hugs one edge, the window is the other side */
+    const [ws, we] = (p.left - s.left) >= (s.right - p.right)
+      ? [s.left, p.left] : [p.right, s.right];
+    return (ws + we) / 2 - s.left;
   }
 
   /* layout x of the strip's origin, independent of the current translation */
   function originX() {
-    const hero = document.querySelector(".hero").getBoundingClientRect();
+    const s = strip().getBoundingClientRect();
     const cur = gsap.getProperty(filmScroll, "x") || 0;
-    return filmScroll.getBoundingClientRect().left - hero.left - cur;
+    return filmScroll.getBoundingClientRect().left - s.left - cur;
+  }
+
+  /* the x that centers frame i, before choosing which period-copy to use */
+  function wantX(i) {
+    const f = first[i];
+    return windowCenter() - (originX() + f.offsetLeft + f.offsetWidth / 2);
   }
 
   /* nearest x that centers frame i in the film window (period-aware) */
   function xForFrame(i) {
-    const f = first[i];
-    const want = windowCenter() - (originX() + f.offsetLeft + f.offsetWidth / 2);
+    const want = wantX(i);
     const cur = gsap.getProperty(filmScroll, "x") || 0;
     return want + Math.round((cur - want) / period) * period;
+  }
+
+  /* Seeding straight from wantX() can leave the content's leading edge inside
+     the window — that was the blank gap at the start of the EN (LTR) layout,
+     where the window sits on the far side from the panel so want came out
+     large and positive.
+     What has to land in the right place is the content's leading edge in
+     strip coordinates (originX + x), NOT x itself: under RTL a max-content
+     track is right-aligned, so originX is a large negative number and x is
+     the positive translation that cancels it.
+     Content is periodic, so shift by whole periods until that leading edge
+     sits in (-P, -2P] — one full period before the window, with room for the
+     tween to travel a period in either direction and still cover it. A copy
+     of frame i stays centered, because the shift is a multiple of a period. */
+  function seedX(i) {
+    const want = wantX(i);
+    const lead = originX() + want;
+    let target = lead % period;
+    if (target > 0) target -= period;   /* (-P, 0]  */
+    target -= period;                   /* (-2P, -P] */
+    return want + (target - lead);
   }
 
   function run() {
@@ -393,12 +470,12 @@ const filmLoop = (() => {
          the tile's own aspect, so the scan is shown unstretched */
       filmScroll.style.setProperty("--pitch", period + "px");
       /* cover the window for every x the loop and focus jumps can reach */
-      const viewW = document.querySelector(".hero").getBoundingClientRect().width;
+      const viewW = strip().getBoundingClientRect().width;
       const copies = Math.ceil(viewW / period) + 4;
       for (let i = 0; i < copies; i++) filmScroll.appendChild(group.cloneNode(true));
       first = Array.from(group.children);
       ready = true;
-      gsap.set(filmScroll, { x: xForFrame(0) });
+      gsap.set(filmScroll, { x: seedX(0) });
       run();
     },
     focus(id) {
@@ -450,7 +527,7 @@ function applyI18n() {
     el.textContent = num("0" + (i + 1));
   });
 
-  renderExample(currentService);
+  svcSlider.render();
   renderLibrary();
   rebuildLoops();
   filmLoop.rebuild();
@@ -482,7 +559,10 @@ if (curtain && !prefersReduced) {
     duration: 0.8,
     delay: 0.15,
     ease: "power4.inOut",
-    onComplete: () => (curtain.style.display = "none"),
+    onComplete: () => {
+      curtain.style.display = "none";
+      queueMenuSync();
+    },
   });
 } else if (curtain) {
   curtain.style.display = "none";
@@ -514,6 +594,8 @@ if (menuBtn && overlay) {
     open = !open;
     document.body.classList.toggle("nav-open", open);
     menuBtn.setAttribute("aria-expanded", String(open));
+    /* the overlay forces cream bars; on close, re-read what's underneath */
+    if (!open) queueMenuSync();
     if (prefersReduced) return;
     if (open) {
       gsap.fromTo(overlay, { yPercent: -100 }, { yPercent: 0, duration: 0.65, ease: "power4.inOut" });
@@ -532,60 +614,191 @@ if (menuBtn && overlay) {
   });
 }
 
-/* ══════════ what we do — awards strip + example ══════════ */
-const EXAMPLES = {
-  identity: {
-    kicker: { ar: "مثال — هويّة بصريّة", en: "Example — visual identity" },
-    title: { ar: "مؤسّسة بنيان بحلّتها الجديدة", en: "Bunyan Foundation, renewed" },
-    desc: {
-      ar: "حضورٌ أوضح وأكثر حداثة، مع الحفاظ على روح العلامة القريبة والمألوفة: شعار، ألوان، تغليف، وظهور يومي.",
-      en: "A clearer, more modern presence that keeps the brand's familiar spirit: logo, colors, packaging, and daily touchpoints.",
-    },
-    seed: "aliphsvc1",
-  },
-  content: {
-    kicker: { ar: "مثال — صناعة محتوى", en: "Example — content creation" },
-    title: { ar: "مواسم الزيتون: توثيق بصري", en: "Olive Seasons: a visual record" },
-    desc: {
-      ar: "سلسلة محتوى مصوّر لمواسم القطف، من الحقل إلى المعصرة: ٤٧ لقطة، وقصص يوميّة، وهويّة لونيّة واحدة.",
-      en: "A photographed content series across the harvest, from field to press: 47 shots, daily stories, one visual tone.",
-    },
-    seed: "aliphsvc2",
-  },
-  marketing: {
-    kicker: { ar: "مثال — تسويق مبتكر", en: "Example — creative marketing" },
-    title: { ar: "حملة سوق البلدة", en: "The Old Town Market campaign" },
-    desc: {
-      ar: "حملة إعلانيّة كاملة لإحياء السوق القديم: مفهوم، تصوير، وإدارة منصّات لثلاثة أشهر متواصلة.",
-      en: "A full campaign to revive the old market: concept, photography, and three months of channel management.",
-    },
-    seed: "aliphsvc3",
-  },
-  events: {
-    kicker: { ar: "مثال — تنظيم فعاليّات", en: "Example — event production" },
-    title: { ar: "ليالي رمضان", en: "Ramadan Nights" },
-    desc: {
-      ar: "تنظيم وتوثيق فعاليّة مجتمعيّة على مدار الشهر: برنامج، هويّة بصريّة للفعاليّة، وتغطية يوميّة.",
-      en: "A month-long community event, organized and documented: program, event identity, and daily coverage.",
-    },
-    seed: "aliphsvc4",
-  },
-};
+/* ══════════ menu button: invert over dark sections ══════════
+   The burger is fixed above the page, so whatever scrolls under it decides
+   its colour. Every opaque ink-field in the design is listed here; if one is
+   in the hit-stack under the button's centre it is what's actually visible,
+   because nothing cream is ever painted on top of them.
+   The load curtain is deliberately NOT in this list: it covers the button
+   anyway, and counting it would leave the button stuck dark after the
+   curtain lifts, since nothing re-samples until the first scroll. */
+const DARK_UNDER = [
+  ".filmstrip", ".banner", ".marquee", ".story-panel.ink", ".footer",
+  ".testi", ".sl-stage", ".service-cell.is-active",
+].join(",");
+
+function syncMenuBtn() {
+  if (!menuBtn || document.body.classList.contains("nav-open")) return;
+  const r = menuBtn.getBoundingClientRect();
+  const stack = document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+  let dark = false;
+  for (const el of stack) {
+    if (el === menuBtn || menuBtn.contains(el)) continue;
+    if (el === document.body || el === document.documentElement) break;
+    if (el.closest(DARK_UNDER)) { dark = true; break; }
+  }
+  menuBtn.classList.toggle("on-dark", dark);
+}
+
+let menuTick = false;
+function queueMenuSync() {
+  if (menuTick) return;
+  menuTick = true;
+  requestAnimationFrame(() => { menuTick = false; syncMenuBtn(); });
+}
+window.addEventListener("scroll", queueMenuSync, { passive: true });
+window.addEventListener("resize", queueMenuSync);
+
+/* ══════════ what we do — awards strip + latest-work slider ══════════
+   The stage shows the newest projects in whichever service is selected,
+   newest first. Mechanics are unchanged from the old example panel — the
+   service cells still drive it — but each service now carries several
+   pieces, so prev/next step through that category's latest work. */
+const SLIDER_MAX = 5;
 
 let currentService = "identity";
 
-function renderExample(id) {
-  const data = EXAMPLES[id];
-  const kicker = document.getElementById("exampleKicker");
-  if (!data || !kicker) return;
-  kicker.textContent = data.kicker[lang];
-  document.getElementById("exampleTitle").textContent = data.title[lang];
-  document.getElementById("exampleDesc").textContent = data.desc[lang];
-  const media = document.getElementById("exampleMedia");
-  if (media) {
-    media.innerHTML = `<img src="https://picsum.photos/seed/${data.seed}/1000/700" alt="" style="height:100%;width:100%;object-fit:cover;opacity:1;filter:grayscale(1) contrast(1.08)">`;
+const svcSlider = (() => {
+  const stage = document.getElementById("slStage");
+  const slides = document.getElementById("slSlides");
+  if (!stage || !slides) return { setService() {}, render() {}, next() {}, prev() {} };
+
+  const wipe = document.getElementById("slWipe");
+  const stamp = document.getElementById("slStamp");
+  const elKicker = document.getElementById("slKicker");
+  const elTitle = document.getElementById("slTitle");
+  const elMeta = document.getElementById("slMeta");
+  const elDesc = document.getElementById("slDesc");
+  const elIndex = document.getElementById("slIndex");
+  const elTotal = document.getElementById("slTotal");
+  const elCap = document.getElementById("slPlateCap");
+  const elTag = document.getElementById("slPlateTag");
+  const elBar = document.getElementById("slProgressBar");
+
+  const line = elTitle.querySelector(".line");
+  const SVC_TAG = { identity: "IDENTITY", content: "CONTENT", marketing: "MARKETING", events: "EVENTS" };
+
+  let items = [], idx = 0, busy = false;
+
+  const rtl = () => document.documentElement.dir === "rtl";
+  const stampRot = () => (rtl() ? -7 : 7);
+  const svcName = (id) => {
+    const c = CATS.find((c) => c.id === id);
+    return c ? c[lang] : "";
+  };
+
+  function pick(catId) {
+    return PROJECTS
+      .filter((p) => p.cat === catId)
+      .sort((a, b) => b.year - a.year || b.count - a.count)
+      .slice(0, SLIDER_MAX);
   }
-}
+
+  /* one <img> lives in the stage and is swapped behind the wipe; the rest
+     are warmed in the background so the swap never shows a blank frame */
+  function ensureImg() {
+    let img = slides.querySelector("img");
+    if (!img) {
+      slides.innerHTML = `<div class="sl-slide"><img alt=""></div>`;
+      img = slides.querySelector("img");
+    }
+    return img;
+  }
+  const src = (p) => `https://picsum.photos/seed/${p.seed}/1200/900`;
+  function preload() {
+    items.forEach((p) => { const i = new Image(); i.src = src(p); });
+  }
+
+  /* write both sides for the current item — no animation. the .line node is
+     reused rather than rebuilt so tweens can hold a stable reference to it */
+  function paint() {
+    const p = items[idx];
+    if (!p) return;
+    elKicker.textContent = `${I18N.slLatest[lang]} — ${svcName(currentService)}`;
+    line.textContent = p[lang];
+    elMeta.innerHTML =
+      `<span class="sl-year">${num(p.year)}</span>` +
+      `<span class="sl-sep">·</span>` +
+      `<span class="sl-count">${num(p.count)} ${I18N.slPieces[lang]}</span>`;
+    elDesc.textContent = p.desc ? p.desc[lang] : "";
+    elIndex.textContent = num(String(idx + 1).padStart(2, "0"));
+    elTotal.textContent = num(String(items.length).padStart(2, "0"));
+    elCap.textContent = p[lang];
+    elTag.textContent = SVC_TAG[currentService] || "";
+    elBar.style.width = `${((idx + 1) / items.length) * 100}%`;
+    /* only the newest piece in a category wears the stamp. GSAP writes
+       inline styles, so the resting state has to be set here too or the
+       CSS :not(.on) rule loses to a leftover inline opacity */
+    const newest = idx === 0;
+    stamp.classList.toggle("on", newest);
+    gsap.set(stamp, newest
+      ? { opacity: 1, scale: 1, rotate: stampRot() }
+      : { opacity: 0 });
+    ensureImg().src = src(p);
+  }
+
+  /* the swap: the text lifts out and an ink bar sweeps in from the leading
+     edge; content changes behind it; the bar sweeps off the far edge and the
+     photo settles out of a slow zoom while the new text drops in.
+     Everything that depends on the new content is created *after* paint(),
+     so no tween is left pointing at the previous slide's values. */
+  function go(next, dir, force) {
+    if (busy || !items.length) return;
+    const target = ((next % items.length) + items.length) % items.length;
+    if (target === idx && !force) return;
+    idx = target;
+
+    if (prefersReduced || !wipe) { paint(); return; }
+    busy = true;
+    const isRtl = rtl();
+    /* the bar enters from the side the new slide travels in from */
+    const enter = dir > 0 ? (isRtl ? "right" : "left") : (isRtl ? "left" : "right");
+    const exit = enter === "left" ? "right" : "left";
+
+    gsap.timeline({ onComplete: () => (busy = false) })
+      .set(wipe, { transformOrigin: `${enter} center`, scaleX: 0 })
+      .to(wipe, { scaleX: 1, duration: 0.42, ease: "power3.in" }, 0)
+      .to(line, { yPercent: -108, duration: 0.34, ease: "power3.in" }, 0)
+      .to([elMeta, elDesc], { opacity: 0, y: -10, duration: 0.3, ease: "power2.in" }, 0)
+      .add(() => {
+        paint();
+        gsap.set(line, { yPercent: 108 });
+        gsap.fromTo(slides.querySelector("img"),
+          { scale: 1.14, xPercent: dir * (isRtl ? 3 : -3) },
+          { scale: 1, xPercent: 0, duration: 1.5, ease: "power3.out" });
+        if (idx === 0) {
+          gsap.fromTo(stamp,
+            { opacity: 0, scale: 0.7, rotate: 0 },
+            { opacity: 1, scale: 1, rotate: stampRot(), duration: 0.55, delay: 0.36, ease: "back.out(2.2)" });
+        }
+      })
+      .set(wipe, { transformOrigin: `${exit} center` })
+      .to(wipe, { scaleX: 0, duration: 0.52, ease: "power3.out" })
+      .to(line, { yPercent: 0, duration: 0.6, ease: "power4.out" }, "-=0.46")
+      .fromTo([elMeta, elDesc],
+        { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.07, ease: "power2.out" }, "-=0.5");
+  }
+
+  return {
+    /* switching service jumps to that category's newest piece — forced,
+       because the index is usually already 0 but the content has changed */
+    setService(catId) {
+      items = pick(catId);
+      preload();
+      go(0, 1, true);
+    },
+    /* language switch / first boot: repaint in place, no transition */
+    render() {
+      items = pick(currentService);
+      idx = Math.min(idx, Math.max(items.length - 1, 0));
+      preload();
+      gsap.set([line, elMeta, elDesc], { clearProps: "all" });
+      paint();
+    },
+    next() { go(idx + 1, 1); },
+    prev() { go(idx - 1, -1); },
+  };
+})();
 
 function activateService(id, scroll) {
   const cells = document.querySelectorAll(".service-cell");
@@ -596,21 +809,14 @@ function activateService(id, scroll) {
     b.setAttribute("aria-selected", String(on));
   });
   currentService = id;
-  if (prefersReduced) {
-    renderExample(id);
-  } else {
-    gsap.to("#serviceExample", {
-      opacity: 0, y: 10, duration: 0.22, ease: "power2.in",
-      onComplete() {
-        renderExample(id);
-        gsap.to("#serviceExample", { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
-      },
-    });
-  }
+  svcSlider.setService(id);
   if (scroll) {
     document.getElementById("services").scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
   }
 }
+
+document.getElementById("slNext")?.addEventListener("click", () => svcSlider.next());
+document.getElementById("slPrev")?.addEventListener("click", () => svcSlider.prev());
 
 document.querySelectorAll(".service-cell").forEach((btn) => {
   btn.addEventListener("click", () => activateService(btn.dataset.service, false));
@@ -682,74 +888,80 @@ function initScatter() {
   });
 }
 
-/* ══════════ hero dropcap: layered torn-paper cutout ══════════
-   the paper artwork is stacked as three layers; each rests at its own offset
-   and rotation, drifts on its own timing, and separates further on hover */
+/* ══════════ hero dropcap: torn paper that unfolds ══════════
+   Each of the two sheets is drawn as two halves clipped to the top and the
+   bottom of the same box, sharing a fold line down the middle. Swinging the
+   halves on rotateX opens the paper like a folded note; at rotateX(0) both
+   halves carry the identical background at the identical size, so the seam
+   closes invisibly. The letter unfurls from the fold as the sheet flattens. */
 function initPaperCap() {
   const cap = document.querySelector(".dropcap[data-paper]");
   if (!cap || cap.dataset.bound) return;
   cap.dataset.bound = "1";
 
-  /* rest pose per layer: [x, y, rotation, hover multiplier] */
-  const POSE = [
-    [".pl-back", -9, 11, -4.2, 2.3],
-    [".pl-mid", -4.5, 5.5, -2.0, 1.7],
-    [".pl-front", 0, 0, 1.1, 1.0],
-  ];
-  const layers = POSE.map(([sel, x, y, rot, mul]) => {
-    const el = cap.querySelector(sel);
-    if (!el) return null;
-    el._pose = { x, y, rot, mul };
-    gsap.set(el, { x, y, rotation: rot });
-    return el;
-  }).filter(Boolean);
+  const back = cap.querySelector(".sheet-back");
+  const front = cap.querySelector(".sheet-front");
+  const crease = cap.querySelector(".crease");
+  const letter = cap.querySelector(".dc-letter");
+  if (!back || !front || !letter) return;
 
-  const letter = cap.querySelector(".dc-tile");
-  const grain = cap.querySelector(".paper-grain");
-  if (grain) gsap.set(grain, { rotation: 1.1 });
-  if (prefersReduced) return;
+  const halves = (sheet) => [sheet.querySelector(".half-t"), sheet.querySelector(".half-b")];
+  const [bt, bb] = halves(back);
+  const [ft, fb] = halves(front);
+  const allHalves = [bt, bb, ft, fb];
 
-  const idle = (el) => {
-    if (el._idle) el._idle.kill();
-    const p = el._pose;
-    el._idle = gsap.to(el, {
-      x: p.x + gsap.utils.random(-2.5, 2.5),
-      y: p.y + gsap.utils.random(-3.5, 3.5),
-      rotation: p.rot + gsap.utils.random(-1.6, 1.6),
-      duration: gsap.utils.random(3, 4.6),
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true,
+  /* flat, letter showing — the resting state and the whole story for
+     anyone who asked us not to animate */
+  const flatten = () => {
+    gsap.set(allHalves, { rotateX: 0 });
+    gsap.set(crease, { opacity: 0 });
+    gsap.set(letter, { opacity: 1, scaleY: 1, y: 0 });
+  };
+  if (prefersReduced) { flatten(); return; }
+
+  /* folded shut: both halves stood up on the crease, letter hidden inside */
+  gsap.set([bt, ft], { rotateX: -94, transformOrigin: "50% 50%" });
+  gsap.set([bb, fb], { rotateX: 94, transformOrigin: "50% 50%" });
+  gsap.set(crease, { opacity: 1 });
+  gsap.set(letter, { opacity: 0, scaleY: 0.12, y: 0, transformOrigin: "50% 50%" });
+
+  const idle = () => {
+    /* the paper never sits perfectly still — a slow breath on the whole
+       stack plus a hair of residual fold, so it keeps reading as paper */
+    gsap.to(cap, {
+      rotateY: 2.4, rotateX: -1.6, duration: 5.5,
+      ease: "sine.inOut", repeat: -1, yoyo: true,
+    });
+    gsap.to([ft, bt], {
+      rotateX: -2.4, duration: 4.2, ease: "sine.inOut", repeat: -1, yoyo: true,
+    });
+    gsap.to([fb, bb], {
+      rotateX: 1.8, duration: 4.9, ease: "sine.inOut", repeat: -1, yoyo: true,
     });
   };
 
-  /* entrance: layers settle into place, back to front */
-  gsap.from(layers, {
-    y: 26, opacity: 0, duration: 0.85, stagger: 0.1, delay: 0.7,
-    ease: "power3.out", onComplete: () => layers.forEach(idle),
-  });
+  /* the unfold: back sheet opens first and the front follows a beat later,
+     so you read two separate sheets rather than one thick one */
+  gsap.timeline({ delay: 0.85, onComplete: idle })
+    .to([bt, bb], { rotateX: 0, duration: 1.15, ease: "power3.out" })
+    .to([ft, fb], { rotateX: 0, duration: 1.25, ease: "power3.out" }, "-=0.98")
+    .to(crease, { opacity: 0, duration: 0.75, ease: "power2.out" }, "-=0.85")
+    .to(letter, { opacity: 1, scaleY: 1, duration: 0.85, ease: "power4.out" }, "-=0.72");
 
-  cap.addEventListener("mouseenter", () => {
-    layers.forEach((el) => {
-      if (el._idle) el._idle.kill();
-      const p = el._pose;
-      gsap.to(el, {
-        x: p.x * p.mul, y: p.y * p.mul, rotation: p.rot * p.mul,
-        duration: 0.5, ease: "power3.out", overwrite: true,
-      });
+  /* hover: the sheet half-closes again, as if you'd caught it mid-fold */
+  const hoverTo = (v) => {
+    gsap.killTweensOf([ft, fb, bt, bb, crease, letter]);
+    gsap.to([ft, bt], { rotateX: -v * 15, duration: 0.55, ease: "power3.out" });
+    gsap.to([fb, bb], { rotateX: v * 12, duration: 0.55, ease: "power3.out" });
+    gsap.to(crease, { opacity: v * 0.85, duration: 0.55, ease: "power2.out" });
+    gsap.to(letter, {
+      scale: 1 + v * 0.07, y: -v * 4, duration: 0.55, ease: "power3.out",
     });
-    gsap.to(letter, { y: -5, scale: 1.06, duration: 0.5, ease: "power3.out", overwrite: true });
-  });
-
+  };
+  cap.addEventListener("mouseenter", () => hoverTo(1));
   cap.addEventListener("mouseleave", () => {
-    layers.forEach((el) => {
-      const p = el._pose;
-      gsap.to(el, {
-        x: p.x, y: p.y, rotation: p.rot, duration: 0.7,
-        ease: "power3.out", overwrite: true, onComplete: () => idle(el),
-      });
-    });
-    gsap.to(letter, { y: 0, scale: 1, duration: 0.7, ease: "power3.out", overwrite: true });
+    hoverTo(0);
+    gsap.delayedCall(0.6, idle);
   });
 }
 
@@ -883,6 +1095,7 @@ if (page === "about" && !prefersReduced) {
 /* ══════════ boot ══════════ */
 applyI18n();
 initPaperCap();
+syncMenuBtn();
 setInterval(tickClock, 20000);
 
 /* widths measured before the Idris fonts land are wrong, which leaves a gap in
@@ -891,6 +1104,7 @@ if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
     rebuildLoops();
     filmLoop.rebuild();
+    queueMenuSync();
   });
 }
 

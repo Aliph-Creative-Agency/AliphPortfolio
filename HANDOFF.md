@@ -1,6 +1,9 @@
 # Aliph Portfolio — Session Handoff
 
-_Last updated: 2026-07-26. Read this first when starting a new session._
+_Last updated: 2026-07-26 (session 2). Read this first when starting a new session._
+
+> **Standing rule from the user: update this file at the end of every session.**
+> Not only when asked — it is part of finishing the work.
 
 ## What this is
 
@@ -79,6 +82,16 @@ Regeneration recipe for `film.webp` lives in this file's history; the two inputs
 `index.html` order: masthead → **film-strip hero** → **interactive marquee** →
 **"ماذا نفعل؟" services** → **"لماذا ألِف؟" story (4 sticky panels)** → **contact footer**.
 
+### The hero panel is CREAM now (inverted 2026-07-26)
+
+The text panel used to be an ink block with cream type. The user asked to
+"invert the colors for the hero text and its background (**only**)", so
+`.hero-panel` is now cream with ink type, a 3px ink border against the film,
+and its own multiply-linen overlay (`.hero-panel::after`) so it doesn't read as
+a flat cream slab beside the film. `.hero-eyebrow` / `.hero-title` /
+`.hero-rule` / `.dropcap-block` / `.hero-meta` all took the matching ink
+treatment. Nothing else on the page inverted.
+
 ### Film-strip hero (reworked 2026-07-26 — read this before touching it)
 
 - `#filmScroll` holds one `.film-group` of **4 `.film-frame`s — one per service**
@@ -105,6 +118,18 @@ Regeneration recipe for `film.webp` lives in this file's history; the two inputs
 - The page-wide linen (`body::before`) *does* show through the sprocket holes. That is
   **intended and confirmed fine** — the holes are openings onto the background, which
   isn't part of the film.
+- **Seeding (`seedX`, fixed 2026-07-26):** the EN/LTR layout used to open with a
+  blank gap before the first frame. The thing that has to land correctly is the
+  content's **leading edge in strip coordinates** (`originX() + x`), *not* `x`.
+  Under RTL a `max-content` track is right-aligned, so `originX()` is a large
+  negative number and `x` is the positive translation cancelling it — reducing
+  `x` alone (the first attempt) threw the whole strip off-screen. `seedX` shifts
+  by whole periods until that leading edge lands in `(-2P, -P]`: one full period
+  before the window, so the tween can travel a period either way and still
+  cover. A period shift is pixel-identical, so frame 0 stays centred.
+- **Measure against `.filmstrip`, not `.hero`.** `windowCenter()` / `originX()`
+  both do. `windowCenter()` also detects the **stacked mobile layout** (panel
+  above the strip rather than beside it) and returns the strip's own centre.
 - **Loop:** `filmLoop` in main.js. It travels **exactly one period and repeats**
   (`repeat: -1`), one direction, constant **34 px/s**. Because the content and the
   background tile are both periodic at `period`, a one-period shift is pixel-identical,
@@ -120,6 +145,59 @@ Regeneration recipe for `film.webp` lives in this file's history; the two inputs
   grade.
 - ⚠️ Shadows: the user wants depth **at the sprocket holes**, NOT inset shadows on the
   hero's top/bottom edges (I added those once; they were removed on request).
+
+### Hero dropcap — torn paper that unfolds (rebuilt 2026-07-26)
+
+The old three-layer drifting version is gone; the user rejected it twice. The
+current one actually unfolds:
+
+- Each of the **two sheets** (`.sheet-back` / `.sheet-front`) is drawn **twice**
+  — `.half-t` clipped to `inset(0 0 50% 0)`, `.half-b` to `inset(50% 0 0 0)` —
+  over a shared fold line at the box's midline, with `transform-origin: 50% 50%`
+  on both. Swinging them on `rotateX` opens the paper. Both halves carry the
+  **identical background at the identical size**, so at `rotateX(0)` the seam
+  closes invisibly. `perspective` is on `.dropcap`, `transform-style:
+  preserve-3d` on `.paper-stack` and each `.sheet`.
+- `initPaperCap()` sets the folded pose (±94°), then the **back sheet opens
+  first and the front follows a beat later** so you read two sheets, not one
+  thick one. `.crease` (a gradient masked to the paper silhouette) fades out as
+  it flattens, and the letter unfurls from the fold (`scaleY` 0.12 → 1).
+  Then a slow idle breath. Hover half-closes it again.
+- **The letter is pinned to the front sheet's measured alpha centroid —
+  `left: 51.7%; top: 48.3%`** on a zero-size `.dc-letter`, with the glyph
+  absolutely centred on that point. The user's complaint was that the logo
+  wasn't in the middle; centring on the *box* is what looked wrong, because the
+  back sheet's offset skews the cluster's optical centre. If the paper art is
+  ever recut, re-measure the centroid rather than eyeballing it.
+- `.dc-letter img` needs `max-width: none` — the global `img { max-width: 100% }`
+  would otherwise resolve against a zero-width parent and collapse it.
+- Size comes from `--cap-h` on `.dropcap`; the glyph is `calc(var(--cap-h) * .46)`.
+
+### "ماذا نفعل؟" — latest-work slider (rebuilt 2026-07-26)
+
+The static one-example panel is gone. The stage now shows **the newest projects
+in whichever service is selected**, newest first, up to `SLIDER_MAX` (5).
+
+- **Mechanics are unchanged** — the service cells still drive it
+  (`activateService` → `svcSlider.setService`). What's new is that each service
+  has several pieces, so prev/next step through that category's latest work.
+- Every entry in `PROJECTS` now carries a `desc: {ar, en}` one-liner so the text
+  column can speak about whichever piece is on screen. (Placeholder copy.)
+- **The dead space is fixed by construction:** the grid is `align-items:
+  stretch`, `.sl-stage` carries the `min-height`, and `.sl-foot` uses
+  `margin-top: auto`. The "كل الأعمال" button therefore lands **exactly on the
+  stage's bottom edge** — verified, both bottoms at the same y.
+- **`.sl-stamp`** is the newspaper "مؤخّرًا / LATEST" call-out: cream plate,
+  double ink rule, rotated ∓7°. Only `idx === 0` wears it.
+- **The transition** is a press wipe: the text lifts out while an ink bar
+  (`.sl-wipe`) sweeps in from the leading edge, content swaps behind it, the bar
+  sweeps off the far edge, and the photo settles out of a slow zoom.
+  ⚠️ Everything that depends on the new content is built **inside the `.add()`
+  callback, after `paint()`** — tween targets resolved at timeline-build time
+  would point at the previous slide. The `.line` node is reused, never
+  re-created, for the same reason.
+- ⚠️ `paint()` must set the stamp's resting inline styles itself. GSAP writes
+  inline, so a leftover inline `opacity: 1` would beat the CSS `:not(.on)` rule.
 
 ### Other homepage pieces (all wired in `main.js`)
 
@@ -153,19 +231,27 @@ Regeneration recipe for `film.webp` lives in this file's history; the two inputs
   CSS in style.css is now **dead code** — safe to delete, left in place to keep the diff
   small. The about-page `.footer-title` GSAP reveal was removed with it.
 
+## Responsive / phone view
+
+- **The hero stacks on ≤900px: text on top, film strip underneath.** `.hero`
+  becomes `display: flex; flex-direction: column-reverse` (DOM order is strip →
+  overlay), the panel goes full width, and `.filmstrip` becomes static with
+  `height: var(--film-h)`. This puts the film strip **directly above the
+  marquee**, which is the point — the user wants the two strips connected.
+- `.film-scroll { --fh: calc(var(--film-h) - 6px) }` there — the strip's own top
+  and bottom borders sit inside its height. Getting this wrong re-introduces a
+  fractional stretch in the scan.
+- `.svc-latest` collapses to one column with `.sl-stage { order: -1 }` so the
+  photograph leads.
+
 ## Known-open / next up
 
-1. **The torn-paper Aliph dropcap is NOT right — the user's top open item.**
-   Current attempt: `.dropcap[data-paper]` in index.html stacks `.pl-back` / `.pl-mid` /
-   `.pl-front` (from `paper-back.png` / `paper-front.png`) plus a `.paper-grain` linen
-   layer masked to the paper silhouette, with the أ icon on top; `initPaperCap()` in
-   main.js gives each layer a rest pose, an idle drift, and a hover separation.
-   The user's brief was: use `resources/aliph background.png` as the **background** ref,
-   **animate its layers**, **add textures and shadows**. They looked at it and said it
-   "isn't done correctly" — needs rethinking, likely closer to the ref's two-layer
-   torn-paper look.
-2. Then: polish **work (library)** and **about** to the same bar as the new home.
-3. Cropped-title fix is in (see below) — spot-check other headings for the same issue.
+1. Polish **work (library)** and **about** to the same bar as the new home —
+   they have not been touched since the footer unification.
+2. Spot-check remaining headings for the clipped-Arabic-tops issue (see below).
+3. All imagery is still `picsum.photos` placeholders.
+4. Minor, unreported: in EN the Idris Sharp full stop renders as a raised
+   diamond in `.hero-title` ("things begin◆"). Left alone — not asked for.
 
 ## Fixes worth remembering
 
@@ -176,6 +262,26 @@ Regeneration recipe for `film.webp` lives in this file's history; the two inputs
 - **RTL + `width: max-content`**: such a track is right-aligned, so its natural left
   offset is NOT 0. `makeLoop` measures `baseLeft` before seeding x. Assuming 0 pushed
   every frame off-screen once — check this first if a strip renders blank.
+- **The menu button inverts on dark sections.** `syncMenuBtn()` reads
+  `document.elementsFromPoint` at the button's centre and toggles `.on-dark`
+  (cream bars) when anything in `DARK_UNDER` is in the stack. rAF-throttled on
+  scroll/resize, plus a sync at boot, on `fonts.ready`, when the curtain lifts,
+  and when the nav closes. ⚠️ The **curtain is deliberately not in `DARK_UNDER`**
+  — counting it left the button stuck dark after the curtain lifted, because
+  nothing re-sampled until the first scroll.
+- **`.lang-switch` is `position: relative` by default**; only `.masthead
+  .lang-switch` is pinned. It used to be absolutely positioned unconditionally,
+  which yanked it out of the nav overlay's flex footer and dropped it on top of
+  the socials. The overlay copy also inverts (cream pill on ink).
+  ⚠️ The masthead one uses **physical `left`, not `inset-inline-start`** — the
+  burger is physically right, so a logical start would stack them in RTL.
+  (I made exactly that mistake mid-session.)
+- **`.story-index`** ("٠١" … "٠٤" in لماذا ألِف) was `opacity: .28` and read as an
+  invisible watermark. It is now full-strength `currentColor` with a rule under
+  it — a section marker, not a texture.
+- **`body[data-page="index"] .footer { margin-top: 0 }`** — the shared footer's
+  top margin showed as a stray cream strip above the contact band on the home
+  page, where the last story panel already butts up against it.
 
 ## How to preview / verify
 
@@ -199,13 +305,18 @@ Or the Browser pane: `preview_start` with name `"prototype"`.
 
 ## Git
 
-- Branch: `fix/restore-about-library-styles` (NOT main). Main branch is `main`.
-- Latest commit: `4ff1662 Add session handoff notes`.
-- **Everything from 2026-07-25/26 is UNCOMMITTED** — the unified footers, the film-strip
-  rework, the loop fixes, the title fix, the paper dropcap, and the new derived assets
-  (`film.png`, `paper-front.png`, `paper-back.png`). `.claude/settings.local.json` is
-  local config, leave it.
-- Commit only when asked. End commit messages with the Claude co-author trailer.
+- **Remote: `origin` → https://github.com/AliphCreaitve/AliphPortfolio.git**
+- Working branch is now **`main`** (the local branch was called `master`; it was
+  renamed, and `fix/restore-about-library-styles` was fast-forwarded into it).
+  The old feature branch still exists locally and can be deleted.
+- Everything through this session is committed and pushed.
+- `.gitignore` excludes `old/` and `old prototype/` — ~9.8MB of superseded
+  local snapshots. `resources/` **is** tracked: it holds the inputs the derived
+  assets are regenerated from.
+- ⚠️ GitHub warns that `Brand/Printables/NameTag/Open FIles/NameTag-70x100-3mmBleed.indd`
+  is 54MB, over its 50MB recommendation. It pushes fine today; if the repo gets
+  unwieldy, that file is the first candidate for Git LFS.
+- End commit messages with the Claude co-author trailer.
 
 ## Working style notes (from this project so far)
 
