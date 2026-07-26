@@ -47,9 +47,14 @@ memory/               auto-memory (see aliph-website-direction.md)
 | `film-shadow.webp` | `film.webp`'s alpha, offset +15px, Gaussian blur 11, ×0.62 opacity, ink-colored | 210KB. The shadow seen *through* the sprocket holes. |
 ~~`paper-front.png` / `paper-back.png`~~ — **deleted 2026-07-26.** They backed the
 torn-paper dropcap, which is gone for good (see the dropcap section).
-`prototype/assets/img/ready.png` (2.1MB) is also unreferenced — a leftover of the
-film pipeline, whose real input is `resources/ready.png`. Safe to delete; left
-alone because nobody asked.
+**Dead weight was stripped on 2026-07-26.** `prototype/` went 14MB → 9.0MB.
+Deleted: `film-strip.png` (superseded by `film.webp`), `ready.png` (a duplicate
+of `resources/ready.png`), and six unreferenced logo/icon SVG variants. Also
+removed from the shipped code: the whole **testimonials** feature (≈70 lines of
+CSS and the `TESTIMONIALS` array — it had no markup on any page), the old footer
+CSS, `.lang-btn`, `.svc-body-inner`, and 11 orphaned `I18N` keys.
+Everything is recoverable from `Brand/` or git history. If you add a
+testimonials section later, the old block is in the history of this commit.
 
 ⚠️ I once "enhanced" the film (2× LANCZOS + unsharp + baked hole shadows) and the user
 rejected it: **reuse their art as-is.** The pipeline above only restores alpha their
@@ -250,8 +255,8 @@ in whichever service is selected**, newest first, up to `SLIDER_MAX` (5).
 - **about.html:** scattered newspaper clippings + team grid.
 - ✅ **The contact footer is now unified across all three pages** (identical markup on
   index / library / about). The old `.footer-inner` / `.footer-title` / `.footer-social`
-  CSS in style.css is now **dead code** — safe to delete, left in place to keep the diff
-  small. The about-page `.footer-title` GSAP reveal was removed with it.
+  CSS has now been **deleted** (2026-07-26). `@keyframes spin` was kept — it moved
+  out of the dead `.footer-stamp` rule and still drives `.contact-stamp`.
 
 ## Responsive / phone view
 

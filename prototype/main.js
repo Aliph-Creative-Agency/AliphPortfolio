@@ -8,8 +8,6 @@ const I18N = {
   navHome: { ar: "الرئيسيّة", en: "Home" },
   navWork: { ar: "الأعمال", en: "Work" },
   navAbout: { ar: "من نحن", en: "About" },
-  metaPlace: { ar: "القدس، جبل الزيتون", en: "Jerusalem, Mount of Olives" },
-  metaIssue: { ar: "العدد ٠١ — حزيران ٢٠٢٦", en: "Issue 01 — June 2026" },
 
   /* hero */
   heroEyebrow: { ar: "استوديو إبداعي — القدس، جبل الزيتون", en: "A creative studio — Jerusalem, Mount of Olives" },
@@ -29,18 +27,6 @@ const I18N = {
   btnWork: { ar: "كل الأعمال", en: "ALL WORK" },
   btnAbout: { ar: "تعرّف على ألِف", en: "Get to know Aliph" },
 
-  /* testimonials */
-  testiBanner: { ar: "ماذا قالوا عنّا", en: "What they said" },
-  testiLabel: { ar: "WORD OF MOUTH", en: "شهادات" },
-
-  /* film captions */
-  fr1: { ar: "البلدة القديمة — تصوير", en: "The Old City — photography" },
-  fr2: { ar: "مواسم الزيتون", en: "Olive Seasons" },
-  fr3: { ar: "ليالي رمضان — فعاليّة", en: "Ramadan Nights — event" },
-  fr4: { ar: "ورشة الخط", en: "Calligraphy workshop" },
-  fr5: { ar: "سوق البلدة — حملة", en: "Old Town Market — campaign" },
-  fr6: { ar: "جبل الزيتون", en: "Mount of Olives" },
-
   /* services */
   svcBanner: { ar: "ماذا نفعل؟", en: "What we do?" },
   svc1: { ar: "هويّات بصريّة", en: "Identities" },
@@ -51,7 +37,6 @@ const I18N = {
   svc2Label: { ar: "CONTENT", en: "صناعة محتوى" },
   svc3Label: { ar: "MARKETING", en: "تسويق مبتكر" },
   svc4Label: { ar: "EVENTS", en: "تنظيم فعاليّات" },
-  svcCta: { ar: "كل الأعمال في الأرشيف", en: "All work in the archive" },
 
   /* latest-work slider */
   slLatest: { ar: "أحدث الأعمال", en: "Latest work" },
@@ -217,45 +202,6 @@ const MQ_ITEMS = [
   { key: "svc2", target: "content" },
   { key: "svc3", target: "marketing" },
   { key: "svc4", target: "events" },
-];
-
-const TESTIMONIALS = [
-  {
-    seed: "alipht1",
-    quote: {
-      ar: "سلّمونا هويّة تبدو وكأنها كانت موجودة دائمًا. كل تفصيل مدروس، ومن أوّل اجتماع شعرنا أننا بين أيدٍ أمينة.",
-      en: "They handed us an identity that felt like it had always existed. Every detail considered — from the first meeting we felt we were in safe hands.",
-    },
-    name: { ar: "ريم قاسم", en: "Reem Qasem" },
-    role: { ar: "مؤسّسة — مقهى الجبل", en: "Founder — Mountain Café" },
-  },
-  {
-    seed: "alipht2",
-    quote: {
-      ar: "التصوير الذي أنتجه ألِف لموسم الزيتون رفع علامتنا مستوىً كاملًا. صور تحكي، لا تزيّن فقط.",
-      en: "The photography Aliph produced for our olive season lifted the brand a whole level. Images that tell a story, not just decorate.",
-    },
-    name: { ar: "أبو خالد", en: "Abu Khaled" },
-    role: { ar: "مزارع — مواسم الزيتون", en: "Grower — Olive Seasons" },
-  },
-  {
-    seed: "alipht3",
-    quote: {
-      ar: "أداروا حملة السوق من الفكرة إلى آخر منشور بهدوءٍ واحتراف. النتائج تكلّمت عن نفسها.",
-      en: "They ran the market campaign from concept to the last post with calm and craft. The results spoke for themselves.",
-    },
-    name: { ar: "لجنة السوق", en: "Market Committee" },
-    role: { ar: "سوق البلدة القديمة", en: "Old Town Market" },
-  },
-  {
-    seed: "alipht4",
-    quote: {
-      ar: "نظّموا فعاليّتنا ووثّقوها كأنهم جزء من الفريق. مهنيّون، ودودون، ودقيقون في كل خطوة.",
-      en: "They organized and documented our event as if part of the team. Professional, warm, and precise at every step.",
-    },
-    name: { ar: "دار الشباب", en: "Youth House" },
-    role: { ar: "ليالي رمضان", en: "Ramadan Nights" },
-  },
 ];
 
 let lang = localStorage.getItem("aliph-lang") === "en" ? "en" : "ar";
