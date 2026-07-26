@@ -20,6 +20,9 @@ const I18N = {
     ar: "لِف استوديو يبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، ثم رسم النظام كاملًا منها: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم. نصنع الهويّات والمحتوى والحملات والفعاليّات — من الألِف إلى الياء.",
     en: "liph is a studio that begins at the first letter. Every brand has an origin point it is built from and returns to; our work is finding that point, then drawing the whole system from it: the name, the identity, the voice, and the way the brand shows up in the world. Identities, content, campaigns and events — from A to Z.",
   },
+  /* the dropcap letter is baked into the crumple sprite; this is the copy
+     screen readers get */
+  dropLetter: { ar: "أ", en: "A" },
   heroMeta1: { ar: "منذ ٢٠٢٤", en: "Since 2024" },
   heroMeta2: { ar: "١٩ مشروعًا", en: "19 projects" },
   heroMeta3: { ar: "هويّات · محتوى · تسويق · فعاليّات", en: "Identity · Content · Marketing · Events" },
@@ -888,65 +891,54 @@ function initScatter() {
   });
 }
 
-/* ══════════ hero dropcap: a letterpress initial ══════════
-   The slug presses down out of nothing, the glyph rises into it behind a
-   mask, the baseline draws out, and the off-register outline slides into
-   place. Hovering presses the slug into the page: it sinks a couple of
-   pixels and the second impression pulls further out of register.
-   Pure GSAP over the ink/cream system — no bitmap involved. */
+/* ══════════ hero dropcap: the paper uncrumples ══════════
+   A 24-frame sprite baked from the crumple clip (blue surround keyed out,
+   green paper face replaced with the letter, everything re-lit into the
+   ink/cream palette with the original fold shading kept). GSAP scrubs a
+   frame index and we set background-position — no video decode, no
+   runtime chroma key, one 150KB image.
+   Frame 0 is the tight ball, frame 23 the flat printed sheet. */
+const CRUMPLE = { cols: 6, rows: 4, n: 24, rest: 23, half: 10 };
+
 function initDropCap() {
   const cap = document.querySelector(".dropcap[data-cap]");
   if (!cap || cap.dataset.bound) return;
   cap.dataset.bound = "1";
 
-  const ghost = cap.querySelector(".dc-ghost");
-  const slab = cap.querySelector(".dc-slab");
-  const base = cap.querySelector(".dc-base");
-  const glyph = cap.querySelector(".dc-glyph");
-  if (!slab || !glyph) return;
+  const sheet = cap.querySelector(".dc-sheet");
+  if (!sheet) return;
 
-  /* rest pose: the second impression sits slightly out of register */
-  const GX = 5, GY = 5;
-
-  if (prefersReduced) {
-    gsap.set([slab, base], { scaleX: 1, scaleY: 1 });
-    gsap.set(glyph, { yPercent: 0 });
-    gsap.set(ghost, { x: GX, y: GY, opacity: 0.45 });
-    return;
-  }
-
-  gsap.set(slab, { scaleY: 0 });
-  gsap.set(base, { scaleX: 0 });
-  gsap.set(glyph, { yPercent: 115 });
-  gsap.set(ghost, { x: 0, y: 0, opacity: 0 });
-
-  gsap.timeline({ delay: 0.8 })
-    .to(slab, { scaleY: 1, duration: 0.85, ease: "power4.out" })
-    .to(glyph, { yPercent: 0, duration: 0.9, ease: "power4.out" }, "-=0.55")
-    .to(base, { scaleX: 1, duration: 0.7, ease: "power3.inOut" }, "-=0.6")
-    .to(ghost, { x: GX, y: GY, opacity: 0.45, duration: 0.7, ease: "power3.out" }, "-=0.55");
-
-  /* hover: the slug takes the impression, the ghost pulls out of register */
-  const press = (on) => {
-    gsap.to(slab, {
-      x: on ? 2 : 0, y: on ? 2 : 0,
-      duration: 0.45, ease: "power3.out", overwrite: "auto",
-    });
-    gsap.to(glyph, {
-      x: on ? 2 : 0, y: on ? 2 : 0, scale: on ? 1.05 : 1,
-      duration: 0.45, ease: "power3.out", overwrite: "auto",
-    });
-    gsap.to(ghost, {
-      x: on ? GX + 5 : GX, y: on ? GY + 5 : GY, opacity: on ? 0.8 : 0.45,
-      duration: 0.5, ease: "power3.out", overwrite: "auto",
-    });
-    gsap.to(base, {
-      scaleX: on ? 1.12 : 1, opacity: on ? 0.85 : 0.55,
-      duration: 0.5, ease: "power3.out", overwrite: "auto",
-    });
+  const setFrame = (v) => {
+    const i = Math.max(0, Math.min(CRUMPLE.n - 1, Math.round(v)));
+    const c = i % CRUMPLE.cols;
+    const r = (i / CRUMPLE.cols) | 0;
+    sheet.style.backgroundPosition =
+      `${(c / (CRUMPLE.cols - 1)) * 100}% ${(r / (CRUMPLE.rows - 1)) * 100}%`;
   };
-  cap.addEventListener("mouseenter", () => press(true));
-  cap.addEventListener("mouseleave", () => press(false));
+
+  if (prefersReduced) { setFrame(CRUMPLE.rest); return; }
+
+  const st = { f: 0 };
+  setFrame(0);
+  /* ease "none" — the frames are already evenly spaced in time, so any
+     easing here would fight the motion baked into the clip */
+  const play = (to, dur) => gsap.to(st, {
+    f: to, duration: dur, ease: "none", overwrite: true,
+    onUpdate: () => setFrame(st.f),
+  });
+
+  /* don't start until the sprite has actually decoded, or the first frames
+     land on an empty background */
+  const src = getComputedStyle(sheet).backgroundImage.slice(5, -2);
+  const img = new Image();
+  const start = () => gsap.delayedCall(0.55, () => play(CRUMPLE.rest, 0.95));
+  img.onload = start;
+  img.onerror = start;
+  img.src = src;
+
+  /* hover scrunches it part-way shut and lets it fall open again */
+  cap.addEventListener("mouseenter", () => play(CRUMPLE.half, 0.4));
+  cap.addEventListener("mouseleave", () => play(CRUMPLE.rest, 0.5));
 }
 
 /* ══════════ index page motion ══════════ */

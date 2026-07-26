@@ -149,34 +149,51 @@ treatment. Nothing else on the page inverted.
 - ⚠️ Shadows: the user wants depth **at the sprocket holes**, NOT inset shadows on the
   hero's top/bottom edges (I added those once; they were removed on request).
 
-### Hero dropcap — letterpress initial (2026-07-26, final)
+### Hero dropcap — the paper uncrumples (2026-07-26, current)
 
-🚫 **The torn-paper dropcap is dead. Do not bring it back.** Three attempts were
-rejected: the three-layer drifting stack, then a genuine two-sheet `rotateX`
-unfold. The user's call was _"quit using the torn paper asset, just bring
-something that looks good and works from the libs ur connected to."_
-`paper-front.png` / `paper-back.png` have been **deleted** from
-`prototype/assets/img/`. The source art is still at
-`resources/aliph background.png` if it is ever wanted for something else.
+Built from the user's own clip: `resources/Paper Crumple Effect Green Screen.mp4`.
+Rejected before this: the three-layer drifting paper stack, a two-sheet
+`rotateX` unfold, and an asset-free letterpress slug. `paper-front.png` /
+`paper-back.png` are deleted.
 
-What is there now is asset-free and built on GSAP, which the project already
-loads — no new dependency:
+**What the source clip actually is** (the filename is misleading):
 
-- `.dc-slab` — a solid ink slug with the brand linen over it, so it sits in the
-  same material as every other ink field on the site.
-- `.dc-glyph` — `Aliph-Icon-cream.svg` knocked out of the slug, inside an
-  `overflow: hidden` `.dc-letter`, so it rises into place behind a mask. Same
-  line-mask move the headlines use. EN swaps to a Georgia "A" in cream.
-- `.dc-base` — a cream hairline at the letter's foot: the baseline the rest of
-  the alphabet is drawn against, which is the brand's signature stroke.
-- `.dc-ghost` — a second ink outline offset ~5px, like a mis-registered second
-  pass on a press.
-- `initDropCap()` presses it in: slug `scaleY` up from its foot, glyph rises,
-  baseline draws out, ghost slides out of register. Hover takes the impression —
-  the slug sinks 2px, the ghost pulls further out, the baseline brightens.
-- `.dc-glyph img` needs `max-width: none`; the global `img { max-width: 100% }`
-  fights the explicit height otherwise.
-- Size is `--cap-h` on `.dropcap`, width `calc(var(--cap-h) * .47)`.
+- 1920×1080, 2.14s. The background is **blue `(0,102,246)`, not green.**
+- It is a **double key**. The blue is the surround; the **green is the paper's
+  FACE** — a second chroma surface meant to be replaced with your own artwork.
+- Only **0 → 0.88s** is animated: a ball uncrumpling into a flat sheet. After
+  that it is a frozen flat sheet. Play it backwards to crumple.
+
+**The bake** (`build_crumple.py`, kept in the session scratchpad — the recipe
+matters more than the script):
+
+1. Key blue → alpha, with a soft matte (out below 60, in above 120) so edges
+   don't alias.
+2. Key green → the face mask (`g - max(r,b)` ramped 25→60).
+3. Take **luminance from both surfaces** and re-light: paper stock → cream,
+   face → cream × 0.94. This is what keeps every crease and fold.
+4. Print the glyph into the face, scaled to the face's bbox, **modulated by the
+   same shading** so the ink creases with the paper. It fades in over the last
+   ~55% of the clip — you can't read print on a crumpled ball.
+5. Rotate 90° (the sheet is landscape, a dropcap wants portrait), resize to
+   320×450 cells, assemble a 6×4 sprite.
+
+Output: `crumple-ar.webp` / `crumple-en.webp`, ~153KB each, 24 frames.
+
+**Wiring:** `background-size: 600% 400%` makes one cell exactly fill the
+element, so frame maths is `c/(cols-1)` and `r/(rows-1)` in
+`background-position`. ⚠️ **The element's width must stay locked to the cell
+aspect** (`calc(var(--cap-h) * 320 / 450)`) or the frames letterbox.
+`initDropCap()` scrubs a frame index with `ease: "none"` — the frames are
+already evenly spaced in time, so easing would fight the motion baked into the
+clip. It waits for the sprite to decode before starting. Hover scrunches to
+frame 10 and lets it fall open again.
+
+⚠️ **Extracting frames from video here:** seeking (`currentTime` + `onseeked`)
+then drawing to canvas returns **stale frames** in headless Chromium — it
+reported the clip as completely static, which is wrong. Sample during real
+playback with a reduced `playbackRate` instead (floor is 0.0625). Also, a
+`file://` video **taints the canvas**; serve over HTTP.
 
 ### "ماذا نفعل؟" — latest-work slider (rebuilt 2026-07-26)
 
