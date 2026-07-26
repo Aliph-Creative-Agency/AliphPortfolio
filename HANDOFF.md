@@ -45,8 +45,11 @@ memory/               auto-memory (see aliph-website-direction.md)
 |---|---|---|
 | `film.webp` | `resources/upscalled.png` (user's 4× upscale of ready.png, 6144×4096, **alpha flattened by their upscaler**) → alpha transplanted from `ready.png`'s alpha scaled 4× LANCZOS → cropped to the film band `(y 1175–2816)` at **exactly 22 perforation pitches** → 5697×1641, WebP q92 | 0.78MB. **Their pixels, untouched** — only alpha restore + crop. |
 | `film-shadow.webp` | `film.webp`'s alpha, offset +15px, Gaussian blur 11, ×0.62 opacity, ink-colored | 210KB. The shadow seen *through* the sprocket holes. |
-| `paper-front.png` | `resources/aliph background.png`, pixels with luma ≥ 205, tight-cropped to `(182, 74, 853, 1511)` | the bright top paper layer |
-| `paper-back.png` | same source, full silhouette (alpha ≥ 24), same crop | the whole shape, used as the backing layer |
+~~`paper-front.png` / `paper-back.png`~~ — **deleted 2026-07-26.** They backed the
+torn-paper dropcap, which is gone for good (see the dropcap section).
+`prototype/assets/img/ready.png` (2.1MB) is also unreferenced — a leftover of the
+film pipeline, whose real input is `resources/ready.png`. Safe to delete; left
+alone because nobody asked.
 
 ⚠️ I once "enhanced" the film (2× LANCZOS + unsharp + baked hole shadows) and the user
 rejected it: **reuse their art as-is.** The pipeline above only restores alpha their
@@ -146,32 +149,34 @@ treatment. Nothing else on the page inverted.
 - ⚠️ Shadows: the user wants depth **at the sprocket holes**, NOT inset shadows on the
   hero's top/bottom edges (I added those once; they were removed on request).
 
-### Hero dropcap — torn paper that unfolds (rebuilt 2026-07-26)
+### Hero dropcap — letterpress initial (2026-07-26, final)
 
-The old three-layer drifting version is gone; the user rejected it twice. The
-current one actually unfolds:
+🚫 **The torn-paper dropcap is dead. Do not bring it back.** Three attempts were
+rejected: the three-layer drifting stack, then a genuine two-sheet `rotateX`
+unfold. The user's call was _"quit using the torn paper asset, just bring
+something that looks good and works from the libs ur connected to."_
+`paper-front.png` / `paper-back.png` have been **deleted** from
+`prototype/assets/img/`. The source art is still at
+`resources/aliph background.png` if it is ever wanted for something else.
 
-- Each of the **two sheets** (`.sheet-back` / `.sheet-front`) is drawn **twice**
-  — `.half-t` clipped to `inset(0 0 50% 0)`, `.half-b` to `inset(50% 0 0 0)` —
-  over a shared fold line at the box's midline, with `transform-origin: 50% 50%`
-  on both. Swinging them on `rotateX` opens the paper. Both halves carry the
-  **identical background at the identical size**, so at `rotateX(0)` the seam
-  closes invisibly. `perspective` is on `.dropcap`, `transform-style:
-  preserve-3d` on `.paper-stack` and each `.sheet`.
-- `initPaperCap()` sets the folded pose (±94°), then the **back sheet opens
-  first and the front follows a beat later** so you read two sheets, not one
-  thick one. `.crease` (a gradient masked to the paper silhouette) fades out as
-  it flattens, and the letter unfurls from the fold (`scaleY` 0.12 → 1).
-  Then a slow idle breath. Hover half-closes it again.
-- **The letter is pinned to the front sheet's measured alpha centroid —
-  `left: 51.7%; top: 48.3%`** on a zero-size `.dc-letter`, with the glyph
-  absolutely centred on that point. The user's complaint was that the logo
-  wasn't in the middle; centring on the *box* is what looked wrong, because the
-  back sheet's offset skews the cluster's optical centre. If the paper art is
-  ever recut, re-measure the centroid rather than eyeballing it.
-- `.dc-letter img` needs `max-width: none` — the global `img { max-width: 100% }`
-  would otherwise resolve against a zero-width parent and collapse it.
-- Size comes from `--cap-h` on `.dropcap`; the glyph is `calc(var(--cap-h) * .46)`.
+What is there now is asset-free and built on GSAP, which the project already
+loads — no new dependency:
+
+- `.dc-slab` — a solid ink slug with the brand linen over it, so it sits in the
+  same material as every other ink field on the site.
+- `.dc-glyph` — `Aliph-Icon-cream.svg` knocked out of the slug, inside an
+  `overflow: hidden` `.dc-letter`, so it rises into place behind a mask. Same
+  line-mask move the headlines use. EN swaps to a Georgia "A" in cream.
+- `.dc-base` — a cream hairline at the letter's foot: the baseline the rest of
+  the alphabet is drawn against, which is the brand's signature stroke.
+- `.dc-ghost` — a second ink outline offset ~5px, like a mis-registered second
+  pass on a press.
+- `initDropCap()` presses it in: slug `scaleY` up from its foot, glyph rises,
+  baseline draws out, ghost slides out of register. Hover takes the impression —
+  the slug sinks 2px, the ghost pulls further out, the baseline brightens.
+- `.dc-glyph img` needs `max-width: none`; the global `img { max-width: 100% }`
+  fights the explicit height otherwise.
+- Size is `--cap-h` on `.dropcap`, width `calc(var(--cap-h) * .47)`.
 
 ### "ماذا نفعل؟" — latest-work slider (rebuilt 2026-07-26)
 
@@ -292,6 +297,11 @@ Or the Browser pane: `preview_start` with name `"prototype"`.
 
 - The Browser pane's `computer{screenshot}` **times out** here. Use **Playwright**
   (installed for Python): launch chromium, `goto(...)`, screenshot, then Read the PNG.
+- ⚠️ **Stub the picsum images before _any_ screenshot call, not just for
+  deterministic output — it is a hang risk.** `locator.screenshot()` waits for
+  the page to settle, and those requests never finish; one run sat wedged for
+  half an hour. `page.screenshot(clip=...)` with the stub injected is the
+  reliable path.
 - **Use `wait_until="domcontentloaded"`, not the default `load`** — the external
   picsum/CDN images often never finish and `goto` times out at 30s.
 - **picsum.photos rate-limits** these seeds constantly, so film frames render empty in

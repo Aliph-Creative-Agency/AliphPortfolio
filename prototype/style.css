@@ -521,132 +521,89 @@ html[dir="ltr"] .hero-rule {
   font-weight: 500;
   color: rgba(15, 24, 32, 0.82);
 }
-/* ── torn-paper dropcap ───────────────────────────────────────────────
-   The brand's two torn deckle-edge sheets. Each sheet is drawn twice —
-   once clipped to its top half, once to its bottom half — over a shared
-   crease line, so the two halves can swing on rotateX and the sheet
-   literally unfolds. Both halves carry the identical background at the
-   identical size, so at rotateX(0) the seam is invisible.
-   The letter is centred on the FRONT sheet's measured alpha centroid
-   (51.7% / 48.3%), not on the box, so it reads as centred in the paper. */
+/* ── dropcap: a letterpress initial ───────────────────────────────────
+   No bitmap. An ink slug with the alif knocked out in cream, a cream
+   baseline hairline (the brand's extending-stroke move), and a second
+   ink outline offset behind it like a mis-registered second pass on a
+   press. Everything here is the ink/cream system and GSAP — nothing to
+   load, nothing to go stale. */
 .dropcap {
-  --cap-h: clamp(124px, 16vh, 188px);
+  --cap-h: clamp(122px, 15.5vh, 178px);
+  --cap-w: calc(var(--cap-h) * 0.47);
   float: inline-start;
   position: relative;
+  width: var(--cap-w);
   height: var(--cap-h);
-  aspect-ratio: 671 / 1437;
-  margin-inline: 0.15rem 1.35rem;
-  margin-bottom: 0.5rem;
-  perspective: 760px;
-  perspective-origin: 50% 48.3%;
+  margin-inline: 0.1rem 1.15rem;
+  margin-bottom: 0.4rem;
 }
-.paper-stack {
+/* the off-register second impression */
+.dc-ghost {
   position: absolute;
   inset: 0;
-  transform-style: preserve-3d;
-}
-.sheet {
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-}
-/* the back sheet peeks out to the start side and sits a touch lower,
-   matching the reference artwork's two-sheet offset */
-.sheet-back {
-  transform: translate(-6.5%, 1.4%) rotate(-3.2deg);
-  filter: brightness(0.86) saturate(0.75)
-          drop-shadow(0 10px 14px rgba(5, 9, 13, 0.5));
-}
-.sheet-front {
-  filter: drop-shadow(0 12px 22px rgba(5, 9, 13, 0.55));
-}
-.half {
-  position: absolute;
-  inset: 0;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  backface-visibility: hidden;
+  border: 1px solid var(--ink);
+  opacity: 0.45;
   will-change: transform;
 }
-.sheet-back .half { background-image: url("assets/img/paper-back.png"); }
-.sheet-front .half { background-image: url("assets/img/paper-front.png"); }
-/* the fold line is the box's horizontal midline for both halves */
-.half-t { clip-path: inset(0 0 50% 0); transform-origin: 50% 50%; }
-.half-b { clip-path: inset(50% 0 0 0); transform-origin: 50% 50%; }
-/* linen grain travelling with the paper, clipped to its own silhouette */
-.half::after {
+.dc-slab {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+/* linen, so the slug sits in the same material as every other ink field */
+.dc-slab::after {
   content: "";
   position: absolute;
   inset: 0;
   background: url("assets/img/Fabric.jpg");
-  background-size: 150px;
-  mix-blend-mode: multiply;
-  opacity: 0.34;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  pointer-events: none;
+  background-size: 320px;
+  mix-blend-mode: overlay;
+  opacity: 0.2;
 }
-.sheet-back .half::after {
-  -webkit-mask-image: url("assets/img/paper-back.png");
-  mask-image: url("assets/img/paper-back.png");
-}
-.sheet-front .half::after {
-  -webkit-mask-image: url("assets/img/paper-front.png");
-  mask-image: url("assets/img/paper-front.png");
-}
-/* the shadow the fold casts on itself — fades out as the sheet flattens */
-.crease {
+/* the baseline the rest of the letters are drawn against */
+.dc-base {
   position: absolute;
-  inset-inline: 4%;
-  top: 50%;
-  height: 26%;
-  transform: translateY(-50%);
   z-index: 2;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(5, 9, 13, 0) 0%,
-    rgba(5, 9, 13, 0.42) 46%,
-    rgba(5, 9, 13, 0.5) 50%,
-    rgba(5, 9, 13, 0.28) 56%,
-    rgba(5, 9, 13, 0) 100%);
-  -webkit-mask-image: url("assets/img/paper-front.png");
-  mask-image: url("assets/img/paper-front.png");
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+  inset-inline: 14%;
+  bottom: 15%;
+  height: 2px;
+  background: var(--cream);
+  opacity: 0.55;
+  transform-origin: 50% 50%;
+  will-change: transform;
 }
-/* the letter, pinned to the front sheet's optical centre */
+/* the glyph rises into the slug out of a mask, the same line-mask move
+   the headlines use */
 .dc-letter {
   position: absolute;
-  left: 51.7%;
-  top: 48.3%;
-  width: 0;
-  height: 0;
+  inset: 0;
   z-index: 3;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
 }
-.dc-letter img,
-.dc-letter .dc-en {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  will-change: transform, opacity;
+.dc-glyph {
+  display: grid;
+  place-items: center;
+  will-change: transform;
 }
-.dc-letter img { height: calc(var(--cap-h) * 0.46); width: auto; max-width: none; }
-.dc-letter .dc-en {
+.dc-glyph img {
+  height: calc(var(--cap-h) * 0.52);
+  width: auto;
+  max-width: none;
+}
+.dc-glyph .dc-en {
   display: none;
   font-family: var(--font-latin);
   font-weight: 700;
-  font-size: calc(var(--cap-h) * 0.34);
+  font-size: calc(var(--cap-h) * 0.42);
   line-height: 1;
-  color: var(--ink);
+  color: var(--cream);
 }
-html[lang="en"] .dc-letter img { display: none; }
-html[lang="en"] .dc-letter .dc-en { display: block; }
+html[lang="en"] .dc-glyph img { display: none; }
+html[lang="en"] .dc-glyph .dc-en { display: block; }
 
 
 .hero-meta {

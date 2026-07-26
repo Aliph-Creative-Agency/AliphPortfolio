@@ -888,81 +888,65 @@ function initScatter() {
   });
 }
 
-/* ══════════ hero dropcap: torn paper that unfolds ══════════
-   Each of the two sheets is drawn as two halves clipped to the top and the
-   bottom of the same box, sharing a fold line down the middle. Swinging the
-   halves on rotateX opens the paper like a folded note; at rotateX(0) both
-   halves carry the identical background at the identical size, so the seam
-   closes invisibly. The letter unfurls from the fold as the sheet flattens. */
-function initPaperCap() {
-  const cap = document.querySelector(".dropcap[data-paper]");
+/* ══════════ hero dropcap: a letterpress initial ══════════
+   The slug presses down out of nothing, the glyph rises into it behind a
+   mask, the baseline draws out, and the off-register outline slides into
+   place. Hovering presses the slug into the page: it sinks a couple of
+   pixels and the second impression pulls further out of register.
+   Pure GSAP over the ink/cream system — no bitmap involved. */
+function initDropCap() {
+  const cap = document.querySelector(".dropcap[data-cap]");
   if (!cap || cap.dataset.bound) return;
   cap.dataset.bound = "1";
 
-  const back = cap.querySelector(".sheet-back");
-  const front = cap.querySelector(".sheet-front");
-  const crease = cap.querySelector(".crease");
-  const letter = cap.querySelector(".dc-letter");
-  if (!back || !front || !letter) return;
+  const ghost = cap.querySelector(".dc-ghost");
+  const slab = cap.querySelector(".dc-slab");
+  const base = cap.querySelector(".dc-base");
+  const glyph = cap.querySelector(".dc-glyph");
+  if (!slab || !glyph) return;
 
-  const halves = (sheet) => [sheet.querySelector(".half-t"), sheet.querySelector(".half-b")];
-  const [bt, bb] = halves(back);
-  const [ft, fb] = halves(front);
-  const allHalves = [bt, bb, ft, fb];
+  /* rest pose: the second impression sits slightly out of register */
+  const GX = 5, GY = 5;
 
-  /* flat, letter showing — the resting state and the whole story for
-     anyone who asked us not to animate */
-  const flatten = () => {
-    gsap.set(allHalves, { rotateX: 0 });
-    gsap.set(crease, { opacity: 0 });
-    gsap.set(letter, { opacity: 1, scaleY: 1, y: 0 });
-  };
-  if (prefersReduced) { flatten(); return; }
+  if (prefersReduced) {
+    gsap.set([slab, base], { scaleX: 1, scaleY: 1 });
+    gsap.set(glyph, { yPercent: 0 });
+    gsap.set(ghost, { x: GX, y: GY, opacity: 0.45 });
+    return;
+  }
 
-  /* folded shut: both halves stood up on the crease, letter hidden inside */
-  gsap.set([bt, ft], { rotateX: -94, transformOrigin: "50% 50%" });
-  gsap.set([bb, fb], { rotateX: 94, transformOrigin: "50% 50%" });
-  gsap.set(crease, { opacity: 1 });
-  gsap.set(letter, { opacity: 0, scaleY: 0.12, y: 0, transformOrigin: "50% 50%" });
+  gsap.set(slab, { scaleY: 0 });
+  gsap.set(base, { scaleX: 0 });
+  gsap.set(glyph, { yPercent: 115 });
+  gsap.set(ghost, { x: 0, y: 0, opacity: 0 });
 
-  const idle = () => {
-    /* the paper never sits perfectly still — a slow breath on the whole
-       stack plus a hair of residual fold, so it keeps reading as paper */
-    gsap.to(cap, {
-      rotateY: 2.4, rotateX: -1.6, duration: 5.5,
-      ease: "sine.inOut", repeat: -1, yoyo: true,
+  gsap.timeline({ delay: 0.8 })
+    .to(slab, { scaleY: 1, duration: 0.85, ease: "power4.out" })
+    .to(glyph, { yPercent: 0, duration: 0.9, ease: "power4.out" }, "-=0.55")
+    .to(base, { scaleX: 1, duration: 0.7, ease: "power3.inOut" }, "-=0.6")
+    .to(ghost, { x: GX, y: GY, opacity: 0.45, duration: 0.7, ease: "power3.out" }, "-=0.55");
+
+  /* hover: the slug takes the impression, the ghost pulls out of register */
+  const press = (on) => {
+    gsap.to(slab, {
+      x: on ? 2 : 0, y: on ? 2 : 0,
+      duration: 0.45, ease: "power3.out", overwrite: "auto",
     });
-    gsap.to([ft, bt], {
-      rotateX: -2.4, duration: 4.2, ease: "sine.inOut", repeat: -1, yoyo: true,
+    gsap.to(glyph, {
+      x: on ? 2 : 0, y: on ? 2 : 0, scale: on ? 1.05 : 1,
+      duration: 0.45, ease: "power3.out", overwrite: "auto",
     });
-    gsap.to([fb, bb], {
-      rotateX: 1.8, duration: 4.9, ease: "sine.inOut", repeat: -1, yoyo: true,
+    gsap.to(ghost, {
+      x: on ? GX + 5 : GX, y: on ? GY + 5 : GY, opacity: on ? 0.8 : 0.45,
+      duration: 0.5, ease: "power3.out", overwrite: "auto",
     });
-  };
-
-  /* the unfold: back sheet opens first and the front follows a beat later,
-     so you read two separate sheets rather than one thick one */
-  gsap.timeline({ delay: 0.85, onComplete: idle })
-    .to([bt, bb], { rotateX: 0, duration: 1.15, ease: "power3.out" })
-    .to([ft, fb], { rotateX: 0, duration: 1.25, ease: "power3.out" }, "-=0.98")
-    .to(crease, { opacity: 0, duration: 0.75, ease: "power2.out" }, "-=0.85")
-    .to(letter, { opacity: 1, scaleY: 1, duration: 0.85, ease: "power4.out" }, "-=0.72");
-
-  /* hover: the sheet half-closes again, as if you'd caught it mid-fold */
-  const hoverTo = (v) => {
-    gsap.killTweensOf([ft, fb, bt, bb, crease, letter]);
-    gsap.to([ft, bt], { rotateX: -v * 15, duration: 0.55, ease: "power3.out" });
-    gsap.to([fb, bb], { rotateX: v * 12, duration: 0.55, ease: "power3.out" });
-    gsap.to(crease, { opacity: v * 0.85, duration: 0.55, ease: "power2.out" });
-    gsap.to(letter, {
-      scale: 1 + v * 0.07, y: -v * 4, duration: 0.55, ease: "power3.out",
+    gsap.to(base, {
+      scaleX: on ? 1.12 : 1, opacity: on ? 0.85 : 0.55,
+      duration: 0.5, ease: "power3.out", overwrite: "auto",
     });
   };
-  cap.addEventListener("mouseenter", () => hoverTo(1));
-  cap.addEventListener("mouseleave", () => {
-    hoverTo(0);
-    gsap.delayedCall(0.6, idle);
-  });
+  cap.addEventListener("mouseenter", () => press(true));
+  cap.addEventListener("mouseleave", () => press(false));
 }
 
 /* ══════════ index page motion ══════════ */
@@ -1094,7 +1078,7 @@ if (page === "about" && !prefersReduced) {
 
 /* ══════════ boot ══════════ */
 applyI18n();
-initPaperCap();
+initDropCap();
 syncMenuBtn();
 setInterval(tickClock, 20000);
 
