@@ -1,6 +1,11 @@
 # Aliph Portfolio — Session Handoff
 
-_Last updated: 2026-07-26 (session 2). Read this first when starting a new session._
+_Last updated: 2026-07-26 (session 3). Read this first when starting a new session._
+
+> Session 3 touched **no prototype code**. It produced a two-week work report
+> (`D:\Personal\Projects\Weekly-Report-2026-07-26.docx`) covering this project
+> plus AlBaydar-portfolio and the عودة الملكة landing page. Project state below
+> is unchanged from session 2.
 
 > **Standing rule from the user: update this file at the end of every session.**
 > Not only when asked — it is part of finishing the work.
@@ -191,8 +196,15 @@ element, so frame maths is `c/(cols-1)` and `r/(rows-1)` in
 aspect** (`calc(var(--cap-h) * 320 / 450)`) or the frames letterbox.
 `initDropCap()` scrubs a frame index with `ease: "none"` — the frames are
 already evenly spaced in time, so easing would fight the motion baked into the
-clip. It waits for the sprite to decode before starting. Hover scrunches to
-frame 10 and lets it fall open again.
+clip. It waits for the sprite to decode before starting.
+
+**Hover crushes it the whole way back to the ball** (`CRUMPLE.crushed` = frame
+0) and lets it fall open again on leave. It originally stopped half-way at
+frame 10; the user's note was that it *"doesn't retract fully when hovered
+upon"* — a partial retract just reads as a sheet that failed to open. The two
+durations are deliberately unequal (0.5s in, 0.85s out): crushing paper is
+faster than it relaxing back open. The float box keeps its size throughout, so
+the paragraph never reflows.
 
 ⚠️ **Extracting frames from video here:** seeking (`currentTime` + `onseeked`)
 then drawing to canvas returns **stale frames** in headless Chromium — it

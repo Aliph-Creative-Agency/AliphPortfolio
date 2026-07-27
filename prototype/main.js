@@ -844,7 +844,10 @@ function initScatter() {
    frame index and we set background-position — no video decode, no
    runtime chroma key, one 150KB image.
    Frame 0 is the tight ball, frame 23 the flat printed sheet. */
-const CRUMPLE = { cols: 6, rows: 4, n: 24, rest: 23, half: 10 };
+/* `crushed` is the tight ball, `rest` the flat printed sheet. Hover runs the
+   whole way back to the ball — stopping part-way just looked like a sheet
+   that had failed to open. */
+const CRUMPLE = { cols: 6, rows: 4, n: 24, rest: 23, crushed: 0 };
 
 function initDropCap() {
   const cap = document.querySelector(".dropcap[data-cap]");
@@ -883,8 +886,11 @@ function initDropCap() {
   img.src = src;
 
   /* hover scrunches it part-way shut and lets it fall open again */
-  cap.addEventListener("mouseenter", () => play(CRUMPLE.half, 0.4));
-  cap.addEventListener("mouseleave", () => play(CRUMPLE.rest, 0.5));
+  /* crush it right down to the ball, then let it fall open again. the two
+     durations are deliberately different — crushing paper is faster than
+     it relaxing back open */
+  cap.addEventListener("mouseenter", () => play(CRUMPLE.crushed, 0.5));
+  cap.addEventListener("mouseleave", () => play(CRUMPLE.rest, 0.85));
 }
 
 /* ══════════ index page motion ══════════ */
