@@ -33,6 +33,8 @@
 
   const T = {
     launch:   { ar: "اسألوا ألِف", en: "Ask Aliph" },
+    /* the word struck around the seal's rim — short, or the arc crowds */
+    rim:      { ar: "مساعد ألِف", en: "ALIPH ASSISTANT" },
     title:    { ar: "مساعد ألِف", en: "Aliph assistant" },
     sub:      { ar: "يدلّكم على الخدمة المناسبة", en: "Points you to the right service" },
     close:    { ar: "إغلاق", en: "Close" },
@@ -70,8 +72,15 @@
      (`import.meta` is not an option: this is a classic script, and it
      would be a parse-time SyntaxError.) */
   const HERE = (document.currentScript && document.currentScript.src) || location.href;
+
+  /* the rim arc needs a document-unique id — the widget can land on a page
+     that already has SVG defs of its own */
+  const ARC_ID = "ac-rim-arc-" + Math.random().toString(36).slice(2, 8);
   const ICONS = {
-    seal: new URL("../assets/img/HalfAliph-Stamp-cream.svg", HERE).href,
+    /* ⚠️ The plain mark, NOT HalfAliph-Stamp-cream.svg. That asset is itself
+       a seal with its own ring of outlined type, so using it under this
+       label would put two rings of text around one 4rem button.
+       (It also still names the pre-2026-08 services — see HANDOFF.) */
     mark: new URL("../assets/img/Aliph-Icon-cream.svg", HERE).href,
   };
 
@@ -100,9 +109,26 @@
     root.dir = lang === "ar" ? "rtl" : "ltr";
     root.style.setProperty("--ac-origin", lang === "ar" ? "left" : "right");
 
+    /* An ink disc carrying the cream mark, with the label struck around it
+       the way the brand stamp rings its own mark with type. The disc is
+       what lets it sit over cream hero, dark story panels and ink footer
+       alike — the widget floats over every section, so it can never rely
+       on the page behind it. */
     launcher = el("button", "ac-launcher");
     launcher.type = "button";
-    launcher.innerHTML = `<img src="${ICONS.seal}" alt="">`;
+    launcher.innerHTML = `
+      <svg class="ac-rim" viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <!-- Glyphs sit ABOVE their baseline, so this arc is where the type
+               stands, not where its top edge lands: at r=39 with an 8-unit
+               face the ascenders reach ~45, clear of the disc edge at 50. -->
+          <path id="${ARC_ID}" fill="none" d="M 11,50 A 39,39 0 0 1 89,50"/>
+        </defs>
+        <text class="ac-rim-text">
+          <textPath href="#${ARC_ID}" startOffset="50%" text-anchor="middle"></textPath>
+        </text>
+      </svg>
+      <img class="ac-seal" src="${ICONS.mark}" alt="">`;
     launcher.setAttribute("aria-expanded", "false");
 
     panel = el("div", "ac-panel");
@@ -198,6 +224,7 @@
   }
 
   function paint() {
+    launcher.querySelector("textPath").textContent = t("rim");
     panel.querySelector(".ac-title").textContent = t("title");
     panel.querySelector(".ac-sub").textContent = t("sub");
     panel.querySelector(".ac-close").setAttribute("aria-label", t("close"));

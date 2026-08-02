@@ -381,6 +381,29 @@ chat surface without a backend (`?chat=down` forces the fallback back).
 The composer in the "up" state is intentionally inert until stage 3 — see the
 notes under plan §11.1 before touching it.
 
+The launcher is an ink disc with the cream **`Aliph-Icon-cream.svg`** mark and
+"مساعد ألِف" / "ALIPH ASSISTANT" struck around it on an SVG `textPath`, echoing
+how the brand stamp rings its mark with type. ⚠️ **Don't swap the mark for
+`HalfAliph-Stamp-cream.svg`** — that asset already carries its own ring of
+outlined type, so you'd get two rings on one 4rem button. A top arc is used
+rather than a full ring because at that size the bottom half reads upside down.
+
+## ⚠️ The brand stamp still names the old services
+
+`assets/img/HalfAliph-Stamp-cream.svg` has **هويّات بصريّة · صناعة محتوى ·
+تسويق … · تنظيم فعاليّات** set around its rim as **outlined vector paths**, not
+live text. That is the pre-2026-08 taxonomy — it predates the Content+Marketing
+merge and has no حلول تقنيّة.
+
+It is on **every page**: `.contact-stamp` in the shared footer of all three,
+plus `.scatter-mark` in the home story panels. So the site's own seal currently
+contradicts the four services it advertises.
+
+Because the type is outlined, **this cannot be fixed in the SVG by editing
+text** — it needs re-exporting from the Illustrator source
+(`Brand/Assets/Stamp/…`, still on the user's disk though no longer tracked).
+Flagged to the user 2026-08-02; awaiting their call on whether to re-cut it.
+
 Stages 2–4 are blocked on plan §10 — service examples, voice samples, confirmed
 contact details, and who owns the Gemini key.
 

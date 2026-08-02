@@ -29,8 +29,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 3.1rem;
-  height: 3.1rem;
+  width: 4rem;
+  height: 4rem;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -46,23 +46,52 @@
   box-shadow: 0 14px 34px rgba(15, 24, 32, 0.4);
 }
 .ac-launcher:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 3px; }
-.ac-launcher img {
-  width: 62%;
-  height: 62%;
+
+/* ── the label struck around the mark, the way the brand stamp rings
+      its own mark with type ─────────────────────────────────────────
+   Sized in viewBox units, not screen px. A top arc rather than a full
+   ring: the stamp can run type all the way round because it prints
+   large, but at 4rem the bottom half would be upside down and unread. */
+.ac-rim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.ac-rim-text {
+  fill: var(--ac-cream);
+  font-family: var(--ac-display);
+  font-size: 8px;
+  letter-spacing: 0.15px;
+}
+/* Latin sets smaller and wider — all-caps and a longer string */
+.aliph-chat[dir="ltr"] .ac-rim-text { font-size: 6.2px; letter-spacing: 0.85px; }
+
+.ac-seal {
+  position: relative;
+  width: 36%;
+  height: 36%;
   object-fit: contain;
-  /* the seal turns slowly on hover, echoing the footer stamp */
+  /* the type occupies the top of the disc, so a dead-centre mark reads
+     bottom-heavy; drop it a touch to sit under the arc */
+  transform: translateY(6%);
+  /* the mark turns slowly on hover, echoing the footer stamp. The ring of
+     type stays put — it carries the label, and a rotating label is a label
+     you can't read. */
   transition: transform 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.ac-launcher:hover img { transform: rotate(28deg); }
+.ac-launcher:hover .ac-seal { transform: translateY(6%) rotate(28deg); }
 
-/* the hairline ring that pulses once on first paint, then rests */
+/* the hairline ring that pulses twice on first paint, then rests */
 .ac-launcher::after {
   content: "";
   position: absolute;
-  inset: -5px;
-  border: 1px solid rgba(15, 24, 32, 0.4);
+  inset: -4px;
+  border: 1px solid rgba(15, 24, 32, 0.45);
   border-radius: 50%;
   opacity: 0;
+  pointer-events: none;
 }
 .aliph-chat.is-idle .ac-launcher::after { animation: ac-ring 3.4s ease-out 1.2s 2; }
 @keyframes ac-ring {
