@@ -69,6 +69,83 @@
   <div class="acc" id="accRoot"></div>
 </main>
 
+<!-- ══════════ project profile sheet (technical solutions) ══════════ -->
+<div class="sheet-wrap" id="sheet" hidden aria-hidden="true">
+  <div class="sheet-scrim" data-close></div>
+
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <header class="sheet-head">
+      <div class="sheet-id">
+        <div class="sheet-cover"><img id="sheetCover" src="" alt=""></div>
+        <div class="sheet-names">
+          <h2 class="sheet-title" id="sheetTitle"></h2>
+          <p class="sheet-tagline" id="sheetTagline"></p>
+        </div>
+      </div>
+      <button class="sheet-close" id="sheetClose" data-close aria-label="إغلاق">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M4 4l12 12M16 4L4 16"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="sheet-body">
+      <div class="sheet-gallery">
+        <figure class="sheet-shot"><img id="sheetShot" src="" alt=""></figure>
+        <span class="sheet-k sheet-k-shots" id="sheetShotsK">لقطات</span>
+        <div class="sheet-thumbs" id="sheetThumbs" role="group" aria-label="لقطات"></div>
+
+        <div class="sheet-actions">
+          <button class="oval-btn sheet-cta" id="sheetPreview" type="button" hidden>
+            <span class="oval-swap">
+              <span class="ob-face ob-label">معاينة الموقع</span>
+              <span class="ob-face ob-arrow" aria-hidden="true">
+                <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+                </svg>
+              </span>
+            </span>
+          </button>
+          <p class="sheet-note" id="sheetNote" hidden></p>
+        </div>
+      </div>
+
+      <aside class="sheet-side">
+        <span class="sheet-k" id="sheetDetailsK">التفاصيل</span>
+        <dl class="sheet-meta" id="sheetMeta"></dl>
+      </aside>
+
+      <section class="sheet-copy">
+        <span class="sheet-k" id="sheetAboutK">عن المشروع</span>
+        <p id="sheetBody"></p>
+      </section>
+    </div>
+  </div>
+
+  <!-- the live preview: browser chrome around a real preview build -->
+  <div class="webview" id="webview" hidden>
+    <div class="wv-scrim" data-wv-close></div>
+    <div class="wv-window">
+      <div class="wv-chrome">
+        <span class="wv-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="wv-url latin" id="wvUrl" lang="en" dir="ltr"></span>
+        <button class="wv-close" data-wv-close aria-label="إغلاق المعاينة">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M4 4l12 12M16 4L4 16"/>
+          </svg>
+        </button>
+      </div>
+      <!-- no allow-same-origin: the frame gets an opaque origin, so the
+           preview build cannot touch cookies or storage even if it tried.
+           allow-forms only lets the submit event fire — the preview's own
+           handler preventDefaults it and nothing is ever sent. -->
+      <iframe class="wv-frame" id="wvFrame" title="معاينة الموقع"
+              sandbox="allow-scripts allow-forms" src="about:blank"></iframe>
+      <p class="wv-note" id="wvNote"></p>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════ CONTACT FOOTER (shared) ══════════ -->
 <footer class="footer" id="contact">
   <a class="contact-band" href="mailto:info@aliphcreative.com" aria-label="راسلنا">

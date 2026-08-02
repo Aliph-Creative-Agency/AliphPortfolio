@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>معاينة — موقع العميل</title>
+<!--
+  PREVIEW BUILD. This page stands in for a client site inside the profile
+  sheet's browser frame. It is deliberately inert: the form validates and
+  responds, but nothing is stored, sent, or persisted anywhere. It is loaded
+  in a sandboxed iframe with no same-origin access, so it could not write
+  storage even if it tried.
+-->
+<style>
+  /* Deliberately NOT Aliph's Idris. Two reasons: this page stands for a
+     client's own site, so borrowing the studio's typeface would misrepresent
+     it — and the sandboxed frame runs on a null origin, which CORS-blocks any
+     @font-face fetch anyway. System stacks only: nothing to load, nothing to
+     block. */
+  :root {
+    --font-head: "Noto Naskh Arabic", "Traditional Arabic", Georgia, serif;
+    --font-body: "Segoe UI", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
+    --ink: #0F1820;
+    --cream: #D9D9CE;
+    --cream-warm: #E4E2D6;
+    --terra: #BB5C39;
+    --hair: 1px solid rgba(15, 24, 32, 0.16);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 62rem; margin: 0 auto; padding: 0 1.6rem; }
+
+  /* nav */
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.6rem; border-bottom: var(--hair);
+    position: sticky; top: 0; background: var(--cream); z-index: 5;
+  }
+  .nav-brand { font-family: var(--font-head); font-size: 1.35rem; letter-spacing: .02em; }
+  .nav-links { display: flex; gap: 1.4rem; font-size: .82rem; }
+  .nav-links a { color: rgba(15,24,32,.7); text-decoration: none; }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* hero */
+  .hero { padding: 3.4rem 0 2.8rem; border-bottom: var(--hair); }
+  .eyebrow {
+    font-size: .68rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--terra); margin-bottom: .9rem;
+  }
+  .hero h1 {
+    font-family: var(--font-head); font-weight: 800;
+    font-size: clamp(2.1rem, 6vw, 3.4rem); line-height: 1.2;
+    padding-top: .12em;      /* Arabic ascenders clip without this */
+  }
+  .hero p { max-width: 34rem; margin-top: 1.1rem; color: rgba(15,24,32,.78); }
+  .hero-img {
+    margin-top: 1.9rem; aspect-ratio: 21 / 8; overflow: hidden;
+    border: var(--hair); background: var(--cream-warm);
+  }
+  .hero-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.05); }
+
+  /* cards */
+  .grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem;
+    padding: 2.6rem 0; border-bottom: var(--hair);
+  }
+  .card { border: var(--hair); background: var(--cream-warm); padding: 1.2rem; }
+  .card h3 { font-family: var(--font-head); font-size: 1.05rem; margin-bottom: .5rem; padding-top: .1em; }
+  .card p { font-size: .86rem; color: rgba(15,24,32,.72); }
+  .card .n {
+    display: block; font-family: var(--font-head);
+    font-size: .8rem; color: var(--terra); margin-bottom: .6rem;
+  }
+
+  /* form */
+  .form-sec { padding: 2.6rem 0 3.4rem; }
+  .form-sec h2 {
+    font-family: var(--font-head); font-size: 1.6rem;
+    margin-bottom: 1.3rem; padding-top: .1em;
+  }
+  form { display: grid; gap: .9rem; max-width: 30rem; }
+  label { display: block; font-size: .76rem; letter-spacing: .06em; margin-bottom: .3rem; color: rgba(15,24,32,.68); }
+  input, select {
+    width: 100%; padding: .62rem .75rem; font: inherit; font-size: .9rem;
+    background: var(--cream-warm); color: var(--ink);
+    border: var(--hair); border-radius: 0;
+  }
+  input:focus, select:focus { outline: 2px solid var(--terra); outline-offset: 1px; }
+  button {
+    justify-self: start; margin-top: .4rem; padding: .7rem 1.7rem;
+    font: inherit; font-size: .85rem; letter-spacing: .04em;
+    background: var(--ink); color: var(--cream);
+    border: none; cursor: pointer;
+  }
+  button:hover { background: #1a2733; }
+
+  .result {
+    margin-top: 1.1rem; padding: .85rem 1rem; font-size: .84rem;
+    border: 1px dashed var(--terra); color: var(--terra);
+    background: rgba(187, 92, 57, .06);
+  }
+  .result[hidden] { display: none; }
+
+  footer {
+    border-top: var(--hair); padding: 1.4rem 1.6rem;
+    font-size: .74rem; color: rgba(15,24,32,.55);
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">عودة الملكة</span>
+  <span class="nav-links">
+    <a href="#">عن الخلوة</a>
+    <a href="#">البرنامج</a>
+    <a href="#">التسجيل</a>
+  </span>
+</nav>
+
+<div class="wrap">
+
+  <section class="hero">
+    <p class="eyebrow">نسخة معاينة · PREVIEW</p>
+    <h1>خلوة عودة الملكة</h1>
+    <p>ثلاثة أيّام بين الجبل والبحر: جلسات، وورشات، ومساحة للصمت. عدد المقاعد محدود، والتسجيل يُغلق عند اكتمال العدد.</p>
+    <div class="hero-img">
+      <img src="https://picsum.photos/seed/aliphT1a/1600/620" alt="">
+    </div>
+  </section>
+
+  <section class="grid">
+    <article class="card">
+      <span class="n">٠١</span>
+      <h3>البرنامج</h3>
+      <p>جدول يومي واضح من الفجر إلى المساء، مع وقت مفتوح بين الجلسات.</p>
+    </article>
+    <article class="card">
+      <span class="n">٠٢</span>
+      <h3>الإقامة</h3>
+      <p>غرف مشتركة أو فرديّة، وثلاث وجبات يوميّة من مطبخ محلّي.</p>
+    </article>
+    <article class="card">
+      <span class="n">٠٣</span>
+      <h3>التسجيل</h3>
+      <p>استمارة واحدة، وتأكيد بالبريد خلال دقائق من إرسالها.</p>
+    </article>
+  </section>
+
+  <section class="form-sec">
+    <h2>سجّلي مقعدك</h2>
+    <form id="reg" novalidate>
+      <div>
+        <label for="n">الاسم الكامل</label>
+        <input id="n" name="name" type="text" placeholder="الاسم" required>
+      </div>
+      <div>
+        <label for="e">البريد الإلكتروني</label>
+        <input id="e" name="email" type="email" placeholder="name@example.com" dir="ltr" required>
+      </div>
+      <div>
+        <label for="r">نوع الغرفة</label>
+        <select id="r" name="room">
+          <option>غرفة مشتركة</option>
+          <option>غرفة فرديّة</option>
+        </select>
+      </div>
+      <button type="submit">أرسلي الطلب</button>
+    </form>
+    <p class="result" id="result" hidden></p>
+  </section>
+
+</div>
+
+<footer>
+  <span>© عودة الملكة — نسخة معاينة</span>
+  <span>من تنفيذ ألِف</span>
+</footer>
+
+<script>
+  /* The whole point of the preview build: it answers, but it never sends.
+     No fetch, no storage, no analytics — the submit handler only writes to
+     the page. */
+  var form = document.getElementById("reg");
+  var out = document.getElementById("result");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    /* form.elements, not form.name — HTMLFormElement has its own `name`
+       property, so named access silently returns the wrong thing */
+    var name = form.elements.name.value.trim();
+    var email = form.elements.email.value.trim();
+    if (!name || !email) {
+      out.textContent = "أكملي الاسم والبريد الإلكتروني أوّلًا.";
+    } else {
+      out.textContent =
+        "هذه نسخة معاينة — لم يُرسل الطلب ولم تُحفظ أيّ بيانات. " +
+        "في النسخة الحيّة يصل التأكيد إلى " + email + " خلال دقائق.";
+    }
+    out.hidden = false;
+  });
+</script>
+
+</body>
+</html>

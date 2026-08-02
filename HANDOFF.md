@@ -1,21 +1,51 @@
 # Aliph Portfolio — Session Handoff
 
-_Last updated: 2026-07-26 (session 3). Read this first when starting a new session._
-
-> Session 3 touched **no prototype code**. It produced a two-week work report
-> (`D:\Personal\Projects\Weekly-Report-2026-07-26.docx`) covering this project
-> plus AlBaydar-portfolio and the عودة الملكة landing page. Project state below
-> is unchanged from session 2.
+_Last updated: 2026-08-02 (session 5). Read this first when starting a new session._
 
 > **Standing rule from the user: update this file at the end of every session.**
 > Not only when asked — it is part of finishing the work.
+
+## Session 5 (2026-08-02) — services reshuffle, no counts, tech profiles, about rebuild
+
+Six things landed. Everything below is committed and verified in the browser.
+
+1. **The four services changed.** Content and Marketing merged; Technical
+   Solutions was added. Still four. See "Service taxonomy" below.
+2. **Every project count is gone** — hero meta, services strip, archive spines,
+   panel heads, tiles, list rows, the home slider. The archive is now **one
+   continuous run sorted newest-first with no year sections.**
+3. **Technical-solutions projects have a profile sheet** — the Ghost of
+   Tsushima–style page the user referenced, minus the reviews card. Websites
+   additionally open a live preview inside browser chrome.
+4. **The about page was rebuilt**: the clippings section stayed, the team grid
+   is gone, a long read was added, and each of the four services now has its
+   own section (what we do / why us / what's included).
+5. **Google Drive** (agency media + projects) was handed over for later:
+   `https://drive.google.com/drive/folders/15r6-M6L1Y_lmS-PXta_fBNjOE0gNERAB`
+   ⚠️ **Do not pull from it yet** — the user was explicit that nothing is sorted
+   there and a lot is still missing. It's for when they say go.
+6. **`aliph-chatbot-spec.md`** (repo root) was added by the user and reviewed.
+   Nothing has been built. See "Chatbot — status" below.
 
 ## What this is
 
 A portfolio website for **Aliph (ألِف)** — a bilingual (Arabic-first) creative studio
 based in Jerusalem, Mount of Olives. The brand's soul is the letter **Alif**: the first
-letter of the Arabic alphabet, "the point things begin from." Services: visual
-identities, content creation, creative marketing, event production.
+letter of the Arabic alphabet, "the point things begin from."
+
+### Service taxonomy (changed 2026-08-02 — four services, new ids)
+
+| id | Arabic | English | note |
+|---|---|---|---|
+| `identity` | هويّات بصريّة | Identities | unchanged |
+| `creative` | تسويق ومحتوى إبداعي | Creative Marketing | **merge** of the old `content` + `marketing` |
+| `events` | تنظيم فعاليّات | Events | unchanged |
+| `tech` | حلول تقنيّة | Technical Solutions | **new** — software and websites |
+
+The user chose the merged name themselves; don't rename it. The ids are the
+join key across `CATS`, `PROJECTS[].cat`, `SERVICE_FRAMES`, `MQ_ITEMS`,
+`SERVICES`, and `data-service` on the home page's service cells — changing one
+without the others silently breaks the film-strip hover sync.
 
 Everything so far is a **static HTML/CSS/JS prototype** in `prototype/`. No framework,
 no build step. Not a Node/Next project — do NOT try to `npm install` or run Agentation.
@@ -34,12 +64,15 @@ resources/                 raw art the user drops in for me to use (NOT served)
   brown film.png, ChatGPT Image ….png, <uuid>.png   older/unused refs
 prototype/
   index.html   home (film-strip hero, marquee, services, story, contact footer)
-  library.html work archive (category accordion + Optik-style year calendar)
-  about.html   scattered clippings + team
+  library.html work archive (category accordion, continuous run) + profile sheet
+  about.html   clippings + the long read + one section per service
   style.css    one stylesheet, all pages
   main.js      one script, all pages (i18n + all interactions)
   assets/      fonts + img copied from Brand/ + derived art (see below)
+  preview/
+    site-demo.html   the stand-in "preview build" the profile sheet iframes
 .claude/launch.json   preview server config, name "prototype", port 8321
+aliph-chatbot-spec.md the user's chatbot brief (nothing built yet)
 HANDOFF.md            this file
 memory/               auto-memory (see aliph-website-direction.md)
 ```
@@ -259,12 +292,92 @@ in whichever service is selected**, newest first, up to `SLIDER_MAX` (5).
   of masthead. Full AR/EN i18n via the `I18N`/`CATS`/`PROJECTS` dictionaries in main.js;
   choice persists in `localStorage` (`aliph-lang`); `dir` flips RTL/LTR and mirrors layout.
 
+## The data model (`PROJECTS` in main.js) — changed 2026-08-02
+
+- **`count` is gone from every project and every render.** The user asked for
+  the number of projects to disappear everywhere it was mentioned. If you are
+  tempted to show "N pieces" or "N projects" again, don't.
+- **`year` was replaced by `date: "YYYY-MM"`.** `byDate` sorts the whole
+  archive as one run; `fmtDate()` renders it as "أيّار ٢٠٢٦" / "May 2026" using
+  the `MONTHS` table (Levantine month names in Arabic, not كانون/يناير mixed).
+- **`.sc-num` became `.sc-idx`** on the home services strip — same award-strip
+  look, but it prints the ordinal ٠١–٠٤ instead of a project count. The
+  `applyI18n` selector was updated to match.
+- The home slider's meta line is now **date · service**, not year · count.
+
+### `profile` — the technical-solutions preview sheet
+
+A project that carries a `profile` object gets a clickable tile and opens the
+sheet. Only the four `tech` entries have one today, **but nothing about the
+sheet is tech-specific** — give an identity or events project a `profile` and
+it just works. Shape:
+
+```js
+profile: {
+  kind: "site" | "app",     // "site" is what unlocks the live preview button
+  tagline: {ar, en},
+  body: {ar, en},           // the write-up under the screenshots
+  meta: [ { k:{ar,en}, v:{ar,en}, latin?: true } ],   // the details rail
+  shots: ["picsumSeed", …],  // first one is the opening screenshot
+  preview: "preview/site-demo.html",   // sites only
+}
+```
+
+`latin: true` on a meta row is for stack strings. It needs its own rule because
+the global `.latin` carries `letter-spacing: 0.18em` for all-caps display
+strings, which wraps a stack list onto three lines.
+
+The sheet lives in `library.html` as static markup (`#sheet`) and is driven by
+the `projectSheet` module in main.js. `applyI18n` calls `projectSheet.refresh()`
+so switching language while it's open repaints it in place.
+
+### ⚠️ The live preview iframe — two traps, both already hit
+
+1. **`sandbox="allow-scripts"` alone blocks form submission entirely** — the
+   `submit` event never fires, so the preview looked dead. `allow-forms` is
+   required *just to let the event fire*; the demo's own handler still
+   `preventDefault`s it and nothing is ever sent. **`allow-same-origin` is
+   deliberately NOT set**, so the frame runs on an opaque origin and cannot
+   touch cookies or storage. Keep it that way — it's what makes "no data is
+   collected" true rather than a claim.
+2. **That opaque origin CORS-blocks `@font-face`.** Idris silently failed to
+   load inside the frame and it fell back to system fonts. `preview/site-demo.html`
+   therefore uses **system font stacks on purpose** — which is also the more
+   honest choice, since the page stands for a *client's* site, not Aliph's.
+   Don't "fix" it by adding Idris back.
+3. `wvFrame.src` is reset to `about:blank` on close, so the preview build stops
+   running the moment the user closes it.
+
+## Chatbot — status
+
+`aliph-chatbot-spec.md` is the user's brief: a Gemini-backed triage/lead-gen
+widget, hard-guardrailed (no pricing, no creative work product, no internal
+info). **Nothing has been built.** It was reviewed this session; the feedback
+given was that the scope discipline is right, the four-category taxonomy in §3
+now matches the real services above, and the main gaps are: a rate limit per
+visitor (the spec only tracks a global daily counter), what the widget does
+when Gemini is down, and that lead capture is the one place the bot handles
+personal data so it needs a stated retention answer. If the user greenlights
+it, it is a **separate deployable**, not part of `prototype/` — the prototype
+has no build step and no server.
+
 ## Library & About pages
 
-- **library.html:** horizontal **category accordion** (الكل / هويّات / محتوى / تسويق /
-  فعاليّات as vertical spines). Opening one reveals the Optik year-calendar with the
-  sticky year+count. فهرس/معرض (index/gallery) toggle. Rendered from the `PROJECTS` array.
-- **about.html:** scattered newspaper clippings + team grid.
+- **library.html:** horizontal **category accordion** (الكل / هويّات / تسويق ومحتوى /
+  فعاليّات / حلول تقنيّة as vertical spines). فهرس/معرض (index/gallery) toggle.
+  Rendered from `PROJECTS`.
+  ⚠️ **The Optik year-calendar is gone** (2026-08-02). The user asked for the
+  archive to run continuously, so there are no year headings, no sticky year,
+  and no counts on the spines or panel heads. The big top padding that used to
+  clear the sticky year was removed with it — if tiles ever start half a screen
+  down again, that's the leftover `clamp(4.5rem, 9vw, 8.5rem)` coming back.
+- **about.html:** clippings (kept — the user said the first section is good),
+  then `.ab-read` (the long read: text column + a sticky facts rail), then
+  `#svcAbout`, which `renderServiceSections()` fills from the `SERVICES` array —
+  one block per service with what-we-do / why-us / a chip list of deliverables.
+  The photo and text swap sides on even blocks so four in a row don't read as a
+  list. **The team grid was removed on request** — `.team`, `.member` and the
+  `m1Name`…`m3Role` keys are all deleted; they're in git history if wanted back.
 - ✅ **The contact footer is now unified across all three pages** (identical markup on
   index / library / about). The old `.footer-inner` / `.footer-title` / `.footer-social`
   CSS has now been **deleted** (2026-07-26). `@keyframes spin` was kept — it moved
@@ -285,11 +398,23 @@ in whichever service is selected**, newest first, up to `SLIDER_MAX` (5).
 
 ## Known-open / next up
 
-1. Polish **work (library)** and **about** to the same bar as the new home —
-   they have not been touched since the footer unification.
-2. Spot-check remaining headings for the clipped-Arabic-tops issue (see below).
-3. All imagery is still `picsum.photos` placeholders.
-4. Minor, unreported: in EN the Idris Sharp full stop renders as a raised
+1. **The Google Drive is the next big unblock.** When the user says the folder
+   is sorted, real media replaces every `picsum.photos` seed: `PROJECTS[].seed`,
+   `profile.shots`, `FILM_FRAMES`, `SERVICES[].seed`, and the about clippings.
+2. **Library still needs a polish pass** to the same bar as home — the accordion
+   mechanics work but it hasn't had a design round since the year sections came
+   out, and the panels now have a lot of empty top-left space in the grid view.
+3. **The tech `profile` copy and the about service copy are placeholder** — good
+   Arabic in the brand voice, but written by me, not by the studio. Real project
+   facts (clients, stacks, dates) need confirming before this goes anywhere near
+   a client.
+4. Only `tech` projects have profile sheets. If the user wants them for the
+   other three services, it's data-only — add a `profile` block.
+5. The chatbot (see above) is unbuilt and undecided.
+6. Spot-check remaining headings for the clipped-Arabic-tops issue (see below).
+   The three new ones — `.asvc-name`, `.sheet-title`, and the demo page's `h1` —
+   already carry the `padding-top: .12em` fix.
+7. Minor, unreported: in EN the Idris Sharp full stop renders as a raised
    diamond in `.hero-title` ("things begin◆"). Left alone — not asked for.
 
 ## Fixes worth remembering
@@ -346,6 +471,12 @@ Or the Browser pane: `preview_start` with name `"prototype"`.
 - Set `PYTHONIOENCODING=utf-8` when printing Arabic from Python on this Windows shell.
 - Useful loop assertion: sample `gsap.getProperty('#filmScroll','x')` every 500ms — the
   deltas must all share one sign and one magnitude (17px @ 34px/s).
+- ⚠️ **Stub picsum by serving bytes, not by redirecting.** A `302` to a relative
+  local path is not followed from inside the sandboxed preview iframe and
+  leaves broken-image icons everywhere:
+  `page.route("**://picsum.photos/**", lambda r: r.fulfill(status=200,
+  content_type="image/jpeg", body=open(".../assets/img/Fabric.jpg","rb").read()))`
+  The session's screenshot script is in the scratchpad as `shots.py`.
 
 ## Git
 
