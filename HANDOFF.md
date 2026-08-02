@@ -488,9 +488,17 @@ Or the Browser pane: `preview_start` with name `"prototype"`.
 - `.gitignore` excludes `old/` and `old prototype/` — ~9.8MB of superseded
   local snapshots. `resources/` **is** tracked: it holds the inputs the derived
   assets are regenerated from.
-- ⚠️ GitHub warns that `Brand/Printables/NameTag/Open FIles/NameTag-70x100-3mmBleed.indd`
-  is 54MB, over its 50MB recommendation. It pushes fine today; if the repo gets
-  unwieldy, that file is the first candidate for Git LFS.
+- ⚠️ **`Brand/` is no longer in the repo (2026-08-02).** The user deleted it on
+  the remote (commit `8739af2`) to get under GitHub's size limits — the folder
+  is ~174MB and `NameTag-70x100-3mmBleed.indd` alone is 57MB, over the 50MB
+  recommendation. It is now in `.gitignore`, so **the files still live on the
+  user's disk** but git ignores them. Every version through `8739af2` remains
+  in history: `git checkout 5a47349 -- Brand` restores any of it.
+  **The site is unaffected and does not read from `Brand/` at all** — verified:
+  no path in `prototype/` points outside itself, and `prototype/assets/`
+  (8.8MB) carries its own copies of the four Idris cuts, the logo/icon/stamp
+  SVGs and `Fabric.jpg`. If you need brand source art in a future session, ask
+  the user for it rather than assuming a clone has it.
 - End commit messages with the Claude co-author trailer.
 
 ## Working style notes (from this project so far)
