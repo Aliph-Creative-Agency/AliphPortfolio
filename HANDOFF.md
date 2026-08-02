@@ -350,16 +350,27 @@ so switching language while it's open repaints it in place.
 
 ## Chatbot — status
 
-`aliph-chatbot-spec.md` is the user's brief: a Gemini-backed triage/lead-gen
-widget, hard-guardrailed (no pricing, no creative work product, no internal
-info). **Nothing has been built.** It was reviewed this session; the feedback
-given was that the scope discipline is right, the four-category taxonomy in §3
-now matches the real services above, and the main gaps are: a rate limit per
-visitor (the spec only tracks a global daily counter), what the widget does
-when Gemini is down, and that lead capture is the one place the bot handles
-personal data so it needs a stated retention answer. If the user greenlights
-it, it is a **separate deployable**, not part of `prototype/` — the prototype
-has no build step and no server.
+Two files, and **`aliph-chatbot-plan.md` is the one that governs**:
+
+- `aliph-chatbot-spec.md` — the user's original brief. Keep for context.
+- `aliph-chatbot-plan.md` — **the build document**, agreed with the user on
+  2026-08-02. It supersedes the spec's §9 open items and narrows §1/§4/§5.
+  Where the two disagree, the plan wins.
+
+**Nothing has been built yet.** What was decided:
+
+- **v1 classifies, offers a handoff, and captures a lead. It gives NO
+  feasibility read** — the spec's three-bucket "this is something we regularly
+  do" framing was dropped on purpose. It was the biggest liability surface and
+  wasn't needed to route an enquiry. Don't reintroduce it.
+- Leads go to **email** (`info@aliphcreative.com`), **conversations are never
+  logged**, the widget is a **corner launcher on every page**, and the
+  unavailable state is a **contact card with an explicit notice**.
+- It is a **separate deployable** (Cloudflare Worker + vanilla-JS widget), not
+  part of `prototype/` — the prototype has no build step and no server.
+- Stage 1 of §11 (widget shell + fallback) can start before the user supplies
+  anything. Stages 3–4 are blocked on §10 — service examples, voice samples,
+  confirmed contact details, and who owns the Gemini key.
 
 ## Library & About pages
 
