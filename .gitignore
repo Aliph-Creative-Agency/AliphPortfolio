@@ -2,6 +2,16 @@
 old/
 old prototype/
 
+# The brand source art — book, original fonts, logos, printables (~174MB).
+# Untracked as of 2026-08-02: it was pushing the repo past GitHub's size
+# limits (NameTag-70x100-3mmBleed.indd alone is 57MB, over the 50MB
+# recommendation). It still lives on disk, and every version through
+# commit 8739af2 remains in history — `git checkout 5a47349 -- Brand`
+# brings any of it back.
+# The site does NOT read from here: prototype/assets/ holds its own copies
+# of the fonts, logos and the linen texture.
+Brand/
+
 # OS / editor cruft
 Thumbs.db
 desktop.ini
