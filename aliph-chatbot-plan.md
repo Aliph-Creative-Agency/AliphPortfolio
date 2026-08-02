@@ -248,9 +248,32 @@ Nothing below is a decision — it's material I can't invent.
 
 Everything in stage 1 can start before any of §10 is answered.
 
-1. **Widget shell + fallback.** Aliph seal launcher, ink/cream panel, Idris,
-   AR/EN following the site's own toggle. Contact-card fallback built first, so
-   the failure path exists before the success path.
+1. ✅ **Widget shell + fallback — DONE 2026-08-02.**
+   `prototype/chat/aliph-chat.js` + `aliph-chat.css`, loaded by all three
+   pages. Aliph seal launcher, ink/cream panel, Idris, AR/EN following the
+   site's own toggle. Contact-card fallback built first, so the failure path
+   exists before the success path.
+
+   **It currently shows the contact card permanently, and that is correct** —
+   `CONFIG.endpoint` / `CONFIG.health` are `null`, so the health probe returns
+   false without making a request. Stage 3 sets those two and the chat surface
+   starts appearing on its own; no other change is needed to flip it.
+
+   Notes for whoever picks this up:
+   - **Language is followed, not owned.** A `MutationObserver` on
+     `<html lang>` mirrors the site's switch, so `main.js` needs no knowledge
+     of the widget. Don't couple them.
+   - **`?chat=up` forces the chat surface** and `?chat=down` forces the
+     fallback, for design review without a backend.
+   - The composer in the "up" state is **deliberately inert** — a box that
+     swallows messages is worse than one that plainly can't be used yet.
+     Stage 3 replaces `paintUp()`'s handler block.
+   - Icon paths resolve against `document.currentScript.src`, read at parse
+     time. `import.meta` is not available — this is a classic script and it
+     would be a parse-time SyntaxError.
+   - On open, focus goes to the composer if there is one, otherwise to the
+     panel itself — never to the first contact link, because a terracotta
+     focus ring on an email address makes the card read as an error.
 2. **Worker + guardrails, model stubbed.** Pre-filters and rate limiting
    testable without a key.
 3. **Gemini wired in.** Classification only.

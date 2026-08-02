@@ -368,9 +368,21 @@ Two files, and **`aliph-chatbot-plan.md` is the one that governs**:
   unavailable state is a **contact card with an explicit notice**.
 - It is a **separate deployable** (Cloudflare Worker + vanilla-JS widget), not
   part of `prototype/` — the prototype has no build step and no server.
-- Stage 1 of §11 (widget shell + fallback) can start before the user supplies
-  anything. Stages 3–4 are blocked on §10 — service examples, voice samples,
-  confirmed contact details, and who owns the Gemini key.
+**Stage 1 is built** (`prototype/chat/aliph-chat.{js,css}`, loaded by all three
+pages). Seal launcher bottom-corner, ink/cream panel, contact-card fallback,
+AR/EN mirroring the site.
+
+⚠️ **It shows the contact card permanently right now, and that is correct** —
+`CONFIG.endpoint`/`CONFIG.health` are `null`, so the probe returns false without
+making a request. It is not broken. Stage 3 sets those two constants and the
+chat surface appears on its own. Load any page with **`?chat=up`** to review the
+chat surface without a backend (`?chat=down` forces the fallback back).
+
+The composer in the "up" state is intentionally inert until stage 3 — see the
+notes under plan §11.1 before touching it.
+
+Stages 2–4 are blocked on plan §10 — service examples, voice samples, confirmed
+contact details, and who owns the Gemini key.
 
 ## Library & About pages
 
