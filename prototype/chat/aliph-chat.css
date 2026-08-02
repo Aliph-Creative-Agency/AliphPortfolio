@@ -29,8 +29,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 4rem;
-  height: 4rem;
+  width: 4.4rem;
+  height: 4.4rem;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -62,26 +62,25 @@
 .ac-rim-text {
   fill: var(--ac-cream);
   font-family: var(--ac-display);
-  font-size: 8px;
+  font-size: 7.5px;
   letter-spacing: 0.15px;
 }
 /* Latin sets smaller and wider — all-caps and a longer string */
-.aliph-chat[dir="ltr"] .ac-rim-text { font-size: 6.2px; letter-spacing: 0.85px; }
+.aliph-chat[dir="ltr"] .ac-rim-text { font-size: 5.9px; letter-spacing: 0.8px; }
 
 .ac-seal {
   position: relative;
-  width: 36%;
-  height: 36%;
+  width: 58%;
+  height: 58%;
   object-fit: contain;
-  /* the type occupies the top of the disc, so a dead-centre mark reads
+  /* the label occupies the top of the disc, so a dead-centre stamp reads
      bottom-heavy; drop it a touch to sit under the arc */
-  transform: translateY(6%);
-  /* the mark turns slowly on hover, echoing the footer stamp. The ring of
-     type stays put — it carries the label, and a rotating label is a label
-     you can't read. */
+  transform: translateY(7%);
+  /* the stamp turns slowly on hover, as it does in the footer. The label
+     stays put — a rotating label is a label you can't read. */
   transition: transform 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.ac-launcher:hover .ac-seal { transform: translateY(6%) rotate(28deg); }
+.ac-launcher:hover .ac-seal { transform: translateY(7%) rotate(28deg); }
 
 /* the hairline ring that pulses twice on first paint, then rests */
 .ac-launcher::after {

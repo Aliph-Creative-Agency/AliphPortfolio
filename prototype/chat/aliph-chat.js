@@ -77,10 +77,9 @@
      that already has SVG defs of its own */
   const ARC_ID = "ac-rim-arc-" + Math.random().toString(36).slice(2, 8);
   const ICONS = {
-    /* ⚠️ The plain mark, NOT HalfAliph-Stamp-cream.svg. That asset is itself
-       a seal with its own ring of outlined type, so using it under this
-       label would put two rings of text around one 4rem button.
-       (It also still names the pre-2026-08 services — see HANDOFF.) */
+    /* the studio stamp — the mark inside its own ring of type */
+    seal: new URL("../assets/img/HalfAliph-Stamp-cream.svg", HERE).href,
+    /* the bare mark, used small in the panel header */
     mark: new URL("../assets/img/Aliph-Icon-cream.svg", HERE).href,
   };
 
@@ -109,26 +108,27 @@
     root.dir = lang === "ar" ? "rtl" : "ltr";
     root.style.setProperty("--ac-origin", lang === "ar" ? "left" : "right");
 
-    /* An ink disc carrying the cream mark, with the label struck around it
-       the way the brand stamp rings its own mark with type. The disc is
-       what lets it sit over cream hero, dark story panels and ink footer
-       alike — the widget floats over every section, so it can never rely
-       on the page behind it. */
+    /* An ink disc carrying the studio stamp, with the assistant label
+       struck around it — the stamp keeps its own ring of type, this adds
+       an outer one saying what the button is. The disc is what lets it sit
+       over cream hero, dark story panels and ink footer alike; the widget
+       floats over every section, so it can never rely on the page behind. */
     launcher = el("button", "ac-launcher");
     launcher.type = "button";
     launcher.innerHTML = `
       <svg class="ac-rim" viewBox="0 0 100 100" aria-hidden="true">
         <defs>
           <!-- Glyphs sit ABOVE their baseline, so this arc is where the type
-               stands, not where its top edge lands: at r=39 with an 8-unit
-               face the ascenders reach ~45, clear of the disc edge at 50. -->
-          <path id="${ARC_ID}" fill="none" d="M 11,50 A 39,39 0 0 1 89,50"/>
+               stands, not where its top edge lands: at r=41 with a 7.5-unit
+               face the ascenders reach ~47, just inside the disc edge at 50,
+               and the stamp below tops out at r=29. -->
+          <path id="${ARC_ID}" fill="none" d="M 9,50 A 41,41 0 0 1 91,50"/>
         </defs>
         <text class="ac-rim-text">
           <textPath href="#${ARC_ID}" startOffset="50%" text-anchor="middle"></textPath>
         </text>
       </svg>
-      <img class="ac-seal" src="${ICONS.mark}" alt="">`;
+      <img class="ac-seal" src="${ICONS.seal}" alt="">`;
     launcher.setAttribute("aria-expanded", "false");
 
     panel = el("div", "ac-panel");

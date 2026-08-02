@@ -381,12 +381,13 @@ chat surface without a backend (`?chat=down` forces the fallback back).
 The composer in the "up" state is intentionally inert until stage 3 — see the
 notes under plan §11.1 before touching it.
 
-The launcher is an ink disc with the cream **`Aliph-Icon-cream.svg`** mark and
-"مساعد ألِف" / "ALIPH ASSISTANT" struck around it on an SVG `textPath`, echoing
-how the brand stamp rings its mark with type. ⚠️ **Don't swap the mark for
-`HalfAliph-Stamp-cream.svg`** — that asset already carries its own ring of
-outlined type, so you'd get two rings on one 4rem button. A top arc is used
-rather than a full ring because at that size the bottom half reads upside down.
+The launcher is an ink disc carrying the studio stamp
+(**`HalfAliph-Stamp-cream.svg`**) with "مساعد ألِف" / "ALIPH ASSISTANT" struck
+around it on an SVG `textPath` — so there are **two concentric rings of type**:
+the stamp's own, and the assistant label outside it. That is the user's explicit
+choice, made after seeing a single-ring version built on the bare mark. Don't
+"simplify" it back. A top arc rather than a full ring, because at 4.4rem the
+bottom half would read upside down.
 
 ## ⚠️ The brand stamp still names the old services
 
