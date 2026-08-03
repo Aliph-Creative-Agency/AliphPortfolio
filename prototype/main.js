@@ -193,8 +193,8 @@ const SERVICES = [
       en: "From the idea to the post: we set the campaign concept, shoot its material, write its copy, and run the rollout and the numbers across channels. Photography, writing and campaign are one line here — not three suppliers taking turns on the same job and trading blame at the first delay.",
     },
     why: {
-      ar: "لأنّ المحتوى الذي يُصنع داخل الهويّة يبدو مختلفًا عن المحتوى الذي يُلصق عليها. نحن نعرف علامتك من الداخل — غالبًا لأننا من بناها — فكل صورة وكل جملة تخرج من النظام نفسه لا من خارجه. وهذا تحديدًا تاريخنا الطويل: التصوير والإعلان هما ما كنّا نفعله قبل أن نصير استوديو كاملًا.",
-      en: "Because content made inside the identity looks different from content stuck onto it. We know your brand from the inside — often because we built it — so every frame and every line comes out of the same system rather than beside it. And this is where our longest history is: photography and advertising are what we did before we became a full studio.",
+      ar: "لأنّ المحتوى الذي يُصنع داخل الهويّة يبدو مختلفًا عن المحتوى الذي يُلصق عليها. نحن نعرف علامتك من الداخل، غالبًا لأننا من بناها، فكل صورة وكل جملة تخرج من النظام نفسه لا من خارجه. وهذا تحديدًا تاريخنا الطويل: التصوير والإعلان هما ما كنّا نفعله قبل أن نصير استوديو كاملًا.",
+      en: "Because content made inside the identity looks different from content stuck onto it. We know your brand from the inside, often because we built it, so every frame and every line comes out of the same system rather than beside it. And this is where our longest history is: photography and advertising are what we did before we became a full studio.",
     },
     does: {
       ar: ["مفهوم الحملة", "التصوير الفوتوغرافي والفيديو", "كتابة المحتوى", "إدارة المنصّات", "الإعلانات المدفوعة", "التقارير الشهريّة"],
@@ -872,16 +872,18 @@ const svcSlider = (() => {
     if (!p) return;
     elKicker.textContent = `${I18N.slLatest[lang]} — ${svcName(currentService)}`;
     line.textContent = p[lang];
+    /* the separator is punctuation, not content — aria-hidden here too, or
+       the repaint silently drops what the static markup declares */
     elMeta.innerHTML =
       `<span class="sl-date">${fmtDate(p.date)}</span>` +
-      `<span class="sl-sep">·</span>` +
+      `<span class="sl-sep" aria-hidden="true">·</span>` +
       `<span class="sl-cat">${svcName(p.cat)}</span>`;
     elDesc.textContent = p.desc ? p.desc[lang] : "";
     elIndex.textContent = num(String(idx + 1).padStart(2, "0"));
     elTotal.textContent = num(String(items.length).padStart(2, "0"));
     elCap.textContent = p[lang];
     elTag.textContent = SVC_TAG[currentService] || "";
-    elBar.style.width = `${((idx + 1) / items.length) * 100}%`;
+    elBar.style.transform = `scaleX(${(idx + 1) / items.length})`;
     /* only the newest piece in a category wears the stamp. GSAP writes
        inline styles, so the resting state has to be set here too or the
        CSS :not(.on) rule loses to a leftover inline opacity */

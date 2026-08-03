@@ -105,6 +105,13 @@ Regeneration recipe for `film.webp` lives in this file's history; the two inputs
 
 - **Colors: ink `#0F1820` + cream `#D9D9CE` ONLY.** Terracotta `#BB5C39` is reserved
   strictly for the nav strikethrough on the current page + focus rings. No other colors.
+- ⚠️ **Secondary text uses the tint tokens, never a raw low alpha** (added 2026-08-03):
+  `--ink-soft` (0.78) for secondary paragraphs, `--ink-mute` (0.68) for labels, meta
+  and captions, `--ink-faint` (0.5) for **large display only (≥24px)** and decorative
+  separators. Measured on the cream: ink at 0.6 gives **4.15:1** and 0.55 gives
+  **3.6:1** — both fail AA for body text. Twenty elements across all four surfaces
+  were failing before this. If you write `color: rgba(15, 24, 32, 0.5)` on anything
+  small, you have reintroduced the bug.
 - **Type:** Idris Sharp Extrabold = display; Idris Flat = body; Georgia/serif = Latin.
 - **Texture over flatness:** linen grain overlays; B&W photography only (placeholders are
   `picsum.photos` seeds — all imagery is temporary).
@@ -463,6 +470,56 @@ contact details, and who owns the Gemini key.
    already carry the `padding-top: .12em` fix.
 7. Minor, unreported: in EN the Idris Sharp full stop renders as a raised
    diamond in `.hero-title` ("things begin◆"). Left alone — not asked for.
+
+## Polish pass — 2026-08-03 (whole site, client-ready bar)
+
+Run through the `impeccable polish` playbook. What changed, and what was
+deliberately left:
+
+- **Contrast was the systemic finding.** Every ink tint below ~0.65 failed AA on
+  the cream. Fixed via the three tokens above. Failures went 20 → 0 across home,
+  work, about, the profile sheet and the chat widget, at both viewports.
+  ⚠️ The first audit under-reported this because it parsed `rgba()` without
+  compositing the alpha — if you re-audit contrast, composite against the
+  resolved background *and* multiply inherited `opacity`, or you will get a
+  clean result on genuinely failing text.
+- **The `·` and `/` separators are the one accepted exception.** They sit at
+  `--ink-faint` and are `aria-hidden`. Raising them to AA makes punctuation
+  louder than the words it divides. ⚠️ `main.js` `paint()` rebuilds the slider
+  meta, so the `aria-hidden` had to go in the template too — editing only the
+  static HTML silently loses it on the first slide change.
+- **`.ab-pull` lost its vertical rule.** A 3px `border-inline-start` on a
+  blockquote is the generic quote-callout tab. Aliph's device is the logo's
+  *extending baseline* — horizontal — so the rule moved to `border-top`, which
+  matches `.hero-rule` and `.asvc-rule`.
+- **The chat launcher gained a 1px cream ring.** It floats over the ink story
+  panels, the ink banners and the footer, where an ink disc on ink lost its edge
+  entirely. Invisible over cream, load-bearing over ink. Don't remove it.
+- **The slider progress bar animates `scaleX`, not `width`** — the leftover
+  `transform-origin: inline-start` showed that was always the intent. `main.js`
+  writes `style.transform` now, not `style.width`.
+- **Overshoot easings replaced** on `.oval-swap` and `.scatter-card` with
+  `cubic-bezier(0.22, 1, 0.36, 1)`.
+- **`.ab-col` capped at 37.5rem** — the long read measured 78ch, now 69ch.
+- `<img src="">` removed from the two sheet images; an empty `src` re-requests
+  the document URL.
+
+**Knowingly left alone:**
+
+- **`.banner h2` at 209px on desktop.** Over the craft floor's 6rem display cap,
+  but it is the broadsheet masthead and the site's signature. The committed
+  world wins.
+- **`.acc-panel { transition: min-height }`** on mobile. It triggers layout, but
+  it *is* the accordion's motion; replacing it means rewriting the accordion,
+  which is redesign, not polish.
+- **Mobile body measure reads ~26–32ch**, under the Latin ideal. Checked
+  visually and it holds: Arabic sets denser than the `ch` approximation
+  suggests. Don't shrink the type on the strength of that number alone.
+- **`.sc-idx` ordinals (٠١–٠٤) on the services strip.** The craft floor treats
+  section numbers as a default to refuse unless the sequence carries
+  information — and four services are not a sequence. They were kept because
+  removing them is a design decision for the user, not a polish fix. **Worth
+  raising with them.**
 
 ## Fixes worth remembering
 

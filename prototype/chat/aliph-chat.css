@@ -37,13 +37,19 @@
   background: var(--ac-ink);
   color: var(--ac-cream);
   cursor: pointer;
-  box-shadow: 0 8px 26px rgba(15, 24, 32, 0.32);
+  /* The 1px cream ring is the reason this survives the whole page: the
+     launcher floats over the ink story panels, the ink banners and the
+     footer, where an ink disc on ink loses its edge entirely and the mark
+     appears to hang in space. Invisible over cream, load-bearing over ink. */
+  box-shadow: 0 0 0 1px rgba(217, 217, 206, 0.38),
+              0 8px 26px rgba(15, 24, 32, 0.32);
   transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
               box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .ac-launcher:hover {
   transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 14px 34px rgba(15, 24, 32, 0.4);
+  box-shadow: 0 0 0 1px rgba(217, 217, 206, 0.5),
+              0 14px 34px rgba(15, 24, 32, 0.4);
 }
 .ac-launcher:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 3px; }
 
@@ -231,7 +237,8 @@
   font-size: 0.66rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  opacity: 0.62;
+  /* 0.62 read at ~4.2:1 on the warm cream — under AA for text this size */
+  opacity: 0.72;
   white-space: nowrap;
 }
 .ac-contact-v {
@@ -275,7 +282,7 @@
   resize: none;
   max-height: 6rem;
 }
-.ac-input::placeholder { color: rgba(15, 24, 32, 0.45); }
+.ac-input::placeholder { color: rgba(15, 24, 32, 0.62); }
 .ac-input:focus { outline: none; }
 .ac-form:focus-within { outline: 2px solid var(--ac-accent); outline-offset: -2px; }
 .ac-send {
@@ -300,7 +307,7 @@
   padding: 0.4rem 0.8rem 0.5rem;
   font-size: 0.62rem;
   line-height: 1.6;
-  color: rgba(15, 24, 32, 0.55);
+  color: rgba(15, 24, 32, 0.68);
   border-top: var(--ac-hair);
 }
 
