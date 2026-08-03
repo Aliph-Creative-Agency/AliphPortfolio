@@ -307,9 +307,10 @@ in whichever service is selected**, newest first, up to `SLIDER_MAX` (5).
 - **`year` was replaced by `date: "YYYY-MM"`.** `byDate` sorts the whole
   archive as one run; `fmtDate()` renders it as "أيّار ٢٠٢٦" / "May 2026" using
   the `MONTHS` table (Levantine month names in Arabic, not كانون/يناير mixed).
-- **`.sc-num` became `.sc-idx`** on the home services strip — same award-strip
-  look, but it prints the ordinal ٠١–٠٤ instead of a project count. The
-  `applyI18n` selector was updated to match.
+- **`.sc-num` is gone entirely.** It briefly became `.sc-idx` (ordinals ٠١–٠٤
+  in place of the counts), then was removed on 2026-08-03 — see the polish
+  pass below. The services strip is now label-over-name in a single column,
+  and `applyI18n` no longer localises any numeral there.
 - The home slider's meta line is now **date · service**, not year · count.
 
 ### `profile` — the technical-solutions preview sheet
@@ -515,11 +516,19 @@ deliberately left:
 - **Mobile body measure reads ~26–32ch**, under the Latin ideal. Checked
   visually and it holds: Arabic sets denser than the `ch` approximation
   suggests. Don't shrink the type on the strength of that number alone.
-- **`.sc-idx` ordinals (٠١–٠٤) on the services strip.** The craft floor treats
-  section numbers as a default to refuse unless the sequence carries
-  information — and four services are not a sequence. They were kept because
-  removing them is a design decision for the user, not a polish fix. **Worth
-  raising with them.**
+**Then removed on the user's call:**
+
+- **The `.sc-idx` ordinals (٠١–٠٤) are gone.** Section numbers earn their place
+  only when the sequence carries information, and four services are not a
+  sequence — they were decoration standing in for the deleted project counts.
+  Raised with the user, who chose to remove them. The strip rebalanced around
+  what was left: `.service-cell` dropped from a two-column grid (which existed
+  only to seat the ordinal on the far edge) to a single block, the label gained
+  `margin-bottom: 0.5rem`, and the cell padding went 1.5rem → 1.9rem, because
+  the ordinal had been carrying the band's vertical mass and without it the
+  strip collapses to a thin row of names. Verified: no name clips or wraps at
+  either viewport; mobile stays a 2×2 grid where row 1 is taller only because
+  "تسويق ومحتوى إبداعي" wraps to two lines.
 
 ## Fixes worth remembering
 
