@@ -1,9 +1,163 @@
 # Aliph Portfolio — Session Handoff
 
-_Last updated: 2026-08-02 (session 5). Read this first when starting a new session._
+_Last updated: 2026-08-05 (session 6). Read this first when starting a new session._
 
 > **Standing rule from the user: update this file at the end of every session.**
 > Not only when asked — it is part of finishing the work.
+
+## Session 6 (2026-08-05) — measurement pass; one bug fixed, one big finding
+
+Two commits landed on `main`, and a large visual branch was built and then
+**deleted on the user's instruction**. Read the deletion note before assuming
+anything from this session exists in the tree.
+
+### What is actually on `main` now
+
+| commit | what |
+|---|---|
+| `b5c9504` | Restore the focus rings killed by an undefined `--terra` |
+| `c64a68f` | Revert "Drop the services-strip ordinals" — **the ٠١–٠٤ ordinals are BACK** |
+
+The ordinals were dropped in session 5 and restored in session 6, so the strip is
+a two-column grid with `.sc-idx` on the far edge again. `c64a68f` reverted the
+documentation along with the code, so the rest of this file is already
+consistent with that — the sections describing `.sc-idx` as present are correct.
+
+### The `--terra` bug (fixed, `b5c9504`)
+
+`style.css` referenced `var(--terra)` seven times. `--terra` is defined **only**
+in `preview/site-demo.html` — a document loaded into a sandboxed iframe on an
+opaque origin, which cannot reach the parent stylesheet. A `var()` naming an
+undefined custom property is invalid at computed-value time, so the shorthand's
+longhands fall back to `unset` and `outline-style` lands on its initial `none`.
+All seven selectors are **more specific** than the global `:focus-visible`, so
+they won the cascade and then evaluated to nothing.
+
+Keyboard focus was invisible on every archive tile, every index row, the sheet
+thumbnails, and **both modal close buttons** — the only way out of a dialog.
+Two others (`.asvc-index`, the `◦` marker on `.lib-list-row.has-profile`) were
+`color:` and had been rendering inherited ink instead of terracotta.
+
+All seven now use `var(--accent)` — same `#BB5C39`, and the palette's single
+accent token rather than a second alias. **Don't reintroduce `--terra`.**
+
+⚠️ **Verifying focus on this site needs the containers open.** `.sheet-close`,
+`.wv-close` and `.lib-list-row` are `display: none` at rest, and `.focus()` is a
+no-op on a hidden element, so a naive probe reports a false negative. Switch to
+the فهرس view and open both modals first. I reported these three as still broken
+once because of exactly this.
+
+### ⚠️⚠️ The film strip is AI-generated art, not a scan
+
+This is the most important thing in this file. `resources/ready.png` has been
+described here as "the scanned 35mm film strip" since session 2. **It is not a
+scan.** Measured against ISO 1007:
+
+| | `ready.png` | real 35mm |
+|---|---|---|
+| perforation pitch | **5.40 mm**, jittering 34–67px between holes | 4.7498 mm, ±0.01 mm |
+| perforation width | **2.32 mm** | 1.981 mm |
+| edge print | **"KODAK 400TK"** | `400TMY` / `TMY-2` / `5053 TMY` |
+| source size | **1536×1024** | — |
+
+Machine-punched film does not jitter. "400TK" is not a Kodak stock code.
+1536×1024 is a generation size. The 4× upscale in `upscalled.png` locked the
+wrong geometry in, and `film.webp` inherits all of it.
+
+The user's standing rule is "reuse their art as-is, don't substitute" — **that
+rule does not protect this asset**, because they did not make it and have said
+so once they saw the measurements. They approved replacing it. A replacement was
+built and then deleted with the branch (see below); the recipe is recoverable.
+
+If it gets rebuilt: the user's stated preference was **cut it to real spec**
+(35.00mm width, 38.00mm frame advance = 8 perforations, KS-1870 holes at
+2.794 × 1.981mm, pitch held at exactly 38.00/8 so the tile seams) with the real
+emulsion grain high-passed out of their own scan so the surface stays their
+material — **and hunt a genuine photographic scan as a backup**. Also: their own
+negatives are the ideal source and they are a photography-rooted studio.
+⚠️ Put **Aliph's own name** in the rebate, not a manufacturer's — printing a live
+trademark across a commercial studio's hero is a liability with nothing to gain.
+
+### The deleted branch — `visual/broadsheet-furniture`, tip `8d0d04d`
+
+A full visual pass was built on this branch and the user then asked for it to be
+deleted outright, declining a saved patch. It is unreferenced but **still in the
+reflog for ~90 days**:
+
+```bash
+git checkout -b recovered 8d0d04d
+```
+
+It contained: the spec-cut film strip + `resources/build_film.py` that generates
+it, a press-furniture CSS system (tapered rule from the logo's real baseline
+terminal, Scotch rule, dinkus, end-mark, masthead dateline, running folio,
+register marks, halftone screen), removal of the `overflow: hidden` that was the
+mechanical cause of the flatness, four distinct story-panel compositions, and
+several mobile fixes. **None of it is on `main`.** After GC it is gone.
+
+### Measurements taken this session (still true of `main`)
+
+These were the deliverable of a detector pass and are worth not re-deriving:
+
+- **`impeccable` detector: 4 warnings, 0 errors.** Two are `em-dash-overuse`
+  (advisory, and a **false positive** — the rule targets English AI cadence, but
+  most hits are Arabic label separators like `القدس — جبل الزيتون`). Two are
+  `broken-image` on `library.html:88` and `:103` — `#sheetCover` / `#sheetShot`
+  have no `src`; true, but both sit in a `display:none` sheet that JS fills
+  before opening. Neither has an `onerror`.
+- **Focus visibility: 0 failures / 50 focusable elements**, all three pages,
+  after `b5c9504`.
+- **Alt text: 0 missing** across 108 images.
+- **Heading outline: no level skips anywhere.** But `library.html` and
+  `about.html` have **no `h1`**, and library has an **empty `<h2>`**.
+- **Touch targets: 0 fail WCAG 2.2 AA (24×24).** 5–7 per page miss the 44×44
+  comfort target; smallest is the library `فهرس/معرض` toggle at 34×38.
+- **Motion: 3 distinct curves, no overshoot, no runaway durations.** Coherent.
+- **Reduced motion genuinely works** — verified behaviourally, not grepped: the
+  film halts (dx = 0.0) and content stays at opacity 1. Unreduced runs at
+  34 px/s, matching the documented figure.
+- **No horizontal overflow** at any viewport.
+
+### 🔴 The biggest open issue: `index.html` costs 8.9 MB to paint
+
+```
+font          5210 KB   four raw .otf at ~1.3 MB each, format("opentype")
+image         3600 KB   Fabric.jpg alone is 2413 KB
+script         208 KB
+stylesheet      70 KB
+```
+
+Two assets are **~90% of the payload**:
+
+1. **`Fabric.jpg` is 1920×1313 at 2.4 MB**, but it is never tiled larger than
+   **1100px** (most uses are 900px) and it is a multiply overlay at 10–20%
+   opacity. Resizing to its real tile size and converting to WebP should take it
+   to roughly 60 KB with no visible change. This is the cheapest big win on the
+   site and nothing depends on the current dimensions.
+2. **5.2 MB of uncompressed OTF**, served `format("opentype")`. No WOFF2, no
+   subsetting. ⚠️ **Ask before converting** — 29LT is a commercial foundry and
+   the licence may already include a proper webfont kit; converting the desktop
+   OTFs locally can breach some foundry licences. This is the user's call, not
+   a mechanical fix.
+
+For scale: `film.webp` is 817 KB, so **Fabric.jpg alone is three times the film
+strip**. Optimising the film before these two is optimising the wrong asset.
+
+### Also still open (found by review, not fixed)
+
+- `.services-strip` declares `role="tablist"` / `role="tab"` / `aria-selected`
+  with **no `aria-controls`, no `role="tabpanel"`, no roving tabindex and no
+  arrow-key handler.** A half-declared ARIA contract is worse than plain buttons.
+- Every `picsum` `<img>` is `alt=""` with **no `onerror`**, so a rate-limited
+  load — which the notes below say happens constantly — gives a page of empty
+  rectangles with no recovery and nothing announced.
+- The home page has **no primary CTA above 700vh**; the only conversion path is
+  a `mailto:` in the footer.
+- `library.html` has no banner and no heading, so arriving from "كل الأعمال"
+  lands on a bare grid.
+- `transform-origin: inline-start` / `inline-end` appear in `style.css` and are
+  **not valid keywords** — both silently fall back to 50%, so the slider progress
+  bar grows from its own centre rather than the leading edge.
 
 ## Session 5 (2026-08-02) — services reshuffle, no counts, tech profiles, about rebuild
 
@@ -59,7 +213,8 @@ Brand/                     the brand book, fonts, logos, textures (the "soul")
   Assets/Logo, Icon, Stamp SVGs (ink #101820; *-cream.svg variants made for dark bg)
   Assets/Textures/Fabric.jpg   linen grain used across the site
 resources/                 raw art the user drops in for me to use (NOT served)
-  ready.png                the scanned 35mm film strip, bg already transparent
+  ready.png                the hero film strip, bg already transparent
+                           ⚠️ NOT a scan — AI-generated, see session 6 above
   aliph background.png     torn-paper cutout art for the hero dropcap
   brown film.png, ChatGPT Image ….png, <uuid>.png   older/unused refs
 prototype/
@@ -81,7 +236,7 @@ memory/               auto-memory (see aliph-website-direction.md)
 
 | File | How it was made | Notes |
 |---|---|---|
-| `film.webp` | `resources/upscalled.png` (user's 4× upscale of ready.png, 6144×4096, **alpha flattened by their upscaler**) → alpha transplanted from `ready.png`'s alpha scaled 4× LANCZOS → cropped to the film band `(y 1175–2816)` at **exactly 22 perforation pitches** → 5697×1641, WebP q92 | 0.78MB. **Their pixels, untouched** — only alpha restore + crop. |
+| `film.webp` | ⚠️ **built from generated art — see session 6.** `resources/upscalled.png` (user's 4× upscale of ready.png, 6144×4096, **alpha flattened by their upscaler**) → alpha transplanted from `ready.png`'s alpha scaled 4× LANCZOS → cropped to the film band `(y 1175–2816)` at **exactly 22 perforation pitches** → 5697×1641, WebP q92 | 0.78MB. **Their pixels, untouched** — only alpha restore + crop. |
 | `film-shadow.webp` | `film.webp`'s alpha, offset +15px, Gaussian blur 11, ×0.62 opacity, ink-colored | 210KB. The shadow seen *through* the sprocket holes. |
 ~~`paper-front.png` / `paper-back.png`~~ — **deleted 2026-07-26.** They backed the
 torn-paper dropcap, which is gone for good (see the dropcap section).
@@ -95,7 +250,8 @@ Everything is recoverable from `Brand/` or git history. If you add a
 testimonials section later, the old block is in the history of this commit.
 
 ⚠️ I once "enhanced" the film (2× LANCZOS + unsharp + baked hole shadows) and the user
-rejected it: **reuse their art as-is.** The pipeline above only restores alpha their
+rejected it: **reuse their art as-is.** (That rule stands for everything they
+actually made — but see session 6: the film strip is not one of those things.) The pipeline above only restores alpha their
 upscaler destroyed and crops it — no resampling of their pixels, no sharpening.
 
 Regeneration recipe for `film.webp` lives in this file's history; the two inputs
