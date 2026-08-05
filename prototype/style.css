@@ -1228,7 +1228,7 @@ html[dir="ltr"] .sl-stamp { transform: rotate(7deg); }
 .tile.has-profile:hover .tile-open,
 .tile.has-profile:focus-visible .tile-open { transform: translateY(0); }
 .tile.has-profile:hover img { filter: grayscale(0.15) contrast(1.05); }
-.tile.has-profile:focus-visible { outline: 2px solid var(--terra); outline-offset: 3px; }
+.tile.has-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 body.lib-index .lib-grid { display: none; }
 .lib-list { display: none; padding: 1.1rem 1.4rem 1rem; }
@@ -1247,9 +1247,9 @@ body.lib-index .lib-list { display: block; }
 .lib-list-row.has-profile > span:first-child::after {
   content: "◦";
   margin-inline-start: 0.45rem;
-  color: var(--terra);
+  color: var(--accent);
 }
-.lib-list-row.has-profile:focus-visible { outline: 2px solid var(--terra); outline-offset: -2px; }
+.lib-list-row.has-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 /* ═══════════════════════════════════════════
    ABOUT page
@@ -1428,7 +1428,7 @@ body.lib-index .lib-list { display: block; }
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 0.95rem;
-  color: var(--terra);
+  color: var(--accent);
   letter-spacing: 0.08em;
 }
 .asvc-name {
@@ -1828,7 +1828,7 @@ body.sheet-open { overflow: hidden; }
 }
 .sheet-close svg { width: 1.05rem; height: 1.05rem; }
 .sheet-close:hover { background: var(--ink); color: var(--cream); }
-.sheet-close:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; }
+.sheet-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ── body: gallery + copy on one side, details rail on the other ── */
 .sheet-body {
@@ -1887,7 +1887,7 @@ body.sheet-open { overflow: hidden; }
 .sheet-thumbs button:hover { opacity: 0.85; }
 .sheet-thumbs button.on { opacity: 1; outline-color: var(--ink); }
 .sheet-thumbs button.on img { filter: none; }
-.sheet-thumbs button:focus-visible { outline-color: var(--terra); }
+.sheet-thumbs button:focus-visible { outline-color: var(--accent); }
 
 .sheet-actions {
   display: flex;
@@ -2013,7 +2013,7 @@ body.sheet-open { overflow: hidden; }
 }
 .wv-close svg { width: 0.95rem; height: 0.95rem; }
 .wv-close:hover { opacity: 1; }
-.wv-close:focus-visible { outline: 2px solid var(--terra); outline-offset: 1px; }
+.wv-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .wv-frame {
   flex: 1;
