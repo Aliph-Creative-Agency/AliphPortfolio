@@ -677,6 +677,9 @@ function applyI18n() {
     const entry = I18N[el.dataset.i18n];
     if (entry) el.textContent = entry[lang];
   });
+  document.querySelectorAll(".sc-idx[data-num]").forEach((el) => {
+    el.textContent = num(el.dataset.num);
+  });
   document.querySelectorAll(".story-index").forEach((el, i) => {
     el.textContent = num("0" + (i + 1));
   });

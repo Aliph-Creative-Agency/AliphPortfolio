@@ -675,11 +675,12 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 }
 .service-cell {
   position: relative;
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
   text-align: start;
-  /* the ordinal used to carry the strip's vertical mass; without it the
-     padding has to, or the whole band collapses to a thin row of names */
-  padding: 1.9rem 1.4rem;
+  padding: 1.5rem 1.4rem;
   transition: background 0.3s;
 }
 .service-cell:not(:last-child)::after {
@@ -695,7 +696,6 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 .service-cell:hover { background: var(--cream-warm); }
 .service-cell .sc-label {
   display: block;
-  margin-bottom: 0.5rem;
   font-size: 0.62rem;
   letter-spacing: 0.22em;
   color: var(--ink-mute);
@@ -710,6 +710,16 @@ html[lang="en"] .service-cell .sc-label { font-family: var(--font-body); letter-
   line-height: 1.45;
   white-space: nowrap;
 }
+/* the ordinal, not a project count — it keeps the award-strip rhythm without
+   the site ever claiming a number of projects */
+.service-cell .sc-idx {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+  line-height: 1;
+  color: var(--ink-faint);
+}
+.service-cell.is-active .sc-idx { color: rgba(217, 217, 206, 0.5); }
 .service-cell.is-active { background: var(--ink); color: var(--cream); }
 .service-cell.is-active .sc-label { color: rgba(217, 217, 206, 0.65); }
 
@@ -1679,6 +1689,7 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .services-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .service-cell { padding: 1rem 0.9rem; }
   .service-cell .sc-name { white-space: normal; font-size: 1.1rem; }
+  .service-cell .sc-idx { font-size: 2rem; }
   .service-cell .sc-label { letter-spacing: 0.1em; font-size: 0.55rem; }
   .service-cell:nth-child(even)::after { display: none; }
   .banner h2 { white-space: normal; }
