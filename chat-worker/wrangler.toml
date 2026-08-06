@@ -7,6 +7,10 @@ name = "aliph-chat"
 main = "src/index.js"
 compatibility_date = "2026-08-01"
 
+# The studio account, same as the site's — see ../wrangler.toml for why this
+# is pinned rather than chosen at the prompt.
+account_id = "6c60bd775004cfa0082f768c356c7242"
+
 [observability]
 enabled = true
 

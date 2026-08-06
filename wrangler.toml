@@ -18,5 +18,13 @@
 name = "aliphcreative"
 compatibility_date = "2026-08-01"
 
+# ⚠️ Pinned deliberately. Logins here can reach two accounts — the studio's
+# (Ceo@aliphcreative.com's) and a personal one — and with more than one in
+# reach wrangler stops and asks. Answer that prompt wrong and the site
+# publishes into the personal account at a different hostname, looking like
+# a successful deploy. The ID is not a secret; it appears in dashboard URLs.
+# `ceo-6c6` in the live hostname is this ID's first characters.
+account_id = "6c60bd775004cfa0082f768c356c7242"
+
 [assets]
 directory = "./prototype"
