@@ -107,6 +107,33 @@ licence question** (plan: ask before converting — 29LT is a commercial foundry
 and the kit may already exist). This is the single remaining lever on phone
 performance and it is the user's call, not a mechanical fix.
 
+### How the site deploys (found the hard way, 2026-08-06)
+
+**The site is a Cloudflare Worker serving `prototype/` as static assets**, at
+`aliphcreative.ceo-6c6.workers.dev`. There was **no deploy config in the repo**
+— it had been deployed by some out-of-band route — so `wrangler.toml` at the
+repo root is new. `npx wrangler deploy` from the repo root ships the site;
+from `chat-worker/` it ships the chat backend. Two configs, two deployables,
+run wrangler from the one you mean.
+
+⚠️ **Pushing to GitHub does NOT redeploy.** This cost a whole exchange: a bug
+report came in against a build that was two commits stale, and both of the
+reported bugs were already fixed in code that had never been deployed. Verify
+before debugging a phone report — fetch the live asset and grep it:
+
+```bash
+curl -s https://aliphcreative.ceo-6c6.workers.dev/main.js | grep -c pauseOffscreen
+```
+
+A cache-buster query (`?v=123`) rules out edge cache; `CF-Cache-Status: HIT`
+on a stale file is not proof of a stale deploy, an absent code marker is.
+
+Worth doing when someone gets to it: connect **Workers Builds** to the repo so
+`main` deploys itself. The account subdomain `ceo-6c6` identifies which
+Cloudflare account owns it — a Worker's `*.workers.dev` middle segment is
+account-level, so two Workers in one account always share it. That is the
+fastest way to tell whether you are looking at the right account.
+
 ### Second pass, same day — the oval button, and idle animation
 
 **The oval button clipped its own label.** `.oval-swap` had `width: 100%` and

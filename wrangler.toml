@@ -1,0 +1,22 @@
+# ══════════════════════════════════════════════════════════════════
+# The SITE deployment — prototype/ served as static assets.
+#
+# `name` must match the existing Worker, or this creates a second one
+# at a different hostname. It is read from the live URL:
+#   aliphcreative.ceo-6c6.workers.dev
+#    └── worker name        └── account subdomain
+# Check it in the dashboard before the first deploy from here.
+#
+# There is no `main` — this is an assets-only Worker, no script.
+#
+# ⚠️ NOT the chatbot. That is chat-worker/wrangler.toml, a separate
+# deployable with its own name. Run wrangler from the directory whose
+# config you mean: repo root deploys the site, chat-worker/ deploys
+# the chat backend.
+# ══════════════════════════════════════════════════════════════════
+
+name = "aliphcreative"
+compatibility_date = "2026-08-01"
+
+[assets]
+directory = "./prototype"
