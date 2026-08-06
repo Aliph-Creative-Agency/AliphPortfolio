@@ -1040,7 +1040,10 @@ Or the Browser pane: `preview_start` with name `"prototype"`.
 
 ## Git
 
-- **Remote: `origin` → https://github.com/AliphCreaitve/AliphPortfolio.git**
+- **Remote: `origin` → https://github.com/Aliph-Creative-Agency/AliphPortfolio.git**
+  ⚠️ Moved 2026-08-06 from the old `AliphCreaitve/` org (note the typo in the
+  old name). GitHub still redirects pushes, so a stale remote *works* and only
+  prints a warning — easy to miss for months. The local remote was repointed.
 - Working branch is now **`main`** (the local branch was called `master`; it was
   renamed, and `fix/restore-about-library-styles` was fast-forwarded into it).
   The old feature branch still exists locally and can be deleted.
