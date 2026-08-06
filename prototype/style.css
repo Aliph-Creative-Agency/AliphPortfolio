@@ -627,7 +627,21 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   transition: opacity 0.4s, transform 0.5s cubic-bezier(0.65,0,0.35,1);
 }
 .oval-btn:hover::before { opacity: 1; transform: scale(1.05); }
-.oval-swap { position: relative; display: block; width: 100%; height: 1.5em; overflow: hidden; }
+/* ⚠️ Both faces used to be `position: absolute`, which left .oval-swap with
+   ZERO intrinsic width — nothing in it contributed to layout. So the button
+   never grew to fit its label: it sat at `min-width` (150px on a phone, of
+   which 86px is padding) while `overflow: hidden` sliced the text off at both
+   ends. On a phone "تعرّف على ألِف" rendered as "ـرّف على أَلِ".
+   The LABEL is in flow now and is what gives the swap its width; only the
+   arrow stays absolute, since it only ever has to sit behind the label. */
+.oval-swap {
+  position: relative;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  height: 1.5em;
+  overflow: hidden;
+}
 .ob-face {
   position: absolute;
   inset: 0;
@@ -641,6 +655,9 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   white-space: nowrap;
   transition: transform 0.55s cubic-bezier(0.65,0,0.35,1);
 }
+/* ⚠️ Must sit AFTER .ob-face — same specificity, so source order decides.
+   Putting it above leaves the label absolute and the swap 0px wide again. */
+.ob-label { position: relative; inset: auto; height: 100%; }
 .ob-arrow { transform: translateY(115%); }
 .ob-arrow svg { width: 3.2rem; height: auto; }
 html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }

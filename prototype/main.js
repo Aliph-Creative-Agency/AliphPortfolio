@@ -548,10 +548,48 @@ function buildBandSource() {
   }
 }
 
+/* ══════════ don't animate what isn't on screen ══════════
+   The marquee, the contact band and the film strip all run continuously and
+   never stop — including while you are scrolled a page and a half past them.
+   Each one is a composited layer being retransformed every single frame, and
+   on a phone that competes directly with the scroll itself. Desktop GPUs
+   absorb it; phones are exactly where it shows up as "laggy when scrolling
+   fast."
+
+   The tween is PAUSED, not killed: resuming keeps x where it was, so nothing
+   jumps when the strip scrolls back into view. `rootMargin` starts it again
+   slightly before the edge so it is already moving by the time it's visible.
+   Returns a getter for the current state, because rebuildLoops() makes new
+   tweens and a new tween starts playing whether or not anyone can see it. */
+function pauseOffscreen(el, getTween) {
+  if (!el || !window.IntersectionObserver) return () => true;
+  let visible = true;
+  new IntersectionObserver((entries) => {
+    visible = entries[0].isIntersecting;
+    const t = getTween();
+    if (!t) return;
+    visible ? t.resume() : t.pause();
+  }, { rootMargin: "150px" }).observe(el);
+  return () => visible;
+}
+
+let mqVisible = () => true;
+let bandVisible = () => true;
+let loopWatchersReady = false;
+
 function rebuildLoops() {
   [mqTween, bandTween].forEach((t) => t && t.kill());
   mqTween = makeLoop(document.getElementById("marqueeTrack"), MQ_SPEED);
   bandTween = makeLoop(document.getElementById("contactBandTrack"), BAND_SPEED);
+
+  if (!loopWatchersReady) {
+    mqVisible = pauseOffscreen(document.querySelector(".marquee"), () => mqTween);
+    bandVisible = pauseOffscreen(document.querySelector(".contact-band"), () => bandTween);
+    loopWatchersReady = true;
+  }
+  /* a fresh tween plays on creation — honour where the page actually is */
+  if (mqTween && !mqVisible()) mqTween.pause();
+  if (bandTween && !bandVisible()) bandTween.pause();
 }
 
 /* ══════════ hero film strip: seamless loop + hover-to-service sync ══════════
@@ -562,6 +600,9 @@ function rebuildLoops() {
 const filmLoop = (() => {
   const SPEED = 34;               // px per second, constant
   let tween = null, period = 0, first = [], ready = false;
+  /* the hero is the tallest thing on the page and the film is its widest
+     layer — see pauseOffscreen() above for why this matters on a phone */
+  let onScreen = true;
 
   const strip = () => document.querySelector(".filmstrip");
 
@@ -625,7 +666,7 @@ const filmLoop = (() => {
 
   function run() {
     if (tween) tween.kill();
-    if (prefersReduced || !ready) return;
+    if (prefersReduced || !ready || !onScreen) return;
     const from = gsap.getProperty(filmScroll, "x") || 0;
     tween = gsap.fromTo(filmScroll,
       { x: from },
@@ -671,6 +712,14 @@ const filmLoop = (() => {
       filmScroll.classList.remove("has-pop");
       filmScroll.querySelectorAll(".film-frame.pop").forEach((f) => f.classList.remove("pop"));
       run();
+    },
+    /* Paused rather than killed, so x survives and the strip picks up exactly
+       where it left off when the hero scrolls back into view. */
+    setVisible(v) {
+      if (v === onScreen) return;
+      onScreen = v;
+      if (!tween) { if (v) run(); return; }
+      v ? tween.resume() : tween.pause();
     },
   };
 })();
@@ -806,6 +855,11 @@ const DARK_UNDER = [
   ".testi", ".sl-stage", ".service-cell.is-active",
 ].join(",");
 
+/* ⚠️ This is the one thing on the page that does real main-thread work on
+   every scroll frame. `elementsFromPoint` forces a synchronous layout flush
+   and a full hit test, and `closest()` then walks an 8-selector list for each
+   element it returns. Correct, but not something to run 60 times a second on
+   a phone — see queueMenuSync below, which spaces it out. */
 function syncMenuBtn() {
   if (!menuBtn || document.body.classList.contains("nav-open")) return;
   const r = menuBtn.getBoundingClientRect();
@@ -819,11 +873,22 @@ function syncMenuBtn() {
   menuBtn.classList.toggle("on-dark", dark);
 }
 
-let menuTick = false;
+/* Every frame was overkill: the burger inverting ~100ms after a dark band
+   passes under it is imperceptible, and it buys back five of every six hit
+   tests during a fast scroll. The trailing sync is what keeps it honest —
+   without it the button can be left wrong wherever the scroll stops. */
+const MENU_SYNC_MS = 100;
+let menuTick = false, lastMenuSync = 0, menuSettle;
 function queueMenuSync() {
-  if (menuTick) return;
+  clearTimeout(menuSettle);
+  menuSettle = setTimeout(syncMenuBtn, 140);
+  if (menuTick || performance.now() - lastMenuSync < MENU_SYNC_MS) return;
   menuTick = true;
-  requestAnimationFrame(() => { menuTick = false; syncMenuBtn(); });
+  requestAnimationFrame(() => {
+    menuTick = false;
+    lastMenuSync = performance.now();
+    syncMenuBtn();
+  });
 }
 window.addEventListener("scroll", queueMenuSync, { passive: true });
 window.addEventListener("resize", queueMenuSync);
@@ -1483,6 +1548,18 @@ if (document.fonts && document.fonts.ready) {
    reads as "the film strip stopped looping." The marquee restarted with it.
    Neither loop depends on viewport height, so a height change is not a
    reason to rebuild either of them. */
+/* The film has its own module, so it gets its own observer rather than going
+   through pauseOffscreen() — filmLoop.setVisible() has to gate run() too, or
+   a hover-blur would restart the strip while it is off screen. */
+(() => {
+  const strip = document.querySelector(".filmstrip");
+  if (!strip || !window.IntersectionObserver) return;
+  new IntersectionObserver(
+    (e) => filmLoop.setVisible(e[0].isIntersecting),
+    { rootMargin: "150px" },
+  ).observe(strip);
+})();
+
 let resizeTimer;
 let lastW = window.innerWidth;
 window.addEventListener("resize", () => {

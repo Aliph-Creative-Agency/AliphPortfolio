@@ -107,6 +107,50 @@ licence question** (plan: ask before converting — 29LT is a commercial foundry
 and the kit may already exist). This is the single remaining lever on phone
 performance and it is the user's call, not a mechanical fix.
 
+### Second pass, same day — the oval button, and idle animation
+
+**The oval button clipped its own label.** `.oval-swap` had `width: 100%` and
+**both** faces (`.ob-label`, `.ob-arrow`) were `position: absolute` — so
+nothing in it contributed intrinsic width, the button never grew past its
+`min-width` (150px on a phone, 86px of which is padding), and `overflow:
+hidden` sliced the text at both ends. "تعرّف على ألِف" rendered as
+"ـرّف على أَلِ". The label is in flow now and is what sizes the swap; only the
+arrow stays absolute. ⚠️ The override **must sit after `.ob-face`** — same
+specificity, so source order decides, and above it the label stays absolute
+and the swap goes back to 0px. I made exactly that mistake first.
+
+**The three loops now stop when they're off screen.** The marquee, the contact
+band and the film strip ran continuously forever, each retransforming a
+composited layer every frame while you were scrolled a page and a half past
+them. `pauseOffscreen()` (an IntersectionObserver, `rootMargin: 150px`) pauses
+rather than kills, so `x` survives and nothing jumps on the way back.
+⚠️ `filmLoop.setVisible()` also gates `run()`, or a hover-blur restarts the
+strip while it is off screen. ⚠️ `rebuildLoops()` makes *new* tweens and a new
+tween plays on creation, so it re-checks visibility after building.
+
+**`syncMenuBtn` ran a hit test every scroll frame.** `elementsFromPoint` forces
+a synchronous layout flush plus a full hit test, then `closest()` walks an
+8-selector list per element returned. Now spaced to ~100ms with a trailing
+sync when scrolling stops — five of every six hit tests gone, and the burger
+inverting 100ms later is imperceptible. The trailing call is load-bearing:
+without it the button can be left wrong wherever the scroll happens to stop.
+
+⚠️ **I could not reproduce the phone jank locally and did not pretend to.**
+Headless Chromium held a flat 60fps through a hard scroll even at 6× CPU
+throttle, with the linen blend, the section blends, `will-change`,
+ScrollTrigger and the image grade each disabled in turn — all six runs were
+identical. CPU throttling does not throttle the GPU, and a phone's limit is
+compositing and memory bandwidth. **This machine cannot measure the bug.** The
+fixes above are the defensible ones; the phone is the only instrument that can
+confirm them.
+
+Still untouched and still suspect if it persists: `body::before` is a **fixed,
+full-viewport, `mix-blend-mode: multiply`** layer at `z-index: 5`, which
+prevents the compositor's fast scroll path. Left alone deliberately — swapping
+multiply for normal blending is *not* visually neutral (over the ink story
+panels a light linen at normal blend turns into a grey haze instead of
+vanishing), so it needs a design decision, not a perf patch.
+
 ### The Drive was opened and audited (2026-08-06)
 
 The user asked me to look. ⚠️ **The Drive MCP connector returns nothing for
