@@ -274,8 +274,32 @@ Everything in stage 1 can start before any of §10 is answered.
    - On open, focus goes to the composer if there is one, otherwise to the
      panel itself — never to the first contact link, because a terracotta
      focus ring on an email address makes the card read as an error.
-2. **Worker + guardrails, model stubbed.** Pre-filters and rate limiting
-   testable without a key.
+2. ✅ **Worker + guardrails, model stubbed — DONE 2026-08-05.**
+   `chat-worker/` at the repo root (a separate deployable, per §4).
+   `GET /api/health` + `POST /api/chat`; the order of operations is the
+   design: **CORS → validate → rate limit → pre-filter → model →
+   post-filter**. Pre-filters sit before the model so a pricing question
+   or a jailbreak attempt costs no quota; the post-filter sits after it
+   because the model is the one component that can't be trusted to hold
+   a rule. All seven §5 rules are enforced. 67 tests, no key, no
+   network, no wrangler — `npm test` in `chat-worker/`.
+
+   Notes for whoever picks this up:
+   - **The model is a keyword stub, not a classifier.** `respond()` in
+     `src/model.js` is the seam; stage 3 adds Gemini beside it and
+     nothing else moves.
+   - **`ok` and `quotaRemaining` in the health response are a contract
+     with the widget** — it reads exactly those two names. Renaming
+     either sends every visitor to the contact card in silence.
+   - **The bans are curated phrase lists, not patterns.** `/we can\b/`
+     also swallows "we can put you in touch with the team", and
+     describing a service is not a feasibility read.
+   - **`ALLOW_STUB = "1"` is stage-2 only.** Stage 3 flips it to "0", at
+     which point a missing key is a 503 rather than keyword matching
+     served to a real visitor.
+   - ⚠️ A Worker entry module may only export the default handler and
+     Durable Object classes. Node imports anything; workerd refuses to
+     boot. Run `wrangler dev` once before shipping an `index.js` change.
 3. **Gemini wired in.** Classification only.
 4. **Lead capture + email.**
 5. **Adversarial pass.** Deliberately try to get pricing, a free logo concept,
