@@ -67,7 +67,7 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: url("assets/img/Fabric.jpg") repeat;
+  background: url("assets/img/fabric.webp") repeat;
   background-size: 900px;
   mix-blend-mode: multiply;
   opacity: 0.16;
@@ -100,7 +100,7 @@ html[lang="en"] .footer-title { letter-spacing: 0.02em; }
   content: "";
   position: absolute;
   inset: 0;
-  background: url("assets/img/Fabric.jpg");
+  background: url("assets/img/fabric.webp");
   background-size: 900px;
   mix-blend-mode: overlay;
   opacity: 0.15;
@@ -159,7 +159,7 @@ body.nav-open .menu-btn .bars span:nth-child(2) { top: 6px; transform: rotate(-4
   content: "";
   position: absolute;
   inset: 0;
-  background: url("assets/img/Fabric.jpg");
+  background: url("assets/img/fabric.webp");
   background-size: 900px;
   mix-blend-mode: overlay;
   opacity: 0.13;
@@ -377,6 +377,23 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   background-repeat: repeat-x;
   background-size: var(--pitch, 100%) 100%;
 }
+/* ⚠️ THE PHONE'S BIGGEST COST WAS HERE.
+   film.webp and film-shadow.webp are both 5697×1641. A browser decodes an
+   image at its intrinsic size no matter how small it is drawn, so these two
+   cost ~71 MB of RGBA texture — on a phone that paints them into a strip
+   about 390px wide. That is the single heaviest thing on the page and it was
+   invisible in the file sizes (798 KB + 210 KB on disk).
+   The -m variants are 1900px: same pixels, fewer of them — a resolution
+   variant, not a re-render, and not a substitution of the art. 1900 rather
+   than the ~638px the tile actually draws at, because a DPR-3 phone renders
+   that tile at ~1914 device px and sizing to the CSS width would look soft
+   exactly where most people see it. ~8 MB instead of ~71 MB.
+   Desktop keeps the full-size files: there --pitch is ~2433px. */
+@media (max-width: 900px) {
+  .film-scroll { background-image: url("assets/img/film-m.webp"); }
+  .film-scroll::before { background-image: url("assets/img/film-shadow-m.webp"); }
+}
+
 .film-group {
   display: flex;
   align-items: center;
@@ -472,7 +489,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: url("assets/img/Fabric.jpg");
+  background: url("assets/img/fabric.webp");
   background-size: 900px;
   mix-blend-mode: multiply;
   opacity: 0.14;
@@ -838,7 +855,7 @@ html[dir="rtl"] .sl-arrow#slNext:hover { transform: translateX(-4px); }
   inset: 0;
   z-index: 4;
   pointer-events: none;
-  background: url("assets/img/Fabric.jpg");
+  background: url("assets/img/fabric.webp");
   background-size: 800px;
   mix-blend-mode: overlay;
   opacity: 0.16;
@@ -882,7 +899,7 @@ html[dir="rtl"] .sl-arrow#slNext:hover { transform: translateX(-4px); }
   content: "";
   position: absolute;
   inset: 0;
-  background: url("assets/img/Fabric.jpg");
+  background: url("assets/img/fabric.webp");
   background-size: 700px;
   mix-blend-mode: overlay;
   opacity: 0.2;
@@ -982,7 +999,7 @@ html[dir="ltr"] .sl-stamp { transform: rotate(7deg); }
   content: "";
   position: absolute;
   inset: 0;
-  background: url("assets/img/Fabric.jpg");
+  background: url("assets/img/fabric.webp");
   background-size: 900px;
   mix-blend-mode: multiply;
   opacity: 0.1;
@@ -1496,7 +1513,7 @@ body[data-page="index"] .footer { margin-top: 0; }
   content: "";
   position: absolute;
   inset: 0;
-  background: url("assets/img/Fabric.jpg");
+  background: url("assets/img/fabric.webp");
   background-size: 1100px;
   mix-blend-mode: overlay;
   opacity: 0.12;
@@ -1769,7 +1786,7 @@ body.sheet-open { overflow: hidden; }
   content: "";
   position: absolute;
   inset: 0;
-  background: url("assets/img/Fabric.jpg") repeat;
+  background: url("assets/img/fabric.webp") repeat;
   background-size: 380px;
   mix-blend-mode: multiply;
   opacity: 0.16;

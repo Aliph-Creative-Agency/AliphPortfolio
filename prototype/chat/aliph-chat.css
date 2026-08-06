@@ -14,6 +14,12 @@
   --ac-display: var(--font-display, "Idris Sharp", serif);
   --ac-body: var(--font-body, "Idris Flat", serif);
   --ac-hair: 1px solid rgba(15, 24, 32, 0.35);
+  /* ⚠️ The site sets `html { font-size: 150% }`, so 1rem is 24px, not 16px —
+     this disc is 105.6px, not 70.4px. That is fine beside a 1280px page and
+     absurd on a 390px phone, where it covers more than a quarter of the
+     width. Overridden at the foot of this file. Anything sized here in rem
+     is 1.5× what the number reads like. */
+  --ac-launch: 4.4rem;
 
   position: fixed;
   inset-inline-end: clamp(0.9rem, 2.5vw, 1.8rem);
@@ -29,8 +35,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 4.4rem;
-  height: 4.4rem;
+  width: var(--ac-launch);
+  height: var(--ac-launch);
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -131,7 +137,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: url("../assets/img/Fabric.jpg") repeat;
+  background: url("../assets/img/fabric.webp") repeat;
   background-size: 420px;
   mix-blend-mode: multiply;
   opacity: 0.15;
@@ -313,6 +319,18 @@
 
 /* ── phones: the panel takes the screen ─────────────────────────── */
 @media (max-width: 560px) {
+  /* ⚠️ The disc, not the panel, is what reads as "huge" on a phone. At the
+     site's 150% root, 4.4rem is 105.6px — over a quarter of a 390px screen,
+     and roughly double what a corner launcher should be. 3rem is 72px here:
+     still unmistakably the seal, still far past the 44px touch target. */
+  .aliph-chat { --ac-launch: 3rem; }
+  /* The rim label is sized in viewBox units, so it shrinks with the disc.
+     Left alone it drops to ~5px of Arabic and becomes texture rather than a
+     word — the two concentric rings of type are the point of this launcher,
+     so the label scales back up rather than being dropped. */
+  .ac-rim-text { font-size: 9.4px; letter-spacing: 0; }
+  .aliph-chat[dir="ltr"] .ac-rim-text { font-size: 7.2px; letter-spacing: 0.4px; }
+
   .aliph-chat.is-open {
     inset: 0;
     /* the panel fills the viewport, so the fixed corner offsets go */

@@ -1,9 +1,223 @@
 # Aliph Portfolio — Session Handoff
 
-_Last updated: 2026-08-05 (session 6). Read this first when starting a new session._
+_Last updated: 2026-08-06 (session 8). Read this first when starting a new session._
 
 > **Standing rule from the user: update this file at the end of every session.**
 > Not only when asked — it is part of finishing the work.
+
+## Session 8 (2026-08-06) — three phone bugs, and the stock images are gone
+
+The user reported: very laggy on phone but not PC, the film strip no longer
+looping, and the chat launcher huge on phone. Plus: drop the stock images and
+keep bare media holders. All four done and measured.
+
+### 🔴 The film strip "stopped looping" because of the address bar
+
+This is the one worth remembering. `resize` fired on **every** collapse and
+re-show of the phone's browser chrome — height changed, width identical — and
+the debounced handler rebuilt the film strip and the marquee on each one. A
+rebuild tears down the strip's DOM, rebuilds it and re-seeds `x`, so the strip
+visibly **snapped back to its start every time you scrolled**. Reads exactly as
+"it isn't looping any more."
+
+The handler is now **width-only** (`main.js`, bottom of file). Neither loop
+depends on viewport height. Measured: height-only resize → **0** rebuilds
+(was 1 per event), real width change → still rebuilds.
+
+⚠️ The loop itself was never broken. Sampling `x` in headless showed a clean
+34 px/s at both viewports the whole time. If someone reports the loop dead
+again, check what is calling `rebuild()` before touching `filmLoop`.
+
+### 🔴 71 MB of texture for a strip 390px wide
+
+The biggest phone cost on the site, and **invisible in the file sizes.**
+`film.webp` and `film-shadow.webp` are both **5697×1641**. A browser decodes an
+image at its intrinsic size no matter how small it is painted, so those two
+cost **~71 MB of RGBA** — on a phone that draws them into a strip ~390px wide.
+On disk they are only 798 KB + 210 KB, which is why this never showed up in a
+payload audit.
+
+Added `film-m.webp` / `film-shadow-m.webp` at **1900px**, swapped in under
+`@media (max-width: 900px)`. Same pixels, fewer of them — a resolution variant,
+**not** a re-render and not a substitution of the art. 1900 rather than the
+~638px the tile actually draws at, because a DPR-3 phone renders that tile at
+~1914 device px and sizing to the CSS width would look soft exactly where most
+people see it. **~71 MB → ~8 MB.** Desktop keeps the full-size files (`--pitch`
+is ~2433px there).
+
+`Fabric.jpg` (1920×1313, 2.4 MB, ~9.6 MB decoded) → **`fabric.webp`**
+(1100×752, 372 KB, ~3.2 MB decoded), swapped everywhere including the chat
+widget. Safe at every call site: all 10 uses set `background-size` explicitly
+and the largest is 1100px, so nothing is upscaled. This was the cheapest big
+win flagged in session 6 and is now done.
+
+### The stock images are gone — `HOLDER` in `main.js`
+
+Every `picsum.photos` URL is replaced by one inline-SVG data URI (`HOLDER`,
+top of `main.js`; the 15 static ones in `index.html`/`about.html` carry the
+same string). **Third-party hosts on the home page went from picsum + jsdelivr
+to jsdelivr alone**; 37 holders render, 0 broken images.
+
+⚠️ It is an `<img>`, deliberately, **not a `<div>`**. Every image on the site is
+styled through `img` selectors — `object-fit`, the grayscale grade, sizing —
+and swapping the element type silently drops all of it. This way the markup,
+the alt text and the cascade are already what they will be when real
+photographs land: **the only thing that changes then is the src.**
+Don't reintroduce an external placeholder service, and don't use `src=""` —
+that re-requests the document.
+
+`#sheetCover` / `#sheetShot` in `library.html` are seeded with the same holder,
+which closes the last two `broken-image` findings from the session-6 audit.
+**All three pages now report 0 JS errors, 0 broken images, 0 external images**
+at both viewports.
+
+⚠️ `Fabric.jpg` is now unreferenced but **kept on purpose** — it is the source
+`fabric.webp` is derived from, and `Brand/` is no longer tracked. Delete it
+only if you are sure the brand folder is still on disk.
+
+### The chat launcher was 105.6px on a 390px screen
+
+`html { font-size: 150% }` means **1rem is 24px**, so the launcher's `4.4rem`
+was 105.6px — over a quarter of the width of a phone, and about double what a
+corner launcher should be. There *was* already a `@media (max-width: 560px)`
+block in `aliph-chat.css`, but it only made the **open panel** full-screen; the
+launcher had no mobile sizing at all.
+
+Now `--ac-launch`, 4.4rem desktop → **3rem (72px) at ≤560px**. Verified 106px →
+72px. The rim label is sized in viewBox units so it shrank with the disc and
+became texture rather than a word; its font-size is scaled back up in the same
+block rather than dropping the outer ring, which is the user's explicit design.
+
+### Where the payload stands now (measured, phone viewport)
+
+```
+font         5210 KB   ← 83% of the page, and untouched
+image         839 KB   (was ~3600 KB)
+script        143 KB
+stylesheet     72 KB
+document       20 KB
+total        6283 KB   (was ~8.9 MB)
+```
+
+**The fonts are now the whole story.** Four raw OTFs at ~1.3 MB each,
+`format("opentype")`, no WOFF2, no subsetting. `font-display: swap` is already
+set on all four, so they don't block first paint — but 5.2 MB still crosses a
+mobile connection and four OTFs still get parsed. ⚠️ **Still blocked on the
+licence question** (plan: ask before converting — 29LT is a commercial foundry
+and the kit may already exist). This is the single remaining lever on phone
+performance and it is the user's call, not a mechanical fix.
+
+### The Drive was opened and audited (2026-08-06)
+
+The user asked me to look. ⚠️ **The Drive MCP connector returns nothing for
+this folder** — `parentId = '15r6-…'` comes back empty even though the folder
+resolves by id and is shared "anyone with the link". Read it with the headless
+browser instead (`/browse`, then `$B text` per folder).
+
+`aliph website/` holds four subfolders and no loose files:
+
+| folder | contents |
+|---|---|
+| `graphic designs` | 9 PNGs — Grillit (جريلت) + shawarma variants |
+| `horizintal videos` | 4 videos, 55–384 MB |
+| `reels` | 9 vertical videos |
+| `pics` → 10 subfolders | ~54 JPEGs, 3.5–52 MB each, straight off the cameras |
+
+**The photography itself is exactly right** — big, uncropped, unexported.
+**The organisation is not:** it is sorted by *subject* (`food`, `portraits`,
+`students`, `idk category`), and the site's archive is organised by *project*,
+each needing a title, a date, a service and a cover. That mapping cannot be
+derived from the folder names.
+
+Three of the four services have almost nothing: **identities** has only
+Grillit, **events** has nothing identified, and **tech** has **zero
+screenshots** (the profile sheets need them and `Queen retreat` is photos of
+the retreat, not the portal). The 13 videos have no slot anywhere on the site.
+
+The full brief of what to send back was given to the user on 2026-08-06:
+one folder per project named `YYYY-MM — name` with `cover` + numbered extras
+(+ a `screens/` subfolder for sites), one sheet row per project, ≥3 projects
+per service, ~15 loose studio shots, originals not exports, colour not B&W.
+
+## Session 7 (2026-08-05) — chatbot stage 2: the Worker + guardrails
+
+`chat-worker/` at the repo root is new and is **the whole session**. Nothing
+in `prototype/` was touched. Plan §11 stage 2 is now ✅; the plan file carries
+the detail, this is the orientation.
+
+**It is a separate deployable** (plan §4) — the prototype has no build step and
+must keep it that way. Cloudflare Worker, two routes:
+
+```
+GET  /api/health   { ok, quotaRemaining, model, stub, durableRateLimit, … }
+POST /api/chat     { messages[], lang }   header: X-Aliph-Session
+```
+
+**The order of operations is the design:**
+
+```
+CORS → validate → rate limit → PRE-FILTER → model → POST-FILTER
+```
+
+Pre-filters run before the model so a pricing question or a jailbreak attempt
+costs no quota and can't depend on the model behaving. The post-filter runs
+after it because the model is the one component here that can't be trusted to
+hold a rule. All seven of plan §5's rules are enforced in code.
+
+**The model is a keyword stub, not a classifier.** `respond()` in
+`src/model.js` is the seam — stage 3 adds Gemini beside it and nothing else in
+the Worker moves, because the guardrails already run on both sides of that
+call. The stub exists so the flow and the filters are testable without a key.
+
+**67 tests, ~150ms, no key / no network / no wrangler** — the fetch handler
+runs under plain Node and the rate limiter falls back to an in-isolate Map:
+
+```bash
+cd chat-worker && npm test
+```
+
+⚠️ **Traps hit this session, all three worth keeping:**
+
+1. **A Worker entry module may only export the default handler and Durable
+   Object classes.** `export const VERSION` made workerd refuse to boot
+   (*"Incorrect type for map entry 'VERSION'"*). Node imports it happily, so
+   **the test suite cannot catch this class of error** — run `wrangler dev`
+   once before shipping any `index.js` change.
+2. **Arabic clitic stripping is greedy and will eat real letters.** A chain of
+   optional single letters (`^(?:و|ف)?(?:ب|ك|ل)?(?:ال)?`) turns `وكم` into
+   `م`. Strip only the conjunction and the **article** — never a lone
+   preposition.
+3. **`\d` is ASCII-only in JS regex**, so `٢٠٠٠ شيكل` is invisible to a price
+   detector until `norm()` has folded the Arabic-Indic digits. The post-filter
+   tests both the raw and the normalised copy.
+
+**Two contracts not to break:**
+
+- `ok` and `quotaRemaining` in the health response are read *by those exact
+  names* in `prototype/chat/aliph-chat.js` → `probe()`. Renaming either sends
+  every visitor to the contact card, silently.
+- `ALLOW_STUB = "1"` in `wrangler.toml` is **stage-2 only**. Stage 3 flips it
+  to `"0"`, after which a missing key is a 503 rather than keyword matching
+  served to a real visitor as if it were the assistant.
+
+**The guardrail bans are curated phrase lists, not patterns — on purpose.**
+`/we can\b/` also swallows *"we can put you in touch with the team"*, the one
+sentence this bot exists to say. And describing a service ("we do visual
+identities") is **not** a feasibility read; job #1 in plan §9 is answering
+questions about the four services. Only capability or commitment *about the
+visitor's project* is banned. Same reasoning for `كم`: bare, it is "how much"
+and "how many" both, and it lands on `كم يستغرق` (how long) as often as on
+money — so it's a weak signal needing a second one, while `بكم`/`قديش` fire
+alone.
+
+`chat-worker/src/services.js` **must stay in sync with `CATS` in
+`prototype/main.js`.** Its `examples` and `kw` lists are placeholders I wrote,
+not the studio's — plan §3 is explicit that placeholder examples produce
+placeholder classification, and that's plan §10.1's first ask.
+
+Stage 3 (Gemini) is blocked on §10.4 — who owns the key. Stage 4 (lead email)
+needs §10.3 — confirmed contact details. Stage 5 (the adversarial pass) is not
+optional and not a formality.
 
 ## Session 6 (2026-08-05) — measurement pass; one bug fixed, one big finding
 
@@ -226,8 +440,15 @@ prototype/
   assets/      fonts + img copied from Brand/ + derived art (see below)
   preview/
     site-demo.html   the stand-in "preview build" the profile sheet iframes
+chat-worker/               the chatbot backend — a SEPARATE deployable
+  src/index.js             routes; the order of operations is the design
+  src/guardrails.js        pure, testable; plan §5 lives here
+  src/model.js             the seam — keyword stub today, Gemini at stage 3
+  src/ratelimit.js         Durable Object, memory fallback
+  src/services.js          ⚠️ must stay in sync with CATS in main.js
+  test/                    67 cases; no key, no network, no wrangler
 .claude/launch.json   preview server config, name "prototype", port 8321
-aliph-chatbot-spec.md the user's chatbot brief (nothing built yet)
+aliph-chatbot-spec.md the user's chatbot brief (superseded by the plan)
 HANDOFF.md            this file
 memory/               auto-memory (see aliph-website-direction.md)
 ```
@@ -531,9 +752,11 @@ Two files, and **`aliph-chatbot-plan.md` is the one that governs**:
   unavailable state is a **contact card with an explicit notice**.
 - It is a **separate deployable** (Cloudflare Worker + vanilla-JS widget), not
   part of `prototype/` — the prototype has no build step and no server.
-**Stage 1 is built** (`prototype/chat/aliph-chat.{js,css}`, loaded by all three
-pages). Seal launcher bottom-corner, ink/cream panel, contact-card fallback,
-AR/EN mirroring the site.
+**Stages 1 and 2 are built.** Stage 1 is the widget
+(`prototype/chat/aliph-chat.{js,css}`, loaded by all three pages): seal
+launcher bottom-corner, ink/cream panel, contact-card fallback, AR/EN mirroring
+the site. Stage 2 is `chat-worker/` — see session 7 above. **The two are not
+connected yet**; that is stage 3's single line of config.
 
 ⚠️ **It shows the contact card permanently right now, and that is correct** —
 `CONFIG.endpoint`/`CONFIG.health` are `null`, so the probe returns false without
@@ -568,7 +791,7 @@ text** — it needs re-exporting from the Illustrator source
 (`Brand/Assets/Stamp/…`, still on the user's disk though no longer tracked).
 Flagged to the user 2026-08-02; awaiting their call on whether to re-cut it.
 
-Stages 2–4 are blocked on plan §10 — service examples, voice samples, confirmed
+Stages 3–5 are blocked on plan §10 — service examples, voice samples, confirmed
 contact details, and who owns the Gemini key.
 
 ## Library & About pages
@@ -609,8 +832,13 @@ contact details, and who owns the Gemini key.
 ## Known-open / next up
 
 1. **The Google Drive is the next big unblock.** When the user says the folder
-   is sorted, real media replaces every `picsum.photos` seed: `PROJECTS[].seed`,
-   `profile.shots`, `FILM_FRAMES`, `SERVICES[].seed`, and the about clippings.
+   is sorted, real media replaces the `HOLDER` data URI everywhere: the five
+   sites in `main.js` plus the 15 static ones in `index.html`/`about.html`.
+   The `seed` fields on `PROJECTS`, `FILM_FRAMES` and `SERVICES` are now unused
+   by any render — they are just labels waiting for a real path.
+   ⚠️ **Read the Drive audit in session 8 before planning that work**: the
+   folder is sorted by subject, not by project, and three of the four services
+   have almost nothing in it.
 2. **Library still needs a polish pass** to the same bar as home — the accordion
    mechanics work but it hasn't had a design round since the year sections came
    out, and the panels now have a lot of empty top-left space in the grid view.
@@ -620,7 +848,8 @@ contact details, and who owns the Gemini key.
    a client.
 4. Only `tech` projects have profile sheets. If the user wants them for the
    other three services, it's data-only — add a `profile` block.
-5. The chatbot (see above) is unbuilt and undecided.
+5. The chatbot is at **stage 2 of 5** — widget and Worker both built, not yet
+   connected to each other or to a model. See session 7 and plan §11.
 6. Spot-check remaining headings for the clipped-Arabic-tops issue (see below).
    The three new ones — `.asvc-name`, `.sheet-title`, and the demo page's `h1` —
    already carry the `padding-top: .12em` fix.

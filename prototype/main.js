@@ -3,6 +3,26 @@
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 gsap.registerPlugin(ScrollTrigger);
 
+/* ══════════ media holders ══════════
+   Every photograph on this site is still to come from the studio, so
+   there is nothing to load yet. This is the stand-in.
+
+   ⚠️ It is an <img> with an inline SVG data URI, NOT a <div>. Every
+   image on the site is styled through `img` selectors — object-fit,
+   the grayscale grade, the sizing — and swapping the element type
+   silently drops all of it. This way the markup, the alt text and the
+   cascade are exactly what they will be once real photographs land:
+   the only thing that changes then is the src.
+
+   ⚠️ Do NOT go back to an external placeholder service. The previous
+   one (picsum.photos) meant 20+ third-party requests per page, was
+   rate-limited constantly, and left the page full of empty frames on
+   a phone — see the loading notes in HANDOFF.md. An empty `src=""` is
+   not an option either: it re-requests the document itself. */
+const HOLDER =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'" +
+  " preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E";
+
 /* ══════════ i18n ══════════ */
 const I18N = {
   navHome: { ar: "الرئيسيّة", en: "Home" },
@@ -491,7 +511,7 @@ function buildFilm() {
     fig.dataset.frame = i;
     fig.dataset.service = fr.svc;
     fig.innerHTML =
-      `<img src="https://picsum.photos/seed/${fr.seed}/1200/800" alt="">` +
+      `<img src="${HOLDER}" alt="">` +
       `<figcaption>${fr.cap[lang]}</figcaption>`;
     group.appendChild(fig);
   });
@@ -860,7 +880,7 @@ const svcSlider = (() => {
     }
     return img;
   }
-  const src = (p) => `https://picsum.photos/seed/${p.seed}/1200/900`;
+  const src = () => HOLDER;
   function preload() {
     items.forEach((p) => { const i = new Image(); i.src = src(p); });
   }
@@ -1159,7 +1179,7 @@ function renderLibrary() {
     const tiles = items.map((p) => `
       <figure class="tile${hasProfile(p) ? " has-profile" : ""}"${hasProfile(p) ? ` data-project="${at(p)}" role="button" tabindex="0"` : ""}>
         <div class="tile-img">
-          <img src="https://picsum.photos/seed/${p.seed}/600/400" alt="${p[lang]}" loading="lazy">
+          <img src="${HOLDER}" alt="${p[lang]}" loading="lazy">
           ${hasProfile(p) ? `<span class="tile-open" aria-hidden="true">${I18N.pfOpen[lang]}</span>` : ""}
         </div>
         <figcaption><span>${p[lang]}</span><span class="t-date">${fmtDate(p.date)}</span></figcaption>
@@ -1233,7 +1253,7 @@ const projectSheet = (() => {
 
   let current = null, shotIdx = 0, lastFocus = null;
 
-  const shotSrc = (seed, w, h) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
+  const shotSrc = () => HOLDER;
 
   function paintShot(i) {
     const shots = current.profile.shots;
@@ -1371,7 +1391,7 @@ function renderServiceSections() {
     return `
       <article class="asvc" data-svc="${s.id}">
         <figure class="asvc-media">
-          <img src="https://picsum.photos/seed/${s.seed}/900/1150" alt="" loading="lazy">
+          <img src="${HOLDER}" alt="" loading="lazy">
           <figcaption class="asvc-tag latin" lang="en">${s.tag}</figcaption>
         </figure>
         <div class="asvc-body">
@@ -1455,8 +1475,19 @@ if (document.fonts && document.fonts.ready) {
   });
 }
 
+/* ⚠️ WIDTH ONLY. On a phone, scrolling collapses and re-shows the browser's
+   own address bar, and each of those fires `resize` with a changed HEIGHT and
+   an identical width. Rebuilding on those was a real bug: every rebuild tears
+   the film strip's DOM down, rebuilds it, and re-seeds x — so the strip
+   visibly snapped back to its start each time the address bar moved, which
+   reads as "the film strip stopped looping." The marquee restarted with it.
+   Neither loop depends on viewport height, so a height change is not a
+   reason to rebuild either of them. */
 let resizeTimer;
+let lastW = window.innerWidth;
 window.addEventListener("resize", () => {
+  if (window.innerWidth === lastW) return;
+  lastW = window.innerWidth;
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     rebuildLoops();
