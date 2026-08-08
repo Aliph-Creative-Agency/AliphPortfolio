@@ -842,8 +842,10 @@ const ransomCycle = (() => {
   }
 
   function schedule(chip) {
-    /* uneven on purpose — a steady beat is a metronome, not a hand */
-    const wait = 2.2 + Math.random() * 2.1;
+    /* Uneven on purpose — a steady beat is a metronome, not a hand. The
+       spread also has to stay wide enough that the two letters don't drift
+       into step with each other. */
+    const wait = 0.65 + Math.random() * 0.85;
     calls.push(gsap.delayedCall(wait, () => {
       if (!running) return;
       swap(chip);

@@ -386,35 +386,34 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   background-size: var(--pitch, 100%) 100%;
   will-change: transform;
 }
-/* the film sits just above the cream, so it casts a shadow that is only visible
-   THROUGH the sprocket holes. baked from the film's own silhouette (offset +
-   blurred), so there is no runtime filter on a 16000px-wide element. the
-   negative z-index puts it under the film image but above the hero's cream. */
-.film-scroll::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: url("assets/img/film-shadow.webp");
-  background-repeat: repeat-x;
-  background-size: var(--pitch, 100%) 100%;
-}
+/* ── the cast shadow is OFF (2026-08-08) ──────────────────────────
+   `.film-scroll::before` used to paint film-shadow.webp under the film image
+   and above the hero's cream, so the shadow read only THROUGH the sprocket
+   holes. Removed on request, to try the strip without it.
+
+   What it actually changed, since it was more than a halo: the shadow also
+   darkened the whole film base. Without it the strip reads slate-grey and
+   crisper rather than near-black and deep, and the holes are clean-edged.
+
+   ⚠️ `film-shadow.webp` / `film-shadow-m.webp` are still on disk and still
+   re-cut by resources/recut_film.py — they are the source if this comes back.
+   To restore, put the rule back with `inset: 0; z-index: -1;
+   background: url(...) repeat-x; background-size: var(--pitch) 100%`, plus
+   the -m swap in the max-width: 900px block below. */
 /* ⚠️ THE PHONE'S BIGGEST COST WAS HERE.
-   film.webp and film-shadow.webp are both 5697×1641. A browser decodes an
-   image at its intrinsic size no matter how small it is drawn, so these two
-   cost ~71 MB of RGBA texture — on a phone that paints them into a strip
-   about 390px wide. That is the single heaviest thing on the page and it was
-   invisible in the file sizes (798 KB + 210 KB on disk).
-   The -m variants are 1900px: same pixels, fewer of them — a resolution
+   film.webp is 5512×1641. A browser decodes an image at its intrinsic size no
+   matter how small it is drawn, so it costs tens of MB of RGBA texture — on a
+   phone that paints it into a strip about 390px wide. That was the single
+   heaviest thing on the page and it was invisible in the file sizes.
+   The -m variant is 1900px: same pixels, fewer of them — a resolution
    variant, not a re-render, and not a substitution of the art. 1900 rather
-   than the ~638px the tile actually draws at, because a DPR-3 phone renders
-   that tile at ~1914 device px and sizing to the CSS width would look soft
-   exactly where most people see it. ~8 MB instead of ~71 MB.
-   Desktop keeps the full-size files: there --pitch is ~2433px. */
+   than the ~618px the tile actually draws at, because a DPR-3 phone renders
+   that tile at ~1854 device px and sizing to the CSS width would look soft
+   exactly where most people see it.
+   Desktop keeps the full-size file: there --pitch is ~2798px.
+   (The shadow layer that used to be swapped here too is off — see above.) */
 @media (max-width: 900px) {
   .film-scroll { background-image: url("assets/img/film-m.webp"); }
-  .film-scroll::before { background-image: url("assets/img/film-shadow-m.webp"); }
 }
 
 .film-group {
