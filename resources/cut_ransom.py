@@ -31,7 +31,10 @@ OUT = os.path.join(HERE, "..", "prototype", "assets", "img", "ransom")
 SHEETS = {"ar": "ransom arb.png", "en": "ransom eng.png"}
 BG_MAX = 6          # anything above this is paper, not background
 MIN_AREA = 4000     # ignore specks
-TARGET_H = 420      # ~1.4em at a DPR-3 phone; see main.js for display size
+# The chip renders at ~115 CSS px on desktop and less on a phone, so 320
+# covers DPR 2-3 with room to spare. It matters more than it looks: the
+# letters CYCLE, so one visit pulls several of these, not one.
+TARGET_H = 320
 PAD = 2             # keep a hair of the tear's outer fibres
 
 

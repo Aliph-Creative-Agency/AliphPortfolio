@@ -763,8 +763,10 @@ function splitSafe(word, i) {
 const RANSOM_COUNT = 16;
 const pad2 = (n) => String(n).padStart(2, "0");
 
-/** Wrap the target letter of the first matching word in its own clipping. */
-function liftRansom(line, variant) {
+/** Wrap the target letter of the first matching word in its own clipping.
+    `ring` is the sequence of scraps this letter will cycle through. */
+function liftRansom(line, ring) {
+  const variant = ring[0];
   const text = line.textContent;
   for (const w of RANSOM_WORDS[lang] || []) {
     const at = text.indexOf(w);
@@ -790,6 +792,20 @@ function liftRansom(line, variant) {
     img.addEventListener("error", () => chip.classList.add("no-scrap"), { once: true });
 
     chip.append(sr, img);
+    chip._ring = ring;
+    chip._at = 0;
+    /* a small pool of angles per chip, so a repeat of the same scrap still
+       lands differently */
+    chip._tilt = [-5.5, 3.5, -2, 5, -4];
+
+    /* Warm the rest of the ring now. A swap that has to fetch first shows a
+       gap where the letter was — the one frame of this effect that would
+       look broken rather than deliberate. */
+    ring.slice(1).forEach((v) => {
+      const pre = new Image();
+      pre.src = "assets/img/ransom/" + lang + "-" + pad2(v) + ".webp";
+    });
+
     /* rebuilt from text nodes, not innerHTML — the copy is ours but the
        headline is also the one place a stray tag would be most visible */
     line.textContent = "";
@@ -798,6 +814,60 @@ function liftRansom(line, variant) {
   }
   return null;
 }
+
+/* ── the cycle ───────────────────────────────────────────────────
+   The letter keeps being re-cut and re-pasted: every couple of seconds a
+   chip swaps to a different scrap at a different angle. Hard cuts, not
+   tweens — paper does not ease from one piece into another, and a
+   cross-fade would read as a slideshow instead of stop-motion.
+
+   ⚠️ Each chip runs on its own randomised interval. Sharing one would make
+   both letters flip in lockstep, which instantly reads as a mechanism.
+
+   ⚠️ Paused when the hero leaves the viewport, for the same reason the
+   marquee and film strip are — a timer redrawing a composited layer while
+   you scroll somewhere else is exactly the cost we cut earlier. */
+const ransomCycle = (() => {
+  let calls = [];
+  let chips = [];
+  let running = false;
+
+  function swap(chip) {
+    const ring = chip._ring;
+    chip._at = (chip._at + 1) % ring.length;
+    const img = chip.querySelector("img");
+    if (img) img.src = "assets/img/ransom/" + lang + "-" + pad2(ring[chip._at]) + ".webp";
+    /* re-pasted by hand, so the angle changes with the scrap */
+    gsap.set(chip, { rotate: chip._tilt[chip._at % chip._tilt.length] });
+  }
+
+  function schedule(chip) {
+    /* uneven on purpose — a steady beat is a metronome, not a hand */
+    const wait = 2.2 + Math.random() * 2.1;
+    calls.push(gsap.delayedCall(wait, () => {
+      if (!running) return;
+      swap(chip);
+      schedule(chip);
+    }));
+  }
+
+  return {
+    reset(list) {
+      this.stop();
+      chips = list;
+    },
+    start() {
+      if (running || prefersReduced || !chips.length) return;
+      running = true;
+      chips.forEach(schedule);
+    },
+    stop() {
+      running = false;
+      calls.forEach((c) => c.kill());
+      calls = [];
+    },
+  };
+})();
 
 let ransomFirstRun = true;
 function initRansom() {
@@ -810,16 +880,21 @@ function initRansom() {
     [bag[i], bag[j]] = [bag[j], bag[i]];
   }
 
+  /* Each chip gets its own slice of the bag — RING_LEN scraps it will cycle
+     through. Kept short on purpose: every scrap in a ring gets fetched, and
+     this is the hero. Different slices per load, so the set a visitor sees
+     changes between visits without pulling all 16. */
+  const RING_LEN = 5;
   const chips = [];
   document.querySelectorAll(".hero-title .line").forEach((line) => {
-    const chip = liftRansom(line, bag[chips.length]);
+    const ring = bag.slice(chips.length * RING_LEN, (chips.length + 1) * RING_LEN);
+    const chip = liftRansom(line, ring);
     if (chip) chips.push(chip);
   });
   if (!chips.length) return;
 
-  /* deliberately uneven — a clipping pasted by hand is never square */
-  const tilt = [-5.5, 4.5, -3];
-  chips.forEach((c, i) => gsap.set(c, { rotate: tilt[i % tilt.length] }));
+  chips.forEach((c) => gsap.set(c, { rotate: c._tilt[0] }));
+  ransomCycle.reset(chips);
   if (prefersReduced) return;
 
   /* First run waits for the line reveal to finish (delay 0.5 + duration 1).
@@ -835,6 +910,7 @@ function initRansom() {
     ease: "power4.out",
   });
   ransomFirstRun = false;
+  ransomCycle.start();
 }
 
 function tickClock() {
@@ -1684,6 +1760,17 @@ if (document.fonts && document.fonts.ready) {
     (e) => filmLoop.setVisible(e[0].isIntersecting),
     { rootMargin: "150px" },
   ).observe(strip);
+})();
+
+/* The ransom letters keep re-cutting themselves, so they are a running timer
+   like the loops are — same rule, stop when nobody can see them. */
+(() => {
+  const title = document.querySelector(".hero-title");
+  if (!title || !window.IntersectionObserver) return;
+  new IntersectionObserver(
+    (e) => (e[0].isIntersecting ? ransomCycle.start() : ransomCycle.stop()),
+    { rootMargin: "150px" },
+  ).observe(title);
 })();
 
 let resizeTimer;
