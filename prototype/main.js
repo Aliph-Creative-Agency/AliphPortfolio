@@ -753,8 +753,18 @@ function splitSafe(word, i) {
   return !joinedBefore && !joinsAfter;
 }
 
-/** Wrap the target letter of the first matching word in its own chip. */
-function liftRansom(line) {
+/* The user's own clippings, cut from resources/ransom {arb,eng}.png by
+   resources/cut_ransom.py — 16 torn scraps per language, each a different
+   paper, typeface and colour.
+   ⚠️ Some are red, purple, brown or blue-ruled, and the site's palette is
+   ink + cream only with terracotta reserved. Using them all is the deliberate
+   choice: a ransom note that matches isn't one. To restrict it to the
+   neutral scraps, shorten this list — nothing else has to change. */
+const RANSOM_COUNT = 16;
+const pad2 = (n) => String(n).padStart(2, "0");
+
+/** Wrap the target letter of the first matching word in its own clipping. */
+function liftRansom(line, variant) {
   const text = line.textContent;
   for (const w of RANSOM_WORDS[lang] || []) {
     const at = text.indexOf(w);
@@ -762,9 +772,24 @@ function liftRansom(line) {
     const rel = lang === "ar" ? w.lastIndexOf("أ") : w.indexOf("a");
     if (rel < 0 || !splitSafe(w, rel)) continue;
     const k = at + rel;
+
     const chip = document.createElement("span");
     chip.className = "ransom";
-    chip.textContent = text[k];
+    /* the letter stays in the accessibility tree and in a copy-paste of the
+       headline — only its pixels are replaced by the scrap */
+    const sr = document.createElement("span");
+    sr.className = "ransom-sr";
+    sr.textContent = text[k];
+
+    const img = document.createElement("img");
+    img.src = "assets/img/ransom/" + lang + "-" + pad2(variant) + ".webp";
+    img.alt = "";
+    img.decoding = "async";
+    /* If the scrap 404s, fall back to the real letter rather than leaving a
+       hole in the middle of the word. */
+    img.addEventListener("error", () => chip.classList.add("no-scrap"), { once: true });
+
+    chip.append(sr, img);
     /* rebuilt from text nodes, not innerHTML — the copy is ours but the
        headline is also the one place a stray tag would be most visible */
     line.textContent = "";
@@ -776,14 +801,23 @@ function liftRansom(line) {
 
 let ransomFirstRun = true;
 function initRansom() {
+  /* A different scrap on every load, and never the same one twice on the
+     page — two identical clippings would read as a repeated graphic rather
+     than as letters cut from whatever was to hand. */
+  const bag = Array.from({ length: RANSOM_COUNT }, (_, i) => i + 1);
+  for (let i = bag.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [bag[i], bag[j]] = [bag[j], bag[i]];
+  }
+
   const chips = [];
   document.querySelectorAll(".hero-title .line").forEach((line) => {
-    const chip = liftRansom(line);
+    const chip = liftRansom(line, bag[chips.length]);
     if (chip) chips.push(chip);
   });
   if (!chips.length) return;
 
-  /* deliberately uneven — a clipping cut by hand is never square */
+  /* deliberately uneven — a clipping pasted by hand is never square */
   const tilt = [-5.5, 4.5, -3];
   chips.forEach((c, i) => gsap.set(c, { rotate: tilt[i % tilt.length] }));
   if (prefersReduced) return;

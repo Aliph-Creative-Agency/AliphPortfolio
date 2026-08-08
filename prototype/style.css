@@ -562,24 +562,43 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
    padding grows the line box and pushes the two headline lines apart. */
 .ransom {
   display: inline-block;
-  margin-inline: 0.03em;
-  /* Latin default: the only target is the lowercase "a" in "start", so the
-     box hugs the x-height band. A full 1em line-height here makes a domino
-     standing over its own word. */
-  padding: 0.06em 0.1em 0.04em;
-  line-height: 0.8;
-  background: var(--ink);
-  color: var(--cream);
-  /* the shadow a pasted scrap casts on the page under it */
-  box-shadow: 0.02em 0.03em 0 rgba(15, 24, 32, 0.28);
-}
-/* ⚠️ Arabic needs a taller box, and the reason is not cosmetic: Idris Sharp
-   puts the أ's hamza ABOVE the em box, so at Latin padding the hamza renders
-   in cream ON the cream panel and disappears — leaving what looks like a
-   bare ا. The whole effect is the أ, so the ink has to cover the ascender. */
-html[lang="ar"] .ransom {
-  padding: 0.24em 0.11em 0.01em;
+  margin-inline: 0.04em;
+  /* The scrap sets the size. Sized so the letter printed ON it reads at
+     roughly the weight of the type around it — the paper margin means the
+     scrap has to be taller than the glyph it stands in for.
+     ⚠️ `.line-mask` clips, so this cannot grow much further without the
+     tops being sliced. */
+  height: 1.34em;
   line-height: 1;
+  vertical-align: -0.3em;
+  /* a scrap of paper pasted onto a page casts a little shadow */
+  filter: drop-shadow(0.02em 0.035em 0.01em rgba(15, 24, 32, 0.32));
+}
+.ransom img {
+  display: block;
+  height: 100%;
+  width: auto;
+}
+/* The letter itself stays in the DOM for screen readers and for copy-paste;
+   only its pixels are replaced by the scrap. `clip-path` rather than
+   `display: none`, which would take it out of the accessibility tree. */
+.ransom-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* Fallback if a scrap fails to load: show the real letter rather than leave
+   a hole in the middle of the word. */
+.ransom.no-scrap { height: auto; vertical-align: baseline; filter: none; }
+.ransom.no-scrap img { display: none; }
+.ransom.no-scrap .ransom-sr {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
 }
 .hero-rule {
   height: 3px;
