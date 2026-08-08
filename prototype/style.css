@@ -285,14 +285,37 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
 
 /* masthead copy is pinned to the corner opposite the burger. this one is
    physically left in both directions — the burger is physically right, so
-   an inset-inline-start here would stack the two on top of each other in RTL */
+   an inset-inline-start here would stack the two on top of each other in RTL.
+
+   FIXED, not absolute, so it rides down the page with the burger instead of
+   scrolling away with the masthead. `top` centres it on the burger's own
+   centre line (that button is 44px tall at top: 1.1rem), so the two corners
+   stay level at every width. */
 .masthead .lang-switch {
-  position: absolute;
+  position: fixed;
   left: var(--pad);
   right: auto;
-  top: 50%;
+  top: calc(1.1rem + 22px);
   transform: translateY(-50%);
+  z-index: 940;
 }
+/* The overlay carries its own copy in its footer — without this you get two
+   pills on screen, since the fixed one sits above the overlay. */
+body.nav-open .masthead .lang-switch {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Same treatment the burger gets: JS samples whatever is actually under it
+   and inverts the whole pill over ink, so it never dissolves into a dark
+   section. Sampled SEPARATELY from the burger — they sit at opposite
+   corners and are regularly over different sections at the same time. */
+.lang-switch.on-dark { border-color: var(--cream); background: transparent; }
+.lang-switch.on-dark .ls-knob { background: var(--cream); }
+.lang-switch.on-dark .ls-opt { color: var(--cream); }
+html[lang="ar"] .lang-switch.on-dark .ls-opt[data-l="ar"],
+html[lang="en"] .lang-switch.on-dark .ls-opt[data-l="en"] { color: var(--ink); }
+.lang-switch.on-dark:hover { background: rgba(217, 217, 206, 0.12); }
 
 /* overlay copy sits on ink, so the whole pill inverts */
 .nav-overlay .lang-switch { border-color: var(--cream); flex: 0 0 auto; }
@@ -401,12 +424,16 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   height: 100%;
 }
 /* each media frame sits on the film's central window band. the slot width is
-   1/4 of the film tile's own aspect (5697/1641 = 3.4717), so one group spans
-   exactly one tile and the scan is displayed with no horizontal stretch */
+   1/4 of the film tile's own aspect (5512/1641 = 3.3589), so one group spans
+   exactly one tile and the scan is displayed with no horizontal stretch.
+   ⚠️ Retune this constant to tileAspect / 4 whenever the tile is re-cropped —
+   resources/recut_film.py prints the value. It was 0.8679 for the original
+   5697px tile, whose seam crowded two sprocket holes together on every
+   repeat; the re-cut lands the seam inside the art's own gap jitter. */
 .film-frame {
   position: relative;
   flex: 0 0 auto;
-  width: calc(var(--fh) * 0.8679 - var(--fgap) * 2);
+  width: calc(var(--fh) * 0.839732 - var(--fgap) * 2);
   height: 62%;
   margin-inline: var(--fgap);
   margin-top: calc(var(--fh) * 0.021);   /* nudge onto the window band's center */

@@ -860,17 +860,26 @@ const DARK_UNDER = [
    and a full hit test, and `closest()` then walks an 8-selector list for each
    element it returns. Correct, but not something to run 60 times a second on
    a phone — see queueMenuSync below, which spaces it out. */
-function syncMenuBtn() {
-  if (!menuBtn || document.body.classList.contains("nav-open")) return;
-  const r = menuBtn.getBoundingClientRect();
+/** Is the point at this element's centre sitting over a dark section? */
+function overDark(el) {
+  const r = el.getBoundingClientRect();
   const stack = document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-  let dark = false;
-  for (const el of stack) {
-    if (el === menuBtn || menuBtn.contains(el)) continue;
-    if (el === document.body || el === document.documentElement) break;
-    if (el.closest(DARK_UNDER)) { dark = true; break; }
+  for (const node of stack) {
+    if (node === el || el.contains(node)) continue;
+    if (node === document.body || node === document.documentElement) break;
+    if (node.closest(DARK_UNDER)) return true;
   }
-  menuBtn.classList.toggle("on-dark", dark);
+  return false;
+}
+
+function syncMenuBtn() {
+  if (document.body.classList.contains("nav-open")) return;
+  /* The burger and the language pill are pinned to OPPOSITE corners, so they
+     are routinely over different sections at once — each is sampled on its
+     own rather than sharing one answer. */
+  if (menuBtn) menuBtn.classList.toggle("on-dark", overDark(menuBtn));
+  const langPill = document.querySelector(".masthead .lang-switch");
+  if (langPill) langPill.classList.toggle("on-dark", overDark(langPill));
 }
 
 /* Every frame was overkill: the burger inverting ~100ms after a dark band

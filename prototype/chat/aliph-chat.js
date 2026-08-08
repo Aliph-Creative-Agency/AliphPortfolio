@@ -23,12 +23,17 @@
     health: null,            // e.g. "https://chat.aliphcreative.com/api/health"
     healthTimeoutMs: 4000,
 
-    /* ⚠️ Confirm these against the studio before launch — plan §10.3.
-       They currently mirror the site's contact footer. */
+    /* Confirmed by the studio 2026-08-06. ⚠️ The phone and the WhatsApp are
+       DIFFERENT numbers — they were the same until now, so anything that
+       reuses `phoneLabel` for the WhatsApp row is a bug.
+       The label is the local form the studio actually gives out; the `tel:`
+       and `wa.me` targets stay E.164, which is the only form both reliably
+       dial from abroad. */
     email: "info@aliphcreative.com",
     phone: "+972528745090",
-    phoneLabel: "+972 52 8745 090",
-    whatsapp: "972528745090",
+    phoneLabel: "052-874-5090",
+    whatsapp: "972594097725",
+    whatsappLabel: "059-409-7725",
   };
 
   const T = {
@@ -176,7 +181,7 @@
     const rows = [
       { k: t("kMail"), v: CONFIG.email, href: "mailto:" + CONFIG.email },
       { k: t("kPhone"), v: CONFIG.phoneLabel, href: "tel:" + CONFIG.phone },
-      { k: t("kWhats"), v: CONFIG.phoneLabel, href: "https://wa.me/" + CONFIG.whatsapp },
+      { k: t("kWhats"), v: CONFIG.whatsappLabel, href: "https://wa.me/" + CONFIG.whatsapp },
     ];
     bodyEl.innerHTML = `
       <span class="ac-down-mark">${t("downMark")}</span>
