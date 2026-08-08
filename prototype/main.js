@@ -724,6 +724,85 @@ const filmLoop = (() => {
   };
 })();
 
+/* ══════════ ransom-note letters in the hero headline ══════════
+   One letter per headline line is lifted out and set as a newspaper
+   clipping — an ink chip carrying cream type, pasted in at an angle.
+
+   ⚠️ ONLY the two verbs: نبدأ and تبدأ (and "start" in English). الأشياء and
+   ألِف were ruled out by the user — don't add them back.
+
+   ⚠️ ARABIC SHAPING — the thing that makes this dangerous. Pulling a letter
+   into its own element can force the letters around it into isolated forms
+   and visibly break the word. It is safe for these two for a specific
+   reason, not by luck: in both نبدأ and تبدأ the letter before the أ is د,
+   which never joins forward, so that أ was already rendering isolated.
+   Measured: whole 90.25px vs split 90.27px.
+   `splitSafe()` enforces the rule rather than trusting it, so if the copy
+   ever changes to a word whose أ follows a joining letter (ب ت ن س ع …),
+   that word is left whole instead of shattered. */
+const RANSOM_WORDS = { ar: ["نبدأ", "تبدأ"], en: ["start"] };
+/* Arabic letters that never connect to the letter following them. */
+const NON_JOINING = new Set(["ا", "أ", "إ", "آ", "د", "ذ", "ر", "ز", "و", "ؤ", "ء", "ة"]);
+
+function splitSafe(word, i) {
+  /* Latin has no joining behaviour, so every split is safe. Without this the
+     Arabic rule rejects "start" — "t" is not in the non-joining set. */
+  if (!/[؀-ۿ]/.test(word)) return true;
+  const joinedBefore = i > 0 && !NON_JOINING.has(word[i - 1]);
+  const joinsAfter = i < word.length - 1 && !NON_JOINING.has(word[i]);
+  return !joinedBefore && !joinsAfter;
+}
+
+/** Wrap the target letter of the first matching word in its own chip. */
+function liftRansom(line) {
+  const text = line.textContent;
+  for (const w of RANSOM_WORDS[lang] || []) {
+    const at = text.indexOf(w);
+    if (at < 0) continue;
+    const rel = lang === "ar" ? w.lastIndexOf("أ") : w.indexOf("a");
+    if (rel < 0 || !splitSafe(w, rel)) continue;
+    const k = at + rel;
+    const chip = document.createElement("span");
+    chip.className = "ransom";
+    chip.textContent = text[k];
+    /* rebuilt from text nodes, not innerHTML — the copy is ours but the
+       headline is also the one place a stray tag would be most visible */
+    line.textContent = "";
+    line.append(text.slice(0, k), chip, text.slice(k + 1));
+    return chip;
+  }
+  return null;
+}
+
+let ransomFirstRun = true;
+function initRansom() {
+  const chips = [];
+  document.querySelectorAll(".hero-title .line").forEach((line) => {
+    const chip = liftRansom(line);
+    if (chip) chips.push(chip);
+  });
+  if (!chips.length) return;
+
+  /* deliberately uneven — a clipping cut by hand is never square */
+  const tilt = [-5.5, 4.5, -3];
+  chips.forEach((c, i) => gsap.set(c, { rotate: tilt[i % tilt.length] }));
+  if (prefersReduced) return;
+
+  /* First run waits for the line reveal to finish (delay 0.5 + duration 1).
+     A language switch re-snaps them immediately instead — a 1.5s pause after
+     tapping the toggle would just read as lag. */
+  gsap.from(chips, {
+    yPercent: -170,
+    rotate: 0,
+    opacity: 0,
+    duration: ransomFirstRun ? 0.5 : 0.4,
+    stagger: 0.14,
+    delay: ransomFirstRun ? 1.5 : 0.05,
+    ease: "power4.out",
+  });
+  ransomFirstRun = false;
+}
+
 function tickClock() {
   const el = document.getElementById("clockTime");
   if (!el) return;
@@ -752,6 +831,10 @@ function applyI18n() {
   document.querySelectorAll(".story-index").forEach((el, i) => {
     el.textContent = num("0" + (i + 1));
   });
+
+  /* must run after the [data-i18n] loop above — that loop rewrites the
+     headline's textContent and destroys the chips every time */
+  initRansom();
 
   svcSlider.render();
   renderLibrary();

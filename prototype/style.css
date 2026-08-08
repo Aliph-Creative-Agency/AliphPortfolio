@@ -549,6 +549,38 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   margin: -0.26em -0.06em -0.16em;
 }
 .hero-title .line { display: block; }
+
+/* ── the ransom-note letter ──────────────────────────────────────
+   A letter cut out of another paper and pasted into the headline: ink chip,
+   cream type. The two colours the system already has — no third tone, and
+   no terracotta, which is reserved.
+   ⚠️ `.line-mask` above clips (`overflow: hidden`) with only 0.06em of
+   horizontal padding, so the chip has to stay small and the tilt shallow.
+   Both target letters sit mid-line rather than at an edge, which is what
+   makes a few degrees safe here.
+   ⚠️ `line-height: 1` is load-bearing — without it the inline-block's
+   padding grows the line box and pushes the two headline lines apart. */
+.ransom {
+  display: inline-block;
+  margin-inline: 0.03em;
+  /* Latin default: the only target is the lowercase "a" in "start", so the
+     box hugs the x-height band. A full 1em line-height here makes a domino
+     standing over its own word. */
+  padding: 0.06em 0.1em 0.04em;
+  line-height: 0.8;
+  background: var(--ink);
+  color: var(--cream);
+  /* the shadow a pasted scrap casts on the page under it */
+  box-shadow: 0.02em 0.03em 0 rgba(15, 24, 32, 0.28);
+}
+/* ⚠️ Arabic needs a taller box, and the reason is not cosmetic: Idris Sharp
+   puts the أ's hamza ABOVE the em box, so at Latin padding the hamza renders
+   in cream ON the cream panel and disappears — leaving what looks like a
+   bare ا. The whole effect is the أ, so the ink has to cover the ascender. */
+html[lang="ar"] .ransom {
+  padding: 0.24em 0.11em 0.01em;
+  line-height: 1;
+}
 .hero-rule {
   height: 3px;
   background: var(--ink);
