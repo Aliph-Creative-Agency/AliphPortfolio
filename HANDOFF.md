@@ -1,6 +1,6 @@
 # Aliph Portfolio — Session Handoff
 
-_Last updated: 2026-08-06 (session 8). Read this first when starting a new session._
+_Last updated: 2026-08-08 (session 8). Read this first when starting a new session._
 
 > **Standing rule from the user: update this file at the end of every session.**
 > Not only when asked — it is part of finishing the work.
@@ -264,6 +264,74 @@ the pill is over ink and the burger is not). ⚠️ `body.nav-open` hides the
 masthead copy, or the fixed pill floats above the overlay and you see two.
 `syncMenuBtn()` now drives both through a shared `overDark(el)` helper.
 
+### The hero's أ is a ransom-note clipping now (merged from `visual/ransom-hero`)
+
+The أ of **نبدأ** and **تبدأ**, and the Latin **A** of "st**a**rt", are replaced
+by the studio's own photographed paper scraps, and they keep re-cutting
+themselves. ⚠️ **Only those two verbs** — الأشياء and ألِف were ruled out by the
+user; don't add them back.
+
+**The word is split three ways, `[before][letter][after]`** — the user's idea,
+and better than the per-character split I proposed: less markup, the headline
+stays readable text, and it doesn't fight `.line-mask`'s padding.
+
+⚠️ **ARABIC SHAPING is the hazard here.** Pulling a letter into its own element
+can force its neighbours into isolated forms and visibly break the word. It is
+safe in these two for a specific reason, not luck: the letter before the أ is
+**د**, which never joins forward, so that أ already rendered isolated —
+measured, whole 90.25px vs split 90.27px. `splitSafe()` in `main.js` enforces
+the rule rather than trusting it, so a future copy change that puts the أ after
+a joining letter (ب ت ن س ع …) leaves that word **whole** instead of shattered.
+⚠️ It exempts Latin, which has no joining at all — the Arabic rule was silently
+rejecting "start" until that was added.
+
+**The art:** `resources/ransom {arb,eng}.png`, 16 torn scraps per language on a
+pure-black backdrop, cut by `resources/cut_ransom.py` to
+`prototype/assets/img/ransom/{ar,en}-NN.webp` (320px tall, ~16 KB each).
+
+⚠️ **The extraction trap:** a plain luminance key erases half the set. Several
+scraps are **black paper with a light letter**, so their interior sits within a
+few levels of the backdrop — keying on brightness deletes them or punches holes
+through the ones it keeps. What separates them is that the backdrop is exactly
+`0` and paper never is. So: very low threshold, then close the holes by filling
+each row *and* each column between its outermost paper pixels and keeping only
+what both agree on. The torn silhouette survives because the outermost pixel in
+a row **is** the tear.
+
+**The cycle** (`ransomCycle` in `main.js`): each chip swaps scrap and angle
+every **0.65–1.5s**. Hard cuts, not tweens — paper doesn't ease from one piece
+into another, and a cross-fade reads as a slideshow.
+- ⚠️ **Each chip needs its own randomised timer.** Sharing one made both letters
+  flip in lockstep, which instantly reads as a mechanism. Verified: 0
+  simultaneous swaps across a 20s window.
+- ⚠️ **Every scrap in a ring is preloaded when the chip is built.** A swap that
+  has to fetch shows a hole where the letter was — the one frame of this that
+  looks broken rather than deliberate. Verified 0 blank frames.
+- Rings are **5 of the 16**, sliced differently per load: a visit pulls ~10
+  files, not 32, and still varies between visits.
+- Paused when the hero leaves the viewport, same rule as the loops. Static
+  under `prefers-reduced-motion`.
+- The letter stays in the DOM as a visually-hidden span, so the headline still
+  reads correctly to a screen reader and copy-pastes as نبدأ. A 404 falls back
+  to showing the real letter.
+
+⚠️ **These scraps break the palette.** The set includes red, purple, brown and
+blue-ruled paper; the system is ink + cream only with terracotta reserved. All
+16 are in use deliberately — a ransom note that matches isn't one, and the
+standing rule is to use the studio's art as given. **Raised with the user and
+not yet settled.** Restricting it is a one-line change: shorten the ring pool
+in `main.js`.
+
+### The film's cast shadow is OFF (2026-08-08)
+
+`.film-scroll::before` used to paint `film-shadow.webp` under the film and above
+the hero's cream, so it read only through the sprocket holes. Removed on
+request. ⚠️ **It did more than halo the holes — it darkened the whole base.**
+Without it the strip reads slate-grey and crisper instead of near-black and
+deep. `film-shadow.webp` / `-m` stay on disk and are still re-cut by
+`recut_film.py`; the CSS comment says exactly how to restore the rule. Verified
+0 requests for either file at both viewports.
+
 ### Open, and waiting on the user (2026-08-06)
 
 1. **The services are changing to three** — graphic design (logos, printables,
@@ -276,11 +344,10 @@ masthead copy, or the fixed pill floats above the overlay and you see two.
    spines, the about sections **and `chat-worker/src/services.js`**. It also
    touches the film strip, which is **4 frames per group** matched to the tile;
    the plan is to keep 4 and give photography two, not to re-cut the tile again.
-2. **Animated ransom-note أ** in the hero headline (نبدأ / تبدأ, and the Latin
-   "a"). Not started. Two known obstacles: it needs per-character spans, which
-   fights the `.line-mask` padding fix that stops Arabic tops being clipped;
-   and it must survive `applyI18n`, which rewrites that text on every language
-   switch.
+2. ✅ **Animated ransom-note أ — DONE 2026-08-08**, merged from
+   `visual/ransom-hero`. See the section above.
+3. **Whether the coloured scraps stay** (red / purple / brown / blue-ruled)
+   against the ink-and-cream rule. Raised, not answered.
 
 ## Session 7 (2026-08-05) — chatbot stage 2: the Worker + guardrails
 
