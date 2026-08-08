@@ -210,6 +210,78 @@ one folder per project named `YYYY-MM — name` with `cover` + numbered extras
 (+ a `screens/` subfolder for sites), one sheet row per project, ≥3 projects
 per service, ~15 loose studio shots, originals not exports, colour not B&W.
 
+### Third pass, same day — the film tile, the contacts, the language pill
+
+**🔴 "The loop isn't perfect" was the TILE, not the tween.** Worth reading
+before anyone touches `filmLoop` again — that module has now been suspected
+twice and been innocent twice.
+
+The tween is exact: `--pitch` equals the group width to the pixel at every
+viewport, constant 34 px/s, no discontinuity. What was wrong is the art.
+Measured on **both** perforation rows of `film.webp`:
+
+| | inside the tile | across the seam |
+|---|---|---|
+| sprocket gap | 127.9 px | **69.5 px** |
+
+Every repeat crowded two perforations almost on top of each other — one visible
+rhythm break per period. The old crop ("22 perforation pitches", by eye) simply
+did not land on a whole pitch.
+
+`resources/recut_film.py` re-cuts it. Two things in there are load-bearing:
+
+- ⚠️ **It crops from the RIGHT only, x0 stays 0.** The film's frame windows are
+  baked into the art and the DOM frames are laid out from the group's left
+  edge, so trimming the left slides every frame off its window by the amount
+  trimmed.
+- ⚠️ **It SEARCHES for the width instead of deriving it.** I derived it by hand
+  first, assuming the tile's final gaps matched the mean — they are 95.5px, so
+  the computed width still left the seam 30% tight. The search scores every
+  candidate against both rows and rejects any that would slice a hole.
+
+**5697 → 5512px. Seam now within 9.7% of the tile's own mean gap**, which is
+inside the art's natural jitter (119–140px), so it reads as just another gap.
+That is the ceiling for this asset — the jitter is why session 6 concluded the
+art is generated, not scanned.
+
+⚠️ **Re-cropping the tile changes its aspect, so the frame-slot constant in
+`style.css` must be retuned to `tileAspect / 4`.** Now `0.839732` (was
+`0.8679`). The script prints the value. Verified after: pitch == group width
+exactly and the scan renders at 0.9999 stretch, both viewports.
+
+**Phone and WhatsApp are now DIFFERENT numbers** (studio-confirmed
+2026-08-06). Display `052-874-5090` for the phone on all three pages;
+WhatsApp is `+972594097725`. The chat widget grew its own `whatsappLabel` —
+⚠️ anything still reusing `phoneLabel` for the WhatsApp row is now a bug.
+The `tel:`/`wa.me` targets stay E.164; only the label is the local form.
+
+**The language pill is `position: fixed`**, not absolute, so it rides down the
+page with the burger instead of scrolling away with the masthead; `top` centres
+it on the burger's centre line. It takes the same `.on-dark` inversion.
+⚠️ **Sampled separately from the burger** — they are at opposite corners and
+are regularly over different sections at once (verified at 30% scroll, where
+the pill is over ink and the burger is not). ⚠️ `body.nav-open` hides the
+masthead copy, or the fixed pill floats above the overlay and you see two.
+`syncMenuBtn()` now drives both through a shared `overDark(el)` helper.
+
+### Open, and waiting on the user (2026-08-06)
+
+1. **The services are changing to three** — graphic design (logos, printables,
+   posters), photography (reels, horizontal video, stills), technical solutions
+   (portfolios, landing sites, apps). **Not started; the naming is not settled.**
+   Raised with the user: "Photography" undersells 13 videos where Arabic تصوير
+   would cover both, and the three are mixed nouns (two crafts + one outcome).
+   ⚠️ This is not a rename. The ids are the join key across `CATS`,
+   `PROJECTS[].cat`, `SERVICE_FRAMES`, `SERVICES`, `data-service`, the archive
+   spines, the about sections **and `chat-worker/src/services.js`**. It also
+   touches the film strip, which is **4 frames per group** matched to the tile;
+   the plan is to keep 4 and give photography two, not to re-cut the tile again.
+2. **Animated ransom-note أ** in the hero headline (نبدأ / تبدأ, and the Latin
+   "a"). Not started. Two known obstacles: it needs per-character spans, which
+   fights the `.line-mask` padding fix that stops Arabic tops being clipped;
+   and it must survive `applyI18n`, which rewrites that text on every language
+   switch.
+
 ## Session 7 (2026-08-05) — chatbot stage 2: the Worker + guardrails
 
 `chat-worker/` at the repo root is new and is **the whole session**. Nothing
