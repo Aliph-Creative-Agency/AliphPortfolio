@@ -182,9 +182,16 @@ const I18N = {
   /* Block 2 is ONE body of copy that wraps around the two floated
      pictures — not three columns sitting beside them. Merged from the
      old w2ParaA/A2/A3/B/C/C2/C3 on 2026-08-09 at the user's request. */
-  w2Body: {
-    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها، وعملنا هو العثور عليها أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها. لا نبدأ من الشكل، بل ننتهي إليه: الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا جميلًا ولا يخصّ أحدًا. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في الغرفة؟ ثم يثبّت النظام نفسه — لونٌ يمسك البنية، وخطٌّ يحمل الصوت، ودفترٌ يشرح ما يُفعل وما لا يُفعل، حتّى يكمل من يأتي بعدنا دون أن يسأل.",
-    en: "Every brand has an origin point it is built from and returns to, and our work is to find it first — in the name, the story, or the place — then draw the whole system from it. We don't start at the form; we arrive at it: a mark drawn in the first week is usually handsome and belongs to nobody. And because the point is never handed to you in a meeting, we begin with the boring questions: who buys, when, and what gets said about you when you are not in the room. Then the system settles — a colour that holds the structure, a typeface that carries the voice, and a book explaining what to do and what not to, so whoever comes after us can carry on without asking.",
+  /* Block 2 reads as one body, but it is two paragraphs so the second
+     picture can be anchored between them — a float only wraps text that
+     comes after it in the flow. */
+  w2BodyA: {
+    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها، وعملنا هو العثور عليها أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها. لا نبدأ من الشكل، بل ننتهي إليه: الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا جميلًا ولا يخصّ أحدًا. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في الغرفة؟",
+    en: "Every brand has an origin point it is built from and returns to, and our work is to find it first — in the name, the story, or the place — then draw the whole system from it. We don't start at the form; we arrive at it: a mark drawn in the first week is usually handsome and belongs to nobody. And because the point is never handed to you in a meeting, we begin with the boring questions: who buys, when, and what gets said about you when you are not in the room.",
+  },
+  w2BodyB: {
+    ar: "ثم يثبّت النظام نفسه — لونٌ يمسك البنية، وخطٌّ يحمل الصوت، ودفترٌ يشرح ما يُفعل وما لا يُفعل، حتّى يكمل من يأتي بعدنا دون أن يسأل.",
+    en: "Then the system settles — a colour that holds the structure, a typeface that carries the voice, and a book explaining what to do and what not to, so whoever comes after us can carry on without asking.",
   },
   w2Rail: {
     ar: "الملصق يُقرأ من عشرة أمتار ثم من نصف متر: شيء واحد من بعيد، وتفصيلٌ يكافئ من اقترب.",

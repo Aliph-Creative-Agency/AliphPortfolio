@@ -957,12 +957,19 @@ html[lang="en"] .why { --why-type: 0.85; }
   display: block;
   clear: both;
 }
+/* ⚠️ NO bottom margin. A float excludes text with its MARGIN box, so a
+   bottom margin here pushes the exclusion below the picture — and any line
+   box that so much as clips it gets squeezed to the narrow side. Measured
+   with a 28px margin: the line starting at y=406 overlapped the margin box
+   by 10px and came out 35% wide, wrapping instead of running across. With no
+   bottom margin the first line under the picture runs the full column, and
+   the line's own leading is the gap. */
 .wb2-m1 {
   float: inline-end;
   width: 54.3%;
   aspect-ratio: 1 / 1;
   margin-inline-start: var(--why-gap);
-  margin-block-end: var(--why-gap);
+  margin-block-end: 0;
 }
 /* ⚠️ NO top margin, and that is the whole point. A float excludes text with
    its MARGIN box, not its border box — so a top margin here is a band of
