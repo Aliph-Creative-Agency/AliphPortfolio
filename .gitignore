@@ -12,6 +12,10 @@ old prototype/
 # of the fonts, logos and the linen texture.
 Brand/
 
+# Python bytecode from the resources/ build scripts
+__pycache__/
+*.pyc
+
 # OS / editor cruft
 Thumbs.db
 desktop.ini

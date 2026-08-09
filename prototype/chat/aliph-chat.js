@@ -80,13 +80,22 @@
 
   /* the rim arc needs a document-unique id — the widget can land on a page
      that already has SVG defs of its own */
-  const ARC_ID = "ac-rim-arc-" + Math.random().toString(36).slice(2, 8);
   const ICONS = {
     /* the studio stamp — the mark inside its own ring of type */
     seal: new URL("../assets/img/HalfAliph-Stamp-cream.svg", HERE).href,
     /* the bare mark, used small in the panel header */
     mark: new URL("../assets/img/Aliph-Icon-cream.svg", HERE).href,
+    /* the launcher's two layers, in both inks — see the dark-section note */
+    ring: new URL("../assets/img/assistant-ring.png", HERE).href,
+    ringCream: new URL("../assets/img/assistant-ring-cream.png", HERE).href,
+    markInk: new URL("../assets/img/assistant-mark.png", HERE).href,
+    markCream: new URL("../assets/img/assistant-mark-cream.png", HERE).href,
   };
+
+  /* what counts as "dark underneath" — the same surfaces main.js inverts the
+     burger over. Kept as a literal list because the widget is a separate
+     deployable and must not import from the page's script. */
+  const DARK_UNDER = ".filmstrip,.banner,.footer,.sw-stage,.svc-pick.is-active";
 
   /* ── language: follow the site, don't own it ──────────────────────
      main.js writes <html lang> on every switch. Observing that attribute
@@ -113,27 +122,19 @@
     root.dir = lang === "ar" ? "rtl" : "ltr";
     root.style.setProperty("--ac-origin", lang === "ar" ? "left" : "right");
 
-    /* An ink disc carrying the studio stamp, with the assistant label
-       struck around it — the stamp keeps its own ring of type, this adds
-       an outer one saying what the button is. The disc is what lets it sit
-       over cream hero, dark story panels and ink footer alike; the widget
-       floats over every section, so it can never rely on the page behind. */
+    /* Two layers and no disc: the ring of type turns, the double-alif mark
+       inside it stays still.
+       ⚠️ The mark is bilingual and baked into the artwork, so the ring no
+       longer switches with the language. That is the trade for using the
+       studio's own art rather than an SVG textPath.
+       ⚠️ Without a disc there is nothing separating the mark from the page,
+       so syncLauncherInk() below swaps both layers to cream over dark
+       sections. Remove that and the button vanishes on the footer. */
     launcher = el("button", "ac-launcher");
     launcher.type = "button";
-    launcher.innerHTML = `
-      <svg class="ac-rim" viewBox="0 0 100 100" aria-hidden="true">
-        <defs>
-          <!-- Glyphs sit ABOVE their baseline, so this arc is where the type
-               stands, not where its top edge lands: at r=41 with a 7.5-unit
-               face the ascenders reach ~47, just inside the disc edge at 50,
-               and the stamp below tops out at r=29. -->
-          <path id="${ARC_ID}" fill="none" d="M 9,50 A 41,41 0 0 1 91,50"/>
-        </defs>
-        <text class="ac-rim-text">
-          <textPath href="#${ARC_ID}" startOffset="50%" text-anchor="middle"></textPath>
-        </text>
-      </svg>
-      <img class="ac-seal" src="${ICONS.seal}" alt="">`;
+    launcher.innerHTML =
+      `<img class="ac-ring" src="${ICONS.ring}" alt="">` +
+      `<img class="ac-mark" src="${ICONS.markInk}" alt="">`;
     launcher.setAttribute("aria-expanded", "false");
 
     panel = el("div", "ac-panel");
@@ -165,7 +166,20 @@
     footEl = panel.querySelector(".ac-foot");
 
     root.append(launcher, panel);
+    addEventListener("scroll", queueInkSync, { passive: true });
+    addEventListener("resize", queueInkSync);
     document.body.appendChild(root);
+
+    /* ⚠️ AFTER the append, not before. Off the document the launcher measures
+       0x0, so syncLauncherInk() hit its own `if (!b.width) return` guard and
+       the first paint was never sampled — on the home page that left an ink
+       ring sitting on the ink film strip until the first scroll corrected it.
+       Re-sampled on fonts.ready too, because the hero's height (and so what
+       is under the launcher) moves when 5MB of Idris lands. */
+    syncLauncherInk();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(queueInkSync);
+    }
 
     launcher.addEventListener("click", show);
     panel.querySelector(".ac-close").addEventListener("click", hide);
@@ -229,7 +243,6 @@
   }
 
   function paint() {
-    launcher.querySelector("textPath").textContent = t("rim");
     panel.querySelector(".ac-title").textContent = t("title");
     panel.querySelector(".ac-sub").textContent = t("sub");
     panel.querySelector(".ac-close").setAttribute("aria-label", t("close"));
@@ -239,6 +252,29 @@
   }
 
   /* ── open / close ───────────────────────────────────────────────── */
+  /* Sample what is behind the launcher and flip both layers if it is dark.
+     rAF-throttled: elementsFromPoint forces a synchronous layout flush, and
+     this runs on every scroll frame otherwise. */
+  let inkQueued = false, overDark = false;
+  function syncLauncherInk() {
+    inkQueued = false;
+    if (!launcher) return;
+    const b = launcher.getBoundingClientRect();
+    if (!b.width) return;
+    const stack = document.elementsFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    const dark = stack.some((n) => n !== launcher && !launcher.contains(n) && n.closest && n.closest(DARK_UNDER));
+    if (dark === overDark) return;
+    overDark = dark;
+    launcher.classList.toggle("is-dark", dark);
+    launcher.querySelector(".ac-ring").src = dark ? ICONS.ringCream : ICONS.ring;
+    launcher.querySelector(".ac-mark").src = dark ? ICONS.markCream : ICONS.markInk;
+  }
+  function queueInkSync() {
+    if (inkQueued) return;
+    inkQueued = true;
+    requestAnimationFrame(syncLauncherInk);
+  }
+
   function show() {
     open = true;
     lastFocus = document.activeElement;

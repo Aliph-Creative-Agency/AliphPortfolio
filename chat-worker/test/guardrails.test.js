@@ -115,16 +115,16 @@ test("post-filter allows describing a service, which is not a feasibility read",
   /* Job #1 in plan §9 is answering questions about the four services.
      A filter that eats this has eaten the product. */
   const fine = [
-    "That falls under هويّات بصريّة. Would you like the team to get in touch?",
+    "That falls under تصميم. Would you like the team to get in touch?",
     "I can put you in touch with the team — shall I?",
-    "هذه تقع تحت تسويق ومحتوى إبداعي. تحبّون أن يتواصل معكم الفريق؟",
-    "نعمل في الهويّات البصريّة وتنظيم الفعاليّات.",
+    "هذه تقع تحت تصوير. تحبّون أن يتواصل معكم الفريق؟",
+    "نعمل في التصميم والتصوير.",
   ];
   for (const s of fine) assert.equal(postFilter(s).ok, true, s);
 });
 
 test("post-filter rejects a price the model produced itself", () => {
-  assert.equal(postFilter("Identities usually start around 3000 ILS.").ok, false);
+  assert.equal(postFilter("Design usually starts around 3000 ILS.").ok, false);
   assert.equal(postFilter("تبدأ من ٢٠٠٠ شيكل").ok, false);
 });
 
@@ -158,7 +158,7 @@ test("a second clarifying question is forbidden before classification", () => {
 test("questions after classification are not clarifiers — the bot still has to ask for a name", () => {
   const msgs = [
     { role: "user", content: "we need a logo" },
-    { role: "assistant", content: "That falls under هويّات بصريّة. Would you like the team to get in touch?" },
+    { role: "assistant", content: "That falls under تصميم. Would you like the team to get in touch?" },
     { role: "user", content: "yes" },
   ];
   const st = conversationState(msgs);

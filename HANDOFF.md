@@ -1,9 +1,527 @@
 # Aliph Portfolio — Session Handoff
 
-_Last updated: 2026-08-08 (session 8). Read this first when starting a new session._
+_Last updated: 2026-08-09 (session 10). Read this first when starting a new session._
 
 > **Standing rule from the user: update this file at the end of every session.**
 > Not only when asked — it is part of finishing the work.
+
+## Session 10 (2026-08-09) — five reported bugs, and three more found underneath
+
+The user reported five things off one screenshot set. All five are fixed; three
+further bugs surfaced while fixing them. Everything below is verified across
+**3 pages × 2 viewports × 2 languages — 0 JS errors, 0 broken images, 0
+horizontal overflow, 0 overlaps, 0 empty i18n nodes.**
+
+### 🔴 The launcher's mark was a solid rectangle — a black-on-black composite
+
+`double-aliph.png` is **RGBA whose transparent region is black**. `lift()` in
+`build_assistant.py` did `.convert("RGB")`, which composites onto black, so the
+entire frame keyed as ink and emitted a filled slab (1.8 KB).
+
+**Composite onto WHITE and multiply by the source alpha.** Both fixes are one
+line each and the mark came back at 16 KB. ⚠️ Any future art dropped into
+`resources/` may carry the same shape — never `.convert("RGB")` a PNG that
+might have alpha.
+
+⚠️ **It was also less than half scale.** Measured against the studio's own
+composite (`resources/assistant.png`), the mark is **64.8% of the ring's
+height**; the CSS gave it a 28% box. Because the glyph runs the full height of
+its square PNG, that percentage *is* the rendered height. Now 65% / inset
+17.5%.
+
+⚠️ **`syncLauncherInk()` ran BEFORE the launcher was in the DOM.** Off the
+document it measures 0×0 and hits its own `if (!b.width) return`, so the first
+paint was never sampled — an ink ring sat on the ink film strip until the first
+scroll. Moved after `appendChild`, plus a re-sample on `fonts.ready`.
+
+### 🔴 Two dangling selectors in `aliph-chat.css`, left from the SVG launcher
+
+```css
+.aliph-chat[dir="ltr"]        /* ← no block; the comment under it is stripped */
+/* comment */
+.ac-ring, .ac-mark { … }
+```
+
+parses as `.aliph-chat[dir="ltr"] .ac-ring, .ac-mark { … }` — so the **ring only
+got its absolute positioning in English**. The second instance was worse:
+`.aliph-chat[dir="ltr"] .aliph-chat.is-open` can never match, so **the
+full-screen chat panel on phones never applied at all.** Both removed.
+
+⚠️ I also nearly shipped a third of these by leaving orphaned comment text
+after a closed `*/`. There is now a cheap check worth re-running after any CSS
+edit — it catches all of them:
+
+```bash
+python -c "import io,re;s=io.open('prototype/style.css',encoding='utf-8').read();t=re.sub(r'/\*.*?\*/','',s,flags=re.S);print(t.count('{'),t.count('}'),s.count('/*'),s.count('*/'))"
+```
+
+Braces and comment markers must balance, and the browser's parsed rule count
+(`document.styleSheets[i].cssRules`) must equal the source brace count — 411
+for `style.css`, 69 for `aliph-chat.css` today.
+
+### 🔴 The film strip stopped because a killed tween is still truthy
+
+Hovering a `.svc-pick` called `filmLoop.focus()`, which did `tween.kill()`
+**without nulling the handle**. `blur()` → `run()` then early-returned because
+the hero was off screen. Scrolling back ran `setVisible(true)`, which saw
+`tween` as truthy and called `.resume()` — and **`resume()` does not revive a
+killed tween** (verified in the page: `isActive` stays `false`). The strip was
+dead for the rest of the visit.
+
+Every kill now goes through `stop()`, which nulls the handle. **The session-9
+note that this hover binding "costs nothing" was wrong** — it cost the whole
+loop, and the binding is now removed: the strip is three screens above the
+picks and the glide drove nothing anyone could see. `filmLoop.focus()` remains
+for whenever something near the hero wants it.
+
+⚠️ That module has now been suspected four times and been innocent three. The
+cause has been, in order: a yoyo timeline, `resize` on the address bar, the art
+itself, and now a dangling tween handle. **Check the callers first.**
+
+### 🔴 The tile seam sliced the edge print — and I nearly destroyed the alpha
+
+`recut_film.py` picked the tile width by scoring **perforations only**. 5512px
+cuts the rebate mid-wordmark, so the tile ended `KODAK 4` + a 31px sliver and
+repeated straight into its own `KODAK 400TK` — two wordmarks ~70px apart where
+the film's own spacing is ~2760px.
+
+Re-cutting narrower does **not** work: the width that lands the print cleanly
+(~4863) puts the perforation seam **23.7%** off the mean hole gap, against
+9.7% today, and narrows every frame by 12%. `resources/fix_rebate_seam.py`
+keeps the geometry and clears the sliced print instead, filling from the
+film's own 578px blank run. It also levels an **8% base-tone step** across the
+seam (the faint vertical line in the user's screenshot) with a gain eased over
+900px. Result: print gap 1222px, tone step +3.22 → −0.16, perforation seam
+unchanged at −9.7%, aspect unchanged so **the frame-slot constant stays
+0.839732**.
+
+⚠️⚠️ **`film.webp` is RGBA and the alpha is LOAD-BEARING** — 8.1% of the tile
+is transparent (the sprocket holes and the outer edge) and the page's linen
+shows through it. My first pass did `.convert("RGB")` and flattened every hole
+to opaque grey. **The tell is the file size: 810 KB → 145 KB.** If a film file
+ever lands near 145 KB, the alpha is gone. Check with:
+
+```bash
+python -c "from PIL import Image;im=Image.open('prototype/assets/img/film.webp');print(im.mode,im.size)"
+```
+
+It must say `RGBA`. Same for `film-m.webp`.
+
+### ماذا نفعل؟ — measured, not eyeballed
+
+The user: *"completely messed up distribution wise, a lot of spaces, too big
+elements… the services titles should all be centered, and make the dots
+between them bigger."* All measured before and after:
+
+| | was | now |
+|---|---|---|
+| section height | 826px | **591px** |
+| "كل الأعمال" oval | 482 × 219px | **269 × 103px** |
+| void, description → button | 165px | **74px** |
+| pick / dot type | 97.3 / 33.3px | **74.2 / 39.7px** |
+
+The oval was `width: 100%; aspect-ratio: 2.2` — bigger than the headline above
+it. The stage was 58.5% at 5:4 (the wireframe's numbers), which put a 714×571
+picture beside ~200px of copy; it is now `1fr 1fr` at 16:10. `justify-content`
+went `space-between` → **center**, which is what the user meant by centred: the
+dots now sit between the words instead of marooned in 300px of cream.
+
+⚠️ **This overrides the session-9 wireframe measurements for this section.**
+The implementation matched the wireframe and the user rejected the result.
+
+### The phone view — four separate faults
+
+1. 🔴 **`.wb2` stacked its two columns on top of each other** — 342×440px of
+   overlap. The desktop rules pin both children to `grid-row: 1`, and the
+   mobile query reset only `grid-column`. ⚠️ `order` cannot rescue this:
+   **order is ignored for explicitly-placed grid items.** Now resets
+   `grid-row: auto` too.
+2. 🔴 **The open menu's footer was 608px wide inside a 390px overlay**, which
+   put the language pill fully off-screen (`left: -127px`) — you could not
+   switch language from the menu on a phone — and clipped the last social.
+   `.nav-foot` now stacks and `.nav-socials` wraps.
+3. **The service picks wrapped**, stranding تصميم alone on a line. ⚠️ The
+   cause is that **a `clamp()` FLOOR wins on a phone, not its vw term**:
+   `clamp(1.7rem, 5.8vw, 5rem)` is 40.8px at 390px because 1.7rem is 40.8px at
+   this 150% root. Only the floor is lowered in the mobile rule — ⚠️ keep the
+   **same vw term**, because a steeper one made the names *bigger* at 900px
+   than at 1000px.
+4. The switcher's button is centred when stacked, which also keeps it clear of
+   the corner launcher.
+
+⚠️ **English still wraps to two lines below 900px and that is correct** —
+"Film & Photography" cannot set beside two more names at headline scale on a
+phone. Arabic holds one line at every width.
+
+### Also done
+
+- **The rule under the hero headline is gone** on the user's instruction —
+  markup, CSS and its `gsap.from` reveal. The hairline above `.hero-meta` is a
+  different element and was left.
+
+### Still open — unchanged from session 9
+
+The لماذا ألِف؟ copy is still mine and still **must not ship** (it invents
+studio history); channel management still has no home in the three-service
+taxonomy; the stamp still names the old four services; the coloured
+ransom-scrap question is still unanswered; the media holders are still
+`HOLDER`; the fonts are still 5.2 MB and still blocked on the 29LT licence.
+**Chatbot stage 3 is still the next real piece of work** — see session 9.
+
+⚠️ `prototype/index.html`'s static `heroMeta3` still reads
+*"هويّات · تسويق · فعاليّات · تقنيّة"* — the pre-2026-08 four. `I18N` overwrites
+it with the three on load, so nothing is visibly wrong, but it is stale
+markup and would show if JS ever failed.
+
+## Session 9 (2026-08-08) — three services, and the home page remodelled
+
+The user supplied a hand-drawn wireframe (`Untitled.png` on their desktop) and
+was explicit: **"stick with the layout i gave u, its the most important part of
+this editing session."** Hero and footer unchanged; everything between them was
+rebuilt. Reference is still the Miranda broadsheet.
+
+### 🔴 The wireframe is drawn as the ARABIC/RTL rendering
+
+Read this before touching either section. The drawing is labelled in English,
+which makes it look LTR — it isn't. Proof: it puts the example stage on the
+left and its description on the right, which is exactly what the *old* slider
+already did under RTL (`.sl-text` is DOM-first, so it lands right).
+
+**So: whatever is first in the DOM appears on the RIGHT.** Anything the drawing
+places on the left has to be DOM-*last*. I got `why-outro` and `svc-demo`
+backwards on the first pass and had to flip both. Verified by measuring the
+distance from each element to the viewport edges, not by eye — every
+composition now matches the drawing on the correct side, and mirrors in EN.
+
+### The new order — the marquee is GONE
+
+`hero → لماذا ألِف؟ → ماذا نفعل؟ → footer`. The two middle sections swapped, so
+the work now shows up in the first screens. **The marquee was dropped on the
+user's instruction** — markup, CSS, `MQ_ITEMS`, `buildMarqueeSource`, `MQ_SPEED`
+and `mqTween` are all deleted. `makeLoop` stays: the contact band still uses it.
+
+⚠️ **The services↔film-strip hover sync is now invisible.** It was the marquee's
+job, and "ماذا نفعل؟" is three screens below the strip. The code is still there
+on `.svc-pick` (harmless, and the hero is unchanged) but nobody will see it fire.
+
+### 🔴 Nothing in the two new sections is animated — on purpose
+
+The user: *"we're not animating anything in the new modeled sections for now."*
+So the scatter-parallax module, the four sticky story panels, the slider's ink
+wipe and the services-cell reveal are all **deleted**, not disabled. The banners
+above the sections still rise (page furniture, not section content).
+
+⚠️ **The banner reveal looks broken in headless and isn't.** `gsap.from(...)`
+with a ScrollTrigger leaves `opacity: 0` until the trigger fires, and it never
+fires if you (a) screenshot full-page, or (b) read it through the Browser pane
+while the pane isn't displayed — a non-compositing tab doesn't run rAF, so the
+tween sits at progress 0 forever. I chased this as a bug. **Scroll the page with
+real wheel events first**, then read: it's `1`.
+
+### The three services — تصميم · تصوير · برمجة
+
+| id | Arabic | English | was |
+|---|---|---|---|
+| `design` | تصميم | Design | `identity`, plus the printed/posted half of `creative` |
+| `photo` | تصوير | Film & Photography | the shooting half of `creative`, plus `events` |
+| `tech` | برمجة | Engineering | `tech` (id kept — cheapest possible churn) |
+
+The user picked these names. **`tech` deliberately keeps its id** so the four
+profile sheets, `PROJECTS[].profile` and the chat worker didn't all move.
+
+All **23 projects were recategorised by primary deliverable, not by old service
+name** (`resources`-free script in the session scratchpad): a signage-and-print
+event is design work; a campaign whose deliverable is the footage is photo work.
+Lands 10 design / 9 photo / 4 tech. `events` is gone as a service — event work
+is now classified by what was actually delivered.
+
+**Subcategories are new and are what the switcher steps through** — `SUBCATS` in
+`main.js`, 3 per service (شعارات · مطبوعات · ملصقات / ريلز · فيديو أفقي · صور
+ثابتة / بورتفوليو · صفحات هبوط · تطبيقات). Each carries its own `desc`, which is
+the wireframe's "description of category and subcategory".
+
+⚠️ **The film strip is still 4 frames** — it's matched to the film tile, whose
+width is one group. Photography takes two of the four slots.
+`SERVICE_FRAMES = { design: 0, photo: 1, tech: 3 }`.
+
+⚠️ **`chat-worker/src/services.js` was rewritten to match** and **67/67 tests
+pass**. Three test expectations encoded the old taxonomy and were updated.
+**But dropping `creative` removed the only service that covered *running* an
+account** — the three new ones describe what gets made, not who posts it. Social
+keywords (انستغرام / سوشيال / instagram / posts) are parked on `photo` with a
+comment. **Ask the studio whether they still take channel management** — if they
+do, it has no name anywhere on the site now.
+
+### The media holders — `setHolder()` in `main.js`
+
+One component per slot, and **it can become a `<video>`, not just an `<img>`**.
+The Drive has 4 horizontal videos (55–384 MB) and 9 reels, and the wireframe
+asks for both by name.
+
+⚠️ Videos are `preload="none"`, poster-first, `muted/loop/playsinline`, and
+**only play while on screen** (`playWhenVisible`). Four autoplaying videos would
+undo every phone fix from session 8 by themselves. `data-kind` on each holder
+records which format the real asset should be, so the Drive hand-off knows what
+belongs where.
+
+### 🔴 The layout spec is an ANNOTATED wireframe — measure it, don't eyeball it
+
+After two rejected passes the user re-saved `Untitled.png` with the slots
+colour-coded: **green = header, red = text, yellow = media, purple = splitter.**
+That file is the spec. `scratchpad/extract.py` pulls the boxes out by colour
+(flood-fill connected components) and prints every one as a percentage of the
+page column — which translates straight into grid tracks. **Do that instead of
+estimating; three of my four estimates were wrong by more than 15 points.**
+
+Measured, normalised to the section's content width:
+
+| slot | width | aspect | I had guessed |
+|---|---|---|---|
+| block 1 film | 69.2% | 3:2 | stretched to text height |
+| block 2 rail | 39.9% | 9:16 | 25% |
+| block 2 pic 1 | 54.3% of its region | 1:1 | 24% |
+| block 2 pic 2 | 56.7% of its region | 7:6 | 28% |
+| block 3 centre | **44.6%** | 4:7 | **20%** |
+| switcher stage | 58.5% | 5:4 | 58% at 3:2 |
+
+Block 3's centre cut is **the widest element in its block**, not the narrowest.
+Gutters are **0.5–1.1% horizontal** (~10px) and **4–9px vertical** — the rules
+and column edges do the separating, not whitespace.
+
+⚠️ **The titles deliberately MOVE between blocks**: block 1's sits in the narrow
+right column, block 2's spans the left region, block 3's runs full width **and
+is centred**. The user called this out specifically — *"notice how i change the
+places of the titles, match that dont force them to one side."* Do not
+normalise them.
+
+Blocks 2 and 3 also carry **a hairline running out of the headline to the
+column edge** (block 3 gets one on both sides, since it is centred). The title
+text stays a **bare text node** — no wrapper span — because `applyI18n` writes
+`textContent` and would delete one; pseudo-elements survive that.
+
+**Spacing is one token, `--why-gap`** (`clamp(1rem, 2.2vw, 1.9rem)`): title to
+body, media to text, and the air above and below every splitter. Splitters are
+2px; every media holder carries `--media-line`, deliberately the same hairline
+as a splitter.
+
+⚠️ **Two layout ideas were tried and REVERTED on the user's instruction** —
+don't reintroduce them thinking they're improvements:
+- **block 3 as CSS multicol** (one body flowing round the centre cut), and
+- **block 2 as floats** (one body wrapping both pictures).
+
+Both were attempts at *"the text areas are supposed to be connected."* The user
+undid each. Block 2 is three rows (text|pic, wide line, pic|text) and block 3
+is a three-column grid, exactly as drawn.
+
+⚠️ **Headline sizes come from the green boxes, not from taste.** Block 3's box
+is 95.8% wide × 136 tall, which is a **single ~158px line**. Block 1's is 29%
+wide × 155 tall — two lines at ~90px in a 400px column. These are Miranda-scale
+headlines; anything smaller reads as a subhead and the user will reject it.
+
+### 🔴 Three measurement traps, all of which produced confident wrong answers
+
+1. **`align-items: stretch` + `aspect-ratio` resolves the width FROM the
+   stretched height.** Block 1's film came out **1140px wide inside a 936px
+   track** and silently walked off spec. The media must never stretch —
+   `align-self: start` on every holder. The text columns still stretch.
+2. **An `fr` track has an automatic min-content floor**, so longer copy pushes
+   a track wider than its fraction. `min-width: 0` on every grid child pins it.
+3. **You cannot measure "is this box full" with `getBoundingClientRect()`.**
+   A stretched `<p>` is always exactly as tall as its row, so every column
+   reported 100% full while block 3 was visibly **13%** inked. Use
+   `document.createRange().selectNodeContents(el).getBoundingClientRect()` —
+   the inked extent. `scratchpad/fit.py` does this and is the tool to re-run
+   after any copy change.
+
+⚠️ Also: **wait for `document.fonts.ready` before measuring.** 5 MB of OTF lands
+after first paint and the numbers move between runs until it does.
+
+### 🔴🔴 `var(--display)` DOES NOT EXIST — the tokens are `--font-display` etc.
+
+The user spotted it: *"i noticed u stopped using our fonts."* Five rules in the
+remodelled sections said `font-family: var(--display)`. The real tokens are
+**`--font-display` / `--font-body` / `--font-latin`**.
+
+⚠️ This failed **silently and plausibly**, which is why it survived a whole
+round of review. `font-family` is an *inherited* property, so an undefined
+custom property is invalid-at-computed-value-time and the element **inherits**
+— every headline quietly rendered in Idris **Flat Regular** (the body face)
+instead of Idris **Sharp ExtraBold**. It looks like a font, just the wrong one,
+and the services picks looked thin for the same reason rather than because
+they needed a weight.
+
+**This is the exact `--terra` bug from session 6.** Second time. If anything
+looks slightly off-brand, `grep -n "var(--[a-z-]*)" style.css` and check every
+token resolves before touching anything else.
+
+### The wireframe's own numbers for the buttons and the picks
+
+| element | width | ratio |
+|---|---|---|
+| about oval | 29.9% of its column | 2.6 : 1 |
+| work oval | fills its text column | 2.2 : 1 |
+| service pick | ~29% each, spread | ink height ~14% of page width |
+
+⚠️ **Three of my CSS replacements silently didn't match and I didn't assert.**
+The block-3 multicol, the button sizes and one hero rule all reported success
+and changed nothing, and I only found out by measuring. **Every scripted edit
+to this repo must `assert old in s`** — `str.replace` on a miss is a no-op that
+looks like a success.
+
+### The launcher — a ring that turns around a mark that doesn't
+
+The user supplied `resources/assistant.png` (composite), then
+`resources/text-with-background.jpg` (the ring alone). `resources/double-aliph.png`
+is the centre mark. `resources/build_assistant.py` lifts both into four
+transparent PNGs (ink + cream of each) in `assets/img/`.
+
+⚠️ **Key on INKINESS, not luminance.** Both sources are ink on white; a
+brightness threshold that clears the white halo also eats the anti-aliased
+edge of every stroke and the type goes ragged at 100px. Rebuilding alpha from
+how ink-like each pixel is removes the halo by construction.
+
+⚠️ **The ring must be trimmed to a square centred on the ring**, or it wobbles
+as it turns — CSS rotates about the box centre, not the artwork's centre.
+
+⚠️ **There is no disc any more** (the user's call), and the disc was what made
+the launcher legible over cream hero, ink banners, ink story panels and the
+ink footer alike. Two mitigations, both load-bearing: `syncLauncherInk()` swaps
+both layers to cream over anything in `DARK_UNDER`, and each layer carries a
+hairline drop-shadow in the *opposite* tone because the launcher sits **on the
+hero/section boundary at rest** and can be half on each. Remove either and the
+button disappears on some part of some page.
+
+⚠️ The ring art is bilingual and baked, so **the rim no longer switches with
+the language** — that is the trade for using the studio's own artwork instead
+of the SVG `textPath` that was there before.
+
+### Filling the boxes — per-column type, not one global size
+
+The user, three times: *"the entire box should be filled with the targeted
+text… mainly size"* and *"more text, and making it a lil bigger, also having
+multiple paragraphs helps."*
+
+A broadsheet does **not** set every column at one size. Each column has a fixed
+measure and a fixed depth (the picture beside it), so the type is tuned per
+column until the copy lands flush. Those per-column sizes live together in
+`style.css` under the `.wb-col` rule and are derived from measured ink-vs-box.
+**Retune them whenever the copy length changes** — `fit.py` prints exactly what
+to change. Current state: every column **94–105% full**, every slot within
+2.5 points of the wireframe.
+
+⚠️ They are tuned for **Arabic**, which is the primary language. English runs
+noticeably longer at the same size, so EN columns overshoot their pictures a
+little. That is the right trade, but don't "fix" the Arabic to suit English.
+
+### What the earlier compaction pass fixed (the user pushed back twice)
+
+First render was rejected: *"ur leaving a lot of empty spaces… it should be
+compact"* and *"make them bigger they're supposed to be like newspaper
+headlines."* Both were right, and the cause was **not** spacing:
+
+1. **A picture with a fixed `aspect-ratio` beside a short column sets the row
+   height, and the leftover is a cream void as tall as the picture.** The fix is
+   `align-items: stretch` + `height: 100%` on the holder so the *text* sets the
+   row and the picture crops to it. Voids went from 250–350px down to **0–13px**.
+2. **There wasn't enough copy.** A broadsheet fills its columns; four lines
+   beside a 400px photo can't. All five `why` paragraphs were lengthened.
+3. **Headlines were subheads.** They now span the full column at
+   `clamp(1.9rem, 5vw, 4.6rem)` — **72px on desktop** — above the body, not
+   beside it. The ordinals (٠١–٠٣) and eyebrows were removed: **not in the
+   wireframe**, and the user asked for them gone.
+
+Net: `.why` **2440px → 1751px**, page 5721 → 4921, with more text than before.
+
+⚠️ **Block 2 uses an explicit grid, NOT floats.** Floats were the obvious answer
+for "text wrapping a picture" and they were wrong: both figures ended up on the
+same side of one tall float, so `clear` pushed the second below every paragraph
+and opened a hole a picture tall. `.wb-flow` is now
+`grid-template-areas: "p1 m1" / "pull pull" / "m2 p2"` — the zigzag is a *placed*
+layout and the areas mirror with the language on their own.
+(`float: inline-start/end` *is* valid, unlike `transform-origin: inline-start` —
+that isn't, see the session-6 note. Floats were dropped for layout reasons.)
+
+⚠️ **The lead block's grid is on `.wb-lead .wb-body`, not `.wb-lead`** — the
+headline was lifted into its own full-width `.wb-head`. The mobile rule still
+targeted `.wb-lead` and silently left block 1 **two columns on a phone**: a
+180px text gutter beside a 130px sliver of picture. Caught only by screenshotting
+the phone viewport. If a block won't collapse, check which element owns the grid.
+
+### The hero is UNCHANGED except for one deletion
+
+A round of hero changes (narrower panel, bigger dropcap, bigger meta) was built
+and then **reverted on the user's instruction**. The only thing that stayed is
+the removal of the eyebrow — *"استوديو إبداعي — القدس، جبل الزيتون"* and its
+rule are gone from `index.html`, and `.hero-eyebrow` is gone from the CSS.
+
+⚠️ The `heroEyebrow` key is still in `I18N` and is now **unreferenced**. Left in
+deliberately in case it comes back; delete it if you're doing an orphan sweep.
+
+⚠️ Worth knowing if it is ever revisited: the panel content only just fits. The
+upsizing overflowed it top and bottom (`justify-content: center` splits the
+overflow in two, so it clips at *both* ends and looks like a crop rather than
+an overflow). Anything that grows the dropcap, the paragraph or the meta needs
+the rule margins and panel padding reduced to pay for it.
+
+### Verified
+
+0 JS errors, 0 broken images, 0 external images, 0 horizontal overflow, 0 empty
+i18n nodes — **across all 3 pages × 2 viewports × 2 languages (12 runs)**. The
+switcher steps all 3 subcategories in all 3 services. `chat-worker` 67/67.
+Every wireframe slot within 2.5 points; every text box 89–107% inked.
+
+⚠️ Still true from session 8: **`computer{screenshot}` in the Browser pane fails
+here** ("pane is not displayed"). Use Playwright, and scroll with real wheel
+events before measuring anything ScrollTrigger drives.
+
+### Left open from this session
+
+1. **The copy in لماذا ألِف؟ is mine, not the studio's — and there is now a
+   LOT of it.** The user said *"u can write whatever now since we're gonna
+   change whats written later."* Filling the wireframe's columns took roughly
+   4× the original volume, so the section is ~20 paragraphs of placeholder.
+   ⚠️ Most of it is about **method** on purpose, but the first pass invented
+   studio history (a room, a camera, a founding anecdote, "we say no more often
+   than anyone expects of a studio in its second year"). That reads as true.
+   **Do not ship it.** When the real copy lands it will not be the same length,
+   so re-run `fit.py` and retune the per-column type sizes.
+2. **Channel management has no home** in the three-service taxonomy (above).
+3. **The stamp still names the old FOUR services** — and now it's two taxonomies
+   out of date. See the section further down; it needs re-cutting from the
+   Illustrator source.
+4. The ransom-scrap palette question from session 8 is still unanswered.
+5. **The media holders are all still `HOLDER`.** Every slot now has a measured
+   size and a `data-kind` (`video` / `poster` / `still` / `reel`) saying what
+   format belongs in it, so the Drive hand-off has a shopping list. Landing the
+   real media is a `src` change — but see the note above about re-running
+   `fit.py` afterwards, because real captions and real copy will not be the
+   length the current type sizes were tuned against.
+
+### ⏭️ NEXT: chatbot stage 3 — the user now has Google Cloud access
+
+Stages 1 and 2 are built and `chat-worker` is green. Stage 3 is wiring a real
+model in, and it is **blocked only on the key**. Two things to get right:
+
+1. **The key must never be pasted into the repo, a file, or this chat.** It goes
+   in as a Worker secret, which is write-only from the CLI and never readable
+   afterwards:
+   ```
+   cd chat-worker && npx wrangler secret put GEMINI_API_KEY
+   ```
+   ⚠️ `wrangler.toml` `[vars]` is **plaintext and committed** — a key there is a
+   key on GitHub. Secrets are a different mechanism; don't confuse them.
+2. **Where the key comes from decides the SDK.** Google AI Studio
+   (`aistudio.google.com`) issues a plain Gemini API key and is the simple path;
+   Vertex AI inside Google Cloud uses a service account and a different
+   endpoint. The plan assumed the AI Studio style. If they've provisioned Vertex
+   instead, `src/model.js` needs the Vertex client, not just a key swap.
+
+Then: `respond()` in `src/model.js` is the seam — the guardrails already run on
+both sides of it, so nothing else in the Worker moves. Flip `ALLOW_STUB` to
+`"0"` (plan §11) so a missing key becomes a 503 instead of keyword matching
+served to a real visitor as if it were the assistant. Finally set
+`CONFIG.endpoint` / `CONFIG.health` in `prototype/chat/aliph-chat.js`, which are
+`null` today — that is the single line that connects the widget to the Worker.
 
 ## Session 8 (2026-08-06) — three phone bugs, and the stock images are gone
 
@@ -334,16 +852,8 @@ deep. `film-shadow.webp` / `-m` stay on disk and are still re-cut by
 
 ### Open, and waiting on the user (2026-08-06)
 
-1. **The services are changing to three** — graphic design (logos, printables,
-   posters), photography (reels, horizontal video, stills), technical solutions
-   (portfolios, landing sites, apps). **Not started; the naming is not settled.**
-   Raised with the user: "Photography" undersells 13 videos where Arabic تصوير
-   would cover both, and the three are mixed nouns (two crafts + one outcome).
-   ⚠️ This is not a rename. The ids are the join key across `CATS`,
-   `PROJECTS[].cat`, `SERVICE_FRAMES`, `SERVICES`, `data-service`, the archive
-   spines, the about sections **and `chat-worker/src/services.js`**. It also
-   touches the film strip, which is **4 frames per group** matched to the tile;
-   the plan is to keep 4 and give photography two, not to re-cut the tile again.
+1. ✅ **The services changed to three — DONE 2026-08-08.** تصميم · تصوير ·
+   برمجة, with three subcategories each. See session 9 at the top of this file.
 2. ✅ **Animated ransom-note أ — DONE 2026-08-08**, merged from
    `visual/ransom-hero`. See the section above.
 3. **Whether the coloured scraps stay** (red / purple / brown / blue-ruled)
@@ -611,19 +1121,27 @@ A portfolio website for **Aliph (ألِف)** — a bilingual (Arabic-first) crea
 based in Jerusalem, Mount of Olives. The brand's soul is the letter **Alif**: the first
 letter of the Arabic alphabet, "the point things begin from."
 
-### Service taxonomy (changed 2026-08-02 — four services, new ids)
+### Service taxonomy (changed 2026-08-08 — THREE services)
 
-| id | Arabic | English | note |
-|---|---|---|---|
-| `identity` | هويّات بصريّة | Identities | unchanged |
-| `creative` | تسويق ومحتوى إبداعي | Creative Marketing | **merge** of the old `content` + `marketing` |
-| `events` | تنظيم فعاليّات | Events | unchanged |
-| `tech` | حلول تقنيّة | Technical Solutions | **new** — software and websites |
+| id | Arabic | English |
+|---|---|---|
+| `design` | تصميم | Design |
+| `photo` | تصوير | Film & Photography |
+| `tech` | برمجة | Engineering |
 
-The user chose the merged name themselves; don't rename it. The ids are the
-join key across `CATS`, `PROJECTS[].cat`, `SERVICE_FRAMES`, `MQ_ITEMS`,
-`SERVICES`, and `data-service` on the home page's service cells — changing one
-without the others silently breaks the film-strip hover sync.
+⚠️ **This replaced the four-service taxonomy** (`identity` / `creative` /
+`events` / `tech`) that stood from 2026-08-02. Session 9 above has the mapping
+and the reasoning; anything below this line describing four services is a record
+of what was true then, not of the site now.
+
+The user chose these names themselves; don't rename them. The ids are the join
+key across `CATS`, `SUBCATS`, `PROJECTS[].cat`, `SERVICE_FRAMES`, `SERVICES`,
+`data-service` on the home page's service picks, **and
+`chat-worker/src/services.js`** — changing one without the others silently
+breaks classification and the film-strip sync.
+
+Each service now also has **three subcategories** (`SUBCATS` in `main.js`), which
+is what the home page's example switcher steps through.
 
 Everything so far is a **static HTML/CSS/JS prototype** in `prototype/`. No framework,
 no build step. Not a Node/Next project — do NOT try to `npm install` or run Agentation.
@@ -719,8 +1237,14 @@ Regeneration recipe for `film.webp` lives in this file's history; the two inputs
 
 ## Homepage — current state
 
-`index.html` order: masthead → **film-strip hero** → **interactive marquee** →
-**"ماذا نفعل؟" services** → **"لماذا ألِف؟" story (4 sticky panels)** → **contact footer**.
+`index.html` order (**remodelled 2026-08-08, see session 9**): masthead →
+**film-strip hero** → **"لماذا ألِف؟" (3 editorial blocks)** → **"ماذا نفعل؟"
+(service picker + subcategory switcher)** → **contact footer**.
+
+⚠️ The marquee is **gone**, the story's 4 sticky panels are **gone**, and the
+two middle sections **swapped order**. Neither new section animates. Sections
+below that describe the marquee, the sticky panels, the scatter clusters or the
+latest-work slider are a record of the old page.
 
 ### The hero panel is CREAM now (inverted 2026-07-26)
 

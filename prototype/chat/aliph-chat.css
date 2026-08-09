@@ -39,60 +39,46 @@
   height: var(--ac-launch);
   padding: 0;
   border: none;
-  border-radius: 50%;
-  background: var(--ac-ink);
-  color: var(--ac-cream);
+  /* no disc — the ring of type IS the button's edge */
+  background: none;
   cursor: pointer;
-  /* The 1px cream ring is the reason this survives the whole page: the
-     launcher floats over the ink story panels, the ink banners and the
-     footer, where an ink disc on ink loses its edge entirely and the mark
-     appears to hang in space. Invisible over cream, load-bearing over ink. */
-  box-shadow: 0 0 0 1px rgba(217, 217, 206, 0.38),
-              0 8px 26px rgba(15, 24, 32, 0.32);
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-              box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.ac-launcher:hover {
-  transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 0 0 1px rgba(217, 217, 206, 0.5),
-              0 14px 34px rgba(15, 24, 32, 0.4);
-}
+.ac-launcher:hover { transform: translateY(-3px) scale(1.04); }
 .ac-launcher:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 3px; }
 
-/* ── the label struck around the mark, the way the brand stamp rings
-      its own mark with type ─────────────────────────────────────────
-   Sized in viewBox units, not screen px. A top arc rather than a full
-   ring: the stamp can run type all the way round because it prints
-   large, but at 4rem the bottom half would be upside down and unread. */
-.ac-rim {
+/* The ring turns; the mark does not. Both are absolutely positioned so
+   they share one centre — CSS rotates about the box centre, so a ring that
+   isn't dead centre visibly wobbles. */
+.ac-ring,
+.ac-mark {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  object-fit: contain;
   pointer-events: none;
 }
-.ac-rim-text {
-  fill: var(--ac-cream);
-  font-family: var(--ac-display);
-  font-size: 7.5px;
-  letter-spacing: 0.15px;
+/* ⚠️ With no disc the launcher can straddle a section edge — it sits at the
+   hero/section boundary at rest — so a flat mark lands half on cream and half
+   on film. A hairline halo in the OPPOSITE tone keeps both layers legible
+   either way; it is invisible against its own background. */
+.ac-ring,
+.ac-mark { filter: drop-shadow(0 0 2px rgba(217, 217, 206, 0.9)); }
+.ac-launcher.is-dark .ac-ring,
+.ac-launcher.is-dark .ac-mark { filter: drop-shadow(0 0 2px rgba(15, 24, 32, 0.9)); }
+.ac-ring { animation: ac-spin 18s linear infinite; }
+.ac-launcher:hover .ac-ring { animation-duration: 7s; }
+/* The mark sits inside the ring's clear centre, at the size the studio's own
+   composite (resources/assistant.png) gives it — measured there at 65% of the
+   ring's height. The glyph runs the full height of its square PNG, so this
+   percentage IS the rendered height; 28% put it at well under half scale. */
+.ac-mark {
+  width: 65%;
+  height: 65%;
+  inset: 17.5%;
 }
-/* Latin sets smaller and wider — all-caps and a longer string */
-.aliph-chat[dir="ltr"] .ac-rim-text { font-size: 5.9px; letter-spacing: 0.8px; }
-
-.ac-seal {
-  position: relative;
-  width: 58%;
-  height: 58%;
-  object-fit: contain;
-  /* the label occupies the top of the disc, so a dead-centre stamp reads
-     bottom-heavy; drop it a touch to sit under the arc */
-  transform: translateY(7%);
-  /* the stamp turns slowly on hover, as it does in the footer. The label
-     stays put — a rotating label is a label you can't read. */
-  transition: transform 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.ac-launcher:hover .ac-seal { transform: translateY(7%) rotate(28deg); }
+@keyframes ac-spin { to { transform: rotate(360deg); } }
 
 /* the hairline ring that pulses twice on first paint, then rests */
 .ac-launcher::after {
@@ -324,13 +310,6 @@
      and roughly double what a corner launcher should be. 3rem is 72px here:
      still unmistakably the seal, still far past the 44px touch target. */
   .aliph-chat { --ac-launch: 3rem; }
-  /* The rim label is sized in viewBox units, so it shrinks with the disc.
-     Left alone it drops to ~5px of Arabic and becomes texture rather than a
-     word — the two concentric rings of type are the point of this launcher,
-     so the label scales back up rather than being dropped. */
-  .ac-rim-text { font-size: 9.4px; letter-spacing: 0; }
-  .aliph-chat[dir="ltr"] .ac-rim-text { font-size: 7.2px; letter-spacing: 0.4px; }
-
   .aliph-chat.is-open {
     inset: 0;
     /* the panel fills the viewport, so the fixed corner offsets go */
@@ -348,5 +327,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ac-launcher, .ac-launcher img { transition: none; }
+  .ac-ring, .ac-launcher:hover .ac-ring { animation: none; }
   .aliph-chat.is-idle .ac-launcher::after { animation: none; }
 }

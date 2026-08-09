@@ -86,7 +86,7 @@ test("classify → offer → capture → done, in Arabic", async () => {
 
   let msgs = asUser("بدنا نفتتح مقهى في بيت حنينا — شعار وقوائم وحدا يدير الإنستغرام");
   let r = await step(msgs);
-  assert.deepEqual(r.services.sort(), ["creative", "identity"]);
+  assert.deepEqual(r.services.sort(), ["design", "photo"]);
   assert.match(r.reply, /تحبّون أن يتواصل معكم الفريق؟$/);
 
   msgs = [...msgs, { role: "assistant", content: r.reply }, { role: "user", content: "نعم" }];
@@ -106,14 +106,14 @@ test("classify → offer → capture → done, in Arabic", async () => {
 test("a single-service idea in English is named, not bucketed into everything", async () => {
   const r = await (await post(asUser("we need a booking system for our clinic"))).json();
   assert.deepEqual(r.services, ["tech"]);
-  assert.match(r.reply, /Technical Solutions/);
+  assert.match(r.reply, /Engineering/);
 });
 
 test("declining the offer closes warmly and stores nothing", async () => {
   const ip = freshIP(), session = "flow-no";
   const msgs = asUser(
     "we need a logo",
-    "That falls under Identities. Would you like the team to get in touch?",
+    "That falls under Design. Would you like the team to get in touch?",
     "no thanks",
   );
   const r = await (await post(msgs, { ip, session })).json();

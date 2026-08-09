@@ -1,4 +1,4 @@
-/* ALIPH prototype v04 — i18n, film strip, interactive marquee, story, contact */
+/* ALIPH prototype v05 — i18n, film strip, why-aliph, what-we-do, contact */
 
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 gsap.registerPlugin(ScrollTrigger);
@@ -23,6 +23,60 @@ const HOLDER =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'" +
   " preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E";
 
+/* Paint one media holder. The remodelled sections hold work in four formats —
+   a horizontal film, a vertical reel, a poster and a still — so a holder has
+   to be able to become a <video> as well as an <img>.
+
+   ⚠️ A holder only ever plays while it is on screen, and never preloads. The
+   Drive's horizontal videos are 55–384 MB; four of those autoplaying would
+   undo every phone fix from session 8 on its own. Poster frame first, bytes
+   only if the visitor actually scrolls to it.
+
+   Real media hasn't landed yet, so `item.src`/`item.video` are absent today
+   and every holder paints HOLDER — but into the element the real asset will
+   use, so landing the media stays a src change, not a markup change. */
+function setHolder(box, item) {
+  if (!box) return;
+  const poster = (item && item.src) || HOLDER;
+
+  if (item && item.video) {
+    let v = box.querySelector("video");
+    if (!v) {
+      box.textContent = "";
+      v = document.createElement("video");
+      v.muted = true;
+      v.loop = true;
+      v.playsInline = true;
+      v.preload = "none";
+      box.appendChild(v);
+      playWhenVisible(v);
+    }
+    if (v.dataset.src !== item.video) {
+      v.dataset.src = item.video;
+      v.poster = poster;
+      v.src = item.video;
+    }
+    return;
+  }
+
+  let img = box.querySelector("img");
+  if (!img) {
+    box.textContent = "";
+    img = document.createElement("img");
+    img.alt = "";
+    box.appendChild(img);
+  }
+  if (img.getAttribute("src") !== poster) img.src = poster;
+}
+
+function playWhenVisible(v) {
+  if (!window.IntersectionObserver) return;
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !prefersReduced) v.play().catch(() => {});
+    else v.pause();
+  }, { rootMargin: "100px" }).observe(v);
+}
+
 /* ══════════ i18n ══════════ */
 const I18N = {
   navHome: { ar: "الرئيسيّة", en: "Home" },
@@ -35,78 +89,162 @@ const I18N = {
   hero2: { ar: "تبدأ الأشياء.", en: "things begin." },
   /* the boxed letter completes the first word: أ + لِف / A + liph */
   heroPara: {
-    ar: "لِف استوديو يبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، ثم رسم النظام كاملًا منها: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم. نصنع الهويّات والحملات والفعاليّات، ونبني المواقع والأنظمة التي تُشغّلها — من الألِف إلى الياء.",
-    en: "liph is a studio that begins at the first letter. Every brand has an origin point it is built from and returns to; our work is finding that point, then drawing the whole system from it: the name, the identity, the voice, and the way the brand shows up in the world. Identities, campaigns and events — and the sites and systems that run them. From A to Z.",
+    ar: "لِف استوديو يبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، ثم رسم النظام كاملًا منها: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم. نصمّم، ونصوّر، ونبرمج المواقع والأنظمة التي تُشغّلها — من الألِف إلى الياء.",
+    en: "liph is a studio that begins at the first letter. Every brand has an origin point it is built from and returns to; our work is finding that point, then drawing the whole system from it: the name, the identity, the voice, and the way the brand shows up in the world. We design, we shoot, and we build the sites and systems that run it all. From A to Z.",
   },
   /* the dropcap letter is baked into the crumple sprite; this is the copy
      screen readers get */
   dropLetter: { ar: "أ", en: "A" },
   heroMeta1: { ar: "منذ ٢٠٢٤", en: "Since 2024" },
   heroMeta2: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
-  heroMeta3: { ar: "هويّات · تسويق · فعاليّات · تقنيّة", en: "Identity · Marketing · Events · Technology" },
+  heroMeta3: { ar: "تصميم · تصوير · برمجة", en: "Design · Film · Engineering" },
   btnWork: { ar: "كل الأعمال", en: "ALL WORK" },
   btnAbout: { ar: "تعرّف على ألِف", en: "Get to know Aliph" },
 
   /* services */
   svcBanner: { ar: "ماذا نفعل؟", en: "What we do?" },
-  svc1: { ar: "هويّات بصريّة", en: "Identities" },
-  svc2: { ar: "تسويق ومحتوى إبداعي", en: "Creative Marketing" },
-  svc3: { ar: "تنظيم فعاليّات", en: "Events" },
-  svc4: { ar: "حلول تقنيّة", en: "Technical Solutions" },
-  svc1Label: { ar: "IDENTITY", en: "هويّات بصريّة" },
-  svc2Label: { ar: "CREATIVE", en: "تسويق ومحتوى إبداعي" },
-  svc3Label: { ar: "EVENTS", en: "تنظيم فعاليّات" },
-  svc4Label: { ar: "TECHNOLOGY", en: "حلول تقنيّة" },
+  svc1: { ar: "تصميم", en: "Design" },
+  svc2: { ar: "تصوير", en: "Film & Photography" },
+  svc3: { ar: "برمجة", en: "Engineering" },
 
-  /* latest-work slider */
-  slLatest: { ar: "أحدث الأعمال", en: "Latest work" },
-  stampNew: { ar: "مؤخّرًا", en: "Latest" },
+  /* the example switcher under "what we do" */
+  swPrev: { ar: "المثال السابق", en: "Previous example" },
+  swNext: { ar: "المثال التالي", en: "Next example" },
 
-  /* story */
+  /* why aliph — three editorial blocks, each carrying real work in its
+     media holders. The essay runs beside the portfolio rather than after it. */
   storyBanner: { ar: "لماذا ألِف؟", en: "Why Aliph?" },
-  st1Eyebrow: { ar: "الاسم", en: "The Name" },
-  st1Title: { ar: "صوت واحد، حرفان، ولغتان.", en: "One sound, two letters, two languages." },
-  st1Para: {
-    ar: "يستمدّ ألِف اسمه من الألف: أوّل حروف الأبجدية العربية، والنقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف. ويحمل الاسم معنًى ثانيًا: أَلِفَ، أي اعتاد واطمأنّ واقترب. لذلك يقف الاستوديو عند المعنيين معًا: ثقة الخطوة الأولى، ودفء الشيء المألوف.",
-    en: "Aliph takes its name from the alif: the first letter of the Arabic alphabet, the point every word starts from, and the measure the other letters are drawn against. The name carries a second meaning too — alifa, to grow familiar, to draw near, to be at ease. So the studio stands on both: the confidence of the first step, and the warmth of the familiar.",
-  },
-  st1Pull: { ar: "بداية، وسطر أساس، في الوقت نفسه.", en: "A beginning and a baseline, at once." },
-  st1Cap1: { ar: "دفتر الهويّة — الصفحة الأولى", en: "Identity notebook — first page" },
-  st1Cap2: { ar: "تجارب الخط", en: "Type trials" },
-  st1Cap3: { ar: "الحرف الأوّل", en: "The first letter" },
 
-  st2Eyebrow: { ar: "الطريقة", en: "The Method" },
-  st2Title: { ar: "نبحث عن النقطة، ثم نرسم النظام.", en: "We find the point, then draw the system." },
-  st2Para: {
-    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها. عملنا هو العثور على تلك النقطة أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها: الشعار، والألوان، والخط، والصوت، وطريقة الظهور اليوميّة. لا نبدأ من الشكل، بل ننتهي إليه.",
-    en: "Every brand has an origin point it is built from and returns to. Our work is to find that point first — in the name, the story, or the place — then draw the whole system from it: the mark, the colors, the type, the voice, and the everyday appearance. We don't start at the form; we arrive at it.",
+  w1Eyebrow: { ar: "الاسم", en: "The Name" },
+  w1Title: { ar: "صوت واحد، حرفان، ولغتان.", en: "One sound, two letters, two languages." },
+  w1Para: {
+    ar: "يستمدّ ألِف اسمه من الألف: أوّل حروف الأبجدية العربية، والنقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف. ويحمل الاسم معنًى ثانيًا: أَلِفَ، أي اعتاد واطمأنّ واقترب. لذلك يقف الاستوديو عند المعنيين معًا: ثقة الخطوة الأولى، ودفء الشيء المألوف. بدأنا سنة ٢٠٢٤ من غرفة واحدة في جبل الزيتون، بكاميرا واحدة وفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم بل نظامًا يُبنى. منذ ذلك الحين ونحن نشتغل بالعربيّة أوّلًا — ليست ترجمةً تُضاف بعد أن يجهز التصميم، بل اللغة التي يُرسم عليها النظام من السطر الأوّل. نشتغل على الهويّات وما يُطبع منها، ونصوّر ما تحتاجه العلامة لتظهر، ونبرمج المواقع والأنظمة التي تُشغّلها — ثلاثة أعمال تبدو منفصلة على الورق، لكنها في الاستوديو خطّ واحد لا ينقطع. ولأنّ الفريق صغير، تبقى المسافة بين الفكرة وتنفيذها قصيرة: يُقرَّر الشيء في الصباح ويُجرَّب في المساء، ولا ينتظر دوره في طابور بين أقسام.",
+    en: "Aliph takes its name from the alif: the first letter of the Arabic alphabet, the point every word starts from, and the measure the other letters are drawn against. The name carries a second meaning too — alifa, to grow familiar, to draw near, to be at ease. So the studio stands on both: the confidence of the first step, and the warmth of the familiar. We started in 2024 out of one room on the Mount of Olives, with one camera and one idea: that a brand is not a logo you draw but a system you build. We have worked Arabic-first ever since — not a translation added once the design is finished, but the language the system is drawn in from the first line. We work on identities and everything printed from them, shoot what a brand needs in order to appear, and build the sites and systems that keep it running — three jobs that look separate on paper and are one unbroken line inside the studio. And because the team is small, the distance between an idea and its execution stays short: a thing is decided in the morning and tried the same evening, rather than queuing between departments.",
   },
-  st2Pull: { ar: "من الألِف إلى الياء.", en: "From A to Z." },
-  st2Cap1: { ar: "جلسة عمل — الاستوديو", en: "Working session — the studio" },
-  st2Cap2: { ar: "مسوّدات أوّليّة", en: "Early drafts" },
-  st2Cap3: { ar: "اختبار على الورق", en: "Tested on paper" },
+  w1Cap: { ar: "من جلسة تصوير — البلدة القديمة", en: "From a shoot — the Old City" },
 
-  st3Eyebrow: { ar: "النظام", en: "The System" },
-  st3Title: { ar: "ألوان من التراب، لا من الصخب.", en: "Colors from the soil, not from noise." },
-  st3Para: {
-    ar: "حبر أزرق عميق يثبّت النظام البصري، وكريمي دافئ يمنحه مساحة للتنفّس. وحول هذين اللونين تأتي درجات طبيعيّة من الطين والزيتون. الخطّ من عائلة Idris: قسوة حادّة للعناوين، وقسوة مسطّحة للنصوص. والنتيجة نظام مدروس، هادئ، ملموس، وواضح الانتماء إلى ألِف.",
-    en: "A deep ink blue anchors the visual system, and a warm cream gives it room to breathe. Around those two sit natural tones drawn from clay and olive. The type is the Idris family: a sharp cut for headlines, a flat cut for text. The result is a system that is considered, quiet, tactile, and unmistakably Aliph.",
+  w2Eyebrow: { ar: "الطريقة", en: "The Method" },
+  w2Title: { ar: "نبحث عن النقطة، ثم نرسم النظام.", en: "We find the point, then draw the system." },
+  w2Para: {
+    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها. عملنا هو العثور على تلك النقطة أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها: الشعار، والألوان، والخط، والصوت، وطريقة الظهور اليوميّة. لا نبدأ من الشكل، بل ننتهي إليه. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في الغرفة؟ من هناك تخرج المسوّدات الأولى، وتُجرّب على الورق قبل الشاشة.",
+    en: "Every brand has an origin point it is built from and returns to. Our work is to find that point first — in the name, the story, or the place — then draw the whole system from it: the mark, the colors, the type, the voice, and the everyday appearance. We don't start at the form; we arrive at it. And because the point is never handed to you in a meeting, we begin with the boring questions: who buys, when, and what gets said about you when you are not in the room. The first drafts come out of those answers, and they are tested on paper long before they reach a screen.",
   },
-  st3Pull: { ar: "تعبير قوي في الأعلى، وهدوء مقروء تحته.", en: "Strong voice above, quiet reading below." },
-  st3Cap1: { ar: "القرطاسيّة", en: "Stationery" },
-  st3Cap2: { ar: "المطبوعات", en: "Printed matter" },
-  st3Cap3: { ar: "لوحة الألوان", en: "The palette" },
+  w2Para2: {
+    ar: "ثم يثبّت النظام نفسه: حبر أزرق عميق يمسك البنية، وكريمي دافئ يمنحها مساحة للتنفّس، ودرجات من الطين والزيتون حولهما. الخطّ من عائلة Idris — قسوة حادّة للعناوين، وقسوة مسطّحة للنصوص. والنتيجة نظام هادئ، ملموس، وواضح الانتماء. وما يُسلّم ليس ملفًّا واحدًا بل دفتر كامل: مقاسات، ومسافات، وأمثلة لما يُفعل وما لا يُفعل، حتّى يستطيع من يأتي بعدنا أن يكمل من حيث وقفنا دون أن يسأل.",
+    en: "Then the system settles: a deep ink blue holds the structure, a warm cream gives it room to breathe, and tones of clay and olive sit around them. The type is the Idris family — a sharp cut for headlines, a flat cut for text. The result is quiet, tactile, and unmistakably ours. What gets handed over is not one file but a whole book: sizes, spacing, and worked examples of what to do and what not to do — so whoever comes after us can carry on from where we stopped without having to ask.",
+  },
+  /* block 2 — row A, two paragraphs so the column sets like a news column */
+  w2ParaA: {
+    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها. عملنا هو العثور على تلك النقطة أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها: الشعار، والألوان، والخط، والصوت، وطريقة الظهور اليوميّة.",
+    en: "Every brand has an origin point it is built from and returns to. Our work is to find that point first — in the name, the story, or the place — then draw the whole system from it: the mark, the colors, the type, the voice, and the everyday appearance.",
+  },
+  w2ParaA2: {
+    ar: "لا نبدأ من الشكل، بل ننتهي إليه. الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا شعارًا جميلًا لا يخصّ أحدًا؛ والذي يخرج بعد أن نفهم من أين تبدأ العلامة يصعب تخيّلها بغيره.",
+    en: "We don't start at the form; we arrive at it. A mark drawn in the first week is usually a handsome mark that belongs to nobody. One drawn after we understand where the brand begins is hard to imagine it without.",
+  },
 
-  st4Eyebrow: { ar: "الوعد", en: "The Promise" },
-  st4Title: { ar: "أن تبدو النتيجة حتميّة.", en: "That the result feels inevitable." },
-  st4Para: {
+  /* block 2 — row C */
+  w2ParaC: {
+    ar: "ثم يثبّت النظام نفسه: حبر أزرق عميق يمسك البنية، وكريمي دافئ يمنحها مساحة للتنفّس، ودرجات من الطين والزيتون حولهما. الخطّ من عائلة Idris — قسوة حادّة للعناوين، وقسوة مسطّحة للنصوص.",
+    en: "Then the system settles: a deep ink blue holds the structure, a warm cream gives it room to breathe, and tones of clay and olive sit around them. The type is the Idris family — a sharp cut for headlines, a flat cut for text.",
+  },
+  w2ParaC2: {
+    ar: "وما يُسلَّم ليس ملفًّا واحدًا بل دفتر كامل: مقاسات، ومسافات، وأمثلة لما يُفعل وما لا يُفعل — حتّى يستطيع من يأتي بعدنا أن يكمل من حيث وقفنا دون أن يسأل.",
+    en: "What gets handed over is not one file but a whole book: sizes, spacing, and worked examples of what to do and what not to do — so whoever comes after us can carry on from where we stopped without having to ask.",
+  },
+
+  /* block 3 — the right column, three paragraphs */
+  w3ParaA: {
     ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف: في المطبوع، وعلى الشاشة، وفي الشارع، وبين يديّ من يستعمله كل يوم. وحين ينتهي العمل، يُختم بختم الاستوديو — علامة ملكيّة صغيرة تقول إن هذا العمل خرج من هنا.",
     en: "We don't hand over a logo and walk away. We hand over a system that knows how to behave: in print, on screen, in the street, and in the hands of whoever uses it daily. And when the work is done, it carries the studio's seal — a small mark of authorship saying this came from here.",
   },
-  st4Pull: { ar: "راسخة، مدروسة، لا تُخطئها العين.", en: "Rooted, considered, impossible to miss." },
-  st4Cap1: { ar: "تسليم مشروع", en: "Project handover" },
-  st4Cap2: { ar: "الختم على العمل", en: "The seal on the work" },
-  st4Cap3: { ar: "في الشارع", en: "Out in the street" },
+  w3ParaB: {
+    ar: "والاختبار الحقيقي يأتي بعد التسليم بسنة: حين تُطبع لافتة لم نرها، ويُكتب منشور لم نكتبه، وتُصوَّر جلسة لم نحضرها — ويظلّ الكلّ يشبه بعضه. ذلك وحده يقول إن النظام اشتغل، لا الإعجاب الذي يناله العرض التقديمي في يومه الأوّل.",
+    en: "The real test arrives a year after handover: when a sign gets printed that we never saw, a post goes out that we never wrote, a shoot happens we were not at — and all of it still looks like the same brand. That, on its own, says the system worked; not the applause a deck gets on the day it is shown.",
+  },
+  w3ParaC: {
+    ar: "لذلك نكتب القواعد بلغة من سيستعملها، لا بلغة المصمّمين. نقول: هذا الشعار لا يوضع على صورة مزدحمة، وهذا اللون لا يُستعمل للنصّ الصغير، وهذه المسافة لا تُقلّ عن كذا — بأمثلة تُرى لا بمصطلحات تُحفظ. النظام الذي لا يُفهم لا يُتّبع، ومهما كان مدروسًا فإنّه ينهار في الشهر الثالث.",
+    en: "So we write the rules in the language of whoever will use them, not in the language of designers. This mark does not go on a busy photograph; this colour is not used for small text; this margin never goes below so much — shown as examples rather than stated as terms. A system nobody understands is a system nobody follows, and however considered it is, it collapses by the third month.",
+  },
+
+  /* block 3 — the left column */
+  w3Para2A: {
+    ar: "ونحن فريق صغير عن قصد: من تُحدّثه في الاجتماع الأوّل هو نفسه من يعمل على مشروعك، ولا يمرّ العمل عبر طبقات حتى يفقد ما بدأ به. نصمّم ونصوّر ونبرمج تحت سقف واحد، فلا يضيع شيء في الانتقال من يدٍ إلى يد.",
+    en: "And we are small on purpose: the person you meet first is the person who does the work, and nothing passes through so many hands that it loses what it started as. We design, shoot and build under one roof, so nothing is lost handing off.",
+  },
+  w3Para2B: {
+    ar: "ومعنى ذلك أيضًا أنّنا نختار المشاريع التي نستطيع أن نمنحها ما تستحقّه من وقت، وأنّنا نقول «لا» أكثر ممّا يتوقّع أحد من استوديو في سنته الثانية. الرفض هنا ليس ترفًا؛ هو الطريقة الوحيدة التي يبقى بها العمل الذي نقبله على مستوى واحد.",
+    en: "It also means we take on the projects we can give the time they deserve, and that we say no more often than anyone expects of a studio in its second year. Refusing is not a luxury here; it is the only way the work we do accept stays at one level.",
+  },
+  w3Para2C: {
+    ar: "وحين ينتهي المشروع لا تنتهي العلاقة. تبقى الملفّات مرتّبة ومسلَّمة كاملةً بلا رهائن، ويبقى الباب مفتوحًا للسؤال بعد شهر أو بعد سنة. العلامة التي بنيناها معكم تكبر بعدنا، وهذا هو المقصود منها أصلًا.",
+    en: "And when a project ends the relationship doesn't. The files stay ordered and are handed over in full with nothing held hostage, and the door stays open for a question a month or a year later. The brand we built with you grows after us — which was the point of building it that way.",
+  },
+  w2ParaA3: {
+    ar: "ونعرض مبكرًا وبصوت مرتفع: مسوّدة في الأسبوع الأوّل خير من عرضٍ مكتمل في الشهر الثالث، لأنّ التصحيح وقتها لا يزال رخيصًا. أسوأ ما يحدث لمشروع أن يُبنى كاملًا في الظلّ ثم يُكشف مرّةً واحدة.",
+    en: "And we show early and out loud: a rough draft in the first week beats a finished presentation in the third month, because at that point correcting it is still cheap. The worst thing that happens to a project is being built whole in the dark and revealed all at once.",
+  },
+  w2ParaC3: {
+    ar: "ولا نصمّم شيئًا لا نعرف كيف يُصنع. نسأل عن المطبعة قبل أن نرسم، وعن الشاشة قبل أن نلوّن، وعن اليد التي ستمسك الملفّ بعد شهر. النظام الذي لا يمكن تنفيذه ليس نظامًا، بل رأي جميل.",
+    en: "And we don't design anything without knowing how it gets made. We ask about the press before drawing, about the screen before colouring, and about the hands that will hold the file a month later. A system that cannot be produced isn't a system — it's a handsome opinion.",
+  },
+
+  w3ParaD: {
+    ar: "ونقيس ما نستطيع قياسه. كم استغرق الموظّف الجديد حتى أخرج منشورًا صحيحًا وحده؟ كم مرّة اضطرّ أحد أن يسأل عن اللون؟ كم ملفًّا خرج خارج القالب؟ هذه أرقام مملّة، لكنها تقول عن صحّة النظام أكثر ممّا يقوله أيّ إعجاب.",
+    en: "And we measure what can be measured. How long before a new employee produced a correct post on their own? How many times did someone have to ask about a colour? How many files went out off-template? These are boring numbers, and they say more about the health of a system than any compliment does.",
+  },
+  w3ParaE: {
+    ar: "وما لا يُقاس نحكم عليه بالعين وحدها: هل يبدو المطبوع وكأنّه خرج من المكان نفسه الذي خرج منه الموقع؟ هل الصورة التي التُقطت الشهر الماضي تجلس بجانب صورة السنة الماضية دون أن تفضحها؟ الاتّساق شعور قبل أن يكون قاعدة.",
+    en: "And what can't be measured we judge by eye alone: does the printed piece look like it came from the same place as the site? Does a photograph taken last month sit beside one from last year without showing it up? Consistency is a feeling before it is a rule.",
+  },
+  w3ParaF: {
+    ar: "ولذلك نُبقي النظام مفتوحًا للنموّ لا مغلقًا على نفسه: مساحة للألوان التي ستُضاف، ولخدمة لم تبدأ بعد، ولفرعٍ في مدينة أخرى. الهويّة التي لا تتّسع لما لم يحدث بعد تصبح قيدًا في السنة الثالثة.",
+    en: "So we keep the system open to growth rather than sealed: room for colours that will be added, for a service that hasn't started, for a branch in another city. An identity with no room for what hasn't happened yet becomes a constraint by year three.",
+  },
+
+  w3Para2D: {
+    ar: "ونحبّ العمل الطويل أكثر من العمل السريع. المشروع الذي نعود إليه كل موسم نعرف تفاصيله كما يعرف صاحبه، ونستطيع أن نقترح قبل أن يُطلب منّا. أمّا العمل الذي يمرّ مرّة واحدة فيبقى مهما أُتقن غريبًا عن صاحبه قليلًا.",
+    en: "And we prefer long work to fast work. A project we come back to each season we know as well as its owner does, and we can suggest things before being asked. Work that passes through once stays, however well made, a little foreign to the person who owns it.",
+  },
+  w3Para2E: {
+    ar: "ونكتب كل شيء. القرار الذي اتُّخذ في مكالمة يُدوَّن في السطر التالي، والسبب معه — لأنّ السؤال «لماذا فعلنا هذا؟» يأتي دائمًا، وغالبًا بعد أن ينسى الجميع. الذاكرة المكتوبة هي ما يجعل الفريق الصغير يتصرّف كفريق كبير.",
+    en: "And we write everything down. A decision taken on a call is recorded in the next line, with its reason — because the question \u201cwhy did we do this?\u201d always comes, usually after everyone has forgotten. Written memory is what lets a small team behave like a large one.",
+  },
+  w3Para2F: {
+    ar: "وفي النهاية، المقياس واحد: أن ينظر صاحب العلامة إلى ما بين يديه فيقول إنّ هذا يشبهه — لا أنّه جميل، ولا أنّه عصري، بل أنّه يشبهه. كل ما نفعله قبل ذلك خدمةٌ لهذه الجملة.",
+    en: "And in the end there is one measure: that the owner looks at what is in their hands and says it looks like them — not that it is beautiful, not that it is modern, but that it looks like them. Everything we do before that is in service of that one sentence.",
+  },
+  /* the wide short line that crosses the whole left region in block 2 */
+  w2ParaB: {
+    ar: "ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في الغرفة؟ من هناك تخرج المسوّدات الأولى، وتُجرّب على الورق قبل الشاشة، ويُرمى منها أكثر ممّا يُبقى — وهذا وحده ما يجعل ما يبقى يستحقّ أن يُرى.",
+    en: "And because the point is never handed to you in a meeting, we begin with the boring questions: who buys, when, and what gets said about you when you are not in the room.",
+  },
+  /* the column sitting under the tall rail */
+  w2Rail: {
+    ar: "الملصق يُقرأ من عشرة أمتار ثم من نصف متر: يقول شيئًا واحدًا من بعيد، ويكافئ من اقترب بتفصيلٍ لم يره أوّل مرّة. ولأنّه يُطبع مرّةً واحدة، نعامله معاملة ما لا يُصحّح: نختبر الأحجام على الجدار قبل المطبعة، ونقرأ النصّ بصوتٍ عالٍ، ونسأل من لم يره من قبل عمّا فهمه في أوّل ثانيتين.",
+    en: "A poster is read from ten metres, then from half a metre: it says one thing from far away, and rewards whoever steps closer with a detail they missed.",
+  },
+  w2Pull: { ar: "من الألِف إلى الياء.", en: "From A to Z." },
+  w2Cap1: { ar: "تجارب الخط", en: "Type trials" },
+  w2Cap2: { ar: "المطبوعات", en: "Printed matter" },
+  w2Cap3: { ar: "ملصق — ليالي رمضان", en: "Poster — Ramadan Nights" },
+
+  w3Eyebrow: { ar: "الوعد", en: "The Promise" },
+  w3Title: { ar: "أن تبدو النتيجة حتميّة.", en: "That the result feels inevitable." },
+  w3Para: {
+    ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف: في المطبوع، وعلى الشاشة، وفي الشارع، وبين يديّ من يستعمله كل يوم. وحين ينتهي العمل، يُختم بختم الاستوديو — علامة ملكيّة صغيرة تقول إن هذا العمل خرج من هنا. والاختبار الحقيقي يأتي بعد التسليم بسنة: حين تُطبع لافتة لم نرها، ويُكتب منشور لم نكتبه، ويظلّ الكلّ يشبه بعضه. ذلك وحده يقول إن النظام اشتغل.",
+    en: "We don't hand over a logo and walk away. We hand over a system that knows how to behave: in print, on screen, in the street, and in the hands of whoever uses it daily. And when the work is done, it carries the studio's seal — a small mark of authorship saying this came from here. The real test arrives a year after handover: when a sign gets printed that we never saw, a post goes out that we never wrote, and all of it still looks like the same brand. That, on its own, is what says the system worked.",
+  },
+  w3Para2: {
+    ar: "ونحن فريق صغير عن قصد: من تُحدّثه في الاجتماع الأوّل هو نفسه من يعمل على مشروعك، ولا يمرّ العمل عبر طبقات حتى يفقد ما بدأ به. نصمّم ونصوّر ونبرمج تحت سقف واحد، فلا يضيع شيء في الانتقال من يدٍ إلى يد. ومعنى ذلك أيضًا أنّنا نختار المشاريع التي نستطيع أن نمنحها ما تستحقّه من وقت، وأنّنا نقول «لا» أكثر ممّا يتوقّع أحد من استوديو في سنته الثانية.",
+    en: "And we are small on purpose: the person you meet first is the person who does the work, and nothing passes through so many hands that it loses what it started as. We design, shoot and build under one roof, so nothing is lost handing off. It also means we take on the projects we can give the time they deserve, and that we say no more often than anyone expects of a studio in its second year.",
+  },
+  w3Pull: { ar: "راسخة، مدروسة، لا تُخطئها العين.", en: "Rooted, considered, impossible to miss." },
+  w3Cap: { ar: "الختم على العمل", en: "The seal on the work" },
+  whyOutro: {
+    ar: "الحكاية كاملةً — كيف بدأ الاستوديو، وكيف نشتغل، وما الذي نقيس عليه عملنا.",
+    en: "The whole story — how the studio started, how we work, and what we measure the work against.",
+  },
 
   /* contact */
   cBand: { ar: "لنبدأ من الألِف", en: "Let's start from the Aliph" },
@@ -166,8 +304,8 @@ const I18N = {
     en: "We are small on purpose. It means the person you meet first is the person who does the work, and that nothing passes through so many hands that it loses what it started as. It also means we take on the projects we can give the time they deserve.",
   },
   abP4: {
-    ar: "من الحرف الأوّل إلى آخر تفصيل: نبني الهويّة، ونصنع المحتوى والحملات التي تنشرها، وننظّم الفعاليّات التي تلتقي فيها بجمهورك، ونبرمج المواقع والأنظمة التي تُشغّلها. أربع خدمات على الورق، لكنها في العمل خطّ واحد متّصل — وهذا هو الفرق.",
-    en: "From the first letter to the last detail: we build the identity, make the content and campaigns that carry it, run the events where you meet your audience, and write the sites and systems that keep it running. Four services on paper — one continuous line in practice, and that is the whole difference.",
+    ar: "من الحرف الأوّل إلى آخر تفصيل: نصمّم الهويّة وما يُطبع منها، ونصوّر ما تحتاجه لتظهر — صورًا وفيديو وريلز — ونبرمج المواقع والأنظمة التي تُشغّلها. ثلاث خدمات على الورق، لكنها في العمل خطّ واحد متّصل — وهذا هو الفرق.",
+    en: "From the first letter to the last detail: we design the identity and everything printed from it, shoot what it needs in order to appear — stills, film and reels — and build the sites and systems that keep it running. Three services on paper — one continuous line in practice, and that is the whole difference.",
   },
   abPull: {
     ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف.",
@@ -180,7 +318,7 @@ const I18N = {
   abFact3k: { ar: "اللغات", en: "Languages" },
   abFact3v: { ar: "عربي / إنجليزي", en: "Arabic / English" },
   abFact4k: { ar: "الخدمات", en: "Services" },
-  abFact4v: { ar: "أربع", en: "Four" },
+  abFact4v: { ar: "ثلاث", en: "Three" },
 
   svcAboutBanner: { ar: "ماذا نقدّم؟", en: "What we offer" },
   abWhat: { ar: "ما نفعله", en: "What we do" },
@@ -192,7 +330,7 @@ const I18N = {
    concrete deliverables underneath */
 const SERVICES = [
   {
-    id: "identity", tag: "IDENTITY", seed: "aliph-svc1",
+    id: "design", tag: "DESIGN", seed: "aliph-svc1",
     what: {
       ar: "نبني الهويّة من نقطة أصلها، لا من شكلها. نبحث أوّلًا في الاسم والحكاية والمكان عن النقطة التي تُبنى منها العلامة، ثم نرسم منها النظام كاملًا: الشعار، ولوحة الألوان، والخطوط، ونبرة الصوت، والقرطاسيّة، وقواعد الظهور اليوميّة.",
       en: "We build an identity from its origin point, not from its shape. First we look in the name, the story and the place for the point the brand is built from, then we draw the whole system out of it: the mark, the palette, the type, the tone of voice, the stationery, and the rules for showing up every day.",
@@ -202,64 +340,87 @@ const SERVICES = [
       en: "Because we don't hand over a logo and walk away — we hand over a system that knows how to behave when we're not in the room: in print, on screen, in the street, in the hands of whoever uses it daily. And because Arabic isn't an afterthought here; we design in it from the first line, so nothing arrives broken because the system was built for another script.",
     },
     does: {
-      ar: ["دليل الهويّة", "الشعار ومشتقّاته", "نظام الألوان والخطوط", "القرطاسيّة", "التغليف واللافتات", "قوالب المنصّات"],
-      en: ["Brand guidelines", "Logo & lockups", "Color & type system", "Stationery", "Packaging & signage", "Channel templates"],
+      ar: ["دليل الهويّة", "الشعار ومشتقّاته", "نظام الألوان والخطوط", "القرطاسيّة", "المطبوعات والملصقات", "التغليف واللافتات"],
+      en: ["Brand guidelines", "Logo & lockups", "Color & type system", "Stationery", "Printables & posters", "Packaging & signage"],
     },
   },
   {
-    id: "creative", tag: "CREATIVE", seed: "aliph-svc2",
+    id: "photo", tag: "FILM & PHOTO", seed: "aliph-svc2",
     what: {
-      ar: "من الفكرة إلى المنشور: نضع مفهوم الحملة، ونصوّر موادّها، ونكتب نصوصها، وندير نشرها ومتابعة أرقامها على المنصّات. التصوير والكتابة والحملة عندنا خطّ واحد، لا ثلاث جهات تتناوب على العمل نفسه وتتبادل اللوم عند أوّل تأخير.",
-      en: "From the idea to the post: we set the campaign concept, shoot its material, write its copy, and run the rollout and the numbers across channels. Photography, writing and campaign are one line here — not three suppliers taking turns on the same job and trading blame at the first delay.",
+      ar: "نصوّر ما تحتاجه العلامة لتظهر: جلسات ثابتة للمنتج والمكان والوجوه، وفيديو أفقي للحملات والتعريف، وريلز عموديّة للمنصّات. ومعها التوثيق الكامل للفعاليّات — من أوّل ساعة تجهيز إلى آخر ضيف يغادر.",
+      en: "We shoot what a brand needs in order to appear: stills of the product, the place and the faces; horizontal video for campaigns and profiles; vertical reels for the feed. And full coverage of events — from the first hour of setup to the last guest leaving.",
     },
     why: {
-      ar: "لأنّ المحتوى الذي يُصنع داخل الهويّة يبدو مختلفًا عن المحتوى الذي يُلصق عليها. نحن نعرف علامتك من الداخل، غالبًا لأننا من بناها، فكل صورة وكل جملة تخرج من النظام نفسه لا من خارجه. وهذا تحديدًا تاريخنا الطويل: التصوير والإعلان هما ما كنّا نفعله قبل أن نصير استوديو كاملًا.",
-      en: "Because content made inside the identity looks different from content stuck onto it. We know your brand from the inside, often because we built it, so every frame and every line comes out of the same system rather than beside it. And this is where our longest history is: photography and advertising are what we did before we became a full studio.",
+      ar: "لأنّ الصورة التي تُلتقط داخل الهويّة تبدو مختلفة عن الصورة التي تُلصق عليها. نحن نعرف علامتك من الداخل، غالبًا لأننا من بناها، فكل لقطة تخرج من النظام نفسه لا من خارجه. وهذا تحديدًا تاريخنا الأطول: التصوير هو ما كنّا نفعله قبل أن نصير استوديو كاملًا.",
+      en: "Because a frame shot inside the identity looks different from a frame stuck onto it. We know your brand from the inside, often because we built it, so every shot comes out of the same system rather than beside it. And this is where our longest history is: photography is what we did before we became a full studio.",
     },
     does: {
-      ar: ["مفهوم الحملة", "التصوير الفوتوغرافي والفيديو", "كتابة المحتوى", "إدارة المنصّات", "الإعلانات المدفوعة", "التقارير الشهريّة"],
-      en: ["Campaign concept", "Photography & video", "Copywriting", "Channel management", "Paid media", "Monthly reporting"],
+      ar: ["تصوير المنتج والمكان", "بورتريه ووجوه", "فيديو أفقي وتعريفي", "ريلز عموديّة", "تغطية الفعاليّات", "المونتاج والتلوين"],
+      en: ["Product & place photography", "Portraiture", "Horizontal & profile video", "Vertical reels", "Event coverage", "Edit & grade"],
     },
   },
   {
-    id: "events", tag: "EVENTS", seed: "aliph-svc3",
+    id: "tech", tag: "ENGINEERING", seed: "aliph-svc3",
     what: {
-      ar: "نتولّى الفعاليّة كاملةً أو نمسك جزأها البصري: هويّة الفعاليّة، وتوزيع المساحة، واللافتات والمطبوعات، وبرنامج اليوم، والتوثيق المصوّر من أوّل ساعة تجهيز إلى آخر ضيف يغادر.",
-      en: "We take on the whole event or hold its visual half: the event identity, the spatial layout, the signage and printed matter, the run of the day, and the photographic record from the first hour of setup to the last guest leaving.",
-    },
-    why: {
-      ar: "لأنّ الفعاليّة أقسى اختبار للهويّة: كل شيء يحدث مرّةً واحدة وأمام الناس، ولا توجد نسخة ثانية. خبرتنا في التصوير تجعلنا نجهّز المكان وفي بالنا كيف سيبدو في الصورة، لا كيف يبدو للعين فقط — فيبقى بعد انتهاء اليوم أرشيفٌ مصنوعٌ بالعناية نفسها التي صُنع بها اليوم.",
-      en: "Because an event is the hardest test an identity takes: everything happens once, in front of people, with no second cut. Our photography background means we dress a space thinking about how it will read in the frame, not only to the eye — so what's left when the day ends was made with the same care as the day itself.",
-    },
-    does: {
-      ar: ["هويّة الفعاليّة", "الدعوات والمطبوعات", "اللافتات وتوزيع المساحة", "إدارة البرنامج", "التوثيق المصوّر", "محتوى ما بعد الفعاليّة"],
-      en: ["Event identity", "Invitations & print", "Signage & spatial layout", "Programme management", "Photographic coverage", "Post-event content"],
-    },
-  },
-  {
-    id: "tech", tag: "TECHNOLOGY", seed: "aliph-svc4",
-    what: {
-      ar: "نبني المواقع والأنظمة والتطبيقات التي تحتاجها العلامة لتشتغل فعلًا: موقع تعريفي أو متجر، نظام تسجيل أو حجز، لوحة إدارة يفهمها صاحبها، أو أداة داخليّة تختصر عملًا يدويًّا يتكرّر كل شهر.",
-      en: "We build the sites, systems and apps a brand needs to actually run: a presence site or a store, a registration or booking system, an admin panel its owner can understand, or an internal tool that removes a manual job repeated every month.",
+      ar: "نبني المواقع والأنظمة والتطبيقات التي تحتاجها العلامة لتشتغل فعلًا: بورتفوليو أو موقع تعريفي، صفحة هبوط لحملة، متجر، نظام تسجيل أو حجز، لوحة إدارة يفهمها صاحبها، أو تطبيق هاتف.",
+      en: "We build the sites, systems and apps a brand needs to actually run: a portfolio or presence site, a campaign landing page, a store, a registration or booking system, an admin panel its owner can understand, or a mobile app.",
     },
     why: {
       ar: "لأنّ الفرق بين موقعٍ جميل وموقعٍ يعمل هو أن يبنيه من يفهم الهويّة والبرمجة معًا. نحن نصمّم ونبرمج تحت سقف واحد، فلا يضيع التصميم في الترجمة إلى كود، ولا يُسلَّم نظام لا يشبه صاحبه. ونبني بالعربيّة أوّلًا: الاتّجاه، والخط، وشكل الأرقام، والاستمارات — لا كإصلاحٍ يُضاف في آخر أسبوع.",
       en: "Because the difference between a site that looks good and a site that works is having it built by people who understand both the identity and the code. We design and engineer under one roof, so nothing is lost translating design into code and no system ships looking unlike its owner. And we build Arabic-first: direction, type, numerals and forms — not as a patch added in the final week.",
     },
     does: {
-      ar: ["مواقع تعريفيّة ومتاجر", "أنظمة تسجيل وحجز", "لوحات إدارة", "تطبيقات هاتف", "أتمتة وربط الأنظمة", "استضافة ومتابعة"],
-      en: ["Sites & storefronts", "Registration & booking systems", "Admin dashboards", "Mobile apps", "Automation & integrations", "Hosting & maintenance"],
+      ar: ["بورتفوليو ومواقع تعريفيّة", "صفحات هبوط ومتاجر", "أنظمة تسجيل وحجز", "لوحات إدارة", "تطبيقات هاتف", "استضافة ومتابعة"],
+      en: ["Portfolios & presence sites", "Landing pages & storefronts", "Registration & booking systems", "Admin dashboards", "Mobile apps", "Hosting & maintenance"],
     },
   },
 ];
 
 const CATS = [
   { id: "all", ar: "الكل", en: "All" },
-  { id: "identity", ar: "هويّات بصريّة", en: "Identities" },
-  { id: "creative", ar: "تسويق ومحتوى إبداعي", en: "Creative Marketing" },
-  { id: "events", ar: "تنظيم فعاليّات", en: "Events" },
-  { id: "tech", ar: "حلول تقنيّة", en: "Technical Solutions" },
+  { id: "design", ar: "تصميم", en: "Design" },
+  { id: "photo", ar: "تصوير", en: "Film & Photography" },
+  { id: "tech", ar: "برمجة", en: "Engineering" },
 ];
+
+/* Each service is shown through its subcategories: the example switcher under
+   "what we do" steps through these, not through projects. `desc` is the line
+   that speaks about the category and the subcategory together. */
+const SUBCATS = {
+  design: [
+    { id: "logos", ar: "شعارات", en: "Logos", seed: "aliph-d1",
+      desc: { ar: "الشعار هو النقطة التي يُبنى منها كل ما بعده: نرسمه بمشتقّاته وأحجامه وحالاته، ونسلّمه بقواعد استعماله لا كملفٍّ وحيد. ونختبره حيث سيعيش فعلًا: على لافتة، وعلى فنجان، وفي صورة شخصيّة مربّعة بحجم ظفر الإبهام. الشعار الذي ينجو من هذه الثلاثة ينجو من كل شيء بعدها.",
+              en: "The mark is the point everything after it is built from: we draw it with its lockups, sizes and states, and hand it over with the rules for using it — not as a single file. And we test it where it will actually live: on a sign, on a cup, and in a square avatar the size of a thumbnail. A mark that survives those three survives everything after them." } },
+    { id: "print", ar: "مطبوعات", en: "Printables", seed: "aliph-d2",
+      desc: { ar: "قرطاسيّة، وقوائم، ودعوات، وكتيّبات — مصمّمة للورق أوّلًا: المقاسات، والهوامش، والحبر، وما يحدث للحرف العربي حين يُطبع صغيرًا. ونحسب الكلفة قبل الجمال: عدد الألوان، ونوع الورق، وما إذا كان التصميم يحتمل الطباعة الرقميّة أم يحتاج أوفست. المطبوع الذي لا يستطيع صاحبه إعادة طباعته هو تصميم استُعمل مرّة واحدة.",
+              en: "Stationery, menus, invitations and booklets — designed for paper first: trim sizes, margins, ink, and what happens to an Arabic letter when it prints small. And we cost it before we prettify it: how many inks, which stock, and whether it survives digital printing or needs offset. Printed matter its owner can't reprint is a design that got used once." } },
+    { id: "posters", ar: "ملصقات", en: "Posters", seed: "aliph-d3",
+      desc: { ar: "الملصق يُقرأ من عشرة أمتار ثم من نصف متر. نصمّمه ليقول شيئًا واحدًا من بعيد، ويكافئ من اقترب بتفصيلٍ لم يره أوّل مرّة. ونصمّمه ليُصوَّر أيضًا: نصف من سيرونه لن يمرّوا بجانبه، بل سيرونه في صورة على الهاتف. ما يعمل على الجدار ولا يعمل في المربّع الصغير نصف عمل.",
+              en: "A poster is read from ten metres, then from half a metre. We design it to say one thing from far away and reward whoever steps closer with a detail they missed. And we design it to be photographed too: half the people who see it will never walk past it — they will see it in a picture on a phone. What works on a wall and dies in a small square is half a job." } },
+  ],
+  photo: [
+    { id: "reels", ar: "ريلز", en: "Reels", seed: "aliph-p1",
+      desc: { ar: "فيديو عمودي قصير للمنصّات: يُصوَّر ويُركَّب ليعمل بلا صوت في أوّل ثانيتين، ثم يكافئ من رفع الصوت. ونكتب الريل قبل تصويره: لقطة تفتح، وفكرة واحدة، ونهاية تُغري بالإعادة. أمّا التصوير أوّلًا ثم البحث عن قصّة في المونتاج فهو أطول طريق إلى أضعف نتيجة.",
+              en: "Short vertical video for the feed: shot and cut to work muted in the first two seconds, then to reward whoever turns the sound on. And we write the reel before shooting it: an opening frame, one idea, and an ending that earns a replay. Shooting first and hunting for a story in the edit is the longest route to the weakest result." } },
+    { id: "video", ar: "فيديو أفقي", en: "Video", seed: "aliph-p2",
+      desc: { ar: "فيديو تعريفي وحملات: مقابلات، ومشاهد مكان، ومنتج في يد صاحبه — مونتاج وتلوين ضمن نظام العلامة اللوني. ونصوّر ليُقتطع: من كل جلسة يخرج الفيلم الطويل، ونسخة قصيرة للمنصّات، ولقطات صامتة تصلح للموقع. الميزانيّة نفسها، وثلاثة استعمالات بدل واحد.",
+              en: "Profile films and campaigns: interviews, place, and the product in its owner's hands — edited and graded inside the brand's own colour system. And we shoot for reuse: every session yields the long film, a short cut for social, and silent clips the website can use. Same budget, three uses instead of one." } },
+    { id: "stills", ar: "صور ثابتة", en: "Stills", seed: "aliph-p3",
+      desc: { ar: "جلسات للمنتج والمكان والوجوه، وتوثيق الفعاليّات. نسلّم مكتبة صور تكفي سنةً من النشر، لا عشر لقطات تنفد في شهر. ونسلّمها مرتّبة ومسمّاة ومقصوصة بالمقاسات التي ستُستعمل بها فعلًا، لا مجلّدًا فيه ثمانمئة ملفّ. المكتبة التي لا يستطيع صاحبها أن يجد فيها صورة هي مكتبة لم تُسلَّم.",
+              en: "Sessions for product, place and faces, and event coverage. We deliver an image library that carries a year of publishing, not ten frames that run out in a month. And we hand them over ordered, named and cropped to the sizes they will actually be used at — not a folder of eight hundred files. A library its owner can't find a picture in is a library that was never delivered." } },
+  ],
+  tech: [
+    { id: "portfolio", ar: "بورتفوليو", en: "Portfolios", seed: "aliph-t1",
+      desc: { ar: "موقع يعرض العمل كما يستحقّ أن يُعرض: سريع على شبكة الهاتف، عربيّ الاتّجاه من السطر الأوّل، ويُحدَّث دون أن تحتاج إلى مبرمج. ونبنيه ليُحدَّث في خمس دقائق: مشروع جديد يعني صورًا وسطرين، لا مكالمة مع مبرمج. البورتفوليو الذي لا يُحدَّث يصبح خلال سنة أسوأ من عدمه.",
+              en: "A site that shows the work the way it deserves: fast on mobile data, right-to-left from the first line, and updatable without needing a developer. And we build it to be updated in five minutes: a new project means pictures and two lines, not a call with a developer. A portfolio nobody updates is, within a year, worse than none." } },
+    { id: "landing", ar: "صفحات هبوط", en: "Landing pages", seed: "aliph-t2",
+      desc: { ar: "صفحة واحدة لحملة واحدة، مبنيّة حول فعلٍ واحد: التسجيل، أو الشراء، أو الحجز. ومعها الأرقام التي تقول إن كانت تعمل. ونقيس ما يهمّ فقط: كم وصل، وكم بدأ، وكم أكمل، وأين توقّف الباقون. ثلاثة أرقام تُقرأ في دقيقة خير من لوحة فيها أربعون رقمًا لا يفتحها أحد.",
+              en: "One page for one campaign, built around a single action: register, buy, or book. And the numbers that say whether it works. And we measure only what matters: how many arrived, how many started, how many finished, and where the rest stopped. Three numbers read in a minute beat a dashboard of forty nobody opens." } },
+    { id: "apps", ar: "تطبيقات", en: "Apps", seed: "aliph-t3",
+      desc: { ar: "أنظمة تسجيل وحجز، ولوحات إدارة، وتطبيقات هاتف — تُبنى لمن يشغّلها يوميًّا، لا لمن يراها في العرض التقديمي. ونبدأ من أصعب يوم لا من أسهله: ماذا يحدث حين تنقطع الشبكة، وحين يصل مئة شخص معًا، وحين يضغط أحدهم زرًّا مرّتين. النظام الذي يُبنى لليوم الهادئ ينكسر في اليوم الذي بُني لأجله.",
+              en: "Registration and booking systems, admin panels and mobile apps — built for whoever runs them daily, not for whoever sees them in the pitch deck. And we start from the hardest day, not the easiest: what happens when the network drops, when a hundred people arrive at once, and when somebody taps a button twice. A system built for the quiet day breaks on the day it was built for." } },
+  ],
+};
 
 /* Every project carries a one-line brief so the "latest work" slider on the
    home page can speak about whichever piece is on screen (placeholder copy).
@@ -270,7 +431,7 @@ const CATS = [
    sites). Any project given a `profile` gets the sheet, so the other three
    services can be extended the same way later. */
 const PROJECTS = [
-  { ar: "مؤسّسة بنيان", en: "Bunyan Foundation", date: "2026-05", cat: "identity", seed: "aliph01",
+  { ar: "مؤسّسة بنيان", en: "Bunyan Foundation", date: "2026-05", cat: "design", seed: "aliph01",
     desc: { ar: "حضورٌ أوضح وأكثر حداثة، مع الحفاظ على روح العلامة المألوفة: شعار، ألوان، تغليف، وظهور يومي.",
             en: "A clearer, more modern presence that keeps the brand's familiar spirit: mark, colors, packaging, and daily touchpoints." } },
   { ar: "بوّابة عودة الملكة", en: "Queen's Retreat Portal", date: "2026-05", cat: "tech", seed: "aliphT1",
@@ -293,13 +454,13 @@ const PROJECTS = [
       shots: ["aliphT1a", "aliphT1b", "aliphT1c", "aliphT1d", "aliphT1e"],
       preview: "preview/site-demo.html",
     } },
-  { ar: "مواسم الزيتون", en: "Olive Seasons", date: "2026-04", cat: "creative", seed: "aliph02",
+  { ar: "مواسم الزيتون", en: "Olive Seasons", date: "2026-04", cat: "photo", seed: "aliph02",
     desc: { ar: "توثيق بصري لموسم القطف من الحقل إلى المعصرة، بهويّة لونيّة واحدة وقصص يوميّة.",
             en: "A visual record of the harvest from field to press — one tonal identity and daily stories." } },
-  { ar: "ورشة الخط", en: "Calligraphy Workshop", date: "2026-03", cat: "events", seed: "aliph03",
+  { ar: "ورشة الخط", en: "Calligraphy Workshop", date: "2026-03", cat: "design", seed: "aliph03",
     desc: { ar: "ورشة مفتوحة في الاستوديو: برنامج، مطبوعات، وتغطية كاملة لليومين.",
             en: "An open workshop at the studio: program, printed matter, and full two-day coverage." } },
-  { ar: "حارة النصارى", en: "Christian Quarter", date: "2026-03", cat: "creative", seed: "aliph04",
+  { ar: "حارة النصارى", en: "Christian Quarter", date: "2026-03", cat: "photo", seed: "aliph04",
     desc: { ar: "سلسلة مصوّرة عن تفاصيل الحارة ووجوهها، بالأبيض والأسود.",
             en: "A photographed series on the quarter's details and faces, in black and white." } },
   { ar: "دفتر الحضور", en: "Attendance Book", date: "2026-02", cat: "tech", seed: "aliphT2",
@@ -321,16 +482,16 @@ const PROJECTS = [
       ],
       shots: ["aliphT2a", "aliphT2b", "aliphT2c", "aliphT2d"],
     } },
-  { ar: "مقهى الجبل", en: "Mountain Café", date: "2026-02", cat: "identity", seed: "aliph05",
+  { ar: "مقهى الجبل", en: "Mountain Café", date: "2026-02", cat: "design", seed: "aliph05",
     desc: { ar: "هويّة كاملة لمقهى صغير: اسم، شعار، قائمة، ولوحة واجهة.",
             en: "A complete identity for a small café: name, mark, menu, and shopfront." } },
-  { ar: "معرض التراث", en: "Heritage Fair", date: "2026-02", cat: "events", seed: "aliph06",
+  { ar: "معرض التراث", en: "Heritage Fair", date: "2026-02", cat: "design", seed: "aliph06",
     desc: { ar: "تنظيم معرض ثلاثة أيام: توزيع المساحة، لافتات، وتوثيق مصوّر.",
             en: "A three-day fair: spatial layout, signage, and photographic documentation." } },
-  { ar: "سوق البلدة", en: "Old Town Market", date: "2026-01", cat: "creative", seed: "aliph07",
+  { ar: "سوق البلدة", en: "Old Town Market", date: "2026-01", cat: "photo", seed: "aliph07",
     desc: { ar: "حملة إعلانيّة كاملة لإحياء السوق القديم: مفهوم، تصوير، وإدارة منصّات لثلاثة أشهر.",
             en: "A full campaign to revive the old market: concept, photography, and three months of channel management." } },
-  { ar: "جبل الزيتون", en: "Mount of Olives", date: "2026-01", cat: "creative", seed: "aliph08",
+  { ar: "جبل الزيتون", en: "Mount of Olives", date: "2026-01", cat: "photo", seed: "aliph08",
     desc: { ar: "لقطات من الجبل عند الفجر — مادّة أساس لمكتبة الصور.",
             en: "Shots from the mount at first light — base material for the image library." } },
   { ar: "متجر بنيان", en: "Bunyan Shop", date: "2025-11", cat: "tech", seed: "aliphT3",
@@ -353,19 +514,19 @@ const PROJECTS = [
       shots: ["aliphT3a", "aliphT3b", "aliphT3c", "aliphT3d"],
       preview: "preview/site-demo.html",
     } },
-  { ar: "ليالي رمضان", en: "Ramadan Nights", date: "2025-10", cat: "events", seed: "aliph09",
+  { ar: "ليالي رمضان", en: "Ramadan Nights", date: "2025-10", cat: "photo", seed: "aliph09",
     desc: { ar: "فعاليّة مجتمعيّة على مدار الشهر: برنامج، هويّة للفعاليّة، وتغطية يوميّة.",
             en: "A month-long community event: program, event identity, and daily coverage." } },
-  { ar: "البلدة القديمة", en: "The Old City", date: "2025-09", cat: "creative", seed: "aliph10",
+  { ar: "البلدة القديمة", en: "The Old City", date: "2025-09", cat: "photo", seed: "aliph10",
     desc: { ar: "أرشيف مصوّر للأزقّة والأبواب، صُوّر على مدار فصلين.",
             en: "A photographic archive of alleys and doorways, shot across two seasons." } },
-  { ar: "مهرجان الصيف", en: "Summer Festival", date: "2025-08", cat: "events", seed: "aliph11",
+  { ar: "مهرجان الصيف", en: "Summer Festival", date: "2025-08", cat: "design", seed: "aliph11",
     desc: { ar: "مهرجان مفتوح: هويّة بصريّة، لافتات موقع، وتوثيق مباشر.",
             en: "An open-air festival: visual identity, site signage, and live documentation." } },
-  { ar: "دار الأيتام", en: "Orphanage Campaign", date: "2025-06", cat: "creative", seed: "aliph12",
+  { ar: "دار الأيتام", en: "Orphanage Campaign", date: "2025-06", cat: "photo", seed: "aliph12",
     desc: { ar: "حملة تبرّعات هادئة تعتمد على الحكاية لا على الصخب.",
             en: "A quiet fundraising campaign built on story rather than volume." } },
-  { ar: "مطعم الديوان", en: "Al-Diwan Restaurant", date: "2025-05", cat: "identity", seed: "aliph13",
+  { ar: "مطعم الديوان", en: "Al-Diwan Restaurant", date: "2025-05", cat: "design", seed: "aliph13",
     desc: { ar: "هويّة مطعم: شعار، قوائم، قرطاسيّة، ونظام لافتات.",
             en: "A restaurant identity: mark, menus, stationery, and a signage system." } },
   { ar: "لوحة المواسم", en: "Seasons Dashboard", date: "2025-04", cat: "tech", seed: "aliphT4",
@@ -387,22 +548,22 @@ const PROJECTS = [
       ],
       shots: ["aliphT4a", "aliphT4b", "aliphT4c"],
     } },
-  { ar: "أسبوع التصميم", en: "Design Week", date: "2025-03", cat: "events", seed: "aliph14",
+  { ar: "أسبوع التصميم", en: "Design Week", date: "2025-03", cat: "design", seed: "aliph14",
     desc: { ar: "برنامج أسبوع كامل: جدول، مطبوعات، وتغطية للجلسات.",
             en: "A week-long program: schedule, printed matter, and session coverage." } },
-  { ar: "افتتاح المكتبة", en: "Library Opening", date: "2024-11", cat: "events", seed: "aliph15",
+  { ar: "افتتاح المكتبة", en: "Library Opening", date: "2024-11", cat: "design", seed: "aliph15",
     desc: { ar: "افتتاح مكتبة الحيّ: دعوات، لافتات، وتوثيق الليلة.",
             en: "A neighbourhood library opening: invitations, signage, and coverage of the night." } },
-  { ar: "حملة التخرّج", en: "Graduation Campaign", date: "2024-09", cat: "creative", seed: "aliph16",
+  { ar: "حملة التخرّج", en: "Graduation Campaign", date: "2024-09", cat: "photo", seed: "aliph16",
     desc: { ar: "حملة موسميّة للجامعات: مفهوم، تصوير، ونشر على المنصّات.",
             en: "A seasonal campaign for universities: concept, photography, and channel rollout." } },
-  { ar: "بيت الشباب", en: "Youth House", date: "2024-07", cat: "identity", seed: "aliph17",
+  { ar: "بيت الشباب", en: "Youth House", date: "2024-07", cat: "design", seed: "aliph17",
     desc: { ar: "هويّة مرنة لمركز شبابي، تتحمّل أيدي كثيرة وتظلّ متماسكة.",
             en: "A flexible identity for a youth centre — it survives many hands and stays coherent." } },
-  { ar: "نادي القراءة", en: "Reading Club", date: "2024-05", cat: "creative", seed: "aliph18",
+  { ar: "نادي القراءة", en: "Reading Club", date: "2024-05", cat: "design", seed: "aliph18",
     desc: { ar: "محتوى شهري لنادي قراءة: أغلفة، اقتباسات، ومنشورات.",
             en: "Monthly content for a reading club: covers, pull quotes, and posts." } },
-  { ar: "عرس فلسطيني", en: "Palestinian Wedding", date: "2024-03", cat: "creative", seed: "aliph19",
+  { ar: "عرس فلسطيني", en: "Palestinian Wedding", date: "2024-03", cat: "photo", seed: "aliph19",
     desc: { ar: "توثيق عرس كامل من التحضير إلى آخر رقصة.",
             en: "A full wedding documented from preparation to the last dance." } },
 ];
@@ -416,14 +577,6 @@ const MONTHS = {
   en: ["January", "February", "March", "April", "May", "June",
        "July", "August", "September", "October", "November", "December"],
 };
-
-/* marquee items — the four services link to the services section */
-const MQ_ITEMS = [
-  { key: "svc1", target: "identity" },
-  { key: "svc2", target: "creative" },
-  { key: "svc3", target: "events" },
-  { key: "svc4", target: "tech" },
-];
 
 let lang = localStorage.getItem("aliph-lang") === "en" ? "en" : "ar";
 
@@ -482,19 +635,21 @@ function makeLoop(track, speed) {
   });
 }
 
-const MQ_SPEED = 40;
 const BAND_SPEED = 40;
 
-let mqTween = null, bandTween = null;
+let bandTween = null;
 
-/* 4 hero film frames — one per service, in service order */
+/* The group stays 4 frames — it is matched to the film tile, whose width is
+   one group and whose sprocket pattern repeats in lockstep with it. Re-cutting
+   the tile to 3 is a separate job (see resources/recut_film.py), so with three
+   services photography takes two of the four slots. */
 const FILM_FRAMES = [
-  { seed: "aliphf1", svc: "identity", cap: { ar: "مؤسّسة بنيان — هويّة", en: "Bunyan — identity" } },
-  { seed: "aliphf5", svc: "creative", cap: { ar: "سوق البلدة — حملة", en: "Old Town Market — campaign" } },
-  { seed: "aliphf7", svc: "events",   cap: { ar: "ليالي رمضان — فعاليّة", en: "Ramadan Nights — event" } },
-  { seed: "aliphf9", svc: "tech",     cap: { ar: "عودة الملكة — منصّة", en: "Queen's Retreat — platform" } },
+  { seed: "aliphf1", svc: "design", cap: { ar: "مؤسّسة بنيان — هويّة", en: "Bunyan — identity" } },
+  { seed: "aliphf5", svc: "photo",  cap: { ar: "سوق البلدة — حملة", en: "Old Town Market — campaign" } },
+  { seed: "aliphf7", svc: "photo",  cap: { ar: "ليالي رمضان — تغطية", en: "Ramadan Nights — coverage" } },
+  { seed: "aliphf9", svc: "tech",   cap: { ar: "عودة الملكة — منصّة", en: "Queen's Retreat — platform" } },
 ];
-const SERVICE_FRAMES = { identity: 0, creative: 1, events: 2, tech: 3 };
+const SERVICE_FRAMES = { design: 0, photo: 1, tech: 3 };
 const filmScroll = document.getElementById("filmScroll");
 
 /* One group = the 4 frames. The group is cloned across the strip and the film
@@ -519,23 +674,6 @@ function buildFilm() {
   return group;
 }
 
-function buildMarqueeSource() {
-  const track = document.getElementById("marqueeTrack");
-  if (!track) return;
-  track.innerHTML = "";
-  MQ_ITEMS.forEach((it) => {
-    const el = document.createElement("span");
-    el.className = "mq-item";
-    el.dataset.target = it.target;
-    el.innerHTML = `<span data-i18n="${it.key}"></span><i class="mq-star">✳</i>`;
-    track.appendChild(el);
-  });
-  const brand = document.createElement("span");
-  brand.className = "mq-item";
-  brand.innerHTML = `<span class="latin" lang="en">ALIPH CREATIVE</span><i class="mq-star">✳</i>`;
-  track.appendChild(brand);
-}
-
 function buildBandSource() {
   const track = document.getElementById("contactBandTrack");
   if (!track) return;
@@ -549,8 +687,8 @@ function buildBandSource() {
 }
 
 /* ══════════ don't animate what isn't on screen ══════════
-   The marquee, the contact band and the film strip all run continuously and
-   never stop — including while you are scrolled a page and a half past them.
+   The contact band and the film strip both run continuously and never stop —
+   including while you are scrolled a page and a half past them.
    Each one is a composited layer being retransformed every single frame, and
    on a phone that competes directly with the scroll itself. Desktop GPUs
    absorb it; phones are exactly where it shows up as "laggy when scrolling
@@ -573,22 +711,18 @@ function pauseOffscreen(el, getTween) {
   return () => visible;
 }
 
-let mqVisible = () => true;
 let bandVisible = () => true;
 let loopWatchersReady = false;
 
 function rebuildLoops() {
-  [mqTween, bandTween].forEach((t) => t && t.kill());
-  mqTween = makeLoop(document.getElementById("marqueeTrack"), MQ_SPEED);
+  if (bandTween) bandTween.kill();
   bandTween = makeLoop(document.getElementById("contactBandTrack"), BAND_SPEED);
 
   if (!loopWatchersReady) {
-    mqVisible = pauseOffscreen(document.querySelector(".marquee"), () => mqTween);
     bandVisible = pauseOffscreen(document.querySelector(".contact-band"), () => bandTween);
     loopWatchersReady = true;
   }
   /* a fresh tween plays on creation — honour where the page actually is */
-  if (mqTween && !mqVisible()) mqTween.pause();
   if (bandTween && !bandVisible()) bandTween.pause();
 }
 
@@ -664,8 +798,18 @@ const filmLoop = (() => {
     return want + (target - lead);
   }
 
-  function run() {
+  /* ⚠️ ALWAYS null the handle when killing. gsap's kill() does not clear the
+     reference, and a killed tween still answers truthy — so setVisible() would
+     call resume() on a corpse and the strip would never move again. That was
+     the "film strip stops randomly" bug: hovering a service pick killed the
+     tween while the hero was off screen, and nothing could revive it. */
+  function stop() {
     if (tween) tween.kill();
+    tween = null;
+  }
+
+  function run() {
+    stop();
     if (prefersReduced || !ready || !onScreen) return;
     const from = gsap.getProperty(filmScroll, "x") || 0;
     tween = gsap.fromTo(filmScroll,
@@ -676,7 +820,7 @@ const filmLoop = (() => {
 
   return {
     rebuild() {
-      if (tween) tween.kill();
+      stop();
       ready = false;
       const group = buildFilm();
       if (!group) return;
@@ -699,7 +843,7 @@ const filmLoop = (() => {
     focus(id) {
       const i = SERVICE_FRAMES[id];
       if (i == null || !ready) return;
-      if (tween) tween.kill();
+      stop();
       if (!prefersReduced) {
         gsap.to(filmScroll, { x: xForFrame(i), duration: 0.85, ease: "power3.inOut", overwrite: true });
       }
@@ -718,6 +862,8 @@ const filmLoop = (() => {
     setVisible(v) {
       if (v === onScreen) return;
       onScreen = v;
+      /* no live tween to resume — build a fresh one rather than assuming one
+         is merely paused (see stop() above) */
       if (!tween) { if (v) run(); return; }
       v ? tween.resume() : tween.pause();
     },
@@ -930,31 +1076,22 @@ function applyI18n() {
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
 
-  buildMarqueeSource();
   buildBandSource();
 
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const entry = I18N[el.dataset.i18n];
     if (entry) el.textContent = entry[lang];
   });
-  document.querySelectorAll(".sc-idx[data-num]").forEach((el) => {
-    el.textContent = num(el.dataset.num);
-  });
-  document.querySelectorAll(".story-index").forEach((el, i) => {
-    el.textContent = num("0" + (i + 1));
-  });
-
   /* must run after the [data-i18n] loop above — that loop rewrites the
      headline's textContent and destroys the chips every time */
   initRansom();
 
-  svcSlider.render();
+  svcPicker.render();
   renderLibrary();
   renderServiceSections();
   projectSheet.refresh();
   rebuildLoops();
   filmLoop.rebuild();
-  initScatter();
   tickClock();
 }
 
@@ -1046,8 +1183,8 @@ if (menuBtn && overlay) {
    anyway, and counting it would leave the button stuck dark after the
    curtain lifts, since nothing re-samples until the first scroll. */
 const DARK_UNDER = [
-  ".filmstrip", ".banner", ".marquee", ".story-panel.ink", ".footer",
-  ".testi", ".sl-stage", ".service-cell.is-active",
+  ".filmstrip", ".banner", ".footer",
+  ".testi", ".sw-stage", ".svc-pick.is-active",
 ].join(",");
 
 /* ⚠️ This is the one thing on the page that does real main-thread work on
@@ -1097,158 +1234,64 @@ function queueMenuSync() {
 window.addEventListener("scroll", queueMenuSync, { passive: true });
 window.addEventListener("resize", queueMenuSync);
 
-/* ══════════ what we do — awards strip + latest-work slider ══════════
-   The stage shows the newest projects in whichever service is selected,
-   newest first. Mechanics are unchanged from the old example panel — the
-   service cells still drive it — but each service now carries several
-   pieces, so prev/next step through that category's latest work. */
-const SLIDER_MAX = 5;
+/* ══════════ what we do — service picker + example switcher ══════════
+   Three services, shown one at a time. The arrows step through that service's
+   SUBCATEGORIES (logos / printables / posters …), not through projects — the
+   right-hand column speaks about the category and the subcategory together.
+   Deliberately not animated: the swap is a straight repaint. */
+let currentService = "design";
 
-let currentService = "identity";
+const svcPicker = (() => {
+  const stage = document.getElementById("swStage");
+  if (!stage) return { setService() {}, render() {}, next() {}, prev() {} };
 
-const svcSlider = (() => {
-  const stage = document.getElementById("slStage");
-  const slides = document.getElementById("slSlides");
-  if (!stage || !slides) return { setService() {}, render() {}, next() {}, prev() {} };
+  const media = document.getElementById("swMedia");
+  const elCap = document.getElementById("swCap");
+  const elKicker = document.getElementById("swKicker");
+  const elName = document.getElementById("swName");
+  const elDesc = document.getElementById("swDesc");
+  const elIndex = document.getElementById("swIndex");
+  const elTotal = document.getElementById("swTotal");
 
-  const wipe = document.getElementById("slWipe");
-  const stamp = document.getElementById("slStamp");
-  const elKicker = document.getElementById("slKicker");
-  const elTitle = document.getElementById("slTitle");
-  const elMeta = document.getElementById("slMeta");
-  const elDesc = document.getElementById("slDesc");
-  const elIndex = document.getElementById("slIndex");
-  const elTotal = document.getElementById("slTotal");
-  const elCap = document.getElementById("slPlateCap");
-  const elTag = document.getElementById("slPlateTag");
-  const elBar = document.getElementById("slProgressBar");
+  let items = [], idx = 0;
 
-  const line = elTitle.querySelector(".line");
-  const SVC_TAG = { identity: "IDENTITY", creative: "CREATIVE", events: "EVENTS", tech: "TECHNOLOGY" };
-
-  let items = [], idx = 0, busy = false;
-
-  const rtl = () => document.documentElement.dir === "rtl";
-  const stampRot = () => (rtl() ? -7 : 7);
   const svcName = (id) => {
     const c = CATS.find((c) => c.id === id);
     return c ? c[lang] : "";
   };
 
-  function pick(catId) {
-    return PROJECTS.filter((p) => p.cat === catId).sort(byDate).slice(0, SLIDER_MAX);
-  }
-
-  /* one <img> lives in the stage and is swapped behind the wipe; the rest
-     are warmed in the background so the swap never shows a blank frame */
-  function ensureImg() {
-    let img = slides.querySelector("img");
-    if (!img) {
-      slides.innerHTML = `<div class="sl-slide"><img alt=""></div>`;
-      img = slides.querySelector("img");
-    }
-    return img;
-  }
-  const src = () => HOLDER;
-  function preload() {
-    items.forEach((p) => { const i = new Image(); i.src = src(p); });
-  }
-
-  /* write both sides for the current item — no animation. the .line node is
-     reused rather than rebuilt so tweens can hold a stable reference to it */
   function paint() {
-    const p = items[idx];
-    if (!p) return;
-    elKicker.textContent = `${I18N.slLatest[lang]} — ${svcName(currentService)}`;
-    line.textContent = p[lang];
-    /* the separator is punctuation, not content — aria-hidden here too, or
-       the repaint silently drops what the static markup declares */
-    elMeta.innerHTML =
-      `<span class="sl-date">${fmtDate(p.date)}</span>` +
-      `<span class="sl-sep" aria-hidden="true">·</span>` +
-      `<span class="sl-cat">${svcName(p.cat)}</span>`;
-    elDesc.textContent = p.desc ? p.desc[lang] : "";
+    const s = items[idx];
+    if (!s) return;
+    elKicker.textContent = svcName(currentService);
+    elName.textContent = s[lang];
+    elDesc.textContent = s.desc ? s.desc[lang] : "";
     elIndex.textContent = num(String(idx + 1).padStart(2, "0"));
     elTotal.textContent = num(String(items.length).padStart(2, "0"));
-    elCap.textContent = p[lang];
-    elTag.textContent = SVC_TAG[currentService] || "";
-    elBar.style.transform = `scaleX(${(idx + 1) / items.length})`;
-    /* only the newest piece in a category wears the stamp. GSAP writes
-       inline styles, so the resting state has to be set here too or the
-       CSS :not(.on) rule loses to a leftover inline opacity */
-    const newest = idx === 0;
-    stamp.classList.toggle("on", newest);
-    gsap.set(stamp, newest
-      ? { opacity: 1, scale: 1, rotate: stampRot() }
-      : { opacity: 0 });
-    ensureImg().src = src(p);
+    elCap.textContent = `${svcName(currentService)} — ${s[lang]}`;
+    setHolder(media, s);
   }
 
-  /* the swap: the text lifts out and an ink bar sweeps in from the leading
-     edge; content changes behind it; the bar sweeps off the far edge and the
-     photo settles out of a slow zoom while the new text drops in.
-     Everything that depends on the new content is created *after* paint(),
-     so no tween is left pointing at the previous slide's values. */
-  function go(next, dir, force) {
-    if (busy || !items.length) return;
-    const target = ((next % items.length) + items.length) % items.length;
-    if (target === idx && !force) return;
-    idx = target;
-
-    if (prefersReduced || !wipe) { paint(); return; }
-    busy = true;
-    const isRtl = rtl();
-    /* the bar enters from the side the new slide travels in from */
-    const enter = dir > 0 ? (isRtl ? "right" : "left") : (isRtl ? "left" : "right");
-    const exit = enter === "left" ? "right" : "left";
-
-    gsap.timeline({ onComplete: () => (busy = false) })
-      .set(wipe, { transformOrigin: `${enter} center`, scaleX: 0 })
-      .to(wipe, { scaleX: 1, duration: 0.42, ease: "power3.in" }, 0)
-      .to(line, { yPercent: -108, duration: 0.34, ease: "power3.in" }, 0)
-      .to([elMeta, elDesc], { opacity: 0, y: -10, duration: 0.3, ease: "power2.in" }, 0)
-      .add(() => {
-        paint();
-        gsap.set(line, { yPercent: 108 });
-        gsap.fromTo(slides.querySelector("img"),
-          { scale: 1.14, xPercent: dir * (isRtl ? 3 : -3) },
-          { scale: 1, xPercent: 0, duration: 1.5, ease: "power3.out" });
-        if (idx === 0) {
-          gsap.fromTo(stamp,
-            { opacity: 0, scale: 0.7, rotate: 0 },
-            { opacity: 1, scale: 1, rotate: stampRot(), duration: 0.55, delay: 0.36, ease: "back.out(2.2)" });
-        }
-      })
-      .set(wipe, { transformOrigin: `${exit} center` })
-      .to(wipe, { scaleX: 0, duration: 0.52, ease: "power3.out" })
-      .to(line, { yPercent: 0, duration: 0.6, ease: "power4.out" }, "-=0.46")
-      .fromTo([elMeta, elDesc],
-        { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.07, ease: "power2.out" }, "-=0.5");
+  function go(next) {
+    if (!items.length) return;
+    idx = ((next % items.length) + items.length) % items.length;
+    paint();
   }
 
   return {
-    /* switching service jumps to that category's newest piece — forced,
-       because the index is usually already 0 but the content has changed */
-    setService(catId) {
-      items = pick(catId);
-      preload();
-      go(0, 1, true);
-    },
-    /* language switch / first boot: repaint in place, no transition */
+    setService(id) { items = SUBCATS[id] || []; idx = 0; paint(); },
     render() {
-      items = pick(currentService);
+      items = SUBCATS[currentService] || [];
       idx = Math.min(idx, Math.max(items.length - 1, 0));
-      preload();
-      gsap.set([line, elMeta, elDesc], { clearProps: "all" });
       paint();
     },
-    next() { go(idx + 1, 1); },
-    prev() { go(idx - 1, -1); },
+    next() { go(idx + 1); },
+    prev() { go(idx - 1); },
   };
 })();
 
 function activateService(id, scroll) {
-  const cells = document.querySelectorAll(".service-cell");
+  const cells = document.querySelectorAll(".svc-pick");
   if (!cells.length) return;
   cells.forEach((b) => {
     const on = b.dataset.service === id;
@@ -1256,83 +1299,28 @@ function activateService(id, scroll) {
     b.setAttribute("aria-selected", String(on));
   });
   currentService = id;
-  svcSlider.setService(id);
+  svcPicker.setService(id);
   if (scroll) {
     document.getElementById("services").scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
   }
 }
 
-document.getElementById("slNext")?.addEventListener("click", () => svcSlider.next());
-document.getElementById("slPrev")?.addEventListener("click", () => svcSlider.prev());
+document.getElementById("swNext")?.addEventListener("click", () => svcPicker.next());
+document.getElementById("swPrev")?.addEventListener("click", () => svcPicker.prev());
 
-document.querySelectorAll(".service-cell").forEach((btn) => {
+document.querySelectorAll(".svc-pick").forEach((btn) => {
   btn.addEventListener("click", () => activateService(btn.dataset.service, false));
-  /* hovering a service drives the hero film strip to its two frames */
-  btn.addEventListener("mouseenter", () => filmLoop.focus(btn.dataset.service));
-  btn.addEventListener("mouseleave", () => filmLoop.blur());
+  /* ⚠️ No filmLoop.focus()/blur() here any more. The strip is three screens up,
+     so the glide drove nothing anyone could see — and it was pointing the loop
+     at a frame while the hero was off screen, which is how the strip ended up
+     stopped. filmLoop.focus() still exists for whenever something NEAR the
+     hero wants to drive it. */
 });
-
-/* marquee: hover pauses the loop + syncs the film, click jumps to that service */
-const marquee = document.getElementById("marquee");
-if (marquee) {
-  marquee.addEventListener("mouseenter", () => mqTween && mqTween.pause());
-  marquee.addEventListener("mouseleave", () => mqTween && mqTween.resume());
-  marquee.addEventListener("mouseover", (e) => {
-    const item = e.target.closest(".mq-item[data-target]");
-    if (item) filmLoop.focus(item.dataset.target);
-  });
-  marquee.addEventListener("mouseout", (e) => {
-    const item = e.target.closest(".mq-item[data-target]");
-    const to = e.relatedTarget && e.relatedTarget.closest(".mq-item[data-target]");
-    if (item && !to) filmLoop.blur();
-  });
-  marquee.addEventListener("click", (e) => {
-    const item = e.target.closest(".mq-item[data-target]");
-    if (item) activateService(item.dataset.target, true);
-  });
-}
 
 const band = document.querySelector(".contact-band");
 if (band) {
   band.addEventListener("mouseenter", () => bandTween && bandTween.pause());
   band.addEventListener("mouseleave", () => bandTween && bandTween.resume());
-}
-
-/* ══════════ story: scattered media parallax ══════════ */
-const SCATTER_BASE = [-3, 2.4, -1.6];
-
-function initScatter() {
-  document.querySelectorAll("[data-scatter]").forEach((sc) => {
-    if (sc.dataset.bound) return;
-    sc.dataset.bound = "1";
-    const cards = Array.from(sc.querySelectorAll(".scatter-card"));
-    cards.forEach((c, i) => {
-      c._base = SCATTER_BASE[i % SCATTER_BASE.length];
-      gsap.set(c, { rotation: c._base });
-    });
-    if (prefersReduced) return;
-
-    sc.addEventListener("mousemove", (e) => {
-      const r = sc.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width - 0.5;
-      const py = (e.clientY - r.top) / r.height - 0.5;
-      cards.forEach((c) => {
-        const d = parseFloat(c.dataset.depth || 1);
-        gsap.to(c, {
-          x: -px * d * 16,
-          y: -py * d * 13,
-          rotation: c._base + px * d * 1.1,
-          duration: 0.6,
-          ease: "power2.out",
-        });
-      });
-    });
-    sc.addEventListener("mouseleave", () => {
-      cards.forEach((c) =>
-        gsap.to(c, { x: 0, y: 0, rotation: c._base, duration: 0.8, ease: "power3.out" })
-      );
-    });
-  });
 }
 
 /* ══════════ hero dropcap: the paper uncrumples ══════════
@@ -1398,7 +1386,6 @@ if (page === "index" && !prefersReduced) {
   gsap.from(".rule-double", { scaleX: 0, transformOrigin: "right center", duration: 1, ease: "power3.inOut" });
   gsap.from(".hero-panel", { opacity: 0, y: 34, duration: 1, delay: 0.35, ease: "power3.out" });
   gsap.from(".hero-title .line", { yPercent: 110, duration: 1, stagger: 0.12, delay: 0.5, ease: "power4.out" });
-  gsap.from(".hero-rule", { scaleX: 0, duration: 1, delay: 0.9, ease: "power3.inOut" });
 
   gsap.utils.toArray(".banner h2").forEach((el) => {
     gsap.from(el, {
@@ -1406,22 +1393,10 @@ if (page === "index" && !prefersReduced) {
       scrollTrigger: { trigger: el, start: "top 88%" },
     });
   });
-  gsap.utils.toArray(".service-cell").forEach((el) => {
-    gsap.from(el, {
-      opacity: 0, y: 20, duration: 0.7, ease: "power2.out",
-      scrollTrigger: { trigger: el, start: "top 94%" },
-    });
-  });
-  gsap.utils.toArray(".story-panel").forEach((panel) => {
-    gsap.from(panel.querySelectorAll(".story-text > *"), {
-      opacity: 0, y: 26, duration: 0.75, stagger: 0.09, ease: "power2.out",
-      scrollTrigger: { trigger: panel, start: "top 65%" },
-    });
-    gsap.from(panel.querySelectorAll(".scatter-card"), {
-      opacity: 0, scale: 0.94, y: 30, duration: 0.8, stagger: 0.1, ease: "power3.out",
-      scrollTrigger: { trigger: panel, start: "top 70%" },
-    });
-  });
+  /* the remodelled sections — لماذا ألِف؟ and ماذا نفعل؟ — are deliberately
+     not animated. They are a printed sheet: it doesn't assemble itself while
+     you read it. The banners above them still rise, since those belong to the
+     page furniture rather than to either section. */
 }
 
 /* ══════════ library: category accordion ══════════ */

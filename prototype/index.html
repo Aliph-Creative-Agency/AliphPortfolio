@@ -63,12 +63,10 @@
 
   <div class="hero-overlay">
     <div class="hero-panel">
-      <p class="hero-eyebrow" data-i18n="heroEyebrow">استوديو إبداعي — القدس، جبل الزيتون</p>
       <h1 class="hero-title">
         <span class="line-mask"><span class="line" data-i18n="hero1">نبدأ من حيث</span></span>
         <span class="line-mask"><span class="line" data-i18n="hero2">تبدأ الأشياء.</span></span>
       </h1>
-      <div class="hero-rule" aria-hidden="true"></div>
       <div class="dropcap-block">
         <span class="dropcap" data-cap>
           <span class="dc-sheet" aria-hidden="true"></span>
@@ -87,81 +85,147 @@
   </div>
 </section>
 
-<!-- ══════════ INTERACTIVE MARQUEE ══════════ -->
-<div class="marquee" id="marquee">
-  <div class="marquee-track" id="marqueeTrack"></div>
-</div>
+<!-- ══════════ WHY ALIPH — three editorial blocks ══════════
+     Laid out to the user's annotated wireframe. Track widths and media
+     aspects come straight off that overlay; the titles deliberately move
+     from block to block (right column → left → full width) rather than all
+     hanging off one edge. Deliberately unanimated — it is a printed sheet. -->
+<div class="banner"><h2 data-i18n="storyBanner">لماذا ألِف؟</h2></div>
 
-<!-- ══════════ WHAT WE DO ══════════ -->
+<section class="why" id="why">
+
+  <!-- block 1 — title + text in a narrow right column, wide film beside it -->
+  <article class="why-block wb1">
+    <div class="wb1-side">
+      <h3 class="why-title" data-i18n="w1Title">صوت واحد، حرفان، ولغتان.</h3>
+      <p class="why-para" data-i18n="w1Para">يستمدّ ألِف اسمه من الألف.</p>
+    </div>
+    <figure class="holder wb1-media" data-kind="video">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
+          <figcaption data-i18n="w1Cap">من جلسة تصوير — البلدة القديمة</figcaption>
+        </figure>
+  </article>
+
+  <hr class="splitter">
+
+  <!-- block 2 — title over a zigzag of two pictures, tall rail alongside -->
+  <article class="why-block wb2">
+    <div class="wb2-main">
+      <h3 class="why-title" data-i18n="w2Title">نبحث عن النقطة، ثم نرسم النظام.</h3>
+      <div class="wb2-a">
+        <div class="wb-col">
+          <p class="why-para" data-i18n="w2ParaA">لكل علامة نقطة أصل.</p>
+          <p class="why-para" data-i18n="w2ParaA2">لا نبدأ من الشكل.</p>
+          <p class="why-para" data-i18n="w2ParaA3">ونعرض مبكرًا.</p>
+        </div>
+        <figure class="holder wb2-m1" data-kind="still">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
+          <figcaption data-i18n="w2Cap1">تجارب الخط</figcaption>
+        </figure>
+      </div>
+
+      <p class="why-para wb2-b" data-i18n="w2ParaB">ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة.</p>
+
+      <div class="wb2-c">
+        <figure class="holder wb2-m2" data-kind="still">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
+          <figcaption data-i18n="w2Cap2">المطبوعات</figcaption>
+        </figure>
+        <div class="wb-col">
+          <p class="why-para" data-i18n="w2ParaC">ثم يثبّت النظام نفسه.</p>
+          <p class="why-para" data-i18n="w2ParaC2">وما يُسلّم دفتر كامل.</p>
+          <p class="why-para" data-i18n="w2ParaC3">ولا نصمّم ما لا نعرف صنعه.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wb2-rail">
+      <figure class="holder wb2-rail-media" data-kind="poster">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
+          <figcaption data-i18n="w2Cap3">ملصق — ليالي رمضان</figcaption>
+        </figure>
+      <p class="why-para" data-i18n="w2Rail">الملصق يُقرأ من بعيد ثم من قريب.</p>
+    </div>
+  </article>
+
+  <hr class="splitter">
+
+  <!-- block 3 — full-width title, then two text columns flanking a tall cut -->
+  <article class="why-block wb3">
+    <h3 class="why-title wb3-head" data-i18n="w3Title">أن تبدو النتيجة حتميّة.</h3>
+    <div class="wb3-body">
+      <div class="wb-col">
+        <p class="why-para" data-i18n="w3ParaA">لا نسلّم شعارًا ونمضي.</p>
+        <p class="why-para" data-i18n="w3ParaB">والاختبار الحقيقي يأتي بعد سنة.</p>
+        <p class="why-para" data-i18n="w3ParaC">نكتب القواعد بلغة من سيستعملها.</p>
+        <p class="why-para" data-i18n="w3ParaD">ونقيس ما نستطيع قياسه.</p>
+        <p class="why-para" data-i18n="w3ParaE">وما لا يُقاس نحكم عليه بالعين.</p>
+        <p class="why-para" data-i18n="w3ParaF">ونُبقي النظام مفتوحًا للنموّ.</p>
+      </div>
+      <figure class="holder wb3-media" data-kind="reel">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
+          <figcaption data-i18n="w3Cap">الختم على العمل</figcaption>
+        </figure>
+      <div class="wb-col">
+        <p class="why-para" data-i18n="w3Para2A">ونحن فريق صغير عن قصد.</p>
+        <p class="why-para" data-i18n="w3Para2B">نختار المشاريع التي نستطيع.</p>
+        <p class="why-para" data-i18n="w3Para2C">وحين ينتهي المشروع لا تنتهي العلاقة.</p>
+        <p class="why-para" data-i18n="w3Para2D">ونحبّ العمل الطويل.</p>
+        <p class="why-para" data-i18n="w3Para2E">ونكتب كل شيء.</p>
+        <p class="why-para" data-i18n="w3Para2F">وفي النهاية المقياس واحد.</p>
+      </div>
+    </div>
+  </article>
+
+  <hr class="splitter">
+
+  <!-- the way out of the section: one line, and the door -->
+  <div class="why-outro">
+    <p class="why-outro-line" data-i18n="whyOutro">الحكاية كاملةً.</p>
+    <a class="oval-btn" href="about.html">
+      <span class="oval-swap">
+        <span class="ob-face ob-label" data-i18n="btnAbout">تعرّف على ألِف</span>
+        <span class="ob-face ob-arrow" aria-hidden="true">
+          <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+          </svg>
+        </span>
+      </span>
+    </a>
+  </div>
+
+</section>
+
+<!-- ══════════ WHAT WE DO — service picker + example switcher ══════════
+     Three services as one dot-separated line; the arrows step through the
+     selected service's subcategories, and the column beside the stage speaks
+     about the category and the subcategory together. -->
 <div class="banner"><h2 data-i18n="svcBanner">ماذا نفعل؟</h2></div>
 
 <section class="services" id="services">
-  <div class="services-strip" role="tablist" aria-label="الخدمات">
-    <button class="service-cell is-active" role="tab" aria-selected="true" data-service="identity">
-      <span>
-        <span class="sc-label" data-i18n="svc1Label">IDENTITY</span>
-        <span class="sc-name" data-i18n="svc1">هويّات بصريّة</span>
-      </span>
-      <span class="sc-idx" data-num="01">٠١</span>
+  <div class="svc-picks" role="tablist" aria-label="الخدمات">
+    <button class="svc-pick is-active" role="tab" aria-selected="true" data-service="design">
+      <span data-i18n="svc1">تصميم</span>
     </button>
-    <button class="service-cell" role="tab" aria-selected="false" data-service="creative">
-      <span>
-        <span class="sc-label" data-i18n="svc2Label">CREATIVE</span>
-        <span class="sc-name" data-i18n="svc2">تسويق ومحتوى إبداعي</span>
-      </span>
-      <span class="sc-idx" data-num="02">٠٢</span>
+    <span class="svc-dot" aria-hidden="true">·</span>
+    <button class="svc-pick" role="tab" aria-selected="false" data-service="photo">
+      <span data-i18n="svc2">تصوير</span>
     </button>
-    <button class="service-cell" role="tab" aria-selected="false" data-service="events">
-      <span>
-        <span class="sc-label" data-i18n="svc3Label">EVENTS</span>
-        <span class="sc-name" data-i18n="svc3">تنظيم فعاليّات</span>
-      </span>
-      <span class="sc-idx" data-num="03">٠٣</span>
-    </button>
-    <button class="service-cell" role="tab" aria-selected="false" data-service="tech">
-      <span>
-        <span class="sc-label" data-i18n="svc4Label">TECHNOLOGY</span>
-        <span class="sc-name" data-i18n="svc4">حلول تقنيّة</span>
-      </span>
-      <span class="sc-idx" data-num="04">٠٤</span>
+    <span class="svc-dot" aria-hidden="true">·</span>
+    <button class="svc-pick" role="tab" aria-selected="false" data-service="tech">
+      <span data-i18n="svc3">برمجة</span>
     </button>
   </div>
 
-  <!-- latest work in the service currently being viewed -->
-  <div class="svc-latest" id="svcLatest">
-
-    <div class="sl-text">
-      <p class="sl-kicker" id="slKicker">أحدث الأعمال — هويّات بصريّة</p>
-
-      <h3 class="sl-title" id="slTitle">
-        <span class="line-mask"><span class="line">مؤسّسة بنيان</span></span>
-      </h3>
-
-      <div class="sl-meta" id="slMeta">
-        <span class="sl-date">أيّار ٢٠٢٦</span>
-        <span class="sl-sep" aria-hidden="true">·</span>
-        <span class="sl-cat">هويّات بصريّة</span>
-      </div>
-
-      <p class="sl-desc" id="slDesc">حضورٌ أوضح وأكثر حداثة، مع الحفاظ على روح العلامة القريبة والمألوفة: شعار، ألوان، تغليف، وظهور يومي.</p>
-
-      <div class="sl-foot">
-        <div class="sl-nav">
-          <button class="sl-arrow" id="slPrev" aria-label="السابق">
-            <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-              <path d="M33 6H2"/><path d="M9 1C7.6 3.4 5.4 5 1 6c4.4 1 6.6 2.6 8 5"/>
-            </svg>
-          </button>
-          <span class="sl-index" aria-hidden="true">
-            <b id="slIndex">٠١</b><i aria-hidden="true">/</i><span id="slTotal">٠٥</span>
-          </span>
-          <button class="sl-arrow" id="slNext" aria-label="التالي">
-            <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-              <path d="M1 6h31"/><path d="M25 1c1.4 2.4 3.6 4 8 5-4.4 1-6.6 2.6-8 5"/>
-            </svg>
-          </button>
-        </div>
-
+  <div class="svc-demo">
+    <div class="sw-text">
+      <p class="sw-kicker" id="swKicker">تصميم</p>
+      <h3 class="sw-name" id="swName">شعارات</h3>
+      <p class="sw-desc" id="swDesc"></p>
+      <div class="sw-foot">
+        <span class="sw-index sr-only">
+          <b id="swIndex">٠١</b><i>/</i><span id="swTotal">٠٣</span>
+        </span>
         <a class="oval-btn" href="library.html">
           <span class="oval-swap">
             <span class="ob-face ob-label" data-i18n="btnWork">كل الأعمال</span>
@@ -174,143 +238,27 @@
         </a>
       </div>
     </div>
+    <figure class="sw-stage" id="swStage">
+      <div class="sw-media" id="swMedia"></div>
 
-    <div class="sl-stage" id="slStage">
-      <div class="sl-slides" id="slSlides"><!-- slides built in main.js --></div>
-      <span class="sl-wipe" id="slWipe" aria-hidden="true"></span>
+      <button class="sw-arrow sw-prev" id="swPrev" type="button">
+        <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <path d="M33 6H2"/><path d="M9 1C7.6 3.4 5.4 5 1 6c4.4 1 6.6 2.6 8 5"/>
+        </svg>
+        <span class="sr-only" data-i18n="swPrev">المثال السابق</span>
+      </button>
+      <button class="sw-arrow sw-next" id="swNext" type="button">
+        <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <path d="M1 6h31"/><path d="M25 1c1.4 2.4 3.6 4 8 5-4.4 1-6.6 2.6-8 5"/>
+        </svg>
+        <span class="sr-only" data-i18n="swNext">المثال التالي</span>
+      </button>
 
-      <span class="sl-stamp" id="slStamp" aria-hidden="true">
-        <span class="st-rule"></span>
-        <span class="st-word" data-i18n="stampNew">مؤخّرًا</span>
-        <span class="st-sub latin" lang="en">LATEST</span>
-        <span class="st-rule"></span>
-      </span>
-
-      <div class="sl-plate">
-        <span class="sl-plate-cap" id="slPlateCap">مؤسّسة بنيان</span>
-        <span class="sl-plate-tag latin" lang="en" id="slPlateTag">IDENTITY</span>
-      </div>
-
-      <div class="sl-progress" aria-hidden="true"><span id="slProgressBar"></span></div>
-    </div>
+      <span class="sw-bar" aria-hidden="true"></span>
+      <figcaption class="sw-cap" id="swCap"></figcaption>
+    </figure>
 
   </div>
-</section>
-
-<!-- ══════════ STORY — sticky stacked panels ══════════ -->
-<div class="banner"><h2 data-i18n="storyBanner">لماذا ألِف؟</h2></div>
-
-<section class="story" id="story">
-
-  <article class="story-panel">
-    <div class="story-text">
-      <p class="story-index">٠١</p>
-      <p class="story-eyebrow" data-i18n="st1Eyebrow">الاسم</p>
-      <h3 class="story-title" data-i18n="st1Title">صوت واحد، حرفان، ولغتان.</h3>
-      <p class="story-para" data-i18n="st1Para">يستمدّ ألِف اسمه من الألف: أوّل حروف الأبجدية العربية، والنقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف. ويحمل الاسم معنًى ثانيًا: أَلِفَ، أي اعتاد واطمأنّ واقترب. لذلك يقف الاستوديو عند المعنيين معًا: ثقة الخطوة الأولى، ودفء الشيء المألوف.</p>
-      <span class="story-pull" data-i18n="st1Pull">بداية، وسطر أساس، في الوقت نفسه.</span>
-    </div>
-    <div class="scatter" data-scatter>
-      <figure class="scatter-card sc-a" data-depth="1.4">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st1Cap1">دفتر الهويّة — الصفحة الأولى</figcaption>
-      </figure>
-      <figure class="scatter-card sc-b" data-depth="2.2">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st1Cap2">تجارب الخط</figcaption>
-      </figure>
-      <figure class="scatter-card sc-c" data-depth="3">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st1Cap3">الحرف الأوّل</figcaption>
-      </figure>
-    </div>
-  </article>
-
-  <article class="story-panel ink">
-    <div class="story-text">
-      <p class="story-index">٠٢</p>
-      <p class="story-eyebrow" data-i18n="st2Eyebrow">الطريقة</p>
-      <h3 class="story-title" data-i18n="st2Title">نبحث عن النقطة، ثم نرسم النظام.</h3>
-      <p class="story-para" data-i18n="st2Para">لكل علامة نقطة أصل تُبنى منها وتعود إليها. عملنا هو العثور على تلك النقطة أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها: الشعار، والألوان، والخط، والصوت، وطريقة الظهور اليوميّة. لا نبدأ من الشكل، بل ننتهي إليه.</p>
-      <span class="story-pull" data-i18n="st2Pull">من الألِف إلى الياء.</span>
-    </div>
-    <div class="scatter" data-scatter>
-      <figure class="scatter-card sc-a" data-depth="2.6">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st2Cap1">جلسة عمل — الاستوديو</figcaption>
-      </figure>
-      <figure class="scatter-card sc-b" data-depth="1.5">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st2Cap2">مسوّدات أوّليّة</figcaption>
-      </figure>
-      <figure class="scatter-card sc-c" data-depth="3.4">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st2Cap3">اختبار على الورق</figcaption>
-      </figure>
-      <img class="scatter-mark" src="assets/img/HalfAliph-Stamp-cream.svg" alt="" aria-hidden="true">
-    </div>
-  </article>
-
-  <article class="story-panel">
-    <div class="story-text">
-      <p class="story-index">٠٣</p>
-      <p class="story-eyebrow" data-i18n="st3Eyebrow">النظام</p>
-      <h3 class="story-title" data-i18n="st3Title">ألوان من التراب، لا من الصخب.</h3>
-      <p class="story-para" data-i18n="st3Para">حبر أزرق عميق يثبّت النظام البصري، وكريمي دافئ يمنحه مساحة للتنفّس. وحول هذين اللونين تأتي درجات طبيعيّة من الطين والزيتون. الخطّ من عائلة Idris: قسوة حادّة للعناوين، وقسوة مسطّحة للنصوص. والنتيجة نظام مدروس، هادئ، ملموس، وواضح الانتماء إلى ألِف.</p>
-      <span class="story-pull" data-i18n="st3Pull">تعبير قوي في الأعلى، وهدوء مقروء تحته.</span>
-    </div>
-    <div class="scatter" data-scatter>
-      <figure class="scatter-card sc-a" data-depth="1.8">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st3Cap1">القرطاسيّة</figcaption>
-      </figure>
-      <figure class="scatter-card sc-b" data-depth="3.2">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st3Cap2">المطبوعات</figcaption>
-      </figure>
-      <figure class="scatter-card sc-c" data-depth="2">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st3Cap3">لوحة الألوان</figcaption>
-      </figure>
-    </div>
-  </article>
-
-  <article class="story-panel ink">
-    <div class="story-text">
-      <p class="story-index">٠٤</p>
-      <p class="story-eyebrow" data-i18n="st4Eyebrow">الوعد</p>
-      <h3 class="story-title" data-i18n="st4Title">أن تبدو النتيجة حتميّة.</h3>
-      <p class="story-para" data-i18n="st4Para">لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف: في المطبوع، وعلى الشاشة، وفي الشارع، وبين يديّ من يستعمله كل يوم. وحين ينتهي العمل، يُختم بختم الاستوديو — علامة ملكيّة صغيرة تقول إن هذا العمل خرج من هنا.</p>
-      <span class="story-pull" data-i18n="st4Pull">راسخة، مدروسة، لا تُخطئها العين.</span>
-      <div class="hero-actions story-cta">
-        <a class="oval-btn" href="about.html">
-          <span class="oval-swap">
-            <span class="ob-face ob-label" data-i18n="btnAbout">تعرّف على ألِف</span>
-            <span class="ob-face ob-arrow" aria-hidden="true">
-              <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
-              </svg>
-            </span>
-          </span>
-        </a>
-      </div>
-    </div>
-    <div class="scatter" data-scatter>
-      <figure class="scatter-card sc-a" data-depth="2.4">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st4Cap1">تسليم مشروع</figcaption>
-      </figure>
-      <figure class="scatter-card sc-b" data-depth="1.6">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st4Cap2">الختم على العمل</figcaption>
-      </figure>
-      <figure class="scatter-card sc-c" data-depth="3.1">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-        <figcaption data-i18n="st4Cap3">في الشارع</figcaption>
-      </figure>
-    </div>
-  </article>
-
 </section>
 
 </main>

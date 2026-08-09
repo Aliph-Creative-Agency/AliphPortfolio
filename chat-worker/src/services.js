@@ -2,10 +2,18 @@
    THE SERVICE TAXONOMY — the one thing that must stay in sync
    with the site.
 
-   These four ids are the same join key `prototype/main.js` uses
-   (`CATS`, `PROJECTS[].cat`, `SERVICE_FRAMES`, `SERVICES`,
+   These three ids are the same join key `prototype/main.js` uses
+   (`CATS`, `SUBCATS`, `PROJECTS[].cat`, `SERVICE_FRAMES`, `SERVICES`,
    `data-service`). Plan §3: if the studio's services change again,
    this list and `CATS` move together.
+
+   ⚠️ Changed 2026-08-08 from four services to three. The old `identity`
+   and `creative` ids are gone: identity work is now `design`, and
+   `creative` split — the shooting went to `photo`, the printed and
+   posted output to `design`. `events` disappeared as a service; event
+   work is classified by what was actually delivered (coverage → photo,
+   signage and print → design). A visitor still says "فعالية" though,
+   so those keywords are kept and pointed at the service that does it.
 
    ⚠️ `examples` and `kw` are PLACEHOLDERS written by me, not by the
    studio. Plan §10.1 asks ألف for 2–3 real examples per service, and
@@ -15,65 +23,66 @@
 
 export const SERVICES = [
   {
-    id: "identity",
-    ar: "هويّات بصريّة",
-    en: "Identities",
+    id: "design",
+    ar: "تصميم",
+    en: "Design",
     examples: {
-      ar: "شعار ونظام بصري لمقهى جديد، دليل هويّة لمؤسّسة، تغليف منتج",
-      en: "a logo and visual system for a new café, a brand guide for an institution, product packaging",
+      ar: "شعار ونظام بصري لمقهى جديد، دليل هويّة لمؤسّسة، ملصق، قائمة طعام، تغليف منتج",
+      en: "a logo and visual system for a new café, a brand guide for an institution, a poster, a menu, product packaging",
     },
     kw: {
-      ar: ["هويه", "هويات", "لوجو", "شعار", "علامه تجاريه", "براند", "دليل هويه",
-           "تغليف", "بطاقات", "ريبراند", "نظام بصري", "الوان الشركه"],
-      en: ["logo", "logotype", "brand", "branding", "rebrand", "identity", "packaging",
-           "stationery", "guidelines", "brandbook", "wordmark", "visual system"],
+      ar: ["تصميم", "ديزاين", "هويه", "هويات", "لوجو", "شعار", "علامه تجاريه", "براند",
+           "دليل هويه", "تغليف", "بطاقات", "ريبراند", "نظام بصري", "الوان الشركه",
+           "ملصق", "بوستر", "مطبوعات", "طباعه", "قائمه طعام", "منيو", "دعوات",
+           "لافته", "لافتات", "بروشور", "كتيب"],
+      en: ["design", "graphic design", "logo", "logotype", "brand", "branding", "rebrand",
+           "identity", "packaging", "stationery", "guidelines", "brandbook", "wordmark",
+           "visual system", "poster", "print", "printable", "printing", "menu",
+           "invitation", "signage", "brochure", "booklet", "flyer"],
     },
   },
   {
-    id: "creative",
-    ar: "تسويق ومحتوى إبداعي",
-    en: "Creative Marketing",
+    id: "photo",
+    ar: "تصوير",
+    en: "Film & Photography",
     examples: {
-      ar: "إدارة إنستغرام لمطعم، تصوير منتجات، حملة إعلانية، كتابة محتوى",
-      en: "running a restaurant's Instagram, product photography, an ad campaign, content writing",
+      ar: "تصوير منتجات، جلسة تصوير لمطعم، فيديو تعريفي، ريلز للمنصّات، تغطية فعاليّة",
+      en: "product photography, a shoot for a restaurant, a profile film, reels for social, event coverage",
     },
+    /* ⚠️ The social keywords sit here for want of anywhere better. Dropping
+       `creative` removed the only service that covered RUNNING an account —
+       the three services describe what gets made, not who posts it. A visitor
+       asking "حدا يدير الإنستغرام" is routed to the service that produces the
+       feed's material. Plan §10.1: ask the studio whether they still take
+       channel management, and if so it needs naming somewhere. */
     kw: {
-      ar: ["تسويق", "محتوي", "سوشيال", "انستغرام", "انستقرام", "فيسبوك", "تيك توك",
-           "حمله", "اعلان", "اعلانات", "تصوير", "فيديو", "ريلز", "كتابه", "كوبي", "منشورات"],
-      en: ["marketing", "content", "social", "social media", "instagram", "facebook",
-           "tiktok", "campaign", "ads", "advertising", "photography", "photo", "video",
-           "reels", "copywriting", "posts", "seo"],
-    },
-  },
-  {
-    id: "events",
-    ar: "تنظيم فعاليّات",
-    en: "Events",
-    examples: {
-      ar: "افتتاح فرع، معرض، مؤتمر، تفعيل ميداني",
-      en: "a branch opening, an exhibition, a conference, a field activation",
-    },
-    kw: {
-      ar: ["فعاليه", "فعاليات", "حدث", "افتتاح", "معرض", "مؤتمر", "حفل", "تنظيم",
-           "بوث", "جناح", "ورشه", "احتفال", "اطلاق منتج"],
-      en: ["event", "events", "opening", "launch party", "exhibition", "conference",
-           "activation", "booth", "ceremony", "workshop", "festival"],
+      ar: ["تصوير", "مصور", "صور", "صوره", "فوتو", "فيديو", "فيلم", "ريلز", "ريل",
+           "مونتاج", "تلوين", "جلسه تصوير", "بورتريه", "تغطيه", "توثيق",
+           "فعاليه", "فعاليات", "حدث", "افتتاح", "معرض", "مؤتمر", "حفل", "عرس",
+           "انستغرام", "انستقرام", "سوشيال", "تيك توك", "منشورات", "محتوي"],
+      en: ["photography", "photo", "photos", "photographer", "shoot", "photoshoot",
+           "video", "film", "footage", "reels", "reel", "editing", "grading",
+           "portrait", "coverage", "documentation", "event", "events", "opening",
+           "exhibition", "conference", "wedding", "festival",
+           "instagram", "social", "social media", "tiktok", "posts", "content"],
     },
   },
   {
     id: "tech",
-    ar: "حلول تقنيّة",
-    en: "Technical Solutions",
+    ar: "برمجة",
+    en: "Engineering",
     examples: {
-      ar: "موقع إلكتروني، نظام تسجيل، تطبيق، أتمتة عمليّات",
-      en: "a website, a registration system, an app, process automation",
+      ar: "موقع بورتفوليو، صفحة هبوط لحملة، متجر إلكتروني، نظام تسجيل، تطبيق",
+      en: "a portfolio site, a campaign landing page, an online store, a registration system, an app",
     },
     kw: {
-      ar: ["موقع", "مواقع", "ويب", "تطبيق", "ابليكيشن", "نظام", "برمجه", "منصه",
-           "متجر الكتروني", "حجز", "تسجيل", "اتمته", "لوحه تحكم", "داشبورد", "دومين"],
-      en: ["website", "web", "site", "app", "application", "software", "platform",
-           "system", "ecommerce", "e-commerce", "shop", "booking", "registration",
-           "automation", "dashboard", "api", "domain"],
+      ar: ["برمجه", "مبرمج", "موقع", "مواقع", "ويب", "تطبيق", "ابليكيشن", "نظام",
+           "منصه", "بورتفوليو", "صفحه هبوط", "لاندنج", "متجر الكتروني", "حجز",
+           "تسجيل", "اتمته", "لوحه تحكم", "داشبورد", "دومين", "استضافه"],
+      en: ["engineering", "development", "developer", "website", "web", "site", "app",
+           "application", "software", "platform", "system", "portfolio", "landing page",
+           "ecommerce", "e-commerce", "shop", "booking", "registration", "automation",
+           "dashboard", "api", "domain", "hosting"],
     },
   },
 ];
@@ -82,7 +91,7 @@ export const SERVICE_IDS = SERVICES.map((s) => s.id);
 
 export const byId = (id) => SERVICES.find((s) => s.id === id);
 
-/** "هويّات بصريّة و تسويق ومحتوى إبداعي" — joined the way the language does. */
+/** "تصميم و تصوير" — joined the way the language does. */
 export function nameList(ids, lang) {
   const names = ids.map((id) => byId(id)).filter(Boolean).map((s) => s[lang]);
   if (names.length <= 1) return names[0] || "";
