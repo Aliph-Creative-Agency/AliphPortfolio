@@ -1,34 +1,25 @@
-/* ══════════════════════════════════════════════════════════════════
-   ALIPH CHAT WIDGET — stage 1: shell + fallback
-   See aliph-chatbot-plan.md §11. This stage builds the launcher, the
-   panel, and the unavailable state — the failure path first, so the
-   widget can never render a dead chat box.
+/* Aliph chat widget — stage 1: shell and fallback. See
+   aliph-chatbot-plan.md §11.
 
-   NOTHING IS WIRED TO A MODEL YET. The health probe has no backend to
-   reach, so the widget correctly and permanently shows the contact card.
-   That is the expected stage-1 behaviour, not a bug. Stage 3 sets
-   CONFIG.endpoint and the chat surface starts appearing on its own.
-
-   To review the chat surface before a backend exists, load any page with
-   ?chat=up (and ?chat=down to force the fallback back).
-   ══════════════════════════════════════════════════════════════════ */
+   Nothing is wired to a model yet, so the health probe has no backend and
+   the widget permanently shows the contact card. That is stage-1 behaviour,
+   not a bug — stage 3 sets CONFIG.endpoint and the chat surface appears on
+   its own. Load any page with ?chat=up to review it now (?chat=down forces
+   the fallback back). */
 (function () {
   "use strict";
 
   const CONFIG = {
-    /* Stage 3 points these at the Worker. While `endpoint` is null the
-       widget skips the probe entirely and goes straight to fallback —
-       no failed request, no console noise. */
+    /* Stage 3 points these at the Worker. While `endpoint` is null the widget
+       skips the probe entirely — no failed request, no console noise. */
     endpoint: null,          // e.g. "https://chat.aliphcreative.com/api/chat"
     health: null,            // e.g. "https://chat.aliphcreative.com/api/health"
     healthTimeoutMs: 4000,
 
-    /* Confirmed by the studio 2026-08-06. ⚠️ The phone and the WhatsApp are
-       DIFFERENT numbers — they were the same until now, so anything that
-       reuses `phoneLabel` for the WhatsApp row is a bug.
-       The label is the local form the studio actually gives out; the `tel:`
-       and `wa.me` targets stay E.164, which is the only form both reliably
-       dial from abroad. */
+    /* Studio-confirmed 2026-08-06. The phone and the WhatsApp are DIFFERENT
+       numbers, so reusing `phoneLabel` for the WhatsApp row is a bug. Labels
+       are the local form; the tel:/wa.me targets stay E.164, the only form
+       that dials reliably from abroad. */
     email: "info@aliphcreative.com",
     phone: "+972528745090",
     phoneLabel: "052-874-5090",
@@ -38,8 +29,6 @@
 
   const T = {
     launch:   { ar: "اسألوا ألِف", en: "Ask Aliph" },
-    /* the word struck around the seal's rim — short, or the arc crowds */
-    rim:      { ar: "مساعد ألِف", en: "ALIPH ASSISTANT" },
     title:    { ar: "مساعد ألِف", en: "Aliph assistant" },
     sub:      { ar: "يدلّكم على الخدمة المناسبة", en: "Points you to the right service" },
     close:    { ar: "إغلاق", en: "Close" },
@@ -70,36 +59,29 @@
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* Resolve the icons against this file's own URL so the widget keeps
-     working from whatever depth it's embedded at. `document.currentScript`
-     is only valid while the script is executing, so it must be read here
-     at parse time — not later, inside start(), where it is null.
-     (`import.meta` is not an option: this is a classic script, and it
-     would be a parse-time SyntaxError.) */
+  /* Resolve icons against this file's own URL so the widget works from any
+     depth. `document.currentScript` is only valid while the script runs, so
+     it must be read here at parse time, not later inside start(). */
   const HERE = (document.currentScript && document.currentScript.src) || location.href;
 
-  /* the rim arc needs a document-unique id — the widget can land on a page
-     that already has SVG defs of its own */
   const ICONS = {
-    /* the studio stamp — the mark inside its own ring of type */
-    seal: new URL("../assets/img/HalfAliph-Stamp-cream.svg", HERE).href,
     /* the bare mark, used small in the panel header */
     mark: new URL("../assets/img/Aliph-Icon-cream.svg", HERE).href,
-    /* the launcher's two layers, in both inks — see the dark-section note */
+    /* the launcher's two layers, in both inks */
     ring: new URL("../assets/img/assistant-ring.png", HERE).href,
     ringCream: new URL("../assets/img/assistant-ring-cream.png", HERE).href,
     markInk: new URL("../assets/img/assistant-mark.png", HERE).href,
     markCream: new URL("../assets/img/assistant-mark-cream.png", HERE).href,
   };
 
-  /* what counts as "dark underneath" — the same surfaces main.js inverts the
-     burger over. Kept as a literal list because the widget is a separate
-     deployable and must not import from the page's script. */
+  /* What counts as dark underneath — the same surfaces main.js inverts the
+     burger over. A literal list because this is a separate deployable and
+     must not import from the page's script. */
   const DARK_UNDER = ".filmstrip,.banner,.footer,.sw-stage,.svc-pick.is-active";
 
-  /* ── language: follow the site, don't own it ──────────────────────
-     main.js writes <html lang> on every switch. Observing that attribute
-     keeps the widget in sync without main.js having to know it exists. */
+  /* Language follows the site: main.js writes <html lang> on every switch,
+     and observing that keeps the widget in sync without main.js knowing it
+     exists. */
   const readLang = () => (document.documentElement.lang === "en" ? "en" : "ar");
   let lang = readLang();
   const t = (k) => T[k][lang];
@@ -122,14 +104,11 @@
     root.dir = lang === "ar" ? "rtl" : "ltr";
     root.style.setProperty("--ac-origin", lang === "ar" ? "left" : "right");
 
-    /* Two layers and no disc: the ring of type turns, the double-alif mark
-       inside it stays still.
-       ⚠️ The mark is bilingual and baked into the artwork, so the ring no
-       longer switches with the language. That is the trade for using the
-       studio's own art rather than an SVG textPath.
-       ⚠️ Without a disc there is nothing separating the mark from the page,
-       so syncLauncherInk() below swaps both layers to cream over dark
-       sections. Remove that and the button vanishes on the footer. */
+    /* Two layers, no disc: the ring of type turns, the mark inside stays
+       still. The art is bilingual and baked, so the rim no longer switches
+       with the language — the trade for using the studio's own artwork.
+       With no disc, syncLauncherInk() is what keeps the button visible over
+       dark sections. */
     launcher = el("button", "ac-launcher");
     launcher.type = "button";
     launcher.innerHTML =
@@ -170,12 +149,10 @@
     addEventListener("resize", queueInkSync);
     document.body.appendChild(root);
 
-    /* ⚠️ AFTER the append, not before. Off the document the launcher measures
-       0x0, so syncLauncherInk() hit its own `if (!b.width) return` guard and
-       the first paint was never sampled — on the home page that left an ink
-       ring sitting on the ink film strip until the first scroll corrected it.
-       Re-sampled on fonts.ready too, because the hero's height (and so what
-       is under the launcher) moves when 5MB of Idris lands. */
+    /* After the append, not before: off the document the launcher measures
+       0x0 and syncLauncherInk() hits its own width guard, so the first paint
+       is never sampled. Re-sampled on fonts.ready because the hero's height,
+       and so what sits under the launcher, moves when the fonts land. */
     syncLauncherInk();
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(queueInkSync);
@@ -190,7 +167,7 @@
     paint();
   }
 
-  /* ── the two body states ────────────────────────────────────────── */
+  /* ── the two body states ───────────────────────────────────────── */
   function paintDown() {
     const rows = [
       { k: t("kMail"), v: CONFIG.email, href: "mailto:" + CONFIG.email },
@@ -229,9 +206,9 @@
       </form>
       <p class="ac-privacy">${t("privacy")}</p>`;
 
-    /* Stage 1 ships the composer inert on purpose: there is no model to
-       answer, and a box that swallows messages is worse than one that
-       plainly cannot be used yet. Stage 3 replaces this block. */
+    /* The composer ships inert on purpose: there is no model to answer, and a
+       box that swallows messages is worse than one that plainly cannot be
+       used yet. Stage 3 replaces this block. */
     const input = footEl.querySelector(".ac-input");
     const send = footEl.querySelector(".ac-send");
     input.addEventListener("input", () => {
@@ -251,10 +228,10 @@
     (healthy ? paintUp : paintDown)();
   }
 
-  /* ── open / close ───────────────────────────────────────────────── */
+  /* ── open / close ──────────────────────────────────────────────── */
   /* Sample what is behind the launcher and flip both layers if it is dark.
-     rAF-throttled: elementsFromPoint forces a synchronous layout flush, and
-     this runs on every scroll frame otherwise. */
+     rAF-throttled: elementsFromPoint forces a synchronous layout flush and
+     this would otherwise run every scroll frame. */
   let inkQueued = false, overDark = false;
   function syncLauncherInk() {
     inkQueued = false;
@@ -287,10 +264,9 @@
         { opacity: 0, y: 18, scale: 0.97 },
         { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "power3.out" });
     }
-    /* Focus the composer when there is one to type into. In the fallback
-       state focus the panel itself, not the first contact link — landing
-       a terracotta focus ring on an email address makes the card read as
-       an error rather than an offer. */
+    /* Focus the composer when there is one. In the fallback state focus the
+       panel itself, not the first contact link — a terracotta focus ring on
+       an email address makes the card read as an error. */
     const input = panel.querySelector(".ac-input");
     (input || panel).focus({ preventScroll: true });
   }
@@ -303,11 +279,10 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
   }
 
-  /* ── health probe ───────────────────────────────────────────────────
-     Decides which body the panel shows. With no endpoint configured it
-     resolves false immediately — no request is made at all. Any failure
-     (down, quota exhausted, timeout, CORS) lands in the same place: the
-     contact card. */
+  /* ── health probe ──────────────────────────────────────────────────
+     Decides which body the panel shows. With no endpoint it resolves false
+     without making a request, and every failure — down, quota, timeout,
+     CORS — lands in the same place: the contact card. */
   async function probe() {
     if (forced) return forced === "up";
     if (!CONFIG.health) return false;
@@ -324,7 +299,7 @@
     }
   }
 
-  /* ── boot ───────────────────────────────────────────────────────── */
+  /* ── boot ──────────────────────────────────────────────────────── */
   function start() {
     build();
     probe().then((ok) => {

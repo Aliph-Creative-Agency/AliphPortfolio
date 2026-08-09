@@ -1,10 +1,6 @@
-/* ══════════════════════════════════════════════════════════════════
-   ALIPH CHAT WIDGET — stage 1: shell + fallback
-   Drops onto any page with one <link> and one <script>. Self-contained:
-   it reuses the site's :root tokens when they exist and falls back to
-   literals when they don't, so it can be embedded somewhere without
-   style.css and still look right.
-   ══════════════════════════════════════════════════════════════════ */
+/* Aliph chat widget — stage 1: shell and fallback.
+   Self-contained: reuses the site's :root tokens when they exist and falls
+   back to literals when they don't, so it can be embedded without style.css. */
 
 .aliph-chat {
   --ac-ink: var(--ink, #0F1820);
@@ -14,23 +10,21 @@
   --ac-display: var(--font-display, "Idris Sharp", serif);
   --ac-body: var(--font-body, "Idris Flat", serif);
   --ac-hair: 1px solid rgba(15, 24, 32, 0.35);
-  /* ⚠️ The site sets `html { font-size: 150% }`, so 1rem is 24px, not 16px —
-     this disc is 105.6px, not 70.4px. That is fine beside a 1280px page and
-     absurd on a 390px phone, where it covers more than a quarter of the
-     width. Overridden at the foot of this file. Anything sized here in rem
-     is 1.5× what the number reads like. */
+  /* 1rem is 24px here (the site sets html { font-size: 150% }), so this disc
+     is 105.6px — fine beside a 1280px page, a quarter of a 390px phone.
+     Overridden at the foot of this file. */
   --ac-launch: 4.4rem;
 
   position: fixed;
   inset-inline-end: clamp(0.9rem, 2.5vw, 1.8rem);
   bottom: clamp(0.9rem, 2.5vh, 1.8rem);
-  /* above the page-wide linen (z-index 5) and the nav, below the sheet (120) */
+  /* above the page linen (z-index 5) and the nav, below the sheet (120) */
   z-index: 100;
   font-family: var(--ac-body);
   line-height: 1.7;
 }
 
-/* ── the launcher: the studio seal, not a chat bubble ───────────── */
+/* ── launcher: the studio seal, not a chat bubble ───────────────── */
 .ac-launcher {
   position: relative;
   display: grid;
@@ -39,7 +33,7 @@
   height: var(--ac-launch);
   padding: 0;
   border: none;
-  /* no disc — the ring of type IS the button's edge */
+  /* no disc — the ring of type is the button's edge */
   background: none;
   cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -47,9 +41,9 @@
 .ac-launcher:hover { transform: translateY(-3px) scale(1.04); }
 .ac-launcher:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 3px; }
 
-/* The ring turns; the mark does not. Both are absolutely positioned so
-   they share one centre — CSS rotates about the box centre, so a ring that
-   isn't dead centre visibly wobbles. */
+/* The ring turns, the mark does not. Both absolutely positioned so they
+   share a centre: CSS rotates about the box centre, so an off-centre ring
+   visibly wobbles. */
 .ac-ring,
 .ac-mark {
   position: absolute;
@@ -59,20 +53,17 @@
   object-fit: contain;
   pointer-events: none;
 }
-/* ⚠️ With no disc the launcher can straddle a section edge — it sits at the
-   hero/section boundary at rest — so a flat mark lands half on cream and half
-   on film. A hairline halo in the OPPOSITE tone keeps both layers legible
-   either way; it is invisible against its own background. */
+/* With no disc the launcher can straddle a light/dark edge, so each layer
+   carries a hairline halo in the opposite tone. */
 .ac-ring,
 .ac-mark { filter: drop-shadow(0 0 2px rgba(217, 217, 206, 0.9)); }
 .ac-launcher.is-dark .ac-ring,
 .ac-launcher.is-dark .ac-mark { filter: drop-shadow(0 0 2px rgba(15, 24, 32, 0.9)); }
 .ac-ring { animation: ac-spin 18s linear infinite; }
 .ac-launcher:hover .ac-ring { animation-duration: 7s; }
-/* The mark sits inside the ring's clear centre, at the size the studio's own
-   composite (resources/assistant.png) gives it — measured there at 65% of the
-   ring's height. The glyph runs the full height of its square PNG, so this
-   percentage IS the rendered height; 28% put it at well under half scale. */
+/* 65% of the ring's height — measured off the studio's own composite,
+   resources/assistant.png. The glyph fills its square PNG, so this
+   percentage is the rendered height. */
 .ac-mark {
   width: 65%;
   height: 65%;
@@ -80,7 +71,7 @@
 }
 @keyframes ac-spin { to { transform: rotate(360deg); } }
 
-/* the hairline ring that pulses twice on first paint, then rests */
+/* hairline ring that pulses twice on first paint, then rests */
 .ac-launcher::after {
   content: "";
   position: absolute;
@@ -98,7 +89,7 @@
 
 .aliph-chat.is-open .ac-launcher { transform: scale(0.86); opacity: 0; pointer-events: none; }
 
-/* ── the panel ──────────────────────────────────────────────────── */
+/* ── panel ──────────────────────────────────────────────────────── */
 .ac-panel {
   position: absolute;
   inset-inline-end: 0;
@@ -114,11 +105,10 @@
   overflow: hidden;
 }
 .ac-panel[hidden] { display: none; }
-/* it takes focus on open as the dialog container; it is not itself a
-   control, so it shouldn't draw a ring */
+/* takes focus as the dialog container, but is not itself a control */
 .ac-panel:focus { outline: none; }
 
-/* the linen sits over the panel too, so it isn't a flat cream slab */
+/* linen over the panel too, so it isn't a flat cream slab */
 .ac-panel::before {
   content: "";
   position: absolute;
@@ -186,7 +176,7 @@
   scrollbar-width: thin;
 }
 
-/* the unavailable state — the failure path, built before the success path */
+/* the unavailable state — built before the success path */
 .ac-down-mark {
   display: block;
   font-size: 0.6rem;
@@ -229,7 +219,7 @@
   font-size: 0.66rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  /* 0.62 read at ~4.2:1 on the warm cream — under AA for text this size */
+  /* 0.62 reads ~4.2:1 on the warm cream: under AA at this size */
   opacity: 0.72;
   white-space: nowrap;
 }
@@ -240,7 +230,7 @@
   unicode-bidi: isolate;
 }
 
-/* ── the chat surface (shell only in stage 1 — no model wired) ── */
+/* ── chat surface: shell only until a model is wired ── */
 .ac-log { display: grid; gap: 0.7rem; }
 .ac-msg {
   max-width: 88%;
@@ -253,9 +243,8 @@
   background: var(--ac-cream-warm);
   border: var(--ac-hair);
 }
-/* ⚠️ NOT dead code — this is the VISITOR's bubble, and nothing emits one yet
-   because the composer is deliberately inert until stage 3 wires a model in.
-   A dead-code sweep will flag it every time; leave it. */
+/* The visitor's bubble. Nothing emits one until stage 3, so a dead-code
+   sweep flags it every time — keep it. */
 .ac-msg-me {
   justify-self: end;
   background: var(--ac-ink);
@@ -306,16 +295,14 @@
   border-top: var(--ac-hair);
 }
 
-/* ── phones: the panel takes the screen ─────────────────────────── */
+/* ── phones: the panel takes the screen ────────────────────────── */
 @media (max-width: 560px) {
-  /* ⚠️ The disc, not the panel, is what reads as "huge" on a phone. At the
-     site's 150% root, 4.4rem is 105.6px — over a quarter of a 390px screen,
-     and roughly double what a corner launcher should be. 3rem is 72px here:
-     still unmistakably the seal, still far past the 44px touch target. */
+  /* 4.4rem is 105.6px at this root — a quarter of a 390px screen. 3rem is
+     72px: still the seal, still well past the 44px touch target. */
   .aliph-chat { --ac-launch: 3rem; }
   .aliph-chat.is-open {
     inset: 0;
-    /* the panel fills the viewport, so the fixed corner offsets go */
+    /* the panel fills the viewport, so the corner offsets go */
   }
   .aliph-chat.is-open .ac-panel {
     position: fixed;

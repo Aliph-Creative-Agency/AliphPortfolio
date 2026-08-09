@@ -20,7 +20,7 @@
       coverage here; the prompt is the second line of defence.
    2. Describing a service in general ("we do visual identities") is
       NOT a feasibility read and must stay allowed — job #1 in plan §9
-      is answering simple questions about the four services. Only
+      is answering simple questions about the studio's services. Only
       capability or commitment *about the visitor's project* is banned.
    ══════════════════════════════════════════════════════════════════ */
 

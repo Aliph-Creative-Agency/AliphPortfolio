@@ -15,11 +15,17 @@ account_id = "6c60bd775004cfa0082f768c356c7242"
 enabled = true
 
 [vars]
-# The widget's origin. Plan §10.5 — where the finished site is hosted
-# is still open, so this is the local preview only. Add the real
-# origin before launch; "*" is for a throwaway staging box, not a
-# default.
-ALLOWED_ORIGINS = "http://localhost:8321,http://127.0.0.1:8321"
+# The widget's origins. Matched EXACTLY (src/cors.js) — scheme, host and
+# port, no wildcards, no suffix matching. An origin missing from this
+# list gets a reply with no CORS headers, the browser drops it, and the
+# widget silently shows its contact card: indistinguishable, from the
+# outside, from "the chatbot doesn't work".
+#
+# The live site is the assets-only Worker at ../wrangler.toml.
+# ⚠️ Add the custom domain here too the day the site moves to one —
+# aliphcreative.com is NOT covered by the workers.dev entry.
+# "*" is for a throwaway staging box; it is not a default.
+ALLOWED_ORIGINS = "https://aliphcreative.ceo-6c6.workers.dev,http://localhost:8321,http://127.0.0.1:8321"
 
 # ⚠️ STAGE 2 ONLY. The stub keyword-matcher is the only responder that
 # exists right now, so this has to be on for the Worker to answer at

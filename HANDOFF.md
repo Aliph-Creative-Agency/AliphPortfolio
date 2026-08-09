@@ -191,6 +191,46 @@ committed plaintext — secrets are a different mechanism. Where the key comes f
 decides the SDK: AI Studio issues a plain key; Vertex needs a different client.
 Then flip `ALLOW_STUB` to `"0"` and set the two widget constants.
 
+**Resolved 2026-08-09: it is an AI Studio plain key**, from the user's existing
+default Gemini project — so `respond()` needs one `fetch` to
+`generativelanguage.googleapis.com`, no service account and no OAuth minting.
+⚠️ **That project is on a PERSONAL Google account, not the studio's.** The key is
+only ever a Worker secret, so re-issuing it under `Ceo@aliphcreative.com` is one
+command and zero code changes — but it is a **launch gate**, not a nice-to-have:
+on a personal key, the studio's assistant dies whenever that account revokes it,
+hits quota or changes hands. The studio's Cloud console blocked key creation in
+"My First Project" (`serviceusage.services.list` missing, most likely a
+multi-login mismatch); creating a *fresh* project is the way around it, and if
+`Ceo@` turns out to be Google Workspace, a domain admin can have AI Studio
+switched off entirely.
+
+### Three stage-3 landmines cleared ahead of the wiring (2026-08-09)
+
+All three were dead text at stage 2 and become live faults the moment a real
+model and a real visitor are on the other end. 67/67 still pass.
+
+1. 🔴 **`SYSTEM_PROMPT` said "four services" three times** while `serviceBlock`,
+   which is generated from `SERVICES`, correctly listed three — the generated
+   half survived the session-9 taxonomy change and the prose around it did not.
+   This is the model's actual instruction at stage 3: it was telling the
+   assistant to miscount the studio's own services.
+2. 🔴 **`model.js`'s `offScope` reply still recited the pre-2026-08 four** —
+   الهويّات البصريّة / التسويق والمحتوى / الفعاليّات / التقنية. It is the one line a
+   visitor gets when the bot does *not* recognise their idea, i.e. the worst
+   place on the site to name services that no longer exist.
+3. 🔴 **`ALLOWED_ORIGINS` was localhost-only.** `src/cors.js` matches origins
+   **exactly** — scheme, host, port, no suffix matching. Setting
+   `CONFIG.endpoint` without the live origin present would have failed every
+   visitor's request in CORS, and the widget's own fallback makes that look
+   identical to "the chatbot doesn't work". `https://aliphcreative.ceo-6c6.workers.dev`
+   is now listed; ⚠️ **a custom domain will need adding separately.**
+
+⚠️ **Both counts and both name lists are now DERIVED from `SERVICES`**
+(`prompt.js` `count`, `model.js` `COVERED`) rather than typed, because this is
+the second taxonomy change these strings have failed to survive. Don't retype
+them. `PROMPT_VERSION` is bumped to `2026-08-09.1` — the prompt is versioned
+separately on purpose (spec §8), so bump it whenever its text moves.
+
 Two contracts not to break: `ok` and `quotaRemaining` in the health response are read
 by those exact names, and the guardrail bans are curated phrase lists on purpose —
 a regex for "we can" also swallows the one sentence the bot exists to say.

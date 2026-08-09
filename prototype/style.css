@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════
-   ALIPH — prototype v03
-   Ink & cream broadsheet · AR-RTL / EN-LTR
-   Pages: index / library (accordion) / about
+   ALIPH prototype — ink & cream broadsheet, AR-RTL / EN-LTR
+   Pages: index / library / about
    ═══════════════════════════════════════════ */
 
 @font-face {
@@ -35,11 +34,10 @@
   --cream-warm: #E2E0D6;
   --accent: #BB5C39;            /* terracotta — nav strike + focus only */
 
-  /* Secondary text is the ink at reduced strength, never a gray — the tint
-     has to come from the foreground or the cream turns muddy. These two are
-     the lowest alphas that still clear WCAG AA on the cream (4.5:1 for body,
-     3:1 for large). Anything fainter is decoration, not text: measured, ink
-     at 0.6 lands at 4.15:1 and 0.55 at 3.6:1, both failing. */
+  /* Secondary text is ink at reduced strength, never a grey — the tint has to
+     come from the foreground or the cream turns muddy. These are the lowest
+     alphas that still clear AA on the cream; measured, 0.6 lands at 4.15:1
+     and 0.55 at 3.6:1, both failing. */
   --ink-soft: rgba(15, 24, 32, 0.78);   /* secondary paragraphs */
   --ink-mute: rgba(15, 24, 32, 0.68);   /* labels, meta, captions */
   --ink-faint: rgba(15, 24, 32, 0.5);   /* large display only (≥24px) */
@@ -49,8 +47,8 @@
   --font-latin: Georgia, "Times New Roman", serif;
 
   --pad: clamp(1rem, 3vw, 2.5rem);
-  /* the one vertical rhythm in the remodelled sections: title-to-body,
-     media-to-text, and the air above and below every splitter */
+  /* the one vertical rhythm in these sections: title-to-body, media-to-text,
+     and the air around every splitter */
   --why-gap: clamp(1rem, 2.2vw, 1.9rem);
   /* media hairline — deliberately the same weight and tone as a splitter */
   --media-line: 1px solid rgba(15, 24, 32, 0.3);
@@ -58,7 +56,7 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-/* unified 150% scale across all pages: rem-based sizes inherit it */
+/* 150% across all pages; rem-based sizes inherit it */
 html { scroll-behavior: smooth; overflow-x: clip; font-size: 150%; }
 
 body {
@@ -138,8 +136,8 @@ html[lang="en"] .banner h2,
 }
 .menu-btn .bars span:nth-child(1) { top: 0; }
 .menu-btn .bars span:nth-child(2) { top: 12px; }
-/* the button floats over both cream and ink sections; JS sets .on-dark
-   from whatever is actually under it so the bars never disappear */
+/* the button floats over cream and ink alike; JS sets .on-dark from what is
+   actually under it so the bars never disappear */
 .menu-btn.on-dark .bars span { background: var(--cream); }
 body.nav-open .menu-btn .bars span { background: var(--cream); }
 body.nav-open .menu-btn .bars span:nth-child(1) { top: 6px; transform: rotate(45deg); }
@@ -224,7 +222,7 @@ body.nav-open .nav-overlay { visibility: visible; }
 }
 .nav-socials a:hover { color: var(--cream); }
 
-/* -- masthead -------------------------------- */
+/* ── masthead ───────────────────────────── */
 .masthead {
   position: relative;
   z-index: 20;
@@ -240,9 +238,9 @@ body.nav-open .nav-overlay { visibility: visible; }
 }
 .masthead-logo img { height: 58px; width: auto; }
 
-/* language switch - segmented pill with sliding ink knob.
-   sits in normal flow by default (it is a flex child in the nav overlay);
-   only the masthead copy is pinned to the corner */
+/* Language switch — segmented pill with a sliding knob. In normal flow by
+   default (it is a flex child of the nav overlay); only the masthead copy is
+   pinned to a corner. */
 .lang-switch {
   position: relative;
   direction: ltr;
@@ -287,14 +285,12 @@ html[lang="ar"] .ls-opt[data-l="ar"],
 html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
 .lang-switch:hover { background: var(--cream-warm); }
 
-/* masthead copy is pinned to the corner opposite the burger. this one is
-   physically left in both directions — the burger is physically right, so
-   an inset-inline-start here would stack the two on top of each other in RTL.
+/* Pinned to the corner opposite the burger, physically left in both
+   directions: the burger is physically right, so a logical start would stack
+   the two in RTL.
 
-   FIXED, not absolute, so it rides down the page with the burger instead of
-   scrolling away with the masthead. `top` centres it on the burger's own
-   centre line (that button is 44px tall at top: 1.1rem), so the two corners
-   stay level at every width. */
+   Fixed, not absolute, so it rides down the page with the burger instead of
+   scrolling away; `top` centres it on the burger's centre line. */
 .masthead .lang-switch {
   position: fixed;
   left: var(--pad);
@@ -303,17 +299,15 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
   transform: translateY(-50%);
   z-index: 940;
 }
-/* The overlay carries its own copy in its footer — without this you get two
-   pills on screen, since the fixed one sits above the overlay. */
+/* the overlay carries its own copy in its footer — without this you see two
+   pills, since the fixed one sits above the overlay */
 body.nav-open .masthead .lang-switch {
   opacity: 0;
   pointer-events: none;
 }
 
-/* Same treatment the burger gets: JS samples whatever is actually under it
-   and inverts the whole pill over ink, so it never dissolves into a dark
-   section. Sampled SEPARATELY from the burger — they sit at opposite
-   corners and are regularly over different sections at the same time. */
+/* Same treatment as the burger, but sampled separately: the two sit at
+   opposite corners and are regularly over different sections at once. */
 .lang-switch.on-dark { border-color: var(--cream); background: transparent; }
 .lang-switch.on-dark .ls-knob { background: var(--cream); }
 .lang-switch.on-dark .ls-opt { color: var(--cream); }
@@ -353,7 +347,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   white-space: nowrap;
 }
 
-/* -- hero: film strip on a cream/linen field + solid ink side panel -- */
+/* ── hero: film strip on a linen field + cream side panel ── */
 .hero {
   --hero-h: clamp(560px, 88vh, 940px);
   position: relative;
@@ -369,8 +363,8 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   display: flex;
   align-items: center;
 }
-/* the horizontally-panning strip. ready.png (film.png) supplies the perforated
-   film base; its transparent sprocket holes let the cream field show through */
+/* the panning strip; the film base's transparent sprocket holes let the
+   cream field show through */
 .film-scroll {
   /* the hero's 3px border sits inside its height, so the strip is that much
      shorter — subtract it or the tile ends up fractionally stretched */
@@ -382,40 +376,27 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   display: flex;
   align-items: center;
   width: max-content;
-  /* the user's 4x-upscaled film scan, cropped to exactly 22 perforation
-     pitches so it repeats with no rhythm break. --pitch is set from JS to one
-     group width, so one film tile spans one group and the loop has no seam */
+  /* --pitch is set from JS to one group width, so one film tile spans one
+     group and the loop has no seam */
   background-image: url("assets/img/film.webp");
   background-repeat: repeat-x;
   background-size: var(--pitch, 100%) 100%;
   will-change: transform;
 }
-/* ── the cast shadow is OFF (2026-08-08) ──────────────────────────
-   `.film-scroll::before` used to paint film-shadow.webp under the film image
-   and above the hero's cream, so the shadow read only THROUGH the sprocket
-   holes. Removed on request, to try the strip without it.
+/* The cast shadow is off (2026-08-08). It used to paint film-shadow.webp
+   under the film and above the cream, so it read only through the sprocket
+   holes — but it also darkened the whole base, and without it the strip
+   reads slate-grey and crisper.
 
-   What it actually changed, since it was more than a halo: the shadow also
-   darkened the whole film base. Without it the strip reads slate-grey and
-   crisper rather than near-black and deep, and the holes are clean-edged.
+   film-shadow.webp and its -m variant are still on disk and still re-cut by
+   resources/recut_film.py, if this comes back. */
+/* The phone's biggest cost was here. A browser decodes an image at its
+   intrinsic size however small it is drawn, so the full tile cost tens of MB
+   of texture to paint a ~390px strip — invisible in the file sizes.
 
-   ⚠️ `film-shadow.webp` / `film-shadow-m.webp` are still on disk and still
-   re-cut by resources/recut_film.py — they are the source if this comes back.
-   To restore, put the rule back with `inset: 0; z-index: -1;
-   background: url(...) repeat-x; background-size: var(--pitch) 100%`, plus
-   the -m swap in the max-width: 900px block below. */
-/* ⚠️ THE PHONE'S BIGGEST COST WAS HERE.
-   film.webp is 5512×1641. A browser decodes an image at its intrinsic size no
-   matter how small it is drawn, so it costs tens of MB of RGBA texture — on a
-   phone that paints it into a strip about 390px wide. That was the single
-   heaviest thing on the page and it was invisible in the file sizes.
-   The -m variant is 1900px: same pixels, fewer of them — a resolution
-   variant, not a re-render, and not a substitution of the art. 1900 rather
-   than the ~618px the tile actually draws at, because a DPR-3 phone renders
-   that tile at ~1854 device px and sizing to the CSS width would look soft
-   exactly where most people see it.
-   Desktop keeps the full-size file: there --pitch is ~2798px.
-   (The shadow layer that used to be swapped here too is off — see above.) */
+   The -m variant is 1900px: the same pixels, fewer of them. 1900 rather than
+   the ~618px the tile draws at, because a DPR-3 phone renders it at ~1854
+   device px and sizing to the CSS width would look soft. */
 @media (max-width: 900px) {
   .film-scroll { background-image: url("assets/img/film-m.webp"); }
 }
@@ -426,24 +407,23 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   flex: 0 0 auto;
   height: 100%;
 }
-/* each media frame sits on the film's central window band. the slot width is
-   1/4 of the film tile's own aspect (5512/1641 = 3.3589), so one group spans
-   exactly one tile and the scan is displayed with no horizontal stretch.
-   ⚠️ Retune this constant to tileAspect / 4 whenever the tile is re-cropped —
-   resources/recut_film.py prints the value. It was 0.8679 for the original
-   5697px tile, whose seam crowded two sprocket holes together on every
-   repeat; the re-cut lands the seam inside the art's own gap jitter. */
+/* Each frame sits on the film's central window band. The slot width is a
+   quarter of the tile's own aspect, so one group spans exactly one tile and
+   the scan is shown with no horizontal stretch.
+
+   Retune to tileAspect / 4 whenever the tile is re-cropped —
+   resources/recut_film.py prints the value. */
 .film-frame {
   position: relative;
   flex: 0 0 auto;
   width: calc(var(--fh) * 0.839732 - var(--fgap) * 2);
   height: 62%;
   margin-inline: var(--fgap);
-  margin-top: calc(var(--fh) * 0.021);   /* nudge onto the window band's center */
+  margin-top: calc(var(--fh) * 0.021);   /* nudge onto the window band's centre */
   overflow: hidden;
   transform-origin: center;
   /* seated into the film: hairline rebate, soft cast onto the base, and the
-     emulsion darkening that a real frame picks up at its edges */
+     emulsion darkening a real frame picks up at its edges */
   box-shadow:
     0 0 0 1px rgba(5, 9, 13, 0.95),
     0 14px 30px -10px rgba(5, 9, 13, 0.8),
@@ -458,8 +438,8 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   filter: grayscale(1) contrast(1.08) brightness(0.92) sepia(0.12);
   transition: filter 0.55s, opacity 0.55s;
 }
-/* vignette only — no linen here. the woven grain read as fabric over the
-   photos rather than emulsion, so it is kept off the strip entirely */
+/* vignette only — the woven grain read as fabric over the photos rather than
+   emulsion, so linen is kept off the strip entirely */
 .film-frame::after {
   content: "";
   position: absolute;
@@ -496,8 +476,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   display: flex;
   align-items: stretch;
 }
-/* cream panel pinned to the start side, film strip visible beside it.
-   inverted from the original ink panel — cream field, ink type */
+/* cream panel pinned to the start side, film visible beside it */
 .hero-panel {
   position: relative;
   width: min(40rem, 46vw);
@@ -511,8 +490,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   border-inline-end: 3px solid var(--ink);
   box-shadow: 24px 0 60px -24px rgba(5, 9, 13, 0.55);
 }
-/* linen over the panel so it doesn't read as a flat cream block against
-   the film beside it */
+/* linen over the panel so it doesn't read as a flat cream block */
 .hero-panel::after {
   content: "";
   position: absolute;
@@ -534,8 +512,8 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   color: var(--ink);
 }
 html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
-/* pad the mask on all sides (esp. the top) so Arabic hamza/alef tips aren't
-   clipped, with matching negative margins so line spacing is unchanged */
+/* padded on all sides so Arabic hamza/alef tips aren't clipped, with
+   matching negative margins so line spacing is unchanged */
 .hero-title .line-mask {
   display: block;
   overflow: hidden;
@@ -545,23 +523,21 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
 .hero-title .line { display: block; }
 
 /* ── the ransom-note letter ──────────────────────────────────────
-   A letter cut out of another paper and pasted into the headline: ink chip,
-   cream type. The two colours the system already has — no third tone, and
-   no terracotta, which is reserved.
-   ⚠️ `.line-mask` above clips (`overflow: hidden`) with only 0.06em of
-   horizontal padding, so the chip has to stay small and the tilt shallow.
-   Both target letters sit mid-line rather than at an edge, which is what
-   makes a few degrees safe here.
-   ⚠️ `line-height: 1` is load-bearing — without it the inline-block's
-   padding grows the line box and pushes the two headline lines apart. */
+   A letter cut from other paper and pasted into the headline.
+
+   `.line-mask` above clips with only 0.06em of horizontal padding, so the
+   chip stays small and the tilt shallow; both target letters sit mid-line
+   rather than at an edge, which is what makes a few degrees safe.
+
+   `line-height: 1` is load-bearing — without it the inline-block's padding
+   grows the line box and pushes the headline lines apart. */
 .ransom {
   display: inline-block;
   margin-inline: 0.04em;
-  /* The scrap sets the size. Sized so the letter printed ON it reads at
-     roughly the weight of the type around it — the paper margin means the
-     scrap has to be taller than the glyph it stands in for.
-     ⚠️ `.line-mask` clips, so this cannot grow much further without the
-     tops being sliced. */
+  /* The scrap sets the size: the letter printed on it should read at roughly
+     the weight of the type around it, and the paper margin means the scrap is
+     taller than the glyph it stands in for. `.line-mask` clips, so this
+     cannot grow much further. */
   height: 1.34em;
   line-height: 1;
   vertical-align: -0.3em;
@@ -573,9 +549,9 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   height: 100%;
   width: auto;
 }
-/* The letter itself stays in the DOM for screen readers and for copy-paste;
-   only its pixels are replaced by the scrap. `clip-path` rather than
-   `display: none`, which would take it out of the accessibility tree. */
+/* The letter stays in the DOM for screen readers and copy-paste; only its
+   pixels are replaced. clip-path rather than display:none, which would take
+   it out of the accessibility tree. */
 .ransom-sr {
   position: absolute;
   width: 1px;
@@ -584,8 +560,7 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   clip-path: inset(50%);
   white-space: nowrap;
 }
-/* Fallback if a scrap fails to load: show the real letter rather than leave
-   a hole in the middle of the word. */
+/* if a scrap fails to load, show the real letter rather than leave a hole */
 .ransom.no-scrap { height: auto; vertical-align: baseline; filter: none; }
 .ransom.no-scrap img { display: none; }
 .ransom.no-scrap .ransom-sr {
@@ -594,9 +569,8 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   height: auto;
   clip-path: none;
 }
-/* The rule that sat between the headline and the lede was removed on the
-   user's instruction (2026-08-09). The panel's own 3px border and the
-   dropcap already do the separating. */
+/* the rule between the headline and the lede was removed on request
+   (2026-08-09); the panel's border and the dropcap already separate them */
 .dropcap-block {
   font-size: clamp(0.9rem, 1.35vw, 1.05rem);
   line-height: 1.9;
@@ -604,16 +578,13 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   color: rgba(15, 24, 32, 0.82);
 }
 /* ── dropcap: the paper uncrumples ────────────────────────────────────
-   A 24-frame sprite baked from the user's crumple clip. The source is a
-   double chroma key — blue surround, green paper FACE — so the face was
-   replaced with the letter and the whole thing re-lit into ink + cream
-   with the original fold shading intact. See HANDOFF for the recipe.
+   A 24-frame sprite baked from the studio's crumple clip; see HANDOFF for
+   the recipe.
 
-   The sheet is 6 cols x 4 rows of 320x450 cells. background-size is set
-   to 600% 400% so one cell exactly fills the element, which makes the
-   frame maths a clean c/(cols-1) and r/(rows-1) in background-position.
-   The element's width MUST stay locked to the cell aspect or the frames
-   letterbox. */
+   6 cols x 4 rows of 320x450 cells, with background-size 600% 400% so one
+   cell exactly fills the element — which makes the frame maths a clean
+   c/(cols-1) and r/(rows-1). The element's width must stay locked to the
+   cell aspect or the frames letterbox. */
 .dropcap {
   --cap-h: clamp(138px, 17.5vh, 205px);
   float: inline-start;
@@ -622,8 +593,8 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   height: var(--cap-h);
   margin-inline: 0.1rem 1.2rem;
   margin-bottom: 0.45rem;
-  /* two shadows: a tight contact one to seat the sheet on the panel, and a
-     soft cast one — cream paper on a cream field needs both to read */
+  /* two shadows: a tight contact one to seat the sheet, and a soft cast one —
+     cream paper on a cream field needs both to read */
   filter: drop-shadow(0 2px 2px rgba(5, 9, 13, 0.34))
           drop-shadow(0 14px 24px rgba(5, 9, 13, 0.3));
 }
@@ -636,8 +607,7 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   background-position: 0% 0%;
 }
 html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp"); }
-/* the letter itself is baked into the sprite, so keep a real one for
-   screen readers */
+/* the letter is baked into the sprite, so keep a real one for screen readers */
 .dc-sr {
   position: absolute;
   width: 1px;
@@ -659,17 +629,15 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   color: rgba(15, 24, 32, 0.68);
 }
 /* ── decorative separators ──────────────────────────────────────────
-   The "·" and "/" marks between meta items are punctuation, not content:
-   they carry no meaning a reader loses, and they are aria-hidden so screen
-   readers skip them. They sit one tier below body text on purpose — raising
-   them to AA would make the punctuation louder than the words it divides,
-   which is the wrong trade. This is the file's one deliberate contrast
-   exception, and it applies to nothing that carries meaning. */
+   The · and / marks are punctuation, not content, and are aria-hidden. They
+   sit a tier below body text on purpose: raising them to AA would make the
+   punctuation louder than the words it divides. The file's one deliberate
+   contrast exception, and it applies to nothing that carries meaning. */
 .hero-meta .dot,
 .svc-dot,
 .lib-toggle .sep { color: var(--ink-faint); opacity: 1; }
 
-/* -- oval slide buttons (label -> arrow) --------- */
+/* ── oval slide buttons (label → arrow) ── */
 .oval-btn {
   position: relative;
   display: grid;
@@ -689,13 +657,10 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   transition: opacity 0.4s, transform 0.5s cubic-bezier(0.65,0,0.35,1);
 }
 .oval-btn:hover::before { opacity: 1; transform: scale(1.05); }
-/* ⚠️ Both faces used to be `position: absolute`, which left .oval-swap with
-   ZERO intrinsic width — nothing in it contributed to layout. So the button
-   never grew to fit its label: it sat at `min-width` (150px on a phone, of
-   which 86px is padding) while `overflow: hidden` sliced the text off at both
-   ends. On a phone "تعرّف على ألِف" rendered as "ـرّف على أَلِ".
-   The LABEL is in flow now and is what gives the swap its width; only the
-   arrow stays absolute, since it only ever has to sit behind the label. */
+/* Both faces used to be absolutely positioned, leaving .oval-swap with zero
+   intrinsic width — so the button never grew to fit its label, sat at
+   min-width, and `overflow: hidden` sliced the text at both ends. The label
+   is in flow now and is what sizes the swap; only the arrow stays absolute. */
 .oval-swap {
   position: relative;
   display: block;
@@ -717,8 +682,8 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   white-space: nowrap;
   transition: transform 0.55s cubic-bezier(0.65,0,0.35,1);
 }
-/* ⚠️ Must sit AFTER .ob-face — same specificity, so source order decides.
-   Putting it above leaves the label absolute and the swap 0px wide again. */
+/* Must sit AFTER .ob-face — same specificity, so source order decides.
+   Above it, the label stays absolute and the swap goes back to 0px. */
 .ob-label { position: relative; inset: auto; height: 100%; }
 .ob-arrow { transform: translateY(115%); }
 .ob-arrow svg { width: 3.2rem; height: auto; }
@@ -726,8 +691,7 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 .oval-btn:hover .ob-label { transform: translateY(-115%); }
 .oval-btn:hover .ob-arrow { transform: translateY(0); }
 
-
-/* -- a11y utility -------------------------------- */
+/* ── a11y utility ── */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -739,12 +703,12 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 
 /* ═══════════════════════════════════════════
    MEDIA HOLDERS
-   One component for every slot in the remodelled sections. The real assets
-   are four formats — a horizontal film, a vertical reel, a poster and a
-   still — so the aspect is a modifier, not baked into each call site.
-   ⚠️ img AND video are styled together: setHolder() swaps the element type
-   in place when a slot carries video, and only the src should ever differ
-   between "placeholder today" and "the studio's own work tomorrow".
+   One component for every slot. The real assets come in four formats —
+   film, reel, poster, still — so the aspect is a modifier, not baked into
+   each call site.
+
+   img and video are styled together: setHolder() swaps the element type in
+   place, and only the src should differ between placeholder and real work.
    ═══════════════════════════════════════════ */
 .holder {
   position: relative;
@@ -775,49 +739,43 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
   max-width: 90%;
 }
 
-/* Aspect is set per slot from the wireframe, not from a generic scale —
-   see the WHY ALIPH block below. */
+/* aspect is set per slot from the wireframe — see the WHY ALIPH block */
 
 /* ═══════════════════════════════════════════
    WHY ALIPH — three editorial blocks
 
-   Every track width and media aspect here is measured off the user's
-   colour-coded wireframe overlay (green=header, red=text, yellow=media,
-   purple=splitter), normalised to the section's content width.
+   Every track width and media aspect is measured off the user's colour-coded
+   wireframe overlay, normalised to the section's content width.
 
-   ⚠️ The wireframe is the ARABIC/RTL rendering, so grid column 1 is the
-   RIGHT-hand one. Anything the drawing shows on the left is the LAST
-   column. Get this backwards and every block mirrors.
+   The wireframe is the ARABIC/RTL rendering, so grid column 1 is the RIGHT
+   one — anything the drawing shows on the left is the LAST column. Get this
+   backwards and every block mirrors.
 
-   ⚠️ The titles deliberately MOVE between blocks — right column, then
-   left, then full width. Do not normalise them onto one edge; the user
-   called this out specifically.
+   The titles deliberately move between blocks: right column, then left, then
+   full width. Don't normalise them onto one edge.
 
-   ⚠️ Gutters are ~1% horizontal and 4–9px vertical. This is a broadsheet:
-   the rules and the column edges do the separating, not whitespace.
+   Gutters are ~1% horizontal and 4–9px vertical. This is a broadsheet: the
+   rules and column edges do the separating, not whitespace.
    ═══════════════════════════════════════════ */
 .why {
   padding: 0 var(--pad);
-  /* ⚠️ ONE lever for the language difference. The columns below are solved
-     against the ARABIC copy; the English says the same thing in noticeably
-     more characters, so at the same size it ran 31-46% past every box.
-     Text area grows with the SQUARE of the size (both the line height and the
-     characters per line change), so undoing a ~1.37x overflow takes a
-     1/sqrt(1.37) ~ 0.85 scale, not 1/1.37. */
+  /* One lever for the language difference. The columns below are solved
+     against the ARABIC copy; English says the same thing in more characters
+     and ran 31–46% past every box at the same size. Text area grows with the
+     SQUARE of the size, so undoing a 1.37x overflow takes 1/sqrt(1.37) ≈
+     0.85, not 1/1.37. */
   --why-type: 1;
 }
 html[lang="en"] .why { --why-type: 0.85; }
 
 .why-block { padding: var(--why-gap) 0; }
 
-/* ⚠️ An `fr` track has an automatic min-content floor, so a long word or a
-   tall column can push a track WIDER than the fraction asks for — which
-   silently walks the media boxes off the wireframe's measurements as soon
-   as the copy grows. min-width:0 pins every track to its fraction. */
-/* ⚠️ A stretched grid item that also has aspect-ratio resolves its width
-   FROM the stretched height, so it overflows its own track — block 1's film
-   came out 1140px wide inside a 936px column. The media must size from the
-   track, so it never stretches; the text columns still do. */
+/* An `fr` track has an automatic min-content floor, so long copy can push a
+   track wider than its fraction and walk the media off the wireframe's
+   measurements. min-width:0 pins every track to its fraction. */
+/* A stretched grid item that also has aspect-ratio resolves its width FROM
+   the stretched height and overflows its own track — block 1's film came out
+   1140px wide in a 936px column. Media never stretches; text columns do. */
 .wb1-media,
 .wb2-m1,
 .wb2-m2,
@@ -835,34 +793,21 @@ html[lang="en"] .why { --why-type: 0.85; }
   background: rgba(15, 24, 32, 0.32);
 }
 
-/* -- type ---------------------------------------------------------
-   Sized to FILL its box rather than to a global scale: a block's text
-   box is as tall as the picture beside it, and a half-empty box is the
-   thing the user kept rejecting. The per-block overrides below are the
-   real sizes; these are the defaults. */
 .why-title {
   font-family: var(--font-display);
   line-height: 1.06;
-  /* Arabic hamza/alef tips get clipped without this — see HANDOFF */
+  /* Arabic hamza/alef tips get clipped without this */
   padding-top: 0.12em;
   margin: 0 0 var(--why-gap);
   font-size: clamp(1.6rem, 3.4vw, 3.1rem);
 }
-/* a column of stacked paragraphs — reads as a news column rather than one
-   slab, and the paragraph breaks are what let the copy fill its box */
+/* a column of stacked paragraphs — a news column rather than one slab */
 .wb-col { display: flex; flex-direction: column; }
 
-/* Per-column body size. A broadsheet does NOT set every column at one size:
-   each column has a fixed measure and a fixed depth (the picture beside it),
-   so the type is tuned until the copy lands flush at the bottom. These are
-   derived from measured ink-height vs box-height — see fit.py. Retune them
-   whenever the copy changes length. */
-/* Solved per column against a 1280px page with the shortened copy
-   (2026-08-09): each vw term is the size that lands that column's INKED
-   extent at ~99% of its own box — the picture beside it, or the centre cut.
-   Tuned for ARABIC, which is the primary language; English sets longer at the
-   same size and runs a little past, which is the right trade.
-   ⚠️ Re-solve these whenever the copy changes length. */
+/* Solved per column against a 1280px page (2026-08-09): each vw term is the
+   size that lands that column's INKED extent at ~99% of its own box — the
+   picture beside it, or the centre cut. Tuned for Arabic, the primary
+   language. Re-solve with resources/fit_columns.py when the copy changes. */
 .wb1-side  .why-para { font-size: calc(clamp(0.95rem, 2.20vw, 1.50rem) * var(--why-type)); }   /* 28.2px */
 .wb2-flow  .why-para { font-size: calc(clamp(1.00rem, 2.56vw, 1.75rem) * var(--why-type)); }   /* 32.8px */
 .wb2-rail  .why-para { font-size: calc(clamp(1.15rem, 4.32vw, 2.60rem) * var(--why-type)); }   /* 55.3px */
@@ -873,19 +818,17 @@ html[lang="en"] .why { --why-type: 0.85; }
   line-height: 1.52;
   color: var(--ink-soft);
   margin: 0 0 0.45rem;
-  /* ⚠️ Without this a single unbroken run — a pasted string, a long URL, an
-     Arabic word set without spaces — has no break opportunity and the ink
-     walks straight out of its column. Measured at 272px past the box on
-     desktop and 541px on a phone before this was added. Copy should never be
-     able to break the layout. */
+  /* Without this a single unbroken run — a pasted string, a long URL — has no
+     break opportunity and the ink walks out of its column. Measured at 272px
+     past the box on desktop and 541px on a phone. Copy should never be able
+     to break the layout. */
   overflow-wrap: break-word;
 }
 .why-para:last-child { margin-bottom: 0; }
 
-/* A hairline running out of the headline to the column edge — the
-   reference's masthead treatment. The text stays a bare text node (no
-   wrapper span) because applyI18n writes textContent and would delete one;
-   pseudo-elements survive that. */
+/* A hairline running out of the headline to the column edge. The title stays
+   a bare text node — applyI18n writes textContent and would delete a wrapper
+   span, but pseudo-elements survive that. */
 .wb2 .why-title,
 .wb3-head {
   display: flex;
@@ -902,7 +845,7 @@ html[lang="en"] .why { --why-type: 0.85; }
   background: rgba(15, 24, 32, 0.35);
 }
 
-/* ---- block 1 : text column right (30.1%), film left (69.2%) ------ */
+/* ── block 1: text column right (30.1%), film left (69.2%) ── */
 .wb1 {
   display: grid;
   grid-template-columns: 30.1fr 69.2fr;
@@ -910,60 +853,55 @@ html[lang="en"] .why { --why-type: 0.85; }
   align-items: stretch;
 }
 .wb1-side { display: flex; flex-direction: column; }
-/* the headline sits in a 30%-wide column, so it cannot take the
-   full-width display size — it would set four characters to a line */
-/* Sized from the wireframe's own header box: 29% wide x 155 tall reads as
-   TWO lines at ~90px, not a subhead. These are newspaper headlines. */
+/* a 30%-wide column can't take the full-width display size — it would set
+   four characters to a line */
+/* from the wireframe's header box: two lines at ~90px, not a subhead */
 .wb1 .why-title { font-size: clamp(1.7rem, 6.25vw, 5.8rem); }
 .wb1-media { aspect-ratio: 3 / 2; }
 
-/* ---- block 2 : rail right (39.9%), everything else left (59.3%) --- */
+/* ── block 2: rail right (39.9%), everything else left (59.3%) ── */
 .wb2 {
   display: grid;
   grid-template-columns: 39.9fr 59.3fr;
   gap: 0.8%;
   align-items: start;
 }
-/* Explicit placement so the headline still leads in the DOM while the rail
-   renders on the right (column 1 under RTL).
-   ⚠️ `grid-row: 1` is load-bearing. The main column comes FIRST in the DOM
-   and is placed in column 2, which advances the auto-placement cursor past
-   column 1 — so the rail, placed at column 1, gets pushed to a second row
-   and the block renders at double height with a field of cream beside it. */
+/* Explicit placement so the headline leads in the DOM while the rail renders
+   on the right (column 1 under RTL).
+
+   `grid-row: 1` is load-bearing: the main column comes first in the DOM and
+   is placed in column 2, which advances the auto-placement cursor past
+   column 1 — so the rail would be pushed to a second row and the block would
+   render at double height. */
 .wb2-rail { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
 .wb2-main { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; }
-/* one line across the 57.8%-wide left region */
+/* one line across the left region */
 .wb2 .why-title { font-size: clamp(1.7rem, 6.5vw, 6.2rem); }
 
 .wb2-rail-media { aspect-ratio: 9 / 16; margin-bottom: 0.4rem; }
 
-/* ---- block 2's body: ONE text, the pictures floated into it -------
-   This replaced the three stacked grid rows (.wb2-a / .wb2-b / .wb2-c) on
-   2026-08-09. Those put the copy in separate boxes BESIDE each picture; the
-   user wants one body of text that wraps AROUND them.
+/* ── block 2's body: one text, the pictures floated into it ──
+   Replaced three stacked grid rows that put copy in separate boxes beside
+   each picture; this is one body wrapping around them.
 
-   ⚠️ Session 9 tried floats here and reverted them, and the note said they
-   don't work — but the reason they failed was placement, not floats: both
-   figures were floated to the same side, so the second one cleared past the
-   whole column and opened a hole a picture tall. Floated to OPPOSITE sides
-   with the second staggered downward, the text zigzags between them, which
-   is what the wireframe draws.
+   Floats were tried once before and blamed: the real cause was placement,
+   not floats — both figures were floated to the same side, so the second
+   cleared past the whole column and opened a hole a picture tall. On
+   opposite sides the text zigzags between them, which is what the wireframe
+   draws.
 
-   ⚠️ `float: inline-start/end` is valid CSS (unlike `transform-origin:
-   inline-start`, see the session-6 note) and mirrors with the language on
-   its own, so there is no LTR override to keep in sync. */
+   `float: inline-start/end` is valid and mirrors with the language on its
+   own, so there is no LTR override to keep in sync. */
 .wb2-flow::after {
   content: "";
   display: block;
   clear: both;
 }
-/* ⚠️ NO bottom margin. A float excludes text with its MARGIN box, so a
-   bottom margin here pushes the exclusion below the picture — and any line
-   box that so much as clips it gets squeezed to the narrow side. Measured
-   with a 28px margin: the line starting at y=406 overlapped the margin box
-   by 10px and came out 35% wide, wrapping instead of running across. With no
-   bottom margin the first line under the picture runs the full column, and
-   the line's own leading is the gap. */
+/* No bottom margin. A float excludes text with its MARGIN box, so a bottom
+   margin pushes the exclusion below the picture and any line box that clips
+   it gets squeezed to the narrow side — measured, a 28px margin made the
+   line under the picture 35% wide instead of running across. The line's own
+   leading is the gap. */
 .wb2-m1 {
   float: inline-end;
   width: 54.3%;
@@ -971,17 +909,10 @@ html[lang="en"] .why { --why-type: 0.85; }
   margin-inline-start: var(--why-gap);
   margin-block-end: 0;
 }
-/* ⚠️ NO top margin, and that is the whole point. A float excludes text with
-   its MARGIN box, not its border box — so a top margin here is a band of
-   reserved emptiness that neither the picture nor the copy may use. At 8% it
-   read as a hole: measured, the lines at y=421 and y=452 were still squeezed
-   into the left 281px because m2's margin box already started at y=416.
-
-   With no top margin the second float lands directly under the first one's
-   margin box, so there is no band where the full width is free and the text
-   runs straight from "beside picture one" to "beside picture two" — a
-   continuous wrap, which is what the block is for. The gap between the two
-   pictures is m1's margin-block-end, and that is enough. */
+/* No top margin either, for the same reason: it would be a band of reserved
+   emptiness that neither the picture nor the copy may use. With none, the
+   second float lands directly under the first one's margin box and the text
+   runs straight from one picture to the next. */
 .wb2-m2 {
   float: inline-start;
   width: 56.7%;
@@ -990,9 +921,8 @@ html[lang="en"] .why { --why-type: 0.85; }
   margin-block: 0 var(--why-gap);
 }
 
-/* ---- block 3 : full-width head, then text | tall cut | text ------ */
-/* the full-width banner headline — one line, and the biggest type on the
-   page after the section banners themselves */
+/* ── block 3: full-width head, then text | tall cut | text ── */
+/* the full-width headline — the biggest type after the section banners */
 .wb3-head {
   /* was 11vw and it collided with the splitter above it */
   font-size: clamp(1.8rem, 9.5vw, 8.6rem);
@@ -1006,25 +936,21 @@ html[lang="en"] .why { --why-type: 0.85; }
   gap: 1%;
   align-items: stretch;
 }
-/* ⚠️ the centre cut is the WIDEST element in this block, not the
-   narrowest — 44.6% against text columns of 29% and 23%. */
+/* the centre cut is the WIDEST element in this block, not the narrowest:
+   44.6% against text columns of 29% and 23% */
 .wb3-media { aspect-ratio: 4 / 7; }
 
-/* Both ovals are sized from the wireframe rather than from a global
-   min-width: the about button is 29.9% of the column at ~2.6:1, and the
-   work button fills its text column at ~2.2:1.
-   ⚠️ .oval-swap keeps its 1.5em height on purpose — it is the mask the
-   label slides inside, and stretching it to the button would break the
-   label/arrow travel distance. place-items:center does the centring. */
+/* Both ovals are sized from the wireframe rather than a global min-width.
+   .oval-swap keeps its 1.5em height on purpose — it is the mask the label
+   slides inside, and stretching it would break the travel distance. */
 .why-outro .oval-btn {
   width: 29.9%;
   min-width: 12rem;
   aspect-ratio: 2.6;
 }
-/* ⚠️ NOT full-width at 2.2:1 any more. Filling the text column made this a
-   482x219px ellipse — bigger than the headline above it and the single
-   loudest thing in the section. It is the way out of the section, not its
-   headline, so it takes the ordinary oval sizing. */
+/* Not full-width any more: filling the text column made this a 482x219px
+   ellipse, louder than the headline above it. It is the way out of the
+   section, not its headline. */
 .sw-foot .oval-btn {
   width: auto;
   min-width: clamp(11rem, 21vw, 15rem);
@@ -1033,7 +959,7 @@ html[lang="en"] .why { --why-type: 0.85; }
 .why-outro .ob-face,
 .sw-foot .ob-face { font-size: 1.12rem; }
 
-/* ---- the way out ------------------------------------------------- */
+/* ── the way out ── */
 .why-outro {
   display: flex;
   align-items: center;
@@ -1052,26 +978,24 @@ html[lang="en"] .why { --why-type: 0.85; }
 
 /* ═══════════════════════════════════════════
    WHAT WE DO — service picker + example switcher
-   Three names on one line, one example at a time from the selected
-   service's subcategories. Not animated: the swap is a straight repaint.
+   Three names on one line, one example at a time from the selected service's
+   subcategories. Not animated: the swap is a straight repaint.
    ═══════════════════════════════════════════ */
 .services { padding: 0 var(--pad) clamp(1.2rem, 2.4vw, 2rem); }
 
-/* ⚠️ CENTRED as one line, not space-between. Pushed to the column edges the
+/* Centred as one line, not space-between: pushed to the column edges the
    three names read as three separate headings and the separators end up
-   marooned in the middle of ~300px of cream. Centred, the dots sit where a
-   reader expects them: between the words they divide. */
+   marooned in the middle of ~300px of cream. */
 .svc-picks {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  /* ⚠️ gap in em, not rem. fitPicks() scales this row by font-size alone, and
-     that only works if EVERY horizontal contribution scales with it — a rem
-     gap stays put and the fit lands short. */
+  /* gap in em, not rem: fitPicks() scales this row by font-size alone, which
+     only works if every horizontal contribution scales with it */
   gap: 0.34em;
   flex-wrap: wrap;
   padding: var(--why-gap) 0 0.5rem;
-  /* the starting size; fitPicks() in main.js overwrites it to fill the line */
+  /* the starting size; fitPicks() overwrites it to fill the line */
   font-size: clamp(1.15rem, 5.8vw, 5rem);
 }
 .svc-pick {
@@ -1085,7 +1009,7 @@ html[lang="en"] .why { --why-type: 0.85; }
   /* sized from .svc-picks — see fitPicks() */
   font-size: 1em;
   font-weight: 800;
-  /* the picks are display-size now; 1.06 clipped the Arabic ascenders */
+  /* these are display-size, and 1.06 clipped the Arabic ascenders */
   line-height: 1.24;
   opacity: 0.42;
   border-bottom: 2px solid transparent;
@@ -1095,9 +1019,8 @@ html[lang="en"] .why { --why-type: 0.85; }
 /* the selected-service indicator: a rule under the name, nothing else */
 .svc-pick.is-active { opacity: 1; border-bottom-color: var(--ink); }
 /* The separators carry the line as much as the names do, so they are set as
-   display type at roughly half the name's size — not the 1/3 they were, which
-   read as punctuation left over from a caption. --ink-faint is allowed here:
-   they are decorative and aria-hidden (see the polish-pass note). */
+   display type at roughly half the name's size. --ink-faint is allowed here:
+   they are decorative and aria-hidden. */
 .svc-dot {
   font-family: var(--font-display);
   font-size: 0.52em;
@@ -1106,12 +1029,10 @@ html[lang="en"] .why { --why-type: 0.85; }
   transform: translateY(-0.12em);
 }
 
-/* Text column right, stage left.
-   ⚠️ The wireframe's 39.5 / 58.5 split with a 5:4 stage measured out at a
-   714x571 picture beside about 200px of copy — the column then had to hold
-   370px of nothing, which is the "a lot of spaces" the user rejected. The
-   stage keeps the lead but at a shallower crop and a smaller share, so the
-   two columns land within ~60px of each other. */
+/* Text column right, stage left. The wireframe's 39.5/58.5 split at 5:4 put
+   a 714x571 picture beside ~200px of copy, leaving the column 370px of
+   nothing. The stage keeps the lead at a shallower crop and smaller share, so
+   the two columns land within ~60px of each other. */
 .svc-demo {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1135,7 +1056,7 @@ html[lang="en"] .why { --why-type: 0.85; }
   object-fit: cover;
   filter: grayscale(1) contrast(1.06);
 }
-/* the heavy rule directly under the stage — the studio's baseline stroke */
+/* the heavy rule under the stage — the studio's baseline stroke */
 .sw-bar { display: block; height: 6px; background: var(--ink); }
 
 /* the arrows sit inside the stage, on its two edges */
@@ -1160,9 +1081,9 @@ html[lang="en"] .why { --why-type: 0.85; }
 .sw-prev { inset-inline-start: 0.7rem; }
 .sw-next { inset-inline-end: 0.7rem; }
 
-/* ⚠️ flex column so .sw-foot can take margin-top:auto and land the button
-   on the stage's bottom edge — without it the column ends after the
-   description and leaves a cream void beside a tall picture. */
+/* flex column so .sw-foot can take margin-top:auto and land the button on
+   the stage's bottom edge, instead of ending after the description and
+   leaving a cream void beside a tall picture */
 .sw-text { display: flex; flex-direction: column; }
 .sw-name {
   font-family: var(--font-display);
@@ -1183,9 +1104,7 @@ html[lang="en"] .why { --why-type: 0.85; }
   padding-top: 0.7rem;
 }
 
-/* ═══════════════════════════════════════════
-   LIBRARY: category accordion
-   ═══════════════════════════════════════════ */
+/* ═══════════ LIBRARY: category accordion ═══════════ */
 .lib-bar {
   display: flex;
   align-items: baseline;
@@ -1349,9 +1268,7 @@ body.lib-index .lib-list { display: block; }
 }
 .lib-list-row.has-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
-/* ═══════════════════════════════════════════
-   ABOUT page
-   ═══════════════════════════════════════════ */
+/* ═══════════ ABOUT page ═══════════ */
 .clippings {
   position: relative;
   display: grid;
@@ -1408,7 +1325,7 @@ body.lib-index .lib-list { display: block; }
 }
 .clip-text p { margin-bottom: 1rem; color: rgba(15, 24, 32, 0.78); font-size: 0.95rem; }
 
-/* ── the long read: text column + a facts rail ─────────────────────── */
+/* ── the long read: text column + a facts rail ── */
 .ab-read {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 15rem;
@@ -1417,9 +1334,9 @@ body.lib-index .lib-list { display: block; }
   padding: clamp(1.5rem, 4vh, 2.6rem) var(--pad) clamp(2.4rem, 6vh, 4rem);
   border-bottom: var(--hair);
 }
-/* 37.5rem holds the long read at ~72ch. The grid cell alone is wider than
-   that and pushed the measure to 78ch, which is past the point Arabic body
-   copy stays comfortable to track line to line. */
+/* 37.5rem holds the long read at ~72ch. The grid cell alone is wider and
+   pushed it to 78ch, past where Arabic body copy stays comfortable to track
+   line to line. */
 .ab-col { max-width: 37.5rem; }
 .ab-p {
   font-size: 1rem;
@@ -1435,10 +1352,10 @@ body.lib-index .lib-list { display: block; }
 }
 .ab-lead::first-line { font-weight: 700; }
 
-/* The rule sits ABOVE the quote, not down its side. Aliph's device is the
-   logo's extending baseline — a horizontal stroke, the same one used by
-   .hero-rule and .asvc-rule. Turning it vertical beside a blockquote stops
-   being the brand's mark and becomes the generic quote-callout tab. */
+/* The rule sits ABOVE the quote, not down its side: Aliph's device is the
+   logo's extending baseline, a horizontal stroke. Turned vertical beside a
+   blockquote it stops being the brand's mark and becomes the generic
+   quote-callout tab. */
 .ab-pull {
   margin: 2.2rem 0 1.9rem;
   padding-top: 1.1rem;
@@ -1477,9 +1394,9 @@ body.lib-index .lib-list { display: block; }
   text-align: end;
 }
 
-/* ── one section per service ────────────────────────────────────────
-   The photo and the text swap sides every other block, which is what
-   keeps a run of four from reading as a list. */
+/* ── one section per service ──
+   The photo and text swap sides every other block, which keeps a run of four
+   from reading as a list. */
 .svc-about {
   padding: 0 var(--pad) clamp(1rem, 3vh, 2rem);
 }
@@ -1577,9 +1494,7 @@ body.lib-index .lib-list { display: block; }
   padding: 0 var(--pad) clamp(2.4rem, 6vh, 4rem);
 }
 
-/* ═══════════════════════════════════════════
-   FOOTER (shared across pages)
-   ═══════════════════════════════════════════ */
+/* ═══════════ FOOTER (shared) ═══════════ */
 .footer {
   background: var(--ink);
   color: var(--cream);
@@ -1587,8 +1502,8 @@ body.lib-index .lib-list { display: block; }
   overflow: hidden;
   margin-top: clamp(1.5rem, 4vh, 2.5rem);
 }
-/* the home page ends on the last story panel, which already butts up
-   against the contact band — the gap just read as a stray cream strip */
+/* the home page's last section already butts against the contact band, so
+   the gap just read as a stray cream strip */
 body[data-page="index"] .footer { margin-top: 0; }
 .footer::after {
   content: "";
@@ -1615,9 +1530,7 @@ body[data-page="index"] .footer { margin-top: 0; }
   color: rgba(217, 217, 206, 0.6);
 }
 
-/* ═══════════════════════════════════════════
-   CONTACT FOOTER (index page)
-   ═══════════════════════════════════════════ */
+/* ═══════════ CONTACT FOOTER (index) ═══════════ */
 
 .contact-band {
   position: relative;
@@ -1765,18 +1678,16 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   /* the strip's own borders sit inside its height */
   .film-scroll { --fh: calc(var(--film-h) - 6px); }
 
-  /* why aliph — every grid in the section collapses to one column.
-     ⚠️ There are FIVE of them, not three: the two blocks plus block 2's
-     inner rows. Miss one and it silently stays two columns on a phone,
-     setting text in a 180px gutter beside a sliver of picture. */
+  /* why aliph — the section's grids collapse to one column.
+     Miss one and it silently stays two columns on a phone, setting text in a
+     180px gutter beside a sliver of picture. */
   .wb1,
   .wb2,
   .wb3-body { grid-template-columns: 1fr; gap: 0; }
 
-  /* ⚠️ Block 2's pictures UNFLOAT on a phone. A 54%-wide float in a 342px
-     column leaves a ~150px measure beside it, which is three or four words a
-     line — unreadable in either language. Stacked, the copy keeps its full
-     measure and the pictures read at full width. */
+  /* Block 2's pictures unfloat on a phone: a 54%-wide float in a 342px column
+     leaves a ~150px measure, three or four words a line. Stacked, the copy
+     keeps its full measure and the pictures read at full width. */
   .wb2-m1,
   .wb2-m2 {
     float: none;
@@ -1790,24 +1701,20 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .why-outro .oval-btn,
   .sw-foot .oval-btn { width: auto; aspect-ratio: auto; min-width: 11rem; }
 
-  /* the rail's own column can't stay first, or the poster lands above the
-     headline on a phone.
-     ⚠️ `grid-row` MUST be reset with it. The desktop rules pin both children
-     to row 1 (see the note there); collapsing to a single column while both
-     are still explicitly in row 1 stacks them ON TOP OF EACH OTHER — measured
-     342x440px of the rail's poster and copy sitting under the main column's
-     text. `order` cannot save it either: order is ignored for grid items that
-     are explicitly placed. */
+  /* The rail's column can't stay first, or the poster lands above the
+     headline. `grid-row` must be reset with it: the desktop rules pin both
+     children to row 1, and collapsing to one column while they are still
+     explicitly in row 1 stacks them on top of each other — measured 342x440px
+     of overlap. `order` cannot save it; order is ignored for explicitly
+     placed grid items. */
   .wb2-rail,
   .wb2-main { grid-column: 1; grid-row: auto; }
   .wb2-rail { order: 2; }
 
-  /* ⚠️ Each holder KEEPS ITS OWN ASPECT on a phone. These used to be forced
-     to 4/3 once they were alone in a row, which is wrong for the thing that
-     goes in them: a reel is 9:16 and a poster is portrait, and a landscape
-     crop of either misrepresents the work — `data-kind` on each holder says
-     which it is. Width is capped by the column and height by the viewport, so
-     a tall crop still cannot run away with the page. */
+  /* Each holder keeps its own aspect on a phone. These used to be forced to
+     4/3 once alone in a row, which is wrong for what goes in them — a reel is
+     9:16 and a poster is portrait, and `data-kind` says which. Width is
+     capped by the column and height by the viewport. */
   .wb1-media,
   .wb2-rail-media,
   .wb2-m1,
@@ -1824,22 +1731,18 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .contact-side { align-items: flex-start; text-align: start; }
   .contact-socials { justify-content: flex-start; }
 
-  /* what we do — the switcher stacks with the example leading.
-     Stay centred on a phone too: the user asked for the three names centred,
-     and flex-start pinned them to the reading edge with the dots trailing.
+  /* what we do — the switcher stacks with the example leading, and the names
+     stay centred.
 
-     ⚠️ The desktop clamp's FLOOR (1.7rem = 40.8px at this 150% root) is what
-     applies at 390px, not its vw term — so the three names plus separators
-     came to more than 342px and wrapped, stranding تصميم alone on a line.
-     Only the floor is lowered here: keeping the SAME 5.8vw term matters,
-     because a steeper one made the names bigger at 900px than at 1000px and
-     the type jumped up as the window got narrower. Arabic now holds one line
-     at every width; English still takes two below 900px, which is honest —
-     "Film & Photography" cannot set beside two more names on a phone at
-     anything like headline scale. */
+     The desktop clamp's FLOOR is what applies at 390px, not its vw term, so
+     the names plus separators came to more than the column and wrapped. Only
+     the floor is lowered here: keeping the same vw term matters, because a
+     steeper one made the names bigger at 900px than at 1000px. English still
+     takes two lines below 900px, which is honest — "Film & Photography"
+     cannot set beside two more names at headline scale. */
   .svc-picks { justify-content: center; }
-  /* stacked, the button reads as the section's own way out rather than
-     something pinned to a column edge — and it clears the corner launcher */
+  /* stacked, the button reads as the section's way out rather than something
+     pinned to a column edge — and it clears the corner launcher */
   .sw-foot { justify-content: center; }
   .svc-demo { grid-template-columns: 1fr; }
   .sw-stage { order: -1; }
@@ -1855,11 +1758,9 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .clippings { display: flex; flex-direction: column; }
   .clip { transform: none !important; margin: 0 !important; }
 
-  /* ⚠️ The nav overlay's footer does not fit one phone line — measured 608px
-     inside a 390px overlay, which put the language pill entirely OFF-SCREEN
-     (left: -127px) and clipped the last social link. That made it impossible
-     to switch language from the menu on a phone. Stack the two, and let the
-     socials wrap rather than run off the edge. */
+  /* The nav overlay's footer does not fit one phone line — measured 608px
+     inside a 390px overlay, which put the language pill off-screen and
+     clipped the last social. Stack the two and let the socials wrap. */
   .nav-foot {
     flex-direction: column;
     align-items: flex-start;
@@ -1892,10 +1793,10 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
 }
 
 /* ═══════════════════════════════════════════
-   PROJECT PROFILE SHEET  (technical solutions)
-   A cream broadsheet page over the archive: cover + title, a big screenshot
-   with a thumb strip, a details table, and the write-up. Sites additionally
-   open a browser-chrome frame running a real preview build.
+   PROJECT PROFILE SHEET
+   A cream broadsheet page over the archive: cover and title, a big
+   screenshot with a thumb strip, a details table, and the write-up. Sites
+   also open a browser-chrome frame running a real preview build.
    ═══════════════════════════════════════════ */
 body.sheet-open { overflow: hidden; }
 
@@ -1992,7 +1893,7 @@ body.sheet-open { overflow: hidden; }
 .sheet-close:hover { background: var(--ink); color: var(--cream); }
 .sheet-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ── body: gallery + copy on one side, details rail on the other ── */
+/* ── body: gallery + copy one side, details rail the other ── */
 .sheet-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) clamp(15rem, 26%, 20rem);
@@ -2089,7 +1990,7 @@ body.sheet-open { overflow: hidden; }
   text-align: end;
 }
 /* .latin carries 0.18em tracking for all-caps display strings; a stack list
-   is running text and needs it back to normal or it wraps into three lines */
+   is running text and needs it back to normal or it wraps onto three lines */
 .sm-row dd.latin {
   letter-spacing: 0.01em;
   font-size: 0.78rem;

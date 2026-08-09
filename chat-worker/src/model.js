@@ -15,10 +15,20 @@
    next one.
    ══════════════════════════════════════════════════════════════════ */
 
-import { SERVICES, nameList } from "./services.js";
+import { SERVICES, SERVICE_IDS, nameList } from "./services.js";
 import { norm, tokens, capLength } from "./guardrails.js";
 
 export const STUB_MODEL = "stub";
+
+/* ⚠️ DERIVED, never typed. `offScope` below named the pre-2026-08 four
+   services — الهويّات البصريّة / التسويق والمحتوى / الفعاليّات / التقنية —
+   for as long as services.js has said three, and it is the one reply a
+   visitor gets when the bot doesn't recognise their idea: the worst
+   possible place to recite services the studio no longer offers. */
+const COVERED = {
+  ar: nameList(SERVICE_IDS, "ar"),
+  en: nameList(SERVICE_IDS, "en"),
+};
 
 export const usingModel = (env) =>
   env && env.GEMINI_API_KEY ? String(env.GEMINI_MODEL || "gemini-2.5-flash-lite") : STUB_MODEL;
@@ -46,8 +56,8 @@ const L = {
     en: (n) => `That spans more than one of ours — ${n}. Would you like the team to get in touch?`,
   },
   offScope: {
-    ar: "لا تبدو من الخدمات التي نغطّيها — نحن نعمل في الهويّات البصريّة، التسويق والمحتوى، تنظيم الفعاليّات، والحلول التقنيّة. إن كنت قد أخطأت الفهم، الفريق موجود — تحبّون أن يتواصل معكم الفريق؟",
-    en: "That doesn't look like something we cover — we do identities, marketing and content, events, and technical work. If I've got that wrong, the team is here — would you like the team to get in touch?",
+    ar: `لا تبدو من الخدمات التي نغطّيها — نحن نعمل في ${COVERED.ar}. إن كنت قد أخطأت الفهم، الفريق موجود — تحبّون أن يتواصل معكم الفريق؟`,
+    en: `That doesn't look like something we cover — we do ${COVERED.en}. If I've got that wrong, the team is here — would you like the team to get in touch?`,
   },
   askName: {
     ar: "تمام. ما اسمكم؟",

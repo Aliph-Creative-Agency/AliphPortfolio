@@ -1,40 +1,28 @@
-/* ALIPH prototype v05 — i18n, film strip, why-aliph, what-we-do, contact */
+/* ALIPH prototype — i18n, film strip, why-aliph, what-we-do, contact */
 
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 gsap.registerPlugin(ScrollTrigger);
 
 /* ══════════ media holders ══════════
-   Every photograph on this site is still to come from the studio, so
-   there is nothing to load yet. This is the stand-in.
+   Stand-in until the studio's photographs land.
 
-   ⚠️ It is an <img> with an inline SVG data URI, NOT a <div>. Every
-   image on the site is styled through `img` selectors — object-fit,
-   the grayscale grade, the sizing — and swapping the element type
-   silently drops all of it. This way the markup, the alt text and the
-   cascade are exactly what they will be once real photographs land:
-   the only thing that changes then is the src.
+   It is an <img> with an inline SVG data URI, not a <div>: every image is
+   styled through `img` selectors, so swapping the element type would
+   silently drop object-fit, the grayscale grade and the sizing. This way
+   landing real media is only a src change.
 
-   ⚠️ Do NOT go back to an external placeholder service. The previous
-   one (picsum.photos) meant 20+ third-party requests per page, was
-   rate-limited constantly, and left the page full of empty frames on
-   a phone — see the loading notes in HANDOFF.md. An empty `src=""` is
-   not an option either: it re-requests the document itself. */
+   Don't go back to an external placeholder service (picsum meant 20+
+   third-party requests and constant rate-limiting), and don't use an empty
+   src — that re-requests the document. */
 const HOLDER =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'" +
   " preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E";
 
-/* Paint one media holder. The remodelled sections hold work in four formats —
-   a horizontal film, a vertical reel, a poster and a still — so a holder has
-   to be able to become a <video> as well as an <img>.
+/* Paint one holder. The sections carry work in four formats — film, reel,
+   poster, still — so a holder can become a <video> as well as an <img>.
 
-   ⚠️ A holder only ever plays while it is on screen, and never preloads. The
-   Drive's horizontal videos are 55–384 MB; four of those autoplaying would
-   undo every phone fix from session 8 on its own. Poster frame first, bytes
-   only if the visitor actually scrolls to it.
-
-   Real media hasn't landed yet, so `item.src`/`item.video` are absent today
-   and every holder paints HOLDER — but into the element the real asset will
-   use, so landing the media stays a src change, not a markup change. */
+   Video never preloads and only plays on screen: the Drive's horizontal
+   videos are 55–384 MB and four autoplaying would undo every phone fix. */
 function setHolder(box, item) {
   if (!box) return;
   const poster = (item && item.src) || HOLDER;
@@ -91,8 +79,8 @@ const I18N = {
     ar: "لِف استوديو يبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، ثم رسم النظام كاملًا منها: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم. نصمّم، ونصوّر، ونبرمج المواقع والأنظمة التي تُشغّلها — من الألِف إلى الياء.",
     en: "liph is a studio that begins at the first letter. Every brand has an origin point it is built from and returns to; our work is finding that point, then drawing the whole system from it: the name, the identity, the voice, and the way the brand shows up in the world. We design, we shoot, and we build the sites and systems that run it all. From A to Z.",
   },
-  /* the dropcap letter is baked into the crumple sprite; this is the copy
-     screen readers get */
+  /* the dropcap letter is baked into the sprite; this is what screen
+     readers get */
   dropLetter: { ar: "أ", en: "A" },
   heroMeta1: { ar: "منذ ٢٠٢٤", en: "Since 2024" },
   heroMeta2: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
@@ -110,8 +98,7 @@ const I18N = {
   swPrev: { ar: "المثال السابق", en: "Previous example" },
   swNext: { ar: "المثال التالي", en: "Next example" },
 
-  /* why aliph — three editorial blocks, each carrying real work in its
-     media holders. The essay runs beside the portfolio rather than after it. */
+  /* why aliph — three editorial blocks, each carrying work in its holders */
   storyBanner: { ar: "لماذا ألِف؟", en: "Why Aliph?" },
 
   w1Title: { ar: "صوت واحد، حرفان، ولغتان.", en: "One sound, two letters, two languages." },
@@ -122,9 +109,6 @@ const I18N = {
   w1Cap: { ar: "من جلسة تصوير — البلدة القديمة", en: "From a shoot — the Old City" },
 
   w2Title: { ar: "نبحث عن النقطة، ثم نرسم النظام.", en: "We find the point, then draw the system." },
-  /* block 2 — row A, two paragraphs so the column sets like a news column */
-
-  /* block 2 — row C */
 
   w3ParaA: {
     ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف: في المطبوع، وعلى الشاشة، وبين يديّ من يستعمله كل يوم.",
@@ -177,16 +161,12 @@ const I18N = {
     ar: "وفي النهاية المقياس واحد: أن تبدو النتيجة حتميّة — كأنّها لم تكن لتكون غير ذلك.",
     en: "And in the end there is one measure: that the result looks inevitable — as if it could not have been anything else.",
   },
-  /* the wide short line that crosses the whole left region in block 2 */
-  /* the column sitting under the tall rail */
-  /* Block 2 is ONE body of copy that wraps around the two floated
-     pictures — not three columns sitting beside them. Merged from the
-     old w2ParaA/A2/A3/B/C/C2/C3 on 2026-08-09 at the user's request. */
+
   /* Block 2 reads as one body, but it is two paragraphs so the second
      picture can be anchored between them — a float only wraps text that
      comes after it in the flow. */
   w2BodyA: {
-    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها، وعملنا هو العثور عليها أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها. لا نبدأ من الشكل، بل ننتهي إليه: الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا جميلًا ولا يخصّ أحدًا. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في الغرفة؟",
+    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها، وعملنا هو العثور عليها أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها. لا نبدأ من الشكل، بل ننتهي إليه: الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا جميلًا ولا يخصّ أحدًا. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم الغرفة؟",
     en: "Every brand has an origin point it is built from and returns to, and our work is to find it first — in the name, the story, or the place — then draw the whole system from it. We don't start at the form; we arrive at it: a mark drawn in the first week is usually handsome and belongs to nobody. And because the point is never handed to you in a meeting, we begin with the boring questions: who buys, when, and what gets said about you when you are not in the room.",
   },
   w2BodyB: {
@@ -224,7 +204,7 @@ const I18N = {
   libGallery: { ar: "معرض", en: "Gallery" },
   aboutBanner: { ar: "من نحن؟", en: "Who are we?" },
 
-  /* project profile sheet (technical solutions) */
+  /* project profile sheet */
   pfOpen: { ar: "افتح الملف", en: "Open profile" },
   pfDetails: { ar: "التفاصيل", en: "Details" },
   pfShots: { ar: "لقطات", en: "Screenshots" },
@@ -286,8 +266,7 @@ const I18N = {
   abDoes: { ar: "يشمل", en: "Includes" },
 };
 
-/* one section per service on the about page — what we do, why us, and the
-   concrete deliverables underneath */
+/* one section per service on the about page */
 const SERVICES = [
   {
     id: "design", tag: "DESIGN", seed: "aliph-svc1",
@@ -343,9 +322,8 @@ const CATS = [
   { id: "tech", ar: "برمجة", en: "Engineering" },
 ];
 
-/* Each service is shown through its subcategories: the example switcher under
-   "what we do" steps through these, not through projects. `desc` is the line
-   that speaks about the category and the subcategory together. */
+/* The example switcher steps through these subcategories, not through
+   projects. `desc` speaks about the category and subcategory together. */
 const SUBCATS = {
   design: [
     {
@@ -418,14 +396,9 @@ const SUBCATS = {
   ],
 };
 
-/* Every project carries a one-line brief so the "latest work" slider on the
-   home page can speak about whichever piece is on screen (placeholder copy).
-   `date` is "YYYY-MM" — the archive is one continuous run, newest first, with
-   no year sections and no piece counts anywhere.
-   Technical-solutions entries additionally carry a `profile`, which is what
-   opens the preview sheet (screenshots + details, plus a live preview for
-   sites). Any project given a `profile` gets the sheet, so the other three
-   services can be extended the same way later. */
+/* `date` is "YYYY-MM"; the archive is one continuous run, newest first,
+   with no year sections and no piece counts. A `profile` is what opens the
+   preview sheet — any project given one gets the sheet. */
 const PROJECTS = [
   {
     ar: "مؤسّسة بنيان", en: "Bunyan Foundation", date: "2026-05", cat: "design", seed: "aliph01",
@@ -656,7 +629,7 @@ const PROJECTS = [
   },
 ];
 
-/* the archive is one continuous run — newest first, no year sections */
+/* one continuous run — newest first, no year sections */
 const byDate = (a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
 
 const MONTHS = {
@@ -682,11 +655,10 @@ function fmtDate(iso) {
   return `${MONTHS[lang][+m - 1]} ${num(y)}`;
 }
 
-/* ══════════ seamless infinite loop helper ══════════
-   Wraps a track's children into one group and clones it until the track is
-   wider than the host plus two periods. The tween then travels exactly one
-   period and repeats: shifting periodic content by one period is pixel-
-   identical, so the restart is invisible — no modifier needed. */
+/* ══════════ seamless infinite loop ══════════
+   Clones a track's children until it is wider than the host plus two
+   periods, then travels exactly one period and repeats. Shifting periodic
+   content by one period is pixel-identical, so the restart is invisible. */
 function makeLoop(track, speed) {
   if (!track || prefersReduced) return null;
   const cs = getComputedStyle(track);
@@ -727,10 +699,9 @@ const BAND_SPEED = 40;
 
 let bandTween = null;
 
-/* The group stays 4 frames — it is matched to the film tile, whose width is
-   one group and whose sprocket pattern repeats in lockstep with it. Re-cutting
-   the tile to 3 is a separate job (see resources/recut_film.py), so with three
-   services photography takes two of the four slots. */
+/* Four frames, matched to the film tile: the tile is one group wide and its
+   sprocket run repeats in lockstep. Re-cutting it to three is a separate job
+   (resources/recut_film.py), so photography takes two of the four slots. */
 const FILM_FRAMES = [
   { seed: "aliphf1", svc: "design", cap: { ar: "مؤسّسة بنيان — هويّة", en: "Bunyan — identity" } },
   { seed: "aliphf5", svc: "photo", cap: { ar: "سوق البلدة — حملة", en: "Old Town Market — campaign" } },
@@ -740,9 +711,8 @@ const FILM_FRAMES = [
 const SERVICE_FRAMES = { design: 0, photo: 1, tech: 3 };
 const filmScroll = document.getElementById("filmScroll");
 
-/* One group = the 4 frames. The group is cloned across the strip and the film
-   background tile is sized to exactly one group width, so the sprocket pattern
-   repeats in lockstep with the frames and the loop has no seam. */
+/* One group = the four frames, cloned across the strip, with the film tile
+   sized to exactly one group so the sprockets repeat in step. */
 function buildFilm() {
   if (!filmScroll) return;
   filmScroll.innerHTML = "";
@@ -775,18 +745,12 @@ function buildBandSource() {
 }
 
 /* ══════════ don't animate what isn't on screen ══════════
-   The contact band and the film strip both run continuously and never stop —
-   including while you are scrolled a page and a half past them.
-   Each one is a composited layer being retransformed every single frame, and
-   on a phone that competes directly with the scroll itself. Desktop GPUs
-   absorb it; phones are exactly where it shows up as "laggy when scrolling
-   fast."
+   The contact band and film strip retransform a composited layer every
+   frame, which on a phone competes with the scroll itself.
 
-   The tween is PAUSED, not killed: resuming keeps x where it was, so nothing
-   jumps when the strip scrolls back into view. `rootMargin` starts it again
-   slightly before the edge so it is already moving by the time it's visible.
-   Returns a getter for the current state, because rebuildLoops() makes new
-   tweens and a new tween starts playing whether or not anyone can see it. */
+   Paused, not killed, so x survives and nothing jumps on return. Returns a
+   getter because rebuilds make new tweens, and a new tween plays whether or
+   not anyone can see it. */
 function pauseOffscreen(el, getTween) {
   if (!el || !window.IntersectionObserver) return () => true;
   let visible = true;
@@ -814,22 +778,20 @@ function rebuildLoops() {
   if (bandTween && !bandVisible()) bandTween.pause();
 }
 
-/* ══════════ hero film strip: seamless loop + hover-to-service sync ══════════
-   the strip runs continuously in ONE direction at a CONSTANT speed. one group
-   of 4 frames is cloned across the strip and the film background tile is sized
-   to exactly one group, so translating by one period is pixel-identical — the
-   tween restart is invisible. hovering a service glides to its frame and stops. */
+/* ══════════ hero film strip ══════════
+   One direction, constant speed. One group of four frames is cloned across
+   the strip and the film tile is sized to one group, so translating by a
+   period is pixel-identical and the restart is invisible. */
 const filmLoop = (() => {
   const SPEED = 34;               // px per second, constant
   let tween = null, period = 0, first = [], ready = false;
-  /* the hero is the tallest thing on the page and the film is its widest
-     layer — see pauseOffscreen() above for why this matters on a phone */
+  /* the hero is the tallest thing on the page and the film its widest layer */
   let onScreen = true;
 
   const strip = () => document.querySelector(".filmstrip");
 
-  /* the visible film window, measured against the strip itself so this works
-     whether the panel sits beside the film (desktop) or above it (mobile) */
+  /* the visible film window, measured against the strip itself so it works
+     whether the panel sits beside the film or above it */
   function windowCenter() {
     const el = strip();
     const panel = document.querySelector(".hero-panel");
@@ -852,31 +814,25 @@ const filmLoop = (() => {
     return filmScroll.getBoundingClientRect().left - s.left - cur;
   }
 
-  /* the x that centers frame i, before choosing which period-copy to use */
+  /* the x that centres frame i, before choosing which period-copy to use */
   function wantX(i) {
     const f = first[i];
     return windowCenter() - (originX() + f.offsetLeft + f.offsetWidth / 2);
   }
 
-  /* nearest x that centers frame i in the film window (period-aware) */
+  /* nearest x that centres frame i in the film window (period-aware) */
   function xForFrame(i) {
     const want = wantX(i);
     const cur = gsap.getProperty(filmScroll, "x") || 0;
     return want + Math.round((cur - want) / period) * period;
   }
 
-  /* Seeding straight from wantX() can leave the content's leading edge inside
-     the window — that was the blank gap at the start of the EN (LTR) layout,
-     where the window sits on the far side from the panel so want came out
-     large and positive.
-     What has to land in the right place is the content's leading edge in
-     strip coordinates (originX + x), NOT x itself: under RTL a max-content
-     track is right-aligned, so originX is a large negative number and x is
-     the positive translation that cancels it.
-     Content is periodic, so shift by whole periods until that leading edge
-     sits in (-P, -2P] — one full period before the window, with room for the
-     tween to travel a period in either direction and still cover it. A copy
-     of frame i stays centered, because the shift is a multiple of a period. */
+  /* What has to land correctly is the content's leading edge in strip
+     coordinates (originX + x), not x itself — under RTL a max-content track
+     is right-aligned, so originX is a large negative number and x cancels it.
+     Seeding from wantX() alone left a blank gap at the start of the EN
+     layout. Content is periodic, so shift by whole periods until that edge
+     sits one period before the window, leaving room to travel either way. */
   function seedX(i) {
     const want = wantX(i);
     const lead = originX() + want;
@@ -886,11 +842,9 @@ const filmLoop = (() => {
     return want + (target - lead);
   }
 
-  /* ⚠️ ALWAYS null the handle when killing. gsap's kill() does not clear the
-     reference, and a killed tween still answers truthy — so setVisible() would
-     call resume() on a corpse and the strip would never move again. That was
-     the "film strip stops randomly" bug: hovering a service pick killed the
-     tween while the hero was off screen, and nothing could revive it. */
+  /* Always null the handle when killing: gsap's kill() doesn't clear it and a
+     killed tween still answers truthy, so setVisible() would call resume()
+     on a corpse and the strip would never move again. */
   function stop() {
     if (tween) tween.kill();
     tween = null;
@@ -915,9 +869,9 @@ const filmLoop = (() => {
       gsap.set(filmScroll, { x: 0 });
       period = group.getBoundingClientRect().width;
       if (!period) return;
-      /* one scanned film tile per group, so the sprocket run repeats in step
-         with the frames and the loop stays seamless. the frame slot is 1/4 of
-         the tile's own aspect, so the scan is shown unstretched */
+      /* one film tile per group, so the sprocket run repeats in step with the
+         frames; the frame slot is a quarter of the tile's own aspect, so the
+         scan is shown unstretched */
       filmScroll.style.setProperty("--pitch", period + "px");
       /* cover the window for every x the loop and focus jumps can reach */
       const viewW = strip().getBoundingClientRect().width;
@@ -945,60 +899,52 @@ const filmLoop = (() => {
       filmScroll.querySelectorAll(".film-frame.pop").forEach((f) => f.classList.remove("pop"));
       run();
     },
-    /* Paused rather than killed, so x survives and the strip picks up exactly
-       where it left off when the hero scrolls back into view. */
+    /* Paused rather than killed, so x survives and the strip resumes where it
+       left off. */
     setVisible(v) {
       if (v === onScreen) return;
       onScreen = v;
-      /* no live tween to resume — build a fresh one rather than assuming one
-         is merely paused (see stop() above) */
+      /* no live tween to resume — build a fresh one rather than assume it is
+         merely paused */
       if (!tween) { if (v) run(); return; }
       v ? tween.resume() : tween.pause();
     },
   };
 })();
 
-/* ══════════ ransom-note letters in the hero headline ══════════
-   One letter per headline line is lifted out and set as a newspaper
-   clipping — an ink chip carrying cream type, pasted in at an angle.
+/* ══════════ ransom-note letters in the headline ══════════
+   One letter per line is set as a pasted paper clipping.
 
-   ⚠️ ONLY the two verbs: نبدأ and تبدأ (and "start" in English). الأشياء and
-   ألِف were ruled out by the user — don't add them back.
+   Only the two verbs نبدأ and تبدأ (and "start"); الأشياء and ألِف were
+   ruled out by the user.
 
-   ⚠️ ARABIC SHAPING — the thing that makes this dangerous. Pulling a letter
-   into its own element can force the letters around it into isolated forms
-   and visibly break the word. It is safe for these two for a specific
-   reason, not by luck: in both نبدأ and تبدأ the letter before the أ is د,
-   which never joins forward, so that أ was already rendering isolated.
-   Measured: whole 90.25px vs split 90.27px.
-   `splitSafe()` enforces the rule rather than trusting it, so if the copy
-   ever changes to a word whose أ follows a joining letter (ب ت ن س ع …),
-   that word is left whole instead of shattered. */
+   Arabic shaping is the hazard: pulling a letter into its own element can
+   force its neighbours into isolated forms and break the word. It is safe
+   here because the letter before the أ is د, which never joins forward, so
+   that أ already rendered isolated. splitSafe() enforces the rule rather
+   than trusting it. */
 const RANSOM_WORDS = { ar: ["نبدأ", "تبدأ"], en: ["start"] };
-/* Arabic letters that never connect to the letter following them. */
+/* Arabic letters that never connect to the letter following them */
 const NON_JOINING = new Set(["ا", "أ", "إ", "آ", "د", "ذ", "ر", "ز", "و", "ؤ", "ء", "ة"]);
 
 function splitSafe(word, i) {
-  /* Latin has no joining behaviour, so every split is safe. Without this the
-     Arabic rule rejects "start" — "t" is not in the non-joining set. */
+  /* Latin has no joining, so every split is safe. Without this the Arabic
+     rule rejects "start" — "t" is not in the non-joining set. */
   if (!/[؀-ۿ]/.test(word)) return true;
   const joinedBefore = i > 0 && !NON_JOINING.has(word[i - 1]);
   const joinsAfter = i < word.length - 1 && !NON_JOINING.has(word[i]);
   return !joinedBefore && !joinsAfter;
 }
 
-/* The user's own clippings, cut from resources/ransom {arb,eng}.png by
-   resources/cut_ransom.py — 16 torn scraps per language, each a different
-   paper, typeface and colour.
-   ⚠️ Some are red, purple, brown or blue-ruled, and the site's palette is
-   ink + cream only with terracotta reserved. Using them all is the deliberate
-   choice: a ransom note that matches isn't one. To restrict it to the
-   neutral scraps, shorten this list — nothing else has to change. */
+/* The studio's own clippings, cut by resources/cut_ransom.py — 16 scraps
+   per language. Some are red, purple or blue-ruled against an ink-and-cream
+   palette: deliberate, since a ransom note that matches isn't one. Shorten
+   this list to restrict it. */
 const RANSOM_COUNT = 16;
 const pad2 = (n) => String(n).padStart(2, "0");
 
 /** Wrap the target letter of the first matching word in its own clipping.
-    `ring` is the sequence of scraps this letter will cycle through. */
+    `ring` is the sequence of scraps this letter cycles through. */
 function liftRansom(line, ring) {
   const variant = ring[0];
   const text = line.textContent;
@@ -1012,7 +958,7 @@ function liftRansom(line, ring) {
     const chip = document.createElement("span");
     chip.className = "ransom";
     /* the letter stays in the accessibility tree and in a copy-paste of the
-       headline — only its pixels are replaced by the scrap */
+       headline — only its pixels are replaced */
     const sr = document.createElement("span");
     sr.className = "ransom-sr";
     sr.textContent = text[k];
@@ -1021,27 +967,24 @@ function liftRansom(line, ring) {
     img.src = "assets/img/ransom/" + lang + "-" + pad2(variant) + ".webp";
     img.alt = "";
     img.decoding = "async";
-    /* If the scrap 404s, fall back to the real letter rather than leaving a
-       hole in the middle of the word. */
+    /* if a scrap 404s, fall back to the real letter rather than leave a hole */
     img.addEventListener("error", () => chip.classList.add("no-scrap"), { once: true });
 
     chip.append(sr, img);
     chip._ring = ring;
     chip._at = 0;
-    /* a small pool of angles per chip, so a repeat of the same scrap still
-       lands differently */
+    /* a small pool of angles, so a repeated scrap still lands differently */
     chip._tilt = [-5.5, 3.5, -2, 5, -4];
 
-    /* Warm the rest of the ring now. A swap that has to fetch first shows a
-       gap where the letter was — the one frame of this effect that would
-       look broken rather than deliberate. */
+    /* Warm the rest of the ring now: a swap that has to fetch first shows a gap
+       where the letter was. */
     ring.slice(1).forEach((v) => {
       const pre = new Image();
       pre.src = "assets/img/ransom/" + lang + "-" + pad2(v) + ".webp";
     });
 
-    /* rebuilt from text nodes, not innerHTML — the copy is ours but the
-       headline is also the one place a stray tag would be most visible */
+    /* rebuilt from text nodes, not innerHTML — a stray tag would be most
+       visible here of all places */
     line.textContent = "";
     line.append(text.slice(0, k), chip, text.slice(k + 1));
     return chip;
@@ -1050,17 +993,13 @@ function liftRansom(line, ring) {
 }
 
 /* ── the cycle ───────────────────────────────────────────────────
-   The letter keeps being re-cut and re-pasted: every couple of seconds a
-   chip swaps to a different scrap at a different angle. Hard cuts, not
-   tweens — paper does not ease from one piece into another, and a
-   cross-fade would read as a slideshow instead of stop-motion.
+   Every couple of seconds a chip swaps scrap and angle. Hard cuts, not
+   tweens: paper doesn't ease from one piece into another, and a cross-fade
+   reads as a slideshow.
 
-   ⚠️ Each chip runs on its own randomised interval. Sharing one would make
-   both letters flip in lockstep, which instantly reads as a mechanism.
-
-   ⚠️ Paused when the hero leaves the viewport, for the same reason the
-   marquee and film strip are — a timer redrawing a composited layer while
-   you scroll somewhere else is exactly the cost we cut earlier. */
+   Each chip runs on its own randomised interval — sharing one made both
+   letters flip in lockstep, which reads as a mechanism. Paused when the hero
+   leaves the viewport, same rule as the loops. */
 const ransomCycle = (() => {
   let calls = [];
   let chips = [];
@@ -1076,9 +1015,8 @@ const ransomCycle = (() => {
   }
 
   function schedule(chip) {
-    /* Uneven on purpose — a steady beat is a metronome, not a hand. The
-       spread also has to stay wide enough that the two letters don't drift
-       into step with each other. */
+    /* Uneven on purpose — a steady beat is a metronome, not a hand — and wide
+       enough that the two letters don't drift into step. */
     const wait = 0.65 + Math.random() * 0.85;
     calls.push(gsap.delayedCall(wait, () => {
       if (!running) return;
@@ -1107,19 +1045,17 @@ const ransomCycle = (() => {
 
 let ransomFirstRun = true;
 function initRansom() {
-  /* A different scrap on every load, and never the same one twice on the
-     page — two identical clippings would read as a repeated graphic rather
-     than as letters cut from whatever was to hand. */
+  /* A different scrap each load, never the same one twice on the page: two
+     identical clippings read as a repeated graphic rather than as letters. */
   const bag = Array.from({ length: RANSOM_COUNT }, (_, i) => i + 1);
   for (let i = bag.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [bag[i], bag[j]] = [bag[j], bag[i]];
   }
 
-  /* Each chip gets its own slice of the bag — RING_LEN scraps it will cycle
-     through. Kept short on purpose: every scrap in a ring gets fetched, and
-     this is the hero. Different slices per load, so the set a visitor sees
-     changes between visits without pulling all 16. */
+  /* Each chip gets its own slice of the bag. Kept short because every scrap
+     in a ring gets fetched and this is the hero; different slices per load,
+     so the set changes between visits without pulling all 16. */
   const RING_LEN = 5;
   const chips = [];
   document.querySelectorAll(".hero-title .line").forEach((line) => {
@@ -1133,9 +1069,8 @@ function initRansom() {
   ransomCycle.reset(chips);
   if (prefersReduced) return;
 
-  /* First run waits for the line reveal to finish (delay 0.5 + duration 1).
-     A language switch re-snaps them immediately instead — a 1.5s pause after
-     tapping the toggle would just read as lag. */
+  /* First run waits for the line reveal to finish. A language switch re-snaps
+     immediately instead — a 1.5s pause after tapping the toggle reads as lag. */
   gsap.from(chips, {
     yPercent: -170,
     rotate: 0,
@@ -1170,8 +1105,8 @@ function applyI18n() {
     const entry = I18N[el.dataset.i18n];
     if (entry) el.textContent = entry[lang];
   });
-  /* must run after the [data-i18n] loop above — that loop rewrites the
-     headline's textContent and destroys the chips every time */
+  /* must run after the [data-i18n] loop above, which rewrites the headline's
+     textContent and destroys the chips */
   initRansom();
 
   svcPicker.render();
@@ -1184,18 +1119,15 @@ function applyI18n() {
   tickClock();
 }
 
-/* ══════════ the three service names, set to FILL their line ══════════
+/* ══════════ service names, set to fill their line ══════════
    They are the section's headline, so they should run the width of the
-   column rather than sit in the middle of it with cream either side.
+   column rather than sit in the middle of it.
 
-   ⚠️ This cannot be a fixed vw. The right size depends on the strings, and
-   the two languages are nowhere near the same length — "Film & Photography"
-   against تصوير — so any single vw value either wraps in English or leaves
-   Arabic floating in the middle. Measure, then scale.
-
-   Text width is proportional to font-size, so ONE measurement is enough: set
-   a probe size, read the natural single-line width, and multiply. Everything
-   horizontal in the row is in em (including the gap) for that to hold. */
+   This cannot be a fixed vw: "Film & Photography" against تصوير means any
+   single value either wraps in English or leaves Arabic floating. Text width
+   is proportional to font-size, so one probe measurement is enough —
+   everything horizontal in the row is in em, including the gap, for that to
+   hold. */
 function fitPicks() {
   const row = document.querySelector(".svc-picks");
   if (!row) return;
@@ -1205,13 +1137,11 @@ function fitPicks() {
   const avail = row.clientWidth;
   row.style.fontSize = PROBE + "px";
 
-  /* ⚠️ Measuring with `white-space: nowrap` does NOT work here: that governs
-     line breaking inside a text run, not flex wrapping, so the row still
-     wrapped and scrollWidth just came back equal to clientWidth — the fit
-     silently no-opped and left the probe size on the page.
-     `width: max-content` + `flex-wrap: nowrap` is what actually asks the row
-     for its one-line intrinsic width. Both are restored before anything can
-     paint, since this all runs in one synchronous block. */
+  /* `white-space: nowrap` does NOT work here — it governs line breaking inside
+     a text run, not flex wrapping, so the row still wrapped and scrollWidth
+     came back equal to clientWidth. `width: max-content` + `flex-wrap: nowrap`
+     is what asks for the one-line intrinsic width. Both restored before
+     anything can paint. */
   const wrap = row.style.flexWrap, wide = row.style.width;
   row.style.flexWrap = "nowrap";
   row.style.width = "max-content";
@@ -1220,14 +1150,12 @@ function fitPicks() {
   row.style.width = wide;
   if (!natural || !avail) { row.style.fontSize = ""; return; }
 
-  /* ⚠️ The 0.4% shave is load-bearing. Sized to land exactly on the container
-     width, sub-pixel rounding in the flex layout tips the row into a second
-     line at some widths (measured: it wrapped at 1440 and 1024 and filled at
-     everything between). Half a percent of headroom costs nothing visible and
-     keeps it one line at every width. */
+  /* Sized to land exactly on the container, sub-pixel rounding tips the row
+     into a second line at some widths. Half a percent of headroom is
+     invisible and keeps it on one line everywhere. */
   const size = ((PROBE * avail) / natural) * 0.996;
-  /* Below MIN the line genuinely cannot fit — let it wrap at MIN rather than
-     shrink into a caption. English does this on a phone; Arabic never does. */
+  /* below MIN the line genuinely cannot fit — let it wrap rather than shrink
+     into a caption. English does this on a phone; Arabic never does. */
   row.style.fontSize = Math.max(MIN, size) + "px";
 }
 
@@ -1312,22 +1240,18 @@ if (menuBtn && overlay) {
 
 /* ══════════ menu button: invert over dark sections ══════════
    The burger is fixed above the page, so whatever scrolls under it decides
-   its colour. Every opaque ink-field in the design is listed here; if one is
-   in the hit-stack under the button's centre it is what's actually visible,
-   because nothing cream is ever painted on top of them.
-   The load curtain is deliberately NOT in this list: it covers the button
-   anyway, and counting it would leave the button stuck dark after the
-   curtain lifts, since nothing re-samples until the first scroll. */
+   its colour. Every opaque ink field is listed here.
+
+   The load curtain is deliberately NOT listed: it covers the button anyway,
+   and counting it left the button stuck dark after the curtain lifted. */
 const DARK_UNDER = [
   ".filmstrip", ".banner", ".footer",
   ".testi", ".sw-stage", ".svc-pick.is-active",
 ].join(",");
 
-/* ⚠️ This is the one thing on the page that does real main-thread work on
-   every scroll frame. `elementsFromPoint` forces a synchronous layout flush
-   and a full hit test, and `closest()` then walks an 8-selector list for each
-   element it returns. Correct, but not something to run 60 times a second on
-   a phone — see queueMenuSync below, which spaces it out. */
+/* The one thing here that does real main-thread work per scroll frame:
+   elementsFromPoint forces a synchronous layout flush and a full hit test.
+   queueMenuSync below spaces it out. */
 /** Is the point at this element's centre sitting over a dark section? */
 function overDark(el) {
   const r = el.getBoundingClientRect();
@@ -1342,18 +1266,16 @@ function overDark(el) {
 
 function syncMenuBtn() {
   if (document.body.classList.contains("nav-open")) return;
-  /* The burger and the language pill are pinned to OPPOSITE corners, so they
-     are routinely over different sections at once — each is sampled on its
-     own rather than sharing one answer. */
+  /* The burger and the language pill sit at opposite corners and are routinely
+     over different sections, so each is sampled on its own. */
   if (menuBtn) menuBtn.classList.toggle("on-dark", overDark(menuBtn));
   const langPill = document.querySelector(".masthead .lang-switch");
   if (langPill) langPill.classList.toggle("on-dark", overDark(langPill));
 }
 
-/* Every frame was overkill: the burger inverting ~100ms after a dark band
-   passes under it is imperceptible, and it buys back five of every six hit
-   tests during a fast scroll. The trailing sync is what keeps it honest —
-   without it the button can be left wrong wherever the scroll stops. */
+/* Every frame was overkill: inverting ~100ms late is imperceptible and buys
+   back five of every six hit tests. The trailing sync is what keeps it
+   honest — without it the button can be left wrong wherever scrolling stops. */
 const MENU_SYNC_MS = 100;
 let menuTick = false, lastMenuSync = 0, menuSettle;
 function queueMenuSync() {
@@ -1370,11 +1292,9 @@ function queueMenuSync() {
 window.addEventListener("scroll", queueMenuSync, { passive: true });
 window.addEventListener("resize", queueMenuSync);
 
-/* ══════════ what we do — service picker + example switcher ══════════
-   Three services, shown one at a time. The arrows step through that service's
-   SUBCATEGORIES (logos / printables / posters …), not through projects — the
-   right-hand column speaks about the category and the subcategory together.
-   Deliberately not animated: the swap is a straight repaint. */
+/* ══════════ what we do — picker + example switcher ══════════
+   The arrows step through the selected service's subcategories, not its
+   projects. Deliberately not animated: the swap is a straight repaint. */
 let currentService = "design";
 
 const svcPicker = (() => {
@@ -1437,11 +1357,10 @@ document.getElementById("swPrev")?.addEventListener("click", () => svcPicker.pre
 
 document.querySelectorAll(".svc-pick").forEach((btn) => {
   btn.addEventListener("click", () => activateService(btn.dataset.service, false));
-  /* ⚠️ No filmLoop.focus()/blur() here any more. The strip is three screens up,
-     so the glide drove nothing anyone could see — and it was pointing the loop
-     at a frame while the hero was off screen, which is how the strip ended up
-     stopped. filmLoop.focus() still exists for whenever something NEAR the
-     hero wants to drive it. */
+  /* No filmLoop.focus()/blur() here: the strip is three screens up, so the
+     glide drove nothing visible while pointing the loop at a frame off
+     screen — which is how the strip ended up stopped. focus() still exists
+     for anything near the hero that wants it. */
 });
 
 const band = document.querySelector(".contact-band");
@@ -1451,15 +1370,11 @@ if (band) {
 }
 
 /* ══════════ hero dropcap: the paper uncrumples ══════════
-   A 24-frame sprite baked from the crumple clip (blue surround keyed out,
-   green paper face replaced with the letter, everything re-lit into the
-   ink/cream palette with the original fold shading kept). GSAP scrubs a
-   frame index and we set background-position — no video decode, no
-   runtime chroma key, one 150KB image.
+   A 24-frame sprite baked from the crumple clip. GSAP scrubs a frame index
+   and we set background-position — no video decode, no runtime chroma key.
    Frame 0 is the tight ball, frame 23 the flat printed sheet. */
-/* `crushed` is the tight ball, `rest` the flat printed sheet. Hover runs the
-   whole way back to the ball — stopping part-way just looked like a sheet
-   that had failed to open. */
+/* Hover runs the whole way back to the ball — stopping part-way just looked
+   like a sheet that had failed to open. */
 const CRUMPLE = { cols: 6, rows: 4, n: 24, rest: 23, crushed: 0 };
 
 function initDropCap() {
@@ -1482,15 +1397,15 @@ function initDropCap() {
 
   const st = { f: 0 };
   setFrame(0);
-  /* ease "none" — the frames are already evenly spaced in time, so any
-     easing here would fight the motion baked into the clip */
+  /* ease "none" — the frames are evenly spaced in time, so easing would fight
+     the motion baked into the clip */
   const play = (to, dur) => gsap.to(st, {
     f: to, duration: dur, ease: "none", overwrite: true,
     onUpdate: () => setFrame(st.f),
   });
 
-  /* don't start until the sprite has actually decoded, or the first frames
-     land on an empty background */
+  /* don't start until the sprite has decoded, or the first frames land on an
+     empty background */
   const src = getComputedStyle(sheet).backgroundImage.slice(5, -2);
   const img = new Image();
   const start = () => gsap.delayedCall(0.55, () => play(CRUMPLE.rest, 0.95));
@@ -1498,10 +1413,9 @@ function initDropCap() {
   img.onerror = start;
   img.src = src;
 
-  /* hover scrunches it part-way shut and lets it fall open again */
-  /* crush it right down to the ball, then let it fall open again. the two
-     durations are deliberately different — crushing paper is faster than
-     it relaxing back open */
+  /* hover scrunches it shut and lets it fall open again */
+  /* the two durations differ on purpose — crushing paper is faster than it
+     relaxing back open */
   cap.addEventListener("mouseenter", () => play(CRUMPLE.crushed, 0.5));
   cap.addEventListener("mouseleave", () => play(CRUMPLE.rest, 0.85));
 }
@@ -1520,19 +1434,18 @@ if (page === "index" && !prefersReduced) {
       scrollTrigger: { trigger: el, start: "top 88%" },
     });
   });
-  /* the remodelled sections — لماذا ألِف؟ and ماذا نفعل؟ — are deliberately
-     not animated. They are a printed sheet: it doesn't assemble itself while
-     you read it. The banners above them still rise, since those belong to the
-     page furniture rather than to either section. */
+  /* لماذا ألِف؟ and ماذا نفعل؟ are deliberately not animated — they are a
+     printed sheet. The banners above them still rise, being page furniture
+     rather than section content. */
 }
 
 /* ══════════ library: category accordion ══════════ */
 const accRoot = document.getElementById("accRoot");
 let openCat = "all";
 
-/* the run is continuous — sorted newest first with no year grouping. a project
-   that carries a `profile` gets an "open the sheet" affordance and its index in
-   PROJECTS on the node, which is how the overlay finds it again. */
+/* One continuous run, newest first. A project with a `profile` gets an
+   open-the-sheet affordance and its PROJECTS index on the node, which is how
+   the overlay finds it again. */
 function renderLibrary() {
   if (!accRoot) return;
   accRoot.innerHTML = "";
@@ -1606,11 +1519,9 @@ if (accRoot) {
 }
 
 /* ══════════ project profile sheet ══════════
-   A cream broadsheet page that rises over the archive: cover + title, a big
-   screenshot with a thumb strip, a details table, and the write-up. Sites also
-   get a browser-chrome frame running a real preview build.
-   Only projects carrying a `profile` open it, so the other services can be
-   given one later without touching this code. */
+   Cover, a big screenshot with a thumb strip, a details table and the
+   write-up; sites also get a browser-chrome frame running a preview build.
+   Only projects carrying a `profile` open it. */
 const projectSheet = (() => {
   const root = document.getElementById("sheet");
   if (!root) return { open() { }, close() { }, refresh() { } };
@@ -1836,30 +1747,26 @@ initDropCap();
 syncMenuBtn();
 setInterval(tickClock, 20000);
 
-/* widths measured before the Idris fonts land are wrong, which leaves a gap in
-   the loops — remeasure once the fonts are actually applied */
+/* widths measured before Idris lands are wrong and leave a gap in the
+   loops — remeasure once the fonts are applied */
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
     rebuildLoops();
     filmLoop.rebuild();
-    /* ⚠️ fitPicks measures text, so it is wrong until Idris has actually
-       landed — the fallback face is a different width entirely. */
+    /* fitPicks measures text, so it is wrong until Idris has landed — the
+       fallback face is a different width entirely */
     fitPicks();
     queueMenuSync();
   });
 }
 
-/* ⚠️ WIDTH ONLY. On a phone, scrolling collapses and re-shows the browser's
-   own address bar, and each of those fires `resize` with a changed HEIGHT and
-   an identical width. Rebuilding on those was a real bug: every rebuild tears
-   the film strip's DOM down, rebuilds it, and re-seeds x — so the strip
-   visibly snapped back to its start each time the address bar moved, which
-   reads as "the film strip stopped looping." The marquee restarted with it.
-   Neither loop depends on viewport height, so a height change is not a
-   reason to rebuild either of them. */
-/* The film has its own module, so it gets its own observer rather than going
-   through pauseOffscreen() — filmLoop.setVisible() has to gate run() too, or
-   a hover-blur would restart the strip while it is off screen. */
+/* WIDTH ONLY. On a phone the address bar collapsing fires `resize` with a
+   changed height and an identical width. Rebuilding on those tore the film
+   strip's DOM down and re-seeded x, so the strip snapped back to its start
+   every time the address bar moved — which reads as "it stopped looping".
+   Neither loop depends on viewport height. */
+/* The film has its own module and its own observer: filmLoop.setVisible()
+   has to gate run() too, or a hover-blur would restart the strip off screen. */
 (() => {
   const strip = document.querySelector(".filmstrip");
   if (!strip || !window.IntersectionObserver) return;
@@ -1869,8 +1776,8 @@ if (document.fonts && document.fonts.ready) {
   ).observe(strip);
 })();
 
-/* The ransom letters keep re-cutting themselves, so they are a running timer
-   like the loops are — same rule, stop when nobody can see them. */
+/* the ransom letters are a running timer like the loops — same rule, stop
+   when nobody can see them */
 (() => {
   const title = document.querySelector(".hero-title");
   if (!title || !window.IntersectionObserver) return;
