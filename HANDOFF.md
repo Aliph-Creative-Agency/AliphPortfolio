@@ -107,10 +107,20 @@ python -c "import io,re;s=io.open('prototype/style.css',encoding='utf-8').read()
 null the handle when killing, or a "paused" check resumes a corpse and the animation
 never restarts.
 
-**A float excludes text with its MARGIN box.** A top margin reserves dead space that
-neither the picture nor the copy can use; a bottom margin squeezes the first line
-under the picture. And a float only wraps text that comes *after* it in the flow — no
-margin can put a line above it, only markup order can.
+**A float excludes text with its MARGIN box.** A top margin reserves dead space
+neither the picture nor the copy can use. A bottom margin is worse: any line box that
+so much as clips it gets squeezed to the narrow side — measured, a 28px bottom margin
+made the line under block 2's first picture 35% wide instead of running the column.
+Both are `0` there now, and the line's own leading is the gap.
+
+**A float only wraps text that comes *after* it in the flow.** No margin can put a
+line of text *above* a float — only markup order can. That is why block 2's body is
+two paragraphs with the second picture between them rather than one.
+
+**Anything that names or counts the services must derive it from `SERVICES`.** Typed
+copies have now survived two taxonomy changes and gone stale both times: the chatbot
+prompt said "four services" and its off-scope reply recited the pre-August four for
+weeks. The brand stamp is still wrong for the same reason (see open questions).
 
 **A `clamp()` floor is what applies on a phone**, not its vw term. At this 150% root,
 `clamp(1.7rem, …)` is 40.8px at 390px wide.
@@ -137,6 +147,10 @@ sprocket holes the page shows through. Flattening it to RGB drops the file from
 and scroll with real wheel events before measuring anything ScrollTrigger drives — a
 `gsap.from()` sits at opacity 0 until its trigger fires.
 
+**A stray terracotta rectangle on the page is the focus ring**, not a bug —
+`:focus-visible { outline: 2px solid var(--accent) }`. It appears around whatever last
+took keyboard focus and has been mistaken for a stray border.
+
 ---
 
 ## The home page
@@ -153,9 +167,17 @@ every second or so. `splitSafe()` refuses to split a word where Arabic shaping w
 break it. Only the two verbs نبدأ and تبدأ.
 
 **لماذا ألِف؟** — three editorial blocks, laid out to the user's annotated wireframe.
-Deliberately unanimated. Block 2's copy is one continuous body that wraps around two
-floated pictures. Per-column type sizes are **solved, not chosen** — each column's
-size is the one that fills its own box:
+Deliberately unanimated.
+
+Block 2's copy reads as one body wrapping around two floated pictures, but it is
+**two paragraphs with the second picture between them** — a float only wraps what
+follows it, so that is the only way to get a line of text above that picture. The
+pictures float to opposite edges so the text zigzags, and both have zero block
+margins so no line gets squeezed. On a phone they unfloat: a 54% float in a 342px
+column leaves three or four words a line.
+
+Per-column type sizes are **solved, not chosen** — each column's size is the one that
+fills its own box:
 
 ```bash
 python resources/fit_columns.py ar
@@ -280,6 +302,34 @@ kept on purpose — they are the shopping list.
 
 ---
 
+## The scripts in `resources/`
+
+Every derived asset comes from one of these, and the source art sits beside it. They
+are the record of *how* something was made — rerun them rather than hand-editing the
+output.
+
+| script | what it does |
+|---|---|
+| `fit_columns.py` | Solves each why-column's body size so its copy fills its box. Run it whenever the copy changes length: `python resources/fit_columns.py ar` |
+| `comment_tool.py` | Splits a source file into code segments and comment spans (string- and regex-aware). Used to rewrite comments without touching code, and to prove code is byte-identical afterwards. |
+| `recut_film.py` | Re-cuts the film tile so it repeats on a whole perforation pitch. Prints the frame-slot constant `style.css` needs. |
+| `fix_rebate_seam.py` | Clears the edge print the tile's right edge slices, and levels the base-tone step across the seam. |
+| `build_assistant.py` | Lifts the launcher's ring and double-alif mark out of the studio's artwork into transparent PNGs. |
+| `cut_ransom.py` | Cuts the 16 torn paper scraps per language for the headline letters. |
+| `build_crumple.py` | Bakes the dropcap's 24-frame sprite from the crumple clip. |
+| `extract.py` | Pulls the wireframe's colour-coded boxes out as percentages of the page column. |
+
+⚠️ Several of these **overwrite their output in place**. Back the file up before
+rerunning, and check the result's mode and size — a film file near 145 KB has lost
+its alpha.
+
+The list above is the whole of `resources/*.py`. Two superseded scripts were deleted
+on 2026-08-09 — `fit.py` (targeted grids block 2 no longer has; `fit_columns.py`
+replaced it) and `clean_assistant.py` (worked on the old single composite and had
+hardcoded absolute paths; `build_assistant.py` replaced it). Both are in git history.
+
+---
+
 ## Git
 
 - Remote: `https://github.com/Aliph-Creative-Agency/AliphPortfolio.git`, branch `main`.
@@ -287,8 +337,12 @@ kept on purpose — they are the shopping list.
   `prototype/assets/` carries its own copies of everything the site needs.
 - `resources/` **is** tracked — it holds the inputs the derived assets come from.
 - End commit messages with the Claude co-author trailer.
-- ⚠️ Run git from the repo root. A `git add -A` from elsewhere will happily stage a
-  different repo.
+- ⚠️ **`git add -A` is a trap here, twice over.** Run from the wrong directory it
+  stages a *different repo* (there is one at `C:\Users\Obaida`). Run at the right
+  moment it sweeps up whatever the user is midway through editing — that is how the
+  chat-worker service-derivation fix ended up inside a commit about comments. Prefer
+  `git -C <repo> add <explicit paths>`.
+- The user edits files between turns. Check `git status` before staging anything.
 
 ---
 
@@ -302,3 +356,9 @@ kept on purpose — they are the shopping list.
 - Measure before claiming. Three estimated layout numbers in a row were wrong by
   more than 15 points; the annotated wireframe is a spec, not a suggestion.
 - All names, counts and images in the prototype are placeholder content.
+- **Comments explain why, not what.** They were all rewritten on 2026-08-09 and cut
+  by a third; keep them short and delete them when the thing they describe is gone.
+  Seven were removed in that pass for naming code that no longer existed — a comment
+  that lies is worse than none.
+- When the user pastes test text into the copy to see how it fits, **take it back
+  out**. Two such runs have nearly shipped.
