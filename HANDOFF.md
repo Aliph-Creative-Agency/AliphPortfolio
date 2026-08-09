@@ -159,6 +159,76 @@ phone. Arabic holds one line at every width.
   markup, CSS and its `gsap.from` reveal. The hairline above `.hero-meta` is a
   different element and was left.
 
+### Second pass, same day — media ratios, one flowing text, and a dead-code sweep
+
+**🔴 The phone view no longer forces every holder to 4:3.** The old rule
+flattened all five to landscape "once alone in a row", which misrepresents
+what goes in them — a reel is 9:16 and a poster is portrait, and `data-kind`
+on each holder says which. Every holder now keeps its own ratio at every
+width (verified: 3:2 video, 1:1 and 7:6 stills, 9:16 rail, 4:7 reel — the same
+numbers on phone as on desktop), capped at `max-height: 78vh` so a tall crop
+still cannot run away with the page.
+
+⚠️ **`wb2-rail-media` is `data-kind="poster"` but sized 9:16**, which is a
+reel ratio; a poster is ~2:3 or A-series (0.707). The 9:16 came from the
+wireframe, so the geometry was left alone — but the kind and the ratio
+disagree and one of them is wrong. **Ask the user which.**
+
+**🔴 Block 2 is now ONE body of copy that wraps around the pictures.** It was
+three grid rows (`.wb2-a` / `.wb2-b` / `.wb2-c`) putting text in separate boxes
+*beside* each picture; the user wanted one text wrapping *around* them. Now
+`.wb2-flow` with both figures floated to opposite sides.
+
+⚠️ **Session 9's note that "floats don't work here" was wrong about the
+cause.** Floats failed then because both figures went to the same side, so the
+second cleared past the whole column. Floated to opposite edges with the
+second staggered down, the text zigzags exactly as the wireframe draws.
+`float: inline-start/end` is valid and mirrors with the language on its own.
+
+⚠️ **The stagger margin is measured, not chosen.** The browser places the
+second float below the first one's margin box *and then* adds its margin — so
+the value is the gap between the two pictures, not the distance from the top.
+Too large and the copy runs out before the picture does (at 58% the Arabic
+ended **354px short** — that is the "hole a picture tall" session 9 saw).
+**8% leaves a 7px tail in both languages.** Re-measure it if the copy changes:
+compare the paragraph's inked bottom (`createRange`) against the flow's
+bottom.
+
+⚠️ On a phone both figures **unfloat** — a 54%-wide float in a 342px column
+leaves a ~150px measure, three or four words a line.
+
+**🔴 Copy could break the layout, and did.** The user pasted a long unbroken
+Arabic run into `w2ParaB` to see how much would fit, and the ink walked
+**272px past its box on desktop and 541px on a phone** — `overflow-wrap` was
+`normal`, so a run with no spaces had no break opportunity. `.why-para` now
+carries `overflow-wrap: break-word`. The pasted test string was removed.
+
+**The dead-code sweep** (the user: *"i feel like theres a lot of garbage
+code"*). Checked against the LIVE DOM of all three pages in both languages,
+with every interactive surface opened, plus every class name mentioned
+anywhere in the sources:
+
+| | before | after |
+|---|---|---|
+| `style.css` classes never used | 4 | **0** |
+| orphaned `I18N` keys | 10 | **0** |
+| unused top-level JS symbols | 0 | 0 |
+
+Removed: `.footer-inner`, `.footer-title`, `.hero-actions`, `.story-cta` (all
+leftovers from the old footer, the hero buttons and the story panels), the
+`heroEyebrow` / `w1Eyebrow` / `w2Eyebrow` / `w3Eyebrow` / `w2Pull` / `w3Pull`
+keys, `w3Para` / `w3Para2` and `w2Para` / `w2Para2` (superseded by the
+lettered splits), `pfPrev` / `pfNext`, one duplicated `.why-outro-line` rule
+and a `.sw-desc { max-width: none }` that undid nothing.
+
+⚠️ **`.ac-msg-me` is NOT dead** — it is the visitor's chat bubble, unused only
+because the composer is inert until stage 3. A sweep flags it every time; it
+now carries a comment saying so.
+
+⚠️ **The `seed` fields on `PROJECTS` / `SUBCATS` / `SERVICES` are dead data
+but kept on purpose** — `shotSrc()` ignores its arguments and returns
+`HOLDER`. They are the shopping list for the Drive hand-off. Don't sweep them.
+
 ### Still open — unchanged from session 9
 
 The لماذا ألِف؟ copy is still mine and still **must not ship** (it invents

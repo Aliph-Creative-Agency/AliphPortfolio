@@ -253,6 +253,9 @@
   background: var(--ac-cream-warm);
   border: var(--ac-hair);
 }
+/* ⚠️ NOT dead code — this is the VISITOR's bubble, and nothing emits one yet
+   because the composer is deliberately inert until stage 3 wires a model in.
+   A dead-code sweep will flag it every time; leave it. */
 .ac-msg-me {
   justify-self: end;
   background: var(--ac-ink);

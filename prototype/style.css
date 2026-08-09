@@ -87,7 +87,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .latin { font-family: var(--font-latin); letter-spacing: 0.18em; }
 html[lang="en"] .hero-title,
 html[lang="en"] .banner h2,
-html[lang="en"] .footer-title { letter-spacing: 0.02em; }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
@@ -671,7 +670,6 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
 .lib-toggle .sep { color: var(--ink-faint); opacity: 1; }
 
 /* -- oval slide buttons (label -> arrow) --------- */
-.hero-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.3rem; }
 .oval-btn {
   position: relative;
   display: grid;
@@ -728,7 +726,6 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 .oval-btn:hover .ob-label { transform: translateY(-115%); }
 .oval-btn:hover .ob-arrow { transform: translateY(0); }
 
-.story-cta { margin-top: 1.4rem; }
 
 /* -- a11y utility -------------------------------- */
 .sr-only {
@@ -818,8 +815,6 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 
 .wb1 > *,
 .wb2 > *,
-.wb2-a > *,
-.wb2-c > *,
 .wb3-body > *,
 .svc-demo > * { min-width: 0; }
 
@@ -853,8 +848,7 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
    derived from measured ink-height vs box-height — see fit.py. Retune them
    whenever the copy changes length. */
 .wb1-side  .why-para { font-size: clamp(0.75rem, 1.4vw, 0.92rem); }
-.wb2-a     .why-para { font-size: clamp(0.8rem, 1.65vw, 1.06rem); }
-.wb2-c     .why-para { font-size: clamp(0.78rem, 1.56vw, 1rem); }
+.wb2-flow  .why-para { font-size: clamp(0.8rem, 1.62vw, 1.04rem); }
 .wb2-rail  .why-para { font-size: clamp(0.84rem, 1.95vw, 1.25rem); }
 .wb3-body > .wb-col:first-child .why-para { font-size: clamp(0.86rem, 1.83vw, 1.18rem); }
 .wb3-body > .wb-col:last-child  .why-para { font-size: clamp(0.83rem, 1.66vw, 1.07rem); }
@@ -863,6 +857,12 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
   line-height: 1.52;
   color: var(--ink-soft);
   margin: 0 0 0.45rem;
+  /* ⚠️ Without this a single unbroken run — a pasted string, a long URL, an
+     Arabic word set without spaces — has no break opportunity and the ink
+     walks straight out of its column. Measured at 272px past the box on
+     desktop and 541px on a phone before this was added. Copy should never be
+     able to break the layout. */
+  overflow-wrap: break-word;
 }
 .why-para:last-child { margin-bottom: 0; }
 
@@ -921,27 +921,50 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 
 .wb2-rail-media { aspect-ratio: 9 / 16; margin-bottom: 0.4rem; }
 
-/* row A — text right (41.7%), picture left (54.3%) */
-.wb2-a {
-  display: grid;
-  grid-template-columns: 41.7fr 54.3fr;
-  gap: 0.9%;
-  align-items: stretch;
-  margin-bottom: var(--why-gap);
-}
-.wb2-m1 { aspect-ratio: 1 / 1; }
+/* ---- block 2's body: ONE text, the pictures floated into it -------
+   This replaced the three stacked grid rows (.wb2-a / .wb2-b / .wb2-c) on
+   2026-08-09. Those put the copy in separate boxes BESIDE each picture; the
+   user wants one body of text that wraps AROUND them.
 
-/* row B — one wide line across the whole left region */
-.wb2-b { margin-bottom: var(--why-gap); }
+   ⚠️ Session 9 tried floats here and reverted them, and the note said they
+   don't work — but the reason they failed was placement, not floats: both
+   figures were floated to the same side, so the second one cleared past the
+   whole column and opened a hole a picture tall. Floated to OPPOSITE sides
+   with the second staggered downward, the text zigzags between them, which
+   is what the wireframe draws.
 
-/* row C — picture right (56.7%), text left (39.3%): the zigzag flips */
-.wb2-c {
-  display: grid;
-  grid-template-columns: 56.7fr 39.3fr;
-  gap: 0.9%;
-  align-items: stretch;
+   ⚠️ `float: inline-start/end` is valid CSS (unlike `transform-origin:
+   inline-start`, see the session-6 note) and mirrors with the language on
+   its own, so there is no LTR override to keep in sync. */
+.wb2-flow::after {
+  content: "";
+  display: block;
+  clear: both;
 }
-.wb2-m2 { aspect-ratio: 7 / 6; }
+.wb2-m1 {
+  float: inline-end;
+  width: 54.3%;
+  aspect-ratio: 1 / 1;
+  margin-inline-start: var(--why-gap);
+  margin-block-end: var(--why-gap);
+}
+/* ⚠️ This margin is what makes the zigzag work, and it is measured, not
+   guessed. The browser places this float below the previous one's margin box
+   first, THEN adds this margin — so the value is the breathing space between
+   the two pictures, not the distance from the top of the flow. A percentage
+   here resolves against the flow's WIDTH, so it scales with the column.
+
+   ⚠️ Too large and the copy runs out before the picture does, which is the
+   hole session 9 blamed on floats: at 58% the Arabic ended 354px short.
+   Measured across both languages, 8% leaves a 7px tail in each — retune it
+   with the same probe if the copy changes length. */
+.wb2-m2 {
+  float: inline-start;
+  width: 56.7%;
+  aspect-ratio: 7 / 6;
+  margin-inline-end: var(--why-gap);
+  margin-block: 8% var(--why-gap);
+}
 
 /* ---- block 3 : full-width head, then text | tall cut | text ------ */
 /* the full-width banner headline — one line, and the biggest type on the
@@ -1735,9 +1758,19 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
      setting text in a 180px gutter beside a sliver of picture. */
   .wb1,
   .wb2,
-  .wb2-a,
-  .wb2-c,
   .wb3-body { grid-template-columns: 1fr; gap: 0; }
+
+  /* ⚠️ Block 2's pictures UNFLOAT on a phone. A 54%-wide float in a 342px
+     column leaves a ~150px measure beside it, which is three or four words a
+     line — unreadable in either language. Stacked, the copy keeps its full
+     measure and the pictures read at full width. */
+  .wb2-m1,
+  .wb2-m2 {
+    float: none;
+    width: 100%;
+    margin-inline: 0;
+    margin-block: 0.45rem 0.8rem;
+  }
 
   .wb3-head { justify-content: flex-start; text-align: start; }
   .wb3-head::before { display: none; }
@@ -1756,20 +1789,23 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .wb2-main { grid-column: 1; grid-row: auto; }
   .wb2-rail { order: 2; }
 
-  /* the tall portrait crops are unreadable at phone width — every holder
-     goes back to a landscape aspect once it is alone in its row */
+  /* ⚠️ Each holder KEEPS ITS OWN ASPECT on a phone. These used to be forced
+     to 4/3 once they were alone in a row, which is wrong for the thing that
+     goes in them: a reel is 9:16 and a poster is portrait, and a landscape
+     crop of either misrepresents the work — `data-kind` on each holder says
+     which it is. Width is capped by the column and height by the viewport, so
+     a tall crop still cannot run away with the page. */
   .wb1-media,
   .wb2-rail-media,
   .wb2-m1,
   .wb2-m2,
   .wb3-media {
-    aspect-ratio: 4 / 3;
     width: 100%;
+    max-height: 78vh;
     margin-block: 0.45rem 0.8rem;
   }
   .why-outro { align-items: flex-start; }
-  .why-outro-line { width: auto; }
-  .why-outro-line { max-width: none; }
+  .why-outro-line { width: auto; max-width: none; }
 
   .contact-grid { grid-template-columns: 1fr; }
   .contact-side { align-items: flex-start; text-align: start; }
@@ -1796,7 +1832,6 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .sw-foot { justify-content: center; }
   .svc-demo { grid-template-columns: 1fr; }
   .sw-stage { order: -1; }
-  .sw-desc { max-width: none; }
   .sw-arrow { width: 2.6rem; height: 2rem; }
   .banner h2 { white-space: normal; }
 
@@ -1821,9 +1856,6 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
     width: 100%;
   }
   .nav-socials { flex-wrap: wrap; gap: 0.4rem 1rem; }
-
-  /* footer */
-  .footer-inner { flex-direction: column; align-items: flex-start; }
 
   /* library */
   .lib-bar { flex-wrap: wrap; }
