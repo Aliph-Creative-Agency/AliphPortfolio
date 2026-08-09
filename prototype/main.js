@@ -116,8 +116,8 @@ const I18N = {
 
   w1Title: { ar: "صوت واحد، حرفان، ولغتان.", en: "One sound, two letters, two languages." },
   w1Para: {
-    ar: "يستمدّ ألِف اسمه من الألف: أوّل حروف الأبجدية العربية، والنقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف. ويحمل الاسم معنًى ثانيًا: أَلِفَ، أي اعتاد واطمأنّ واقترب. لذلك يقف الاستوديو عند المعنيين معًا: ثقة الخطوة الأولى، ودفء الشيء المألوف. بدأنا سنة ٢٠٢٤ من غرفة واحدة في جبل الزيتون، بكاميرا واحدة وفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم بل نظامًا يُبنى. منذ ذلك الحين ونحن نشتغل بالعربيّة أوّلًا — ليست ترجمةً تُضاف بعد أن يجهز التصميم، بل اللغة التي يُرسم عليها النظام من السطر الأوّل. نشتغل على الهويّات وما يُطبع منها، ونصوّر ما تحتاجه العلامة لتظهر، ونبرمج المواقع والأنظمة التي تُشغّلها — ثلاثة أعمال تبدو منفصلة على الورق، لكنها في الاستوديو خطّ واحد لا ينقطع. ولأنّ الفريق صغير، تبقى المسافة بين الفكرة وتنفيذها قصيرة: يُقرَّر الشيء في الصباح ويُجرَّب في المساء، ولا ينتظر دوره في طابور بين أقسام.",
-    en: "Aliph takes its name from the alif: the first letter of the Arabic alphabet, the point every word starts from, and the measure the other letters are drawn against. The name carries a second meaning too — alifa, to grow familiar, to draw near, to be at ease. So the studio stands on both: the confidence of the first step, and the warmth of the familiar. We started in 2024 out of one room on the Mount of Olives, with one camera and one idea: that a brand is not a logo you draw but a system you build. We have worked Arabic-first ever since — not a translation added once the design is finished, but the language the system is drawn in from the first line. We work on identities and everything printed from them, shoot what a brand needs in order to appear, and build the sites and systems that keep it running — three jobs that look separate on paper and are one unbroken line inside the studio. And because the team is small, the distance between an idea and its execution stays short: a thing is decided in the morning and tried the same evening, rather than queuing between departments.",
+    ar: "ألِف أوّل الحروف، والنقطة التي يبدأ منها كل شيء. اسمٌ من حرفين، وصوتٌ واحد في لغتين: نكتب بالعربيّة أوّلًا، ثم باللاتينيّة — لا ترجمةً حرفيّة، بل نصّين يقولان الشيء نفسه بالطريقة التي تليق بكلٍّ منهما. ما يصلح في اتّجاهٍ واحد لا يصلح تلقائيًّا في الآخر، والفرق بينهما هو نصف العمل.",
+    en: "Alif is the first letter, and the point everything starts from. A name of two letters and one voice in two languages: we write Arabic first, then Latin — not a literal translation but two texts saying the same thing the way each one should. What works in one direction does not automatically work in the other, and that difference is half the work.",
   },
   w1Cap: { ar: "من جلسة تصوير — البلدة القديمة", en: "From a shoot — the Old City" },
 
@@ -127,55 +127,55 @@ const I18N = {
   /* block 2 — row C */
 
   w3ParaA: {
-    ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف: في المطبوع، وعلى الشاشة، وفي الشارع، وبين يديّ من يستعمله كل يوم. وحين ينتهي العمل، يُختم بختم الاستوديو — علامة ملكيّة صغيرة تقول إن هذا العمل خرج من هنا.",
-    en: "We don't hand over a logo and walk away. We hand over a system that knows how to behave: in print, on screen, in the street, and in the hands of whoever uses it daily. And when the work is done, it carries the studio's seal — a small mark of authorship saying this came from here.",
+    ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف: في المطبوع، وعلى الشاشة، وبين يديّ من يستعمله كل يوم.",
+    en: "We don't hand over a logo and walk away. We hand over a system that knows how to behave: in print, on screen, and in the hands of whoever uses it daily.",
   },
   w3ParaB: {
-    ar: "والاختبار الحقيقي يأتي بعد التسليم بسنة: حين تُطبع لافتة لم نرها، ويُكتب منشور لم نكتبه، وتُصوَّر جلسة لم نحضرها — ويظلّ الكلّ يشبه بعضه. ذلك وحده يقول إن النظام اشتغل، لا الإعجاب الذي يناله العرض التقديمي في يومه الأوّل.",
-    en: "The real test arrives a year after handover: when a sign gets printed that we never saw, a post goes out that we never wrote, a shoot happens we were not at — and all of it still looks like the same brand. That, on its own, says the system worked; not the applause a deck gets on the day it is shown.",
+    ar: "والاختبار الحقيقي بعد سنة: حين تُطبع لافتة لم نرها، ويُكتب منشور لم نكتبه، ويظلّ الكلّ يشبه بعضه.",
+    en: "The real test comes a year later: a sign gets printed we never saw, a post goes out we never wrote, and all of it still looks like the same brand.",
   },
   w3ParaC: {
-    ar: "لذلك نكتب القواعد بلغة من سيستعملها، لا بلغة المصمّمين. نقول: هذا الشعار لا يوضع على صورة مزدحمة، وهذا اللون لا يُستعمل للنصّ الصغير، وهذه المسافة لا تُقلّ عن كذا — بأمثلة تُرى لا بمصطلحات تُحفظ. النظام الذي لا يُفهم لا يُتّبع، ومهما كان مدروسًا فإنّه ينهار في الشهر الثالث.",
-    en: "So we write the rules in the language of whoever will use them, not in the language of designers. This mark does not go on a busy photograph; this colour is not used for small text; this margin never goes below so much — shown as examples rather than stated as terms. A system nobody understands is a system nobody follows, and however considered it is, it collapses by the third month.",
+    ar: "لذلك نكتب القواعد بلغة من سيستعملها، لا بلغة المصمّمين — بأمثلة تُرى، لا بمصطلحات تُحفظ. النظام الذي لا يُفهم لا يُتّبع.",
+    en: "So we write the rules in the language of whoever will use them, not of designers — shown as examples rather than stated as terms. A system nobody understands is a system nobody follows.",
   },
 
   w3Para2A: {
-    ar: "ونحن فريق صغير عن قصد: من تُحدّثه في الاجتماع الأوّل هو نفسه من يعمل على مشروعك، ولا يمرّ العمل عبر طبقات حتى يفقد ما بدأ به. نصمّم ونصوّر ونبرمج تحت سقف واحد، فلا يضيع شيء في الانتقال من يدٍ إلى يد.",
-    en: "And we are small on purpose: the person you meet first is the person who does the work, and nothing passes through so many hands that it loses what it started as. We design, shoot and build under one roof, so nothing is lost handing off.",
+    ar: "ونحن فريق صغير عن قصد: من تُحدّثه في الاجتماع الأوّل هو نفسه من يعمل على مشروعك.",
+    en: "We are small on purpose: the person you meet first is the person who does the work.",
   },
   w3Para2B: {
-    ar: "ومعنى ذلك أيضًا أنّنا نختار المشاريع التي نستطيع أن نمنحها ما تستحقّه من وقت، وأنّنا نقول «لا» أكثر ممّا يتوقّع أحد من استوديو في سنته الثانية. الرفض هنا ليس ترفًا؛ هو الطريقة الوحيدة التي يبقى بها العمل الذي نقبله على مستوى واحد.",
-    en: "It also means we take on the projects we can give the time they deserve, and that we say no more often than anyone expects of a studio in its second year. Refusing is not a luxury here; it is the only way the work we do accept stays at one level.",
+    ar: "نصمّم ونصوّر ونبرمج تحت سقف واحد، فلا يضيع شيء في الانتقال من يدٍ إلى يد.",
+    en: "We design, shoot and build under one roof, so nothing gets lost handing off.",
   },
   w3Para2C: {
-    ar: "وحين ينتهي المشروع لا تنتهي العلاقة. تبقى الملفّات مرتّبة ومسلَّمة كاملةً بلا رهائن، ويبقى الباب مفتوحًا للسؤال بعد شهر أو بعد سنة. العلامة التي بنيناها معكم تكبر بعدنا، وهذا هو المقصود منها أصلًا.",
-    en: "And when a project ends the relationship doesn't. The files stay ordered and are handed over in full with nothing held hostage, and the door stays open for a question a month or a year later. The brand we built with you grows after us — which was the point of building it that way.",
+    ar: "وحين ينتهي المشروع لا تنتهي العلاقة: تبقى الملفّات مرتّبة ومسلَّمة كاملةً، والباب مفتوح للسؤال بعد شهر أو بعد سنة.",
+    en: "And when a project ends the relationship doesn't: the files stay ordered and are handed over in full, and the door stays open a month or a year later.",
   },
 
   w3ParaD: {
-    ar: "ونقيس ما نستطيع قياسه. كم استغرق الموظّف الجديد حتى أخرج منشورًا صحيحًا وحده؟ كم مرّة اضطرّ أحد أن يسأل عن اللون؟ كم ملفًّا خرج خارج القالب؟ هذه أرقام مملّة، لكنها تقول عن صحّة النظام أكثر ممّا يقوله أيّ إعجاب.",
-    en: "And we measure what can be measured. How long before a new employee produced a correct post on their own? How many times did someone have to ask about a colour? How many files went out off-template? These are boring numbers, and they say more about the health of a system than any compliment does.",
+    ar: "ونقيس ما نستطيع قياسه: كم استغرق الموظّف الجديد حتى أخرج منشورًا صحيحًا وحده؟ أرقام مملّة، وتقول أكثر ممّا يقوله أيّ إعجاب.",
+    en: "And we measure what can be measured: how long before a new employee produced a correct post on their own? Boring numbers, and they say more than any compliment.",
   },
   w3ParaE: {
-    ar: "وما لا يُقاس نحكم عليه بالعين وحدها: هل يبدو المطبوع وكأنّه خرج من المكان نفسه الذي خرج منه الموقع؟ هل الصورة التي التُقطت الشهر الماضي تجلس بجانب صورة السنة الماضية دون أن تفضحها؟ الاتّساق شعور قبل أن يكون قاعدة.",
-    en: "And what can't be measured we judge by eye alone: does the printed piece look like it came from the same place as the site? Does a photograph taken last month sit beside one from last year without showing it up? Consistency is a feeling before it is a rule.",
+    ar: "وما لا يُقاس نحكم عليه بالعين: هل تبدو النتيجة كأنّها كانت هناك دائمًا، أم كأنّها أُلبست العلامة من الخارج؟",
+    en: "And what can't be measured we judge by eye: does the result look like it was always there, or like it was put on the brand from outside?",
   },
   w3ParaF: {
-    ar: "ولذلك نُبقي النظام مفتوحًا للنموّ لا مغلقًا على نفسه: مساحة للألوان التي ستُضاف، ولخدمة لم تبدأ بعد، ولفرعٍ في مدينة أخرى. الهويّة التي لا تتّسع لما لم يحدث بعد تصبح قيدًا في السنة الثالثة.",
-    en: "So we keep the system open to growth rather than sealed: room for colours that will be added, for a service that hasn't started, for a branch in another city. An identity with no room for what hasn't happened yet becomes a constraint by year three.",
+    ar: "ونُبقي النظام مفتوحًا للنموّ. العلامة التي لا تحتمل منتجًا جديدًا بعد سنتين نظامٌ أُغلق مبكرًا.",
+    en: "And we keep the system open to growth. A brand that can't take a new product two years later is a system that was closed too early.",
   },
 
   w3Para2D: {
-    ar: "ونحبّ العمل الطويل أكثر من العمل السريع. المشروع الذي نعود إليه كل موسم نعرف تفاصيله كما يعرف صاحبه، ونستطيع أن نقترح قبل أن يُطلب منّا. أمّا العمل الذي يمرّ مرّة واحدة فيبقى مهما أُتقن غريبًا عن صاحبه قليلًا.",
-    en: "And we prefer long work to fast work. A project we come back to each season we know as well as its owner does, and we can suggest things before being asked. Work that passes through once stays, however well made, a little foreign to the person who owns it.",
+    ar: "ونحبّ العمل الطويل أكثر من الحملة الواحدة — لأنّ النظام لا يُختبر إلّا بالتكرار.",
+    en: "And we prefer long work to a single campaign — a system is only tested by repetition.",
   },
   w3Para2E: {
-    ar: "ونكتب كل شيء. القرار الذي اتُّخذ في مكالمة يُدوَّن في السطر التالي، والسبب معه — لأنّ السؤال «لماذا فعلنا هذا؟» يأتي دائمًا، وغالبًا بعد أن ينسى الجميع. الذاكرة المكتوبة هي ما يجعل الفريق الصغير يتصرّف كفريق كبير.",
-    en: "And we write everything down. A decision taken on a call is recorded in the next line, with its reason — because the question \u201cwhy did we do this?\u201d always comes, usually after everyone has forgotten. Written memory is what lets a small team behave like a large one.",
+    ar: "ونكتب كل شيء: القرار الذي اتُّخذ، والسبب، والبديل الذي رُفض. الذاكرة التي لا تُكتب تُنسى.",
+    en: "And we write everything down: the decision, the reason, and the option refused. Memory that isn't written gets forgotten.",
   },
   w3Para2F: {
-    ar: "وفي النهاية، المقياس واحد: أن ينظر صاحب العلامة إلى ما بين يديه فيقول إنّ هذا يشبهه — لا أنّه جميل، ولا أنّه عصري، بل أنّه يشبهه. كل ما نفعله قبل ذلك خدمةٌ لهذه الجملة.",
-    en: "And in the end there is one measure: that the owner looks at what is in their hands and says it looks like them — not that it is beautiful, not that it is modern, but that it looks like them. Everything we do before that is in service of that one sentence.",
+    ar: "وفي النهاية المقياس واحد: أن تبدو النتيجة حتميّة — كأنّها لم تكن لتكون غير ذلك.",
+    en: "And in the end there is one measure: that the result looks inevitable — as if it could not have been anything else.",
   },
   /* the wide short line that crosses the whole left region in block 2 */
   /* the column sitting under the tall rail */
@@ -183,12 +183,12 @@ const I18N = {
      pictures — not three columns sitting beside them. Merged from the
      old w2ParaA/A2/A3/B/C/C2/C3 on 2026-08-09 at the user's request. */
   w2Body: {
-    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها. عملنا هو العثور على تلك النقطة أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها: الشعار، والألوان، والخط، والصوت، وطريقة الظهور اليوميّة. لا نبدأ من الشكل، بل ننتهي إليه. الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا شعارًا جميلًا لا يخصّ أحدًا؛ والذي يخرج بعد أن نفهم من أين تبدأ العلامة يصعب تخيّلها بغيره. ونعرض مبكرًا وبصوت مرتفع: مسوّدة في الأسبوع الأوّل خير من عرضٍ مكتمل في الشهر الثالث، لأنّ التصحيح وقتها لا يزال رخيصًا. أسوأ ما يحدث لمشروع أن يُبنى كاملًا في الظلّ ثم يُكشف مرّةً واحدة. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في الغرفة؟ من هناك تخرج المسوّدات الأولى، وتُجرّب على الورق قبل الشاشة، ويُرمى منها أكثر ممّا يُبقى — وهذا وحده ما يجعل ما يبقى يستحقّ أن يُرى. ثم يثبّت النظام نفسه: حبر أزرق عميق يمسك البنية، وكريمي دافئ يمنحها مساحة للتنفّس، ودرجات من الطين والزيتون حولهما. الخطّ من عائلة Idris — قسوة حادّة للعناوين، وقسوة مسطّحة للنصوص. وما يُسلَّم ليس ملفًّا واحدًا بل دفتر كامل: مقاسات، ومسافات، وأمثلة لما يُفعل وما لا يُفعل — حتّى يستطيع من يأتي بعدنا أن يكمل من حيث وقفنا دون أن يسأل. ولا نصمّم شيئًا لا نعرف كيف يُصنع. نسأل عن المطبعة قبل أن نرسم، وعن الشاشة قبل أن نلوّن، وعن اليد التي ستمسك الملفّ بعد شهر. النظام الذي لا يمكن تنفيذه ليس نظامًا، بل رأي جميل.",
-    en: "Every brand has an origin point it is built from and returns to. Our work is to find that point first — in the name, the story, or the place — then draw the whole system from it: the mark, the colors, the type, the voice, and the everyday appearance. We don't start at the form; we arrive at it. A mark drawn in the first week is usually a handsome mark that belongs to nobody. One drawn after we understand where the brand begins is hard to imagine it without. And we show early and out loud: a rough draft in the first week beats a finished presentation in the third month, because at that point correcting it is still cheap. The worst thing that happens to a project is being built whole in the dark and revealed all at once. And because the point is never handed to you in a meeting, we begin with the boring questions: who buys, when, and what gets said about you when you are not in the room. Then the system settles: a deep ink blue holds the structure, a warm cream gives it room to breathe, and tones of clay and olive sit around them. The type is the Idris family — a sharp cut for headlines, a flat cut for text. What gets handed over is not one file but a whole book: sizes, spacing, and worked examples of what to do and what not to do — so whoever comes after us can carry on from where we stopped without having to ask. And we don't design anything without knowing how it gets made. We ask about the press before drawing, about the screen before colouring, and about the hands that will hold the file a month later. A system that cannot be produced isn't a system — it's a handsome opinion.",
+    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها، وعملنا هو العثور عليها أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها. لا نبدأ من الشكل، بل ننتهي إليه: الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا جميلًا ولا يخصّ أحدًا. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في الغرفة؟ ثم يثبّت النظام نفسه — لونٌ يمسك البنية، وخطٌّ يحمل الصوت، ودفترٌ يشرح ما يُفعل وما لا يُفعل، حتّى يكمل من يأتي بعدنا دون أن يسأل.",
+    en: "Every brand has an origin point it is built from and returns to, and our work is to find it first — in the name, the story, or the place — then draw the whole system from it. We don't start at the form; we arrive at it: a mark drawn in the first week is usually handsome and belongs to nobody. And because the point is never handed to you in a meeting, we begin with the boring questions: who buys, when, and what gets said about you when you are not in the room. Then the system settles — a colour that holds the structure, a typeface that carries the voice, and a book explaining what to do and what not to, so whoever comes after us can carry on without asking.",
   },
   w2Rail: {
-    ar: "الملصق يُقرأ من عشرة أمتار ثم من نصف متر: يقول شيئًا واحدًا من بعيد، ويكافئ من اقترب بتفصيلٍ لم يره أوّل مرّة. ولأنّه يُطبع مرّةً واحدة، نعامله معاملة ما لا يُصحّح: نختبر الأحجام على الجدار قبل المطبعة، ونقرأ النصّ بصوتٍ عالٍ، ونسأل من لم يره من قبل عمّا فهمه في أوّل ثانيتين.",
-    en: "A poster is read from ten metres, then from half a metre: it says one thing from far away, and rewards whoever steps closer with a detail they missed.",
+    ar: "الملصق يُقرأ من عشرة أمتار ثم من نصف متر: شيء واحد من بعيد، وتفصيلٌ يكافئ من اقترب.",
+    en: "A poster is read from ten metres, then from half a metre: one thing from far away, and a detail that rewards whoever steps closer.",
   },
   w2Cap1: { ar: "تجارب الخط", en: "Type trials" },
   w2Cap2: { ar: "المطبوعات", en: "Printed matter" },
@@ -1173,7 +1173,55 @@ function applyI18n() {
   projectSheet.refresh();
   rebuildLoops();
   filmLoop.rebuild();
+  fitPicks();
   tickClock();
+}
+
+/* ══════════ the three service names, set to FILL their line ══════════
+   They are the section's headline, so they should run the width of the
+   column rather than sit in the middle of it with cream either side.
+
+   ⚠️ This cannot be a fixed vw. The right size depends on the strings, and
+   the two languages are nowhere near the same length — "Film & Photography"
+   against تصوير — so any single vw value either wraps in English or leaves
+   Arabic floating in the middle. Measure, then scale.
+
+   Text width is proportional to font-size, so ONE measurement is enough: set
+   a probe size, read the natural single-line width, and multiply. Everything
+   horizontal in the row is in em (including the gap) for that to hold. */
+function fitPicks() {
+  const row = document.querySelector(".svc-picks");
+  if (!row) return;
+  const MIN = 15;                     // below this it stops being a headline
+  const PROBE = 40;
+
+  const avail = row.clientWidth;
+  row.style.fontSize = PROBE + "px";
+
+  /* ⚠️ Measuring with `white-space: nowrap` does NOT work here: that governs
+     line breaking inside a text run, not flex wrapping, so the row still
+     wrapped and scrollWidth just came back equal to clientWidth — the fit
+     silently no-opped and left the probe size on the page.
+     `width: max-content` + `flex-wrap: nowrap` is what actually asks the row
+     for its one-line intrinsic width. Both are restored before anything can
+     paint, since this all runs in one synchronous block. */
+  const wrap = row.style.flexWrap, wide = row.style.width;
+  row.style.flexWrap = "nowrap";
+  row.style.width = "max-content";
+  const natural = row.getBoundingClientRect().width;
+  row.style.flexWrap = wrap;
+  row.style.width = wide;
+  if (!natural || !avail) { row.style.fontSize = ""; return; }
+
+  /* ⚠️ The 0.4% shave is load-bearing. Sized to land exactly on the container
+     width, sub-pixel rounding in the flex layout tips the row into a second
+     line at some widths (measured: it wrapped at 1440 and 1024 and filled at
+     everything between). Half a percent of headroom costs nothing visible and
+     keeps it one line at every width. */
+  const size = ((PROBE * avail) / natural) * 0.996;
+  /* Below MIN the line genuinely cannot fit — let it wrap at MIN rather than
+     shrink into a caption. English does this on a phone; Arabic never does. */
+  row.style.fontSize = Math.max(MIN, size) + "px";
 }
 
 /* language switch (pill) — click or keyboard */
@@ -1327,8 +1375,6 @@ const svcPicker = (() => {
   if (!stage) return { setService() { }, render() { }, next() { }, prev() { } };
 
   const media = document.getElementById("swMedia");
-  const elCap = document.getElementById("swCap");
-  const elKicker = document.getElementById("swKicker");
   const elName = document.getElementById("swName");
   const elDesc = document.getElementById("swDesc");
   const elIndex = document.getElementById("swIndex");
@@ -1336,20 +1382,13 @@ const svcPicker = (() => {
 
   let items = [], idx = 0;
 
-  const svcName = (id) => {
-    const c = CATS.find((c) => c.id === id);
-    return c ? c[lang] : "";
-  };
-
   function paint() {
     const s = items[idx];
     if (!s) return;
-    elKicker.textContent = svcName(currentService);
     elName.textContent = s[lang];
     elDesc.textContent = s.desc ? s.desc[lang] : "";
     elIndex.textContent = num(String(idx + 1).padStart(2, "0"));
     elTotal.textContent = num(String(items.length).padStart(2, "0"));
-    elCap.textContent = `${svcName(currentService)} — ${s[lang]}`;
     setHolder(media, s);
   }
 
@@ -1796,6 +1835,9 @@ if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
     rebuildLoops();
     filmLoop.rebuild();
+    /* ⚠️ fitPicks measures text, so it is wrong until Idris has actually
+       landed — the fallback face is a different width entirely. */
+    fitPicks();
     queueMenuSync();
   });
 }
@@ -1840,5 +1882,6 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(() => {
     rebuildLoops();
     filmLoop.rebuild();
+    fitPicks();
   }, 250);
 });

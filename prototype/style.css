@@ -796,7 +796,17 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
    ⚠️ Gutters are ~1% horizontal and 4–9px vertical. This is a broadsheet:
    the rules and the column edges do the separating, not whitespace.
    ═══════════════════════════════════════════ */
-.why { padding: 0 var(--pad); }
+.why {
+  padding: 0 var(--pad);
+  /* ⚠️ ONE lever for the language difference. The columns below are solved
+     against the ARABIC copy; the English says the same thing in noticeably
+     more characters, so at the same size it ran 31-46% past every box.
+     Text area grows with the SQUARE of the size (both the line height and the
+     characters per line change), so undoing a ~1.37x overflow takes a
+     1/sqrt(1.37) ~ 0.85 scale, not 1/1.37. */
+  --why-type: 1;
+}
+html[lang="en"] .why { --why-type: 0.85; }
 
 .why-block { padding: var(--why-gap) 0; }
 
@@ -847,11 +857,17 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
    so the type is tuned until the copy lands flush at the bottom. These are
    derived from measured ink-height vs box-height — see fit.py. Retune them
    whenever the copy changes length. */
-.wb1-side  .why-para { font-size: clamp(0.75rem, 1.4vw, 0.92rem); }
-.wb2-flow  .why-para { font-size: clamp(0.8rem, 1.62vw, 1.04rem); }
-.wb2-rail  .why-para { font-size: clamp(0.84rem, 1.95vw, 1.25rem); }
-.wb3-body > .wb-col:first-child .why-para { font-size: clamp(0.86rem, 1.83vw, 1.18rem); }
-.wb3-body > .wb-col:last-child  .why-para { font-size: clamp(0.83rem, 1.66vw, 1.07rem); }
+/* Solved per column against a 1280px page with the shortened copy
+   (2026-08-09): each vw term is the size that lands that column's INKED
+   extent at ~99% of its own box — the picture beside it, or the centre cut.
+   Tuned for ARABIC, which is the primary language; English sets longer at the
+   same size and runs a little past, which is the right trade.
+   ⚠️ Re-solve these whenever the copy changes length. */
+.wb1-side  .why-para { font-size: calc(clamp(0.95rem, 2.20vw, 1.50rem) * var(--why-type)); }   /* 28.2px */
+.wb2-flow  .why-para { font-size: calc(clamp(1.00rem, 2.56vw, 1.75rem) * var(--why-type)); }   /* 32.8px */
+.wb2-rail  .why-para { font-size: calc(clamp(1.15rem, 4.32vw, 2.60rem) * var(--why-type)); }   /* 55.3px */
+.wb3-body > .wb-col:first-child .why-para { font-size: calc(clamp(1.00rem, 2.45vw, 1.70rem) * var(--why-type)); } /* 31.4px */
+.wb3-body > .wb-col:last-child  .why-para { font-size: calc(clamp(1.00rem, 2.40vw, 1.65rem) * var(--why-type)); } /* 30.7px */
 .why-para {
   font-size: clamp(0.86rem, 1.8vw, 1.16rem);
   line-height: 1.52;
@@ -948,22 +964,23 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
   margin-inline-start: var(--why-gap);
   margin-block-end: var(--why-gap);
 }
-/* ⚠️ This margin is what makes the zigzag work, and it is measured, not
-   guessed. The browser places this float below the previous one's margin box
-   first, THEN adds this margin — so the value is the breathing space between
-   the two pictures, not the distance from the top of the flow. A percentage
-   here resolves against the flow's WIDTH, so it scales with the column.
+/* ⚠️ NO top margin, and that is the whole point. A float excludes text with
+   its MARGIN box, not its border box — so a top margin here is a band of
+   reserved emptiness that neither the picture nor the copy may use. At 8% it
+   read as a hole: measured, the lines at y=421 and y=452 were still squeezed
+   into the left 281px because m2's margin box already started at y=416.
 
-   ⚠️ Too large and the copy runs out before the picture does, which is the
-   hole session 9 blamed on floats: at 58% the Arabic ended 354px short.
-   Measured across both languages, 8% leaves a 7px tail in each — retune it
-   with the same probe if the copy changes length. */
+   With no top margin the second float lands directly under the first one's
+   margin box, so there is no band where the full width is free and the text
+   runs straight from "beside picture one" to "beside picture two" — a
+   continuous wrap, which is what the block is for. The gap between the two
+   pictures is m1's margin-block-end, and that is enough. */
 .wb2-m2 {
   float: inline-start;
   width: 56.7%;
   aspect-ratio: 7 / 6;
   margin-inline-end: var(--why-gap);
-  margin-block: 8% var(--why-gap);
+  margin-block: 0 var(--why-gap);
 }
 
 /* ---- block 3 : full-width head, then text | tall cut | text ------ */
@@ -1041,9 +1058,14 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: clamp(0.7rem, 2.4vw, 2.4rem);
+  /* ⚠️ gap in em, not rem. fitPicks() scales this row by font-size alone, and
+     that only works if EVERY horizontal contribution scales with it — a rem
+     gap stays put and the fit lands short. */
+  gap: 0.34em;
   flex-wrap: wrap;
   padding: var(--why-gap) 0 0.5rem;
+  /* the starting size; fitPicks() in main.js overwrites it to fill the line */
+  font-size: clamp(1.15rem, 5.8vw, 5rem);
 }
 .svc-pick {
   appearance: none;
@@ -1053,10 +1075,8 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
   cursor: pointer;
   color: var(--ink);
   font-family: var(--font-display);
-  /* Still the section's headline rather than a tab bar, but pulled back from
-     7.6vw — at 97px on a 1280 page the three names alone were taller than the
-     whole text column beside the stage. */
-  font-size: clamp(1.7rem, 5.8vw, 5rem);
+  /* sized from .svc-picks — see fitPicks() */
+  font-size: 1em;
   font-weight: 800;
   /* the picks are display-size now; 1.06 clipped the Arabic ascenders */
   line-height: 1.24;
@@ -1073,7 +1093,7 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
    they are decorative and aria-hidden (see the polish-pass note). */
 .svc-dot {
   font-family: var(--font-display);
-  font-size: clamp(1.1rem, 3.1vw, 2.7rem);
+  font-size: 0.52em;
   color: var(--ink-faint);
   line-height: 1;
   transform: translateY(-0.12em);
@@ -1110,13 +1130,6 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 }
 /* the heavy rule directly under the stage — the studio's baseline stroke */
 .sw-bar { display: block; height: 6px; background: var(--ink); }
-.sw-cap {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.66rem;
-  letter-spacing: 0.02em;
-  color: var(--ink-mute);
-}
 
 /* the arrows sit inside the stage, on its two edges */
 .sw-arrow {
@@ -1144,13 +1157,6 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
    on the stage's bottom edge — without it the column ends after the
    description and leaves a cream void beside a tall picture. */
 .sw-text { display: flex; flex-direction: column; }
-.sw-kicker {
-  font-size: 0.66rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-  margin-bottom: 0.3rem;
-}
 .sw-name {
   font-family: var(--font-display);
   font-size: clamp(1.7rem, 5.4vw, 4.9rem);
@@ -1824,9 +1830,7 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
      at every width; English still takes two below 900px, which is honest —
      "Film & Photography" cannot set beside two more names on a phone at
      anything like headline scale. */
-  .svc-picks { justify-content: center; gap: 0.4rem 0.7rem; }
-  .svc-pick { font-size: clamp(1.15rem, 5.8vw, 5rem); }
-  .svc-dot { font-size: clamp(0.68rem, 3.1vw, 2.7rem); }
+  .svc-picks { justify-content: center; }
   /* stacked, the button reads as the section's own way out rather than
      something pinned to a column edge — and it clears the corner launcher */
   .sw-foot { justify-content: center; }

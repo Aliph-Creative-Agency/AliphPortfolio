@@ -229,6 +229,85 @@ now carries a comment saying so.
 but kept on purpose** — `shotSrc()` ignores its arguments and returns
 `HOLDER`. They are the shopping list for the Drive hand-off. Don't sweep them.
 
+### Third pass, same day — the type fills its boxes, and the first Drive trial
+
+**The service names now FILL their line** (`fitPicks()` in `main.js`). The user:
+*"therse a lot of space on the left and right, why not use them."* This cannot
+be a fixed `vw` — the two languages are nowhere near the same length ("Film &
+Photography" against تصوير), so any single value either wraps in English or
+leaves Arabic floating in the middle. So: measure, then scale.
+
+⚠️ **Measuring with `white-space: nowrap` does NOT work.** That governs line
+breaking inside a text run, not flex wrapping — the row still wrapped and
+`scrollWidth` came back equal to `clientWidth`, so the fit silently no-opped
+and left the 40px probe size on the page. **`width: max-content` +
+`flex-wrap: nowrap`** is what actually asks for the one-line intrinsic width.
+
+⚠️ Everything horizontal in the row must be in **em**, gap included, or the
+scale is not linear and the fit lands short. ⚠️ And there is a **0.4% shave**
+on the result: sized to land exactly on the container, sub-pixel rounding tips
+it to a second line at some widths (measured: wrapped at 1440 and 1024, filled
+at everything between). Result: one line, **99.6% fill, both languages, every
+width from 360 to 1600**.
+
+**🔴 The gap the user circled in block 2 was a float's TOP MARGIN.** A float
+excludes text with its *margin* box, so `margin-block-start` on the second
+picture was a band of reserved emptiness that neither the picture nor the copy
+could use — measured, the lines at y=421 and y=452 were still squeezed into
+the left 281px because m2's margin box already began at y=416. Set to 0, the
+second float lands directly under the first one's margin box and the text runs
+straight from one picture to the next. Dead band **86px → 29px**, and the 29
+is the gap between the pictures.
+
+**The copy is 41% of what it was, and the type is solved per column.** The
+user: *"theres no point of having so much text, so lets instead make the font
+bigger and reduce the amount of text… try and fill all the text areas."*
+Arabic went 4,965 → 2,019 characters. Then each column was **binary-searched
+against its own box** (`scratchpad/fit_columns.py`, worth keeping):
+
+| column | size @1280 | fill |
+|---|---|---|
+| `.wb1-side` | 28.2px | 98% |
+| `.wb2-flow` | 32.8px | 98% |
+| `.wb2-rail` | 55.3px | 98% |
+| `.wb3` col A | 31.4px | 96% |
+| `.wb3` col B | 30.7px | 99% |
+
+⚠️ **A uniform scale cannot work** — swept 1.0→1.8, and block 3's narrow
+columns overflow before block 2 fills. Per column is not a stylistic
+preference here, it is the only thing that lands.
+
+⚠️ **`--why-type` on `.why` is the language lever.** English says the same
+thing in more characters and ran **31–46% past every box** at the Arabic
+sizes. Text area grows with the SQUARE of the size, so undoing a 1.37×
+overflow takes a **1/√1.37 ≈ 0.85** scale, not 1/1.37. English now lands
+96–114%.
+
+⚠️ **Fill is measured on the INKED extent, never the element box** — the
+session-9 trap, still the trap.
+
+### 🔴 The first real Drive assets went in, and design work does not crop
+
+Pulled four files from `graphic designs` (the folder resolves fine unsigned;
+`https://drive.usercontent.google.com/download?id=…&export=download` works).
+They are **1080×1350 PNGs — 4:5 portrait — plus a 4-page PDF**. Trialled in
+all five holders and screenshotted. Three findings, none of them cosmetic:
+
+1. **These are finished layouts with the type baked in, not photographs.**
+   Every holder crops them (keeps 53–80% of the frame) and the crop **cuts
+   the words** — "أول شاورما على الفحم في القدس" loses its edge in the 3:2
+   slot. A photograph tolerates a crop; a poster does not.
+2. **The site grayscales all imagery** (`filter: grayscale(1)`), so Grillit's
+   orange goes grey. Showing colour design work through a B&W grade defeats
+   the point of showing it.
+3. **No holder is 4:5.** The slots are 3:2, 1:1, 7:6, 9:16 and 4:7 — all from
+   the wireframe, none matching what the studio actually produces.
+
+**So the holders in لماذا ألِف؟ want photographs** (the `pics` folder), and
+the design work needs either `object-fit: contain` on a slot sized to it, or
+its own gallery. **Raise this before wiring any of it in for real.** The trial
+files were deliberately NOT committed.
+
 ### Still open — unchanged from session 9
 
 The لماذا ألِف؟ copy is still mine and still **must not ship** (it invents
