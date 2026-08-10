@@ -731,10 +731,11 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
    the shape of the thing inside it. A reel came out cropped 23% and design
    work at 4:5 was squeezed into a square. Ratio belongs to the medium; if a
    layout needs a different box, change the layout. */
-.holder[data-kind="reel"]   { aspect-ratio: 9 / 16; }
-.holder[data-kind="video"]  { aspect-ratio: 16 / 9; }
-.holder[data-kind="poster"] { aspect-ratio: 4 / 5; }
-.holder[data-kind="still"]  { aspect-ratio: 3 / 2; }
+.holder[data-kind="reel"]     { aspect-ratio: 9 / 16; }
+.holder[data-kind="video"]    { aspect-ratio: 16 / 9; }
+.holder[data-kind="poster"]   { aspect-ratio: 4 / 5; }
+.holder[data-kind="still"]    { aspect-ratio: 3 / 2; }
+.holder[data-kind="portrait"] { aspect-ratio: 2 / 3; }
 .holder > img,
 .holder > video,
 .holder .sw-media > img,
@@ -895,7 +896,18 @@ html[lang="en"] .why { --why-type: 0.85; }
    is placed in column 2, which advances the auto-placement cursor past
    column 1 — so the rail would be pushed to a second row and the block would
    render at double height. */
-.wb2-rail { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
+/* space-between, because the rail no longer matches the text column's height.
+   The poster is 4:5 where the old box was 9/13, so the column comes up ~278px
+   short at 1440 and the slack used to pile up under the paragraph as a dropped
+   foot. Pinning the picture to the top and the line to the bottom spends it as
+   a measured gap between two anchored edges instead. */
+.wb2-rail {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 .wb2-main { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; }
 /* one line across the left region */
 .wb2 .why-title { font-size: clamp(1.7rem, 6.5vw, 6.2rem); }

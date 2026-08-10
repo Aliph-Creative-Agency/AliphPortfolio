@@ -4,7 +4,7 @@ const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").mat
 gsap.registerPlugin(ScrollTrigger);
 
 /* ══════════ media holders ══════════
-   Stand-in until the studio's photographs land.
+   Stand-in until the agency's photographs land.
 
    It is an <img> with an inline SVG data URI, not a <div>: every image is
    styled through `img` selectors, so swapping the element type would
@@ -76,8 +76,8 @@ const I18N = {
   hero2: { ar: "تبدأ الأشياء.", en: "things begin." },
   /* the boxed letter completes the first word: أ + لِف / A + liph */
   heroPara: {
-    ar: "لِف استوديو يبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، ثم رسم النظام كاملًا منها: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم. نصمّم، ونصوّر، ونبرمج المواقع والأنظمة التي تُشغّلها — من الألِف إلى الياء.",
-    en: "liph is a studio that begins at the first letter. Every brand has an origin point it is built from and returns to; our work is finding that point, then drawing the whole system from it: the name, the identity, the voice, and the way the brand shows up in the world. We design, we shoot, and we build the sites and systems that run it all. From A to Z.",
+    ar: "لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، من الألِف إلى الياء.",
+    en: "liph is an agency that begins at the first letter. Every brand has an origin point it is built from and returns to; our work is finding that point, then drawing the whole system from it: the name, the identity, the voice, and the way the brand shows up in the world. We design, we shoot, and we build the sites and systems that run it all. From A to Z.",
   },
   /* the dropcap letter is baked into the sprite; this is what screen
      readers get */
@@ -184,15 +184,15 @@ const I18N = {
   w3Title: { ar: "أن تبدو النتيجة حتميّة.", en: "That the result feels inevitable." },
   w3Cap: { ar: "الختم على العمل", en: "The seal on the work" },
   whyOutro: {
-    ar: "الحكاية كاملةً — كيف بدأ الاستوديو، وكيف نشتغل، وما الذي نقيس عليه عملنا.",
-    en: "The whole story — how the studio started, how we work, and what we measure the work against.",
+    ar: "الحكاية كاملةً — كيف بدأت الوكالة، وكيف نشتغل، وما الذي نقيس عليه عملنا.",
+    en: "The whole story — how the agency started, how we work, and what we measure the work against.",
   },
 
   /* contact */
   cBand: { ar: "لنبدأ من الألِف", en: "Let's start from the Aliph" },
   cLabelMail: { ar: "للمشاريع والتعاون", en: "Projects & collaboration" },
   cLabelPhone: { ar: "هاتف / واتساب", en: "Phone / WhatsApp" },
-  cLabelPlace: { ar: "الاستوديو", en: "The studio" },
+  cLabelPlace: { ar: "الوكالة", en: "The agency" },
   cPlace: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
   cClock: { ar: "بتوقيت القدس", en: "Jerusalem time" },
   legal: { ar: "ألِف © ٢٠٢٦ — جميع الحقوق محفوظة", en: "Aliph © 2026 — All rights reserved" },
@@ -219,7 +219,7 @@ const I18N = {
   pfDate: { ar: "التاريخ", en: "Date" },
   cap1: { ar: "من جلسة تصوير — البلدة القديمة", en: "From a shoot — the Old City" },
   cap2: { ar: "وراء الكواليس — تجهيز فعاليّة", en: "Behind the scenes — event setup" },
-  cap3: { ar: "نقاش تصميم — الاستوديو", en: "Design discussion — the studio" },
+  cap3: { ar: "نقاش تصميم — الوكالة", en: "Design discussion — the agency" },
   quote: {
     ar: "«النتيجة يجب أن تبدو حتميّة: راسخة، مدروسة، وذات شخصيّة لا تُخطئها العين.»",
     en: "“The result should feel inevitable: rooted, considered, with a personality the eye can't miss.”",
@@ -232,8 +232,8 @@ const I18N = {
   },
   /* about — the long read */
   abLead: {
-    ar: "ألِف استوديو إبداعي من القدس — من جبل الزيتون تحديدًا. بدأ سنة ٢٠٢٤ بفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم، بل نظام يُبنى من نقطة أصله. واسمنا نفسه هو أوّل الحروف: النقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف.",
-    en: "Aliph is a creative studio from Jerusalem — from the Mount of Olives, to be exact. It began in 2024 on a single idea: that a brand is not a logo you draw, but a system you build from its point of origin. Our name is that point — the first letter, the place every word starts, and the measure the rest of the letters are drawn against.",
+    ar: "ألِف وكالة إبداعية من القدس — من جبل الزيتون تحديدًا. بدأت بفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم، بل نظام يُبنى من نقطة أصله. واسمنا نفسه هو أوّل الحروف: النقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف.",
+    en: "Aliph is a creative agency from Jerusalem — from the Mount of Olives, to be exact. It began on a single idea: that a brand is not a logo you draw, but a system you build from its point of origin. Our name is that point — the first letter, the place every word starts, and the measure the rest of the letters are drawn against.",
   },
   abP2: {
     ar: "نعمل بالعربيّة أوّلًا. ليست العربيّة عندنا لغةً تُضاف بعد أن يجهز التصميم الإنجليزي، بل هي اللغة التي يُرسم عليها النظام من السطر الأوّل: الخط، والاتّجاه، والإيقاع، وشكل الأرقام. ثم تأتي الإنجليزيّة لتقف إلى جانبها بالكفاءة نفسها، لا كترجمة متأخّرة.",
@@ -290,8 +290,8 @@ const SERVICES = [
       en: "We shoot what a brand needs in order to appear: stills of the product, the place and the faces; horizontal video for campaigns and profiles; vertical reels for the feed. And full coverage of events — from the first hour of setup to the last guest leaving.",
     },
     why: {
-      ar: "لأنّ الصورة التي تُلتقط داخل الهويّة تبدو مختلفة عن الصورة التي تُلصق عليها. نحن نعرف علامتك من الداخل، غالبًا لأننا من بناها، فكل لقطة تخرج من النظام نفسه لا من خارجه. وهذا تحديدًا تاريخنا الأطول: التصوير هو ما كنّا نفعله قبل أن نصير استوديو كاملًا.",
-      en: "Because a frame shot inside the identity looks different from a frame stuck onto it. We know your brand from the inside, often because we built it, so every shot comes out of the same system rather than beside it. And this is where our longest history is: photography is what we did before we became a full studio.",
+      ar: "لأنّ الصورة التي تُلتقط داخل الهويّة تبدو مختلفة عن الصورة التي تُلصق عليها. نحن نعرف علامتك من الداخل، غالبًا لأننا من بناها، فكل لقطة تخرج من النظام نفسه لا من خارجه. وهذا تحديدًا تاريخنا الأطول: التصوير هو ما كنّا نفعله قبل أن نصير وكالة كاملة.",
+      en: "Because a frame shot inside the identity looks different from a frame stuck onto it. We know your brand from the inside, often because we built it, so every shot comes out of the same system rather than beside it. And this is where our longest history is: photography is what we did before we became a full agency.",
     },
     does: {
       ar: ["تصوير المنتج والمكان", "بورتريه ووجوه", "فيديو أفقي وتعريفي", "ريلز عموديّة", "تغطية الفعاليّات", "المونتاج والتلوين"],
@@ -321,6 +321,16 @@ const CATS = [
   { id: "photo", ar: "تصوير احترافي", en: "Professional Photography" },
   { id: "tech", ar: "تطوير برمجيات", en: "Software Development" },
 ];
+
+/* The hero's third meta slot lists what the agency does, and a typed copy of
+   that list has now gone stale twice: it still read "هويّات · تسويق ·
+   فعاليّات · تقنيّة" — the FOUR services retired on 2026-08-08 — and the JS
+   fallback beside it still had the pre-rename short labels. Derived, so the
+   taxonomy is the only place this can be changed. */
+I18N.heroMeta3 = {
+  ar: CATS.filter((c) => c.id !== "all").map((c) => c.ar).join(" · "),
+  en: CATS.filter((c) => c.id !== "all").map((c) => c.en).join(" · "),
+};
 
 /* The example switcher steps through these subcategories, not through
    projects. `desc` speaks about the category and subcategory together. */
@@ -441,8 +451,8 @@ const PROJECTS = [
   {
     ar: "ورشة الخط", en: "Calligraphy Workshop", date: "2026-03", cat: "design", seed: "aliph03",
     desc: {
-      ar: "ورشة مفتوحة في الاستوديو: برنامج، مطبوعات، وتغطية كاملة لليومين.",
-      en: "An open workshop at the studio: program, printed matter, and full two-day coverage."
+      ar: "ورشة مفتوحة في الوكالة: برنامج، مطبوعات، وتغطية كاملة لليومين.",
+      en: "An open workshop at the agency: program, printed matter, and full two-day coverage."
     }
   },
   {
@@ -702,11 +712,14 @@ let bandTween = null;
 /* Four frames, matched to the film tile: the tile is one group wide and its
    sprocket run repeats in lockstep. Re-cutting it to three is a separate job
    (resources/recut_film.py), so photography takes two of the four slots. */
+/* The frame slot is landscape, so these are the 3:2 photographs; a 4:5 design
+   would lose a third of itself to the crop. ⚠️ The captions are still invented
+   project names — real ones are pending from the agency. */
 const FILM_FRAMES = [
-  { seed: "aliphf1", svc: "design", cap: { ar: "مؤسّسة بنيان — هويّة", en: "Bunyan — identity" } },
-  { seed: "aliphf5", svc: "photo", cap: { ar: "سوق البلدة — حملة", en: "Old Town Market — campaign" } },
-  { seed: "aliphf7", svc: "photo", cap: { ar: "ليالي رمضان — تغطية", en: "Ramadan Nights — coverage" } },
-  { seed: "aliphf9", svc: "tech", cap: { ar: "عودة الملكة — منصّة", en: "Queen's Retreat — platform" } },
+  { src: "assets/media/pics-idk-category-28-dsc00020.webp", svc: "design", cap: { ar: "مؤسّسة بنيان — هويّة", en: "Bunyan — identity" } },
+  { src: "assets/media/pics-Interactive-37-dsc03223.webp", svc: "photo", cap: { ar: "سوق البلدة — حملة", en: "Old Town Market — campaign" } },
+  { src: "assets/media/pics-food-21-dsc03454.webp", svc: "photo", cap: { ar: "ليالي رمضان — تغطية", en: "Ramadan Nights — coverage" } },
+  { src: "assets/media/pics-public-services-49-img.webp", svc: "tech", cap: { ar: "عودة الملكة — منصّة", en: "Queen's Retreat — platform" } },
 ];
 const SERVICE_FRAMES = { design: 0, photo: 1, tech: 3 };
 const filmScroll = document.getElementById("filmScroll");
@@ -723,9 +736,13 @@ function buildFilm() {
     fig.className = "film-frame";
     fig.dataset.frame = i;
     fig.dataset.service = fr.svc;
-    fig.innerHTML =
-      `<img src="${HOLDER}" alt="">` +
-      `<figcaption>${fr.cap[lang]}</figcaption>`;
+    /* Captions removed 2026-08-10: every one was an invented project name
+       ("مؤسّسة بنيان — هويّة") and they now sit over real client work, which
+       reads as a false credit. `cap` is kept in FILM_FRAMES on purpose — it
+       is the shopping list for the real titles.
+       NOT lazy: the strip is cloned across several viewport widths and
+       travels continuously, so a deferred frame pops in mid-scroll. */
+    fig.innerHTML = `<img src="${fr.src || HOLDER}" alt="" decoding="async">`;
     group.appendChild(fig);
   });
   filmScroll.appendChild(group);
@@ -936,7 +953,7 @@ function splitSafe(word, i) {
   return !joinedBefore && !joinsAfter;
 }
 
-/* The studio's own clippings, cut by resources/cut_ransom.py — 16 scraps
+/* The agency's own clippings, cut by resources/cut_ransom.py — 16 scraps
    per language. Some are red, purple or blue-ruled against an ink-and-cream
    palette: deliberate, since a ransom note that matches isn't one. Shorten
    this list to restrict it. */

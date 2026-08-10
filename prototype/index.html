@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ألِف — استوديو إبداعي</title>
+<title>ألِف — وكالة إبداعية</title>
 <link rel="icon" href="assets/img/HalfAliph-Icon.svg">
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="chat/aliph-chat.css">
+<!-- chat widget hidden 2026-08-10 at the agency's request until it is finished.
+     Nothing is deleted: restore by uncommenting these two lines on every page. -->
+<!-- <link rel="stylesheet" href="chat/aliph-chat.css"> -->
 </head>
 <body data-page="index">
 
@@ -26,10 +28,12 @@
     <a href="about.html" class="nav-item" data-i18n="navAbout">من نحن</a>
   </nav>
   <div class="nav-foot">
+    <!-- Real accounts as of 2026-08-10. BEHANCE was a placeholder; the agency
+         does not have one. rel="noopener" on every external target=_blank. -->
     <div class="nav-socials latin" lang="en">
-      <a href="#">INSTAGRAM</a><span>·</span>
-      <a href="#">BEHANCE</a><span>·</span>
-      <a href="#">LINKEDIN</a>
+      <a href="https://www.instagram.com/aliph.creative" target="_blank" rel="noopener noreferrer">INSTAGRAM</a><span>·</span>
+      <a href="https://www.facebook.com/share/19F5j4XM6g/" target="_blank" rel="noopener noreferrer">FACEBOOK</a><span>·</span>
+      <a href="https://www.linkedin.com/company/aliph-creative/" target="_blank" rel="noopener noreferrer">LINKEDIN</a>
     </div>
     <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
       <span class="ls-knob" aria-hidden="true"></span>
@@ -72,14 +76,14 @@
           <span class="dc-sheet" aria-hidden="true"></span>
           <span class="dc-sr" data-i18n="dropLetter">أ</span>
         </span>
-        <p data-i18n="heroPara">لِف استوديو يبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، ثم رسم النظام كاملًا منها: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم. نصنع الهويّات والحملات والفعاليّات، ونبني المواقع والأنظمة التي تُشغّلها — من الألِف إلى الياء.</p>
+        <p data-i18n="heroPara">لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، ثم رسم النظام كاملًا منها: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم. نصنع الهويّات والحملات والفعاليّات، ونبني المواقع والأنظمة التي تُشغّلها — من الألِف إلى الياء.</p>
       </div>
       <div class="hero-meta">
         <span data-i18n="heroMeta1">منذ ٢٠٢٤</span>
         <span class="dot" aria-hidden="true">·</span>
         <span data-i18n="heroMeta2">القدس — جبل الزيتون</span>
         <span class="dot" aria-hidden="true">·</span>
-        <span data-i18n="heroMeta3">هويّات · تسويق · فعاليّات · تقنيّة</span>
+        <span data-i18n="heroMeta3">تصميم جرافيكي · تصوير احترافي · تطوير برمجيات</span>
       </div>
     </div>
   </div>
@@ -100,9 +104,11 @@
       <h3 class="why-title" data-i18n="w1Title">صوت واحد، حرفان، ولغتان.</h3>
       <p class="why-para" data-i18n="w1Para">يستمدّ ألِف اسمه من الألف.</p>
     </div>
-    <figure class="holder wb1-media" data-kind="video">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-          <figcaption data-i18n="w1Cap">من جلسة تصوير — البلدة القديمة</figcaption>
+    <!-- was data-kind="video" (16:9). There is no 16:9 still in the agency's
+         Drive — photography is 3:2 either way up — and the caption calls it a
+         shoot, so it is a still. -->
+    <figure class="holder wb1-media" data-kind="still">
+          <img src="assets/media/pics-Interactive-36-dsc02566.webp" alt="" loading="lazy" decoding="async">
         </figure>
   </article>
 
@@ -119,30 +125,29 @@
            its own top margin so the two stagger rather than sit side by side. -->
       <div class="wb2-flow">
         <figure class="holder wb2-m1" data-kind="poster">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-          <figcaption data-i18n="w2Cap1">تجارب الخط</figcaption>
+          <img src="assets/media/design-grillit-1.webp" alt="" loading="lazy" decoding="async">
         </figure>
         <p class="why-para" data-i18n="w2BodyA">لكل علامة نقطة أصل.</p>
         <figure class="holder wb2-m2" data-kind="poster">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-          <figcaption data-i18n="w2Cap2">المطبوعات</figcaption>
+          <img src="assets/media/design-shawarma-habash-1.webp" alt="" loading="lazy" decoding="async">
         </figure>
         <p class="why-para" data-i18n="w2BodyB">ولأنّ النقطة لا تُعطى في اجتماع.</p>
       </div>
     </div>
 
     <div class="wb2-rail">
-      <!-- Trialled with the real reel on 2026-08-10 and it works: 1080x1920
-           H.264, loops cleanly. The file is 51.8 MB, which is
-           too big for this repo, so it stays untracked in prototype/media/
-           and the placeholder holds the slot. Restore with:
-             <video src="<r2-object-url>" autoplay muted loop playsinline></video>
-           once the reel is on R2 (the bucket root alone 404s — it needs the
-           object key). NOTE the source is 9:16 and the holder is 9/13, so
-           object-fit crops ~23%; and the caption below is still poster copy. -->
+      <!-- ⚠️ This slot is a REEL — the agency's own video, and the rail is
+           built around it. It was briefly turned into a still because the
+           caption and w2Rail say "ملصق"; that was backwards. The video is the
+           content, the copy is what is wrong, and both are due in the copy
+           pass. Do not swap it back.
+
+           `src` is the local file while the reel moves to R2. That file is
+           51.8 MB and gitignored, so it CANNOT ship from the repo — and
+           Workers caps a single asset at 25 MiB. This src must become the R2
+           object URL before deploy, or the rail 404s in production. -->
       <figure class="holder wb2-rail-media" data-kind="reel">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16' preserveAspectRatio='none'%3E%3Crect width='9' height='16' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-          <figcaption data-i18n="w2Cap3">ملصق — ليالي رمضان</figcaption>
+          <video src="media/wb2-rail-reel.mov" autoplay muted loop playsinline preload="metadata"></video>
         </figure>
       <p class="why-para" data-i18n="w2Rail">الملصق يُقرأ من بعيد ثم من قريب.</p>
     </div>
@@ -162,9 +167,11 @@
         <p class="why-para" data-i18n="w3ParaE">وما لا يُقاس نحكم عليه بالعين.</p>
         <p class="why-para" data-i18n="w3ParaF">ونُبقي النظام مفتوحًا للنموّ.</p>
       </div>
-      <figure class="holder wb3-media" data-kind="reel">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
-          <figcaption data-i18n="w3Cap">الختم على العمل</figcaption>
+      <!-- was data-kind="reel"; the reels are video and live on R2, so until
+           one lands this carries a portrait photograph at the Drive's real
+           2:3 rather than a 9:16 box with nothing 9:16 to put in it. -->
+      <figure class="holder wb3-media" data-kind="portrait">
+          <img src="assets/media/pics-portraits-46-2j6a5679.webp" alt="" loading="lazy" decoding="async">
         </figure>
       <div class="wb-col">
         <p class="why-para" data-i18n="w3Para2A">ونحن فريق صغير عن قصد.</p>
@@ -288,7 +295,7 @@
         </a>
       </div>
       <div class="contact-row">
-        <span class="contact-label" data-i18n="cLabelPlace">الاستوديو</span>
+        <span class="contact-label" data-i18n="cLabelPlace">الوكالة</span>
         <span class="contact-value" data-i18n="cPlace">القدس — جبل الزيتون</span>
       </div>
     </div>
@@ -300,9 +307,9 @@
         <small data-i18n="cClock">بتوقيت القدس</small>
       </p>
       <nav class="contact-socials latin" lang="en" aria-label="Social">
-        <a href="#">INSTAGRAM</a>
-        <a href="#">BEHANCE</a>
-        <a href="#">LINKEDIN</a>
+        <a href="https://www.instagram.com/aliph.creative" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>
+        <a href="https://www.facebook.com/share/19F5j4XM6g/" target="_blank" rel="noopener noreferrer">FACEBOOK</a>
+        <a href="https://www.linkedin.com/company/aliph-creative/" target="_blank" rel="noopener noreferrer">LINKEDIN</a>
       </nav>
     </div>
   </div>
@@ -317,6 +324,6 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script src="main.js"></script>
-<script src="chat/aliph-chat.js"></script>
+<!-- <script src="chat/aliph-chat.js"></script> -->
 </body>
 </html>

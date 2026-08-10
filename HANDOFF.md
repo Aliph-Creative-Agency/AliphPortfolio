@@ -1,6 +1,23 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-09. Read this first._
+_Updated 2026-08-10. Read this first._
+
+> ## 🔴 State on 2026-08-10: real media is in, NOTHING IS COMMITTED
+>
+> The agency needs a shipped version. Real work is on the page for the first
+> time — 63 images derived from the Drive, and the reel playing in the rail —
+> but **none of it is committed and none of it is deployed.** Pushing to GitHub
+> does not deploy; that is `npx.cmd wrangler deploy` from the repo root.
+>
+> **The one thing that will break a deploy:** `wb2-rail-media` points at
+> `media/wb2-rail-reel.mov`, a 51.8 MB gitignored local file. Workers caps a
+> single asset at **25 MiB**, so that src MUST become an R2 object URL before
+> deploy or the rail 404s in production.
+>
+> **Still fabricated, still not shippable:** every caption and body paragraph in
+> لماذا ألِف؟ and the project entries on the work page. The captions now sit over
+> real client work and are visibly wrong — "تجارب الخط" labels a Grillit food
+> poster. The copy pass is the last blocker before this is honest.
 
 **Standing rule: update this file at the end of every session.**
 
@@ -8,8 +25,17 @@ _Updated 2026-08-09. Read this first._
 
 ## What this is
 
-A portfolio site for **Aliph (ألِف)**, a bilingual Arabic-first creative studio in
-Jerusalem. The brand is built on the letter alif — "the point things begin from."
+A portfolio site for **Aliph Creative Agency (ألِف)**, a bilingual Arabic-first
+creative agency in Jerusalem. The brand is built on the letter alif — "the point
+things begin from."
+
+⚠️ **It is an AGENCY, not a studio** (confirmed 2026-08-10). 29 occurrences were
+renamed across the three pages and `main.js`. Arabic needed care, not a find and
+replace: وكالة is feminine where استوديو is masculine, so `استوديو إبداعي` →
+`وكالة إبداعية`, and the verbs moved with it — `كيف بدأ الاستوديو` → `كيف بدأت
+الوكالة`, `لِف استوديو يبدأ` → `لِف وكالة تبدأ`. **`chat-worker/` still says
+studio in 7 places** and was left alone deliberately: the widget is hidden and
+touching it risks the 67 tests under deadline.
 
 Static HTML/CSS/JS in `prototype/`. **No framework, no build step, no npm.** Plus a
 separate Cloudflare Worker in `chat-worker/` for the (unfinished) chatbot.
@@ -342,7 +368,24 @@ a regex for "we can" also swallows the one sentence the bot exists to say.
 
 ---
 
-## Open questions for the studio
+## Answered by the agency, 2026-08-10
+
+| question | answer |
+|---|---|
+| Name | **Aliph Creative Agency**, not a studio |
+| Founding year "2024" in the about copy | **Deleted.** `بدأ سنة ٢٠٢٤ بفكرة واحدة` → `بدأت بفكرة واحدة` |
+| "منذ ٢٠٢٤ / Since 2024" in the hero furniture | **Kept for now** — note this contradicts the line above; they know |
+| Location, "from the Mount of Olives" | **Real, keep** |
+| Sensitive folders — Agreements, official visits, Queen retreat, students | **Cleared to publish**, clients agreed. All 63 images are in |
+| Project list for the work page | **Deferred.** Display first, organise later |
+| Socials | Real URLs wired on all three pages; **BEHANCE was a placeholder and is gone** |
+| Chatbot | **Hidden**, all three pages. Commented, not deleted |
+
+⚠️ **The reel is not optional.** It was swapped for a still because the caption
+said "ملصق" and R2 was unsolved; that was wrong and was reverted. The video is
+the content and the caption is what needs fixing. Do not make that trade again.
+
+## Open questions for the agency
 
 1. **The لماذا ألِف؟ copy is mine, not the studio's.** It is deliberately about
    method, but an earlier pass invented studio history and that reads as true.
@@ -385,6 +428,40 @@ https://drive.google.com/drive/folders/15r6-M6L1Y_lmS-PXta_fBNjOE0gNERAB
 | `horizintal videos` | `17VKTEzpw4aN-gB_wKTD4xnPnYlNXRAhY` |
 | `pics` | `1pwS50pJajlei9EBmiaIhpu8EI8KXFVo5` |
 | `reels` | `1bb7r81B6lBrTSR0C3q-GhhsXZfzGzF0-` |
+
+### The pipeline, built 2026-08-10 — Drive is the SOURCE, never the server
+
+This was argued twice, so: the Drive is a perfectly good place to pull files
+FROM. It is not a place to serve them from — the download endpoint is not a CDN,
+public files have a daily quota that returns an error page instead of the bytes,
+and Google has broken the hotlink patterns before. The pipeline is
+**Drive → derivative → repo (images) or R2 (video)**.
+
+`scratchpad/build_media.py` does the image half and is worth keeping:
+
+1. `manifest.tsv` — every file id in all 13 folders, walked with the browse tool.
+   Drive virtualises the grid, so **the folder page must be scrolled** or you get
+   the first handful only. Names come from `innerText`; `aria-label` exists only
+   on the folder's own header.
+2. Download originals — **they are camera files, 28-30 MP, 7-10 MB each, 598 MB
+   for 63 images.**
+3. Derive WebP at a **1600px long edge**, quality 82. Nothing on the page is
+   wider than ~936 CSS px, so 1600 is still ~1.7× the largest slot.
+
+**598 MB → 7.9 MB**, individual files 7.2 MB → 116 KB. That is the whole media
+library for less than twice the weight of the fonts. Committed to
+`prototype/assets/media/`.
+
+⚠️ One Drive filename carried a **broken UTF-16 surrogate** and one console print
+killed the whole run. Sanitise names before printing: this box's console is
+cp1252 and cannot render Arabic at all — `.encode("ascii","replace")` any name
+before logging it, or the script dies with a `UnicodeEncodeError` that looks
+like a download failure and is not.
+
+⚠️ The design filenames came out as `copy-of-1`, `copy-of-2` because the slug
+function strips Arabic to nothing. They are renamed after their clients —
+`design-grillit-1.webp`, `design-shawarma-habash-1.webp`. Any new import needs
+the same treatment or the library becomes unnavigable.
 
 ### The ratios, measured 2026-08-10 — the number the layout needs
 
