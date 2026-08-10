@@ -129,11 +129,23 @@ python -c "import io,re;s=io.open('prototype/style.css',encoding='utf-8').read()
 null the handle when killing, or a "paused" check resumes a corpse and the animation
 never restarts.
 
-**A float excludes text with its MARGIN box.** A top margin reserves dead space
-neither the picture nor the copy can use. A bottom margin is worse: any line box that
-so much as clips it gets squeezed to the narrow side — measured, a 28px bottom margin
-made the line under block 2's first picture 35% wide instead of running the column.
-Both are `0` there now, and the line's own leading is the gap.
+**A float excludes text with its MARGIN box.** A bottom margin is the dangerous one:
+any line box that so much as clips it gets squeezed to the narrow side — measured, a
+28px bottom margin made the line under block 2's first picture 35% wide instead of
+running the column. `.wb2-m1`'s is still `0` for that reason.
+
+⚠️ **The same reasoning was wrongly extended to `.wb2-m2`'s TOP margin** and it sat
+at `0` for weeks. Reserved space is the *point* there: with no margin the second
+picture landed 33px below the first, the two read as one stacked pair, and the
+zigzag the wireframe draws collapsed. It is now one line of body copy —
+`calc(var(--wb2-body) * 1.52)`, the solved size times `.why-para`'s line-height, so
+it tracks the type rather than being a magic number. Measured: the gap goes 33 → 89px
+against a 56px line, a full line lands between the two pictures, and block 2's two
+columns come out at 1246 and 1253 instead of 1190 and 1253.
+
+The lesson is narrower than "no margins on floats": a top margin costs you a band on
+the picture's own side, which is worth paying when the alternative is two pictures
+colliding, and never worth paying at the foot of a column.
 
 **A float only wraps text that comes *after* it in the flow.** No margin can put a
 line of text *above* a float — only markup order can. That is why block 2's body is
@@ -230,25 +242,18 @@ be honoured and the cap wins silently: 78vh is 520px on a 667px phone, while a
 full-width 9:16 reel needs 581px. It was re-cropping the exact media the ratios
 exist to protect, on the smallest screens.
 
-⚠️ **The three desktop widths in block 2 are SOLVED against those ratios, and must
-be re-solved if `data-kind` changes on any of them.** Giving the media its true
-shape at the old widths made everything taller and walked the block off the
-wireframe. Height is what the eye reads in a stacked editorial column, so each width
-was reset to reproduce the ORIGINAL height at the new ratio:
+⚠️ **Width is the wireframe's; HEIGHT is whatever the real ratio makes it. Do not
+invert that — it was tried and reverted the same day.** The widths were briefly
+re-solved so the true ratios would reproduce the old heights exactly:
+`w_new = w_old × ratio_new / ratio_old`, giving 38.4%, 34.3% and 81.3%. The
+arithmetic was right and the result was wrong on both counts: the two pictures came
+out 20% narrower, which is the dimension you actually see in a column of floats, and
+the rail left 18.7% of its track empty, which reads as a gap between the text and the
+reel — a rail that does not reach its own edge stops being a rail.
 
-```
-w_new = w_old × ratio_new / ratio_old
-
-.wb2-m1          48%  × 0.800 / 1.000  = 38.4%    385×385 → 308×385
-.wb2-m2          50%  × 0.800 / 1.167  = 34.3%    401×344 → 275×344
-.wb2-rail-media  100% × 0.5625 / 0.6923 = 81.3%   540×780 → 439×781
-```
-
-Measured after: block 2 is **1137px, identical to before**; its two columns are 977
-and 1074 against 977 and 1073. The whole section moves 3,354 → 3,365px, 0.3%, and
-that residue is block 1 getting 97px shorter (16:9 is wider than the 3:2 it had) and
-block 3 gaining 16px. The pictures are narrower and the text measure is wider; the
-composition and the wrap points are where the wireframe put them.
+So the widths stayed at 48%, 50% and 100%, and **block 2 is ~180px taller than the
+wireframe**. That is the honest cost of showing a 9:16 reel uncropped, paid in the
+dimension the eye forgives. Its two columns still balance: 1246 against 1253.
 
 **One medium and one text field per block**, to the studio's sketch: block 1 is
 title → `wb1-media` → text (`.wb1-side` becomes `display: contents` so the picture

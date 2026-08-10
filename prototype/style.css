@@ -827,7 +827,11 @@ html[lang="en"] .why { --why-type: 0.85; }
    picture beside it, or the centre cut. Tuned for Arabic, the primary
    language. Re-solve with resources/fit_columns.py when the copy changes. */
 .wb1-side  .why-para { font-size: calc(clamp(0.95rem, 2.20vw, 1.50rem) * var(--why-type)); }   /* 28.2px */
-.wb2-flow  .why-para { font-size: calc(clamp(1.00rem, 2.56vw, 1.75rem) * var(--why-type)); }   /* 32.8px */
+/* Hoisted to a property because .wb2-m2's top margin is expressed as one line
+   of this copy. Two places needing the same solved size is exactly how a typed
+   copy goes stale — state it once. */
+.wb2-flow { --wb2-body: calc(clamp(1.00rem, 2.56vw, 1.75rem) * var(--why-type)); }   /* 32.8px */
+.wb2-flow  .why-para { font-size: var(--wb2-body); }
 .wb2-rail  .why-para { font-size: calc(clamp(1.15rem, 4.32vw, 2.60rem) * var(--why-type)); }   /* 55.3px */
 .wb3-body > .wb-col:first-child .why-para { font-size: calc(clamp(1.00rem, 2.45vw, 1.70rem) * var(--why-type)); } /* 31.4px */
 .wb3-body > .wb-col:last-child  .why-para { font-size: calc(clamp(1.00rem, 2.40vw, 1.65rem) * var(--why-type)); } /* 30.7px */
@@ -896,15 +900,14 @@ html[lang="en"] .why { --why-type: 0.85; }
 /* one line across the left region */
 .wb2 .why-title { font-size: clamp(1.7rem, 6.5vw, 6.2rem); }
 
-/* Same solve as the two floats below, for the same reason. A true 9:16 reel
-   at the full column width is 960px tall against the 780 the wireframe drew,
-   which pushed the rail 276px past the text column beside it and opened a
-   hole that tall at the bottom of the block.
-     w = 100 x 0.5625 / 0.6923 = 81.3%
-   restores the original 780 and with it the balance between the two columns.
-   The picture no longer fills its track; the caption travels with it and the
-   paragraph under it keeps the full measure. */
-.wb2-rail-media { width: 81.3%; margin-bottom: 0.4rem; }
+/* Full width of its track, deliberately. This was briefly 81.3%, solved to
+   keep the wireframe's 780px height once the reel went to a true 9:16 — and
+   it was wrong: 18.7% of the track went empty, which reads as a gap between
+   the text column and the reel, and a rail that does not reach its own edge
+   stops being a rail. The block is ~150px taller than the wireframe instead.
+   That is the honest cost of showing a 9:16 reel uncropped, and it is paid
+   in a dimension the eye forgives. */
+.wb2-rail-media { margin-bottom: 0.4rem; }
 
 /* ── block 2's body: one text, the pictures floated into it ──
    Replaced three stacked grid rows that put copy in separate boxes beside
@@ -928,36 +931,35 @@ html[lang="en"] .why { --why-type: 0.85; }
    it gets squeezed to the narrow side — measured, a 28px margin made the
    line under the picture 35% wide instead of running across. The line's own
    leading is the gap. */
-/* ⚠️ These widths are SOLVED, not chosen, and they must be re-solved whenever
-   `data-kind` changes on either figure.
+/* ⚠️ Width is the wireframe's; HEIGHT is whatever the real ratio makes it.
+   Do not invert that.
 
-   The pictures used to be 48% at 1/1 and 50% at 7/6. Moving them to the real
-   4:5 of the studio's design work at those same widths made them 25% and 46%
-   taller and pushed the block down the page. Height is what the eye reads in
-   a stacked editorial column, so the width is now set to reproduce the
-   ORIGINAL height at the new ratio:
-
-     w_new = w_old x ratio_new / ratio_old
-     m1:  48 x 0.800 / 1.000  = 38.4%   (was 338x338, now 270x338)
-     m2:  50 x 0.800 / 1.167  = 34.3%   (was 352x302, now 242x302)
-
-   The pictures are narrower and the text measure is wider, but the block's
-   vertical rhythm and the wrap points are where the wireframe put them. */
+   These were briefly narrowed — 38.4% and 34.3%, solved so that 4:5 would
+   reproduce the old 1/1 and 7/6 heights exactly. The arithmetic worked and
+   the result was wrong: the pictures came out 20% narrower, which is the one
+   dimension you actually see in a column of floats. Block 2 is taller than
+   the wireframe now and that is the correct trade. */
 .wb2-m1 {
   float: inline-end;
-  width: 38.4%;
+  width: 48%;
   margin-inline-start: 0.75rem;
   margin-block-end: 0;
 }
-/* No top margin either, for the same reason: it would be a band of reserved
-   emptiness that neither the picture nor the copy may use. With none, the
-   second float lands directly under the first one's margin box and the text
-   runs straight from one picture to the next. */
+/* ⚠️ REVERSAL. This was 0 with a comment saying a top margin is "a band of
+   reserved emptiness". That is true of the mechanism and was the wrong call
+   here: with no margin the second picture landed 33px under the first, the
+   two read as one stacked pair, and the zigzag the wireframe draws collapsed.
+
+   One line of body copy — 1.52 is `.why-para`'s line-height, and `--wb2-body`
+   is the size fit_columns.py solved — so it tracks the type instead of being
+   a magic pixel value. The band IS reserved on the picture's own side; what
+   lands in it is a short line in the channel the first picture vacated, which
+   is what separates them. */
 .wb2-m2 {
   float: inline-start;
-  width: 34.3%;
+  width: 50%;
   margin-inline-end: 0.75rem;
-  margin-block: 0 var(--why-gap);
+  margin-block: calc(var(--wb2-body) * 1.52) var(--why-gap);
 }
 
 /* ── block 3: full-width head, then text | tall cut | text ── */
