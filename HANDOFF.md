@@ -213,6 +213,39 @@ lever for the language difference (English runs longer; text area grows with the
 column exactly. Not a fixed vw: the strings differ too much between languages. Below
 the names, a subcategory switcher with one media slot.
 
+### The phone edit of لماذا ألِف؟ (≤640px, added 2026-08-10)
+
+A **separate breakpoint from the 900px one**, which also catches tablets and small
+laptop windows. Don't merge them: at tablet width the section still reads as a sheet.
+
+**`data-kind` now drives `aspect-ratio`** below 640px, from the measured Drive
+numbers — `reel` 9/16, `video` 16/9, `poster` 4/5, `still` 3/2. Before this, every
+holder wore the ratio its *desktop grid cell* needed (1/1 and 7/6 for design work,
+9/13 for a reel), which on a phone serves nothing and just deforms the media.
+
+⚠️ **`max-height: 78vh` had to go with it.** A cap and an `aspect-ratio` cannot both
+be honoured and the cap wins silently: 78vh is 520px on a 667px phone, while a
+full-width 9:16 reel needs 581px. It was re-cropping the exact media the ratios
+exist to protect, on the smallest screens.
+
+⚠️ **Desktop still uses the wireframe's ratios**, so a reel in the rail is still
+cropped ~23% there. That is deliberate — the desktop grid was solved to the
+annotated wireframe and changing it is a layout decision, not a bug fix.
+
+**One medium and one text field per block**, to the studio's sketch: block 1 is
+title → `wb1-media` → text (`.wb1-side` becomes `display: contents` so the picture
+can be ordered *between* the title and the paragraph, which is impossible while they
+share a wrapper); block 2 keeps only `wb2-m1` and `w2BodyA`; block 3 leads with the
+media and drops `w3ParaA`.
+
+`.wb2-rail` is hidden **as a unit** on purpose — hiding the poster but keeping
+`w2Rail` would leave "الملصق يُقرأ من بعيد ثم من قريب" describing a poster that is
+not on the screen.
+
+Measured effect at 375px: the section went **4,493px → 3,434px** (5.5 screens →
+4.2), and the page **7,701px → 6,643px**. Block 3 still carries eight paragraphs;
+if it needs to be shorter still, that is where the length is.
+
 ---
 
 ## Chatbot — stage 2 of 5
@@ -309,8 +342,44 @@ a regex for "we can" also swallows the one sentence the bot exists to say.
 ## Real media — first trial done, and it did not fit
 
 The Drive folder (`aliph website/`) holds `graphic designs`, `horizintal videos`,
-`pics` (~54 JPEGs, by subject), `reels`. It resolves without signing in;
-`https://drive.usercontent.google.com/download?id=…&export=download` works.
+`pics` (~54 JPEGs, in 11 subject subfolders), `reels`. It resolves without signing
+in; `https://drive.usercontent.google.com/download?id=…&export=download` works.
+
+**The link, which went unrecorded for weeks and cost a round trip to get back:**
+
+```
+https://drive.google.com/drive/folders/15r6-M6L1Y_lmS-PXta_fBNjOE0gNERAB
+```
+
+| subfolder | id |
+|---|---|
+| `graphic designs` | `1TvlT5QesG6td4KKt5SNinrkvLgMfISij` |
+| `horizintal videos` | `17VKTEzpw4aN-gB_wKTD4xnPnYlNXRAhY` |
+| `pics` | `1pwS50pJajlei9EBmiaIhpu8EI8KXFVo5` |
+| `reels` | `1bb7r81B6lBrTSR0C3q-GhhsXZfzGzF0-` |
+
+### The ratios, measured 2026-08-10 — the number the layout needs
+
+| folder | pixels | ratio | decimal |
+|---|---|---|---|
+| `graphic designs` (all 9) | 1080×1350 | 4:5 | 0.800 |
+| `pics` — portrait | — | 2:3 | 0.667 |
+| `pics` — landscape | — | 3:2 | 1.500 |
+| `reels` | 1080×1920 | 9:16 | 0.563 |
+| `horizintal videos` | — | 16:9 | 1.778 |
+
+⚠️ **Nothing in the Drive is square.** Every near-square holder on the site was
+built for media that does not exist. Don't add another one.
+
+Read a ratio without downloading anything — the thumbnail endpoint needs no auth
+and preserves aspect:
+
+```
+https://drive.google.com/thumbnail?id=<FILE_ID>&sz=w1600
+```
+
+Load it in an `Image()` and read `naturalWidth`/`naturalHeight`. `sz=w1600` caps the
+long edge, so the *pixels* are a lower bound but the *ratio* is exact.
 
 Four files were pulled and trialled in the holders. **The design work does not
 crop.** Those assets are finished layouts with type baked in at 4:5 — every holder

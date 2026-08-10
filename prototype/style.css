@@ -2098,6 +2098,63 @@ body.sheet-open { overflow: hidden; }
   .wv-window { height: 100%; }
 }
 
+/* ═══════════ PHONE ONLY (≤640px) — the short edit of لماذا ألِف؟ ═══════════
+   Deliberately NOT the 900px breakpoint, which also catches tablets and small
+   laptop windows. At tablet width the section still reads as a sheet; on a
+   phone it was 4,493px tall — 5.5 screens at 375px, and 58% of the whole page.
+
+   Two separate things happen here, and only the first is about length.
+
+   1. MEDIA GETS ITS REAL SHAPE. Every holder's aspect was inherited from the
+      desktop grid it sat in, not from what goes inside it: 1/1 and 7/6 for
+      design work, 9/13 for a reel. On a phone that grid is gone, so there is
+      nothing left for those numbers to serve — they just deform the media.
+      The ratios below are measured off the studio's Drive (2026-08-10):
+        reels              1080x1920   9:16    0.563
+        horizontal video               16:9    1.778
+        design work        1080x1350   4:5     0.800
+        photographs                    3:2     1.500 either way up
+      Nothing in the Drive is square. That is why the two square-ish holders
+      were wrong for everything that could ever go in them.
+
+   2. ONE MEDIUM AND ONE TEXT FIELD PER BLOCK, to the studio's wireframe. */
+@media (max-width: 640px) {
+
+  .why .holder[data-kind="reel"]   { aspect-ratio: 9 / 16; }
+  .why .holder[data-kind="video"]  { aspect-ratio: 16 / 9; }
+  .why .holder[data-kind="poster"] { aspect-ratio: 4 / 5; }
+  .why .holder[data-kind="still"]  { aspect-ratio: 3 / 2; }
+
+  /* A max-height cap and an aspect-ratio cannot both be honoured, and the cap
+     wins silently. 78vh is 520px on a 667px phone; a full-width 9:16 reel
+     needs 581px. The cap was re-cropping the exact media this rule exists to
+     show, on precisely the small screens where it hurts most. */
+  .why .holder { max-height: none; }
+
+  /* Block 1 — title, then media, then text. The title and the paragraph live
+     in one wrapper, so there is no way to put the picture between them by
+     ordering .wb1's children. `display: contents` dissolves the wrapper and
+     promotes all three to grid items, which can then be ordered. Safe here:
+     .wb1-side carries no background, border or box of its own. */
+  .wb1-side { display: contents; }
+  .wb1 .why-title { order: 1; }
+  .wb1-media      { order: 2; }
+  .wb1 .why-para  { order: 3; }
+
+  /* Block 2 — everything except the first picture and the first paragraph.
+     The rail goes as a unit: hiding the poster but keeping w2Rail would leave
+     "الملصق يُقرأ من بعيد ثم من قريب" describing a poster that is not there. */
+  .wb2-m2,
+  .wb2-rail,
+  .wb2-flow [data-i18n="w2BodyB"] { display: none; }
+
+  /* Block 3 — media leads, per the wireframe. These children are auto-placed,
+     so `order` works; it would be ignored if they were pinned with grid-row
+     (see the note on .wb2-rail at the 900px breakpoint). */
+  .wb3-media { order: -1; }
+  .wb3-body [data-i18n="w3ParaA"] { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .contact-stamp { animation: none; }
