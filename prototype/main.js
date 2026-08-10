@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 
    It is an <img> with an inline SVG data URI, not a <div>: every image is
    styled through `img` selectors, so swapping the element type would
-   silently drop object-fit, the grayscale grade and the sizing. This way
+   silently drop object-fit, the tonal grade and the sizing. This way
    landing real media is only a src change.
 
    Don't go back to an external placeholder service (picsum meant 20+

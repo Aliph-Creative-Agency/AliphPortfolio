@@ -433,7 +433,9 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.08) brightness(0.92) sepia(0.12);
+  /* sepia went with the grayscale: a 0.12 warm cast on a desaturated frame
+     reads as aged stock, but on colour footage it just tints everything. */
+  filter: contrast(1.08) brightness(0.92);
   transition: filter 0.55s, opacity 0.55s;
 }
 /* vignette only — the woven grain read as fabric over the photos rather than
@@ -463,7 +465,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   box-shadow: 0 34px 58px -16px rgba(5, 9, 13, 0.65);
   z-index: 3;
 }
-.film-frame.pop img { filter: grayscale(1) contrast(1.16) brightness(1.05); }
+.film-frame.pop img { filter: contrast(1.16) brightness(1.05); }
 .film-frame.pop figcaption { opacity: 1; }
 .film-scroll.has-pop .film-frame:not(.pop) img { opacity: 0.45; }
 
@@ -723,7 +725,7 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.06);
+  filter: contrast(1.06);
 }
 .holder figcaption {
   position: absolute;
@@ -1043,7 +1045,7 @@ html[lang="en"] .why { --why-type: 0.85; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.06);
+  filter: contrast(1.06);
 }
 .sw-bar { display: block; height: 6px; background: var(--ink); }
 
@@ -1199,7 +1201,7 @@ html[lang="en"] .why { --why-type: 0.85; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.05);
+  filter: contrast(1.05);
 }
 .tile figcaption {
   display: flex;
@@ -1229,7 +1231,10 @@ html[lang="en"] .why { --why-type: 0.85; }
 }
 .tile.has-profile:hover .tile-open,
 .tile.has-profile:focus-visible .tile-open { transform: translateY(0); }
-.tile.has-profile:hover img { filter: grayscale(0.15) contrast(1.05); }
+/* was grayscale(0.15) — "desaturate less on hover", which only reads against a
+   fully grey base. With the base in colour that value ADDS grey on hover, so the
+   lift is carried by saturation instead. */
+.tile.has-profile:hover img { filter: contrast(1.05) saturate(1.12); }
 .tile.has-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 body.lib-index .lib-grid { display: none; }
@@ -1277,7 +1282,7 @@ body.lib-index .lib-list { display: block; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.05);
+  filter: contrast(1.05);
 }
 .c1 { grid-column: 1 / span 4; transform: rotate(1.4deg); }
 .c2 { grid-column: 5 / span 4; transform: rotate(-1deg); align-self: center; }
@@ -1407,7 +1412,7 @@ body.lib-index .lib-list { display: block; }
   width: 100%;
   aspect-ratio: 4 / 5;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.06);
+  filter: contrast(1.06);
   transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .asvc:hover .asvc-media img { transform: scale(1.03); }
@@ -1848,7 +1853,7 @@ body.sheet-open { overflow: hidden; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.05);
+  filter: contrast(1.05);
 }
 .sheet-title {
   font-family: var(--font-display);
@@ -1930,7 +1935,7 @@ body.sheet-open { overflow: hidden; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.05);
+  filter: contrast(1.05);
 }
 .sheet-thumbs button:hover { opacity: 0.85; }
 .sheet-thumbs button.on { opacity: 1; outline-color: var(--ink); }

@@ -61,7 +61,17 @@ npx.cmd wrangler deploy
   Tokens are `--font-display` / `--font-body` / `--font-latin`.
 - `html { font-size: 150% }`, so **1rem = 24px**. Every rem number reads 1.5× larger
   than it looks.
-- Photography is B&W (`filter: grayscale(1)`). Texture over flatness.
+- **Media is in colour as of 2026-08-10.** `filter: grayscale(1)` was removed from
+  all 11 rules that carried it. What is left is the tonal grade only —
+  `contrast(1.05)`–`contrast(1.08)`, plus `brightness(0.92)` on the film strip.
+  Texture over flatness still holds; it is just no longer monochrome.
+  ⚠️ **This means ink-and-cream is the rule for the *interface*, not the page.**
+  Every photograph now brings its own palette, so "two colours only" can no longer
+  be checked by looking at a screenshot — it applies to type, rules, and chrome.
+  Two knock-ons: the film strip's `sepia(0.12)` went too (a warm cast reads as aged
+  stock on grey, as a yellow tint on colour), and the library tile's hover was
+  `grayscale(0.15)` — "desaturate less on hover", which **inverts** without a grey
+  base — so it is `saturate(1.12)` now.
 - Voice: editorial broadsheet — the site behaves like an Arabic newspaper issue.
 
 **Arabic is the primary language.** Type is tuned to Arabic; English sets longer and
@@ -304,8 +314,9 @@ The Drive folder (`aliph website/`) holds `graphic designs`, `horizintal videos`
 
 Four files were pulled and trialled in the holders. **The design work does not
 crop.** Those assets are finished layouts with type baked in at 4:5 — every holder
-crops them (keeping 53–80%) and the crop cuts the words. The site also grayscales
-everything, so Grillit's orange goes grey.
+crops them (keeping 53–80%) and the crop cuts the words. (The second half of that
+finding has since expired: the site no longer grayscales, so Grillit's orange stays
+orange. **The crop is still fatal**, and it was always the bigger of the two.)
 
 So: the holders in لماذا ألِف؟ want **photographs**, and the design work needs its own
 slot at its own ratio. The Drive is organised by *subject*; the site needs *projects*
@@ -319,9 +330,9 @@ with one exception: `wb2-rail-media` is now a `<video>`. The `seed` fields on
 ### The reel trial — it works, and it is deliberately not in the repo
 
 A real reel was put in `wb2-rail-media` on 2026-08-10 and **the treatment holds**:
-1080×1920 H.264, 30.7s, autoplays muted and loops, and `filter: grayscale(1)` reads
-on video exactly as it does on stills. `.holder > video` was already styled alongside
-`.holder > img`, so no CSS was needed.
+1080×1920 H.264, 30.7s, autoplays muted and loops. `.holder > video` was already
+styled alongside `.holder > img`, so no CSS was needed. (It was trialled under the
+old grayscale grade and read correctly there too, for whatever that is now worth.)
 
 It is **not committed.** The file is 51.8 MB — past GitHub's 50 MB warning, into
 every clone forever, and into the Worker asset bundle, for something that should be
@@ -333,11 +344,40 @@ and `index.html` carries a comment with the markup to restore. The source lives 
 is **9/13**, so `object-fit: cover` crops ~23% — visibly clipping the top and bottom
 of the frame. And the reel has **burnt-in titles** that land where the figcaption sits.
 
-⚠️ **The R2 URL in the repo was the bucket root** — `https://pub-90bac6014abe49c594f8ac9c1f1899cb.r2.dev`,
-no object key, which 404s. The key is recorded nowhere here; it has to come off the
-Cloudflare dashboard. **`moov` is at the end of the file**, so even served correctly it
-buffers fully before the first frame — remux with `-movflags +faststart` before it
-goes anywhere near a visitor.
+### Decided 2026-08-10: video lives on R2, at full quality
+
+**Compression is off the table** — the studio's position is that the work has to be
+shown at the quality it was made at, and that is a brand call, not a technical one.
+So: R2 for video, long term, uncompressed.
+
+That also settles a constraint that had no other answer. **Cloudflare Workers static
+assets cap a single file at 25 MiB**, so a 51.8 MB reel cannot ship in the site
+bundle whatever anyone thinks about repo size. R2 is not the convenient option here,
+it is the only one.
+
+⚠️ **The R2 URL already in the repo was the bucket root** —
+`https://pub-90bac6014abe49c594f8ac9c1f1899cb.r2.dev`, no object key, which 404s.
+The key is recorded nowhere here; it comes off the Cloudflare dashboard, or from
+`npx.cmd wrangler r2 object put <bucket>/<key> --file …`, which prints it.
+
+⚠️ **Full quality still needs one lossless step: `moov` is at the end of the file.**
+Nothing plays until all 51.8 MB has arrived. The fix re-encodes nothing —
+
+```bash
+ffmpeg -i finallllllllllll.mov -c copy -movflags +faststart wb2-rail-reel.mp4
+```
+
+`-c copy` remuxes: every video bit is byte-identical, the index just moves to the
+front so it streams. Do this to anything before it goes on R2. It is not compression
+and does not cost a pixel.
+
+⚠️ **A rail loop and a showcase piece are different assets.** The rail box is
+474×685 CSS px; a 1080×1920 master is downscaled by the browser to fill it, so the
+extra pixels cost bandwidth and are never seen *in that slot*. That is an argument
+for a second, smaller derivative for the loop — **not** for degrading the master,
+which is what full-screen or lightbox playback should serve. If the work is only
+ever shown in a holder this size, the derivative is free quality-wise; if it is ever
+opened full-screen, the master has to be there too.
 
 Before blaming markup for a video that will not play, check the container:
 
