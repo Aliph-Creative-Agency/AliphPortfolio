@@ -717,6 +717,24 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
   border: var(--media-line);
   overflow: hidden;
 }
+
+/* ── the aspect modifier, and the only place a media ratio is declared ──
+   Measured off the studio's Drive on 2026-08-10, not chosen:
+     reel    1080x1920   9:16    0.563
+     video               16:9    1.778
+     poster  1080x1350   4:5     0.800
+     still               3:2     1.500  (photographs, either way up)
+   Nothing in that Drive is square, so no holder should be.
+
+   These used to be per-block — .wb1-media 3/2, .wb2-m1 1/1, .wb2-m2 7/6,
+   .wb2-rail-media 9/13 — each one the shape its grid cell wanted rather than
+   the shape of the thing inside it. A reel came out cropped 23% and design
+   work at 4:5 was squeezed into a square. Ratio belongs to the medium; if a
+   layout needs a different box, change the layout. */
+.holder[data-kind="reel"]   { aspect-ratio: 9 / 16; }
+.holder[data-kind="video"]  { aspect-ratio: 16 / 9; }
+.holder[data-kind="poster"] { aspect-ratio: 4 / 5; }
+.holder[data-kind="still"]  { aspect-ratio: 3 / 2; }
 .holder > img,
 .holder > video,
 .holder .sw-media > img,
@@ -857,7 +875,7 @@ html[lang="en"] .why { --why-type: 0.85; }
    four characters to a line */
 /* from the wireframe's header box: two lines at ~90px, not a subhead */
 .wb1 .why-title { font-size: clamp(1.7rem, 6.25vw, 5.8rem); }
-.wb1-media { aspect-ratio: 3 / 2; }
+/* aspect comes from data-kind — see the holder block */
 
 /* ── block 2: rail right (39.9%), everything else left (59.3%) ── */
 .wb2 {
@@ -878,7 +896,15 @@ html[lang="en"] .why { --why-type: 0.85; }
 /* one line across the left region */
 .wb2 .why-title { font-size: clamp(1.7rem, 6.5vw, 6.2rem); }
 
-.wb2-rail-media { aspect-ratio: 9 / 13; margin-bottom: 0.4rem; }
+/* Same solve as the two floats below, for the same reason. A true 9:16 reel
+   at the full column width is 960px tall against the 780 the wireframe drew,
+   which pushed the rail 276px past the text column beside it and opened a
+   hole that tall at the bottom of the block.
+     w = 100 x 0.5625 / 0.6923 = 81.3%
+   restores the original 780 and with it the balance between the two columns.
+   The picture no longer fills its track; the caption travels with it and the
+   paragraph under it keeps the full measure. */
+.wb2-rail-media { width: 81.3%; margin-bottom: 0.4rem; }
 
 /* ── block 2's body: one text, the pictures floated into it ──
    Replaced three stacked grid rows that put copy in separate boxes beside
@@ -902,10 +928,24 @@ html[lang="en"] .why { --why-type: 0.85; }
    it gets squeezed to the narrow side — measured, a 28px margin made the
    line under the picture 35% wide instead of running across. The line's own
    leading is the gap. */
+/* ⚠️ These widths are SOLVED, not chosen, and they must be re-solved whenever
+   `data-kind` changes on either figure.
+
+   The pictures used to be 48% at 1/1 and 50% at 7/6. Moving them to the real
+   4:5 of the studio's design work at those same widths made them 25% and 46%
+   taller and pushed the block down the page. Height is what the eye reads in
+   a stacked editorial column, so the width is now set to reproduce the
+   ORIGINAL height at the new ratio:
+
+     w_new = w_old x ratio_new / ratio_old
+     m1:  48 x 0.800 / 1.000  = 38.4%   (was 338x338, now 270x338)
+     m2:  50 x 0.800 / 1.167  = 34.3%   (was 352x302, now 242x302)
+
+   The pictures are narrower and the text measure is wider, but the block's
+   vertical rhythm and the wrap points are where the wireframe put them. */
 .wb2-m1 {
   float: inline-end;
-  width: 48%;
-  aspect-ratio: 1 / 1;
+  width: 38.4%;
   margin-inline-start: 0.75rem;
   margin-block-end: 0;
 }
@@ -915,8 +955,7 @@ html[lang="en"] .why { --why-type: 0.85; }
    runs straight from one picture to the next. */
 .wb2-m2 {
   float: inline-start;
-  width: 50%;
-  aspect-ratio: 7 / 6;
+  width: 34.3%;
   margin-inline-end: 0.75rem;
   margin-block: 0 var(--why-gap);
 }
@@ -942,7 +981,8 @@ html[lang="en"] .why { --why-type: 0.85; }
 }
 /* the centre cut is the WIDEST element in this block, not the narrowest:
    44.6% against text columns of 29% and 23% */
-.wb3-media { aspect-ratio: 4 / 7; }
+/* aspect comes from data-kind — see the holder block. It was 4/7 here, which
+   was very nearly a reel (0.571 against 0.563) and is now exactly one. */
 
 /* Both ovals are sized from the wireframe rather than a global min-width.
    .oval-swap keeps its 1.5em height on purpose — it is the mask the label
@@ -2120,11 +2160,6 @@ body.sheet-open { overflow: hidden; }
    2. ONE MEDIUM AND ONE TEXT FIELD PER BLOCK, to the studio's wireframe. */
 @media (max-width: 640px) {
 
-  .why .holder[data-kind="reel"]   { aspect-ratio: 9 / 16; }
-  .why .holder[data-kind="video"]  { aspect-ratio: 16 / 9; }
-  .why .holder[data-kind="poster"] { aspect-ratio: 4 / 5; }
-  .why .holder[data-kind="still"]  { aspect-ratio: 3 / 2; }
-
   /* A max-height cap and an aspect-ratio cannot both be honoured, and the cap
      wins silently. 78vh is 520px on a 667px phone; a full-width 9:16 reel
      needs 581px. The cap was re-cropping the exact media this rule exists to
@@ -2152,7 +2187,16 @@ body.sheet-open { overflow: hidden; }
      so `order` works; it would be ignored if they were pinned with grid-row
      (see the note on .wb2-rail at the 900px breakpoint). */
   .wb3-media { order: -1; }
-  .wb3-body [data-i18n="w3ParaA"] { display: none; }
+  /* One paragraph, like the other two blocks. Block 3 carries nine on desktop
+     across two columns and they were all still here — the whole remaining
+     length of the section. Hide the lot, then bring one back, so adding a
+     paragraph upstairs cannot silently lengthen the phone view again.
+     It also settles the centring: `text-align: center` on these columns reads
+     fine in two narrow desktop tracks and badly over eight full-width
+     paragraphs, but over one short paragraph it is fine. */
+  .wb3-body .wb-col:last-child { display: none; }
+  .wb3-body .why-para { display: none; }
+  .wb3-body [data-i18n="w3ParaB"] { display: block; }
 }
 
 @media (prefers-reduced-motion: reduce) {

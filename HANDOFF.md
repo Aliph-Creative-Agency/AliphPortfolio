@@ -218,19 +218,37 @@ the names, a subcategory switcher with one media slot.
 A **separate breakpoint from the 900px one**, which also catches tablets and small
 laptop windows. Don't merge them: at tablet width the section still reads as a sheet.
 
-**`data-kind` now drives `aspect-ratio`** below 640px, from the measured Drive
-numbers — `reel` 9/16, `video` 16/9, `poster` 4/5, `still` 3/2. Before this, every
-holder wore the ratio its *desktop grid cell* needed (1/1 and 7/6 for design work,
-9/13 for a reel), which on a phone serves nothing and just deforms the media.
+**`data-kind` drives `aspect-ratio`, everywhere, and it is the only place a media
+ratio is declared** — `reel` 9/16, `video` 16/9, `poster` 4/5, `still` 3/2, all from
+the measured Drive numbers. Before this, every holder wore the ratio its *grid cell*
+wanted (1/1 and 7/6 for design work, 9/13 for a reel) rather than the shape of the
+thing inside it. **Ratio belongs to the medium; if a layout needs a different box,
+change the layout.**
 
 ⚠️ **`max-height: 78vh` had to go with it.** A cap and an `aspect-ratio` cannot both
 be honoured and the cap wins silently: 78vh is 520px on a 667px phone, while a
 full-width 9:16 reel needs 581px. It was re-cropping the exact media the ratios
 exist to protect, on the smallest screens.
 
-⚠️ **Desktop still uses the wireframe's ratios**, so a reel in the rail is still
-cropped ~23% there. That is deliberate — the desktop grid was solved to the
-annotated wireframe and changing it is a layout decision, not a bug fix.
+⚠️ **The three desktop widths in block 2 are SOLVED against those ratios, and must
+be re-solved if `data-kind` changes on any of them.** Giving the media its true
+shape at the old widths made everything taller and walked the block off the
+wireframe. Height is what the eye reads in a stacked editorial column, so each width
+was reset to reproduce the ORIGINAL height at the new ratio:
+
+```
+w_new = w_old × ratio_new / ratio_old
+
+.wb2-m1          48%  × 0.800 / 1.000  = 38.4%    385×385 → 308×385
+.wb2-m2          50%  × 0.800 / 1.167  = 34.3%    401×344 → 275×344
+.wb2-rail-media  100% × 0.5625 / 0.6923 = 81.3%   540×780 → 439×781
+```
+
+Measured after: block 2 is **1137px, identical to before**; its two columns are 977
+and 1074 against 977 and 1073. The whole section moves 3,354 → 3,365px, 0.3%, and
+that residue is block 1 getting 97px shorter (16:9 is wider than the 3:2 it had) and
+block 3 gaining 16px. The pictures are narrower and the text measure is wider; the
+composition and the wrap points are where the wireframe put them.
 
 **One medium and one text field per block**, to the studio's sketch: block 1 is
 title → `wb1-media` → text (`.wb1-side` becomes `display: contents` so the picture
@@ -242,9 +260,14 @@ media and drops `w3ParaA`.
 `w2Rail` would leave "الملصق يُقرأ من بعيد ثم من قريب" describing a poster that is
 not on the screen.
 
-Measured effect at 375px: the section went **4,493px → 3,434px** (5.5 screens →
-4.2), and the page **7,701px → 6,643px**. Block 3 still carries eight paragraphs;
-if it needs to be shorter still, that is where the length is.
+Block 3 keeps **one paragraph** (`w3ParaB`). It is done by hiding every `.why-para`
+in the block and bringing one back by name, so adding a paragraph to the desktop
+columns cannot silently lengthen the phone view again. That also settles the
+`text-align: center` on those columns: fine over one short paragraph, bad over eight
+full-width ones.
+
+Measured effect at 375px: the section went **4,493px → 2,509px** (5.5 screens →
+3.1) and the page **7,701px → 5,717px**. Verified at 375, 390 and 360 wide.
 
 ---
 
