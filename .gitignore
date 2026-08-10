@@ -12,6 +12,16 @@ old prototype/
 # of the fonts, logos and the linen texture.
 Brand/
 
+# Real video trialled in the holders. 51.8 MB for one reel — past GitHub's
+# 50 MB warning and into every clone forever, for an asset that belongs on
+# R2 and is served by URL, not bundled. Same reasoning as Brand/ above.
+prototype/media/
+
+# fit_columns.py writes its screenshot to the CWD, so it lands at the repo
+# root. It is a picture of a solve, not the solve — the numbers it produces
+# go into style.css and that is what is kept.
+why_fitted_*.png
+
 # Python bytecode from the resources/ build scripts
 __pycache__/
 *.pyc

@@ -15,6 +15,10 @@
    signage and print → design). A visitor still says "فعالية" though,
    so those keywords are kept and pointed at the service that does it.
 
+   ⚠️ Renamed 2026-08-10: the ids did not move, the labels did —
+   تصميم → تصميم جرافيكي, تصوير → تصوير احترافي, برمجة → تطوير برمجيات.
+   `kw` deliberately keeps the short forms; a visitor types "تصميم".
+
    ⚠️ `examples` and `kw` are PLACEHOLDERS written by me, not by the
    studio. Plan §10.1 asks ألف for 2–3 real examples per service, and
    the classifier is only as good as its anchors. Replace them before
@@ -24,8 +28,8 @@
 export const SERVICES = [
   {
     id: "design",
-    ar: "تصميم",
-    en: "Design",
+    ar: "تصميم جرافيكي",
+    en: "Graphic Design",
     examples: {
       ar: "شعار ونظام بصري لمقهى جديد، دليل هويّة لمؤسّسة، ملصق، قائمة طعام، تغليف منتج",
       en: "a logo and visual system for a new café, a brand guide for an institution, a poster, a menu, product packaging",
@@ -43,8 +47,8 @@ export const SERVICES = [
   },
   {
     id: "photo",
-    ar: "تصوير",
-    en: "Film & Photography",
+    ar: "تصوير احترافي",
+    en: "Professional Photography",
     examples: {
       ar: "تصوير منتجات، جلسة تصوير لمطعم، فيديو تعريفي، ريلز للمنصّات، تغطية فعاليّة",
       en: "product photography, a shoot for a restaurant, a profile film, reels for social, event coverage",
@@ -69,8 +73,8 @@ export const SERVICES = [
   },
   {
     id: "tech",
-    ar: "برمجة",
-    en: "Engineering",
+    ar: "تطوير برمجيات",
+    en: "Software Development",
     examples: {
       ar: "موقع بورتفوليو، صفحة هبوط لحملة، متجر إلكتروني، نظام تسجيل، تطبيق",
       en: "a portfolio site, a campaign landing page, an online store, a registration system, an app",

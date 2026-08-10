@@ -13,7 +13,7 @@
 
 import { SERVICES } from "./services.js";
 
-export const PROMPT_VERSION = "2026-08-09.1";
+export const PROMPT_VERSION = "2026-08-10.1";
 
 /* The examples are the classifier's anchors — plan §3 is explicit that
    placeholder examples produce placeholder classification. */

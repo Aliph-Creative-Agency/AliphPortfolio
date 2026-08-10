@@ -89,10 +89,10 @@ const I18N = {
   btnAbout: { ar: "تعرّف على ألِف", en: "Get to know Aliph" },
 
   /* services */
-  svcBanner: { ar: "ماذا نفعل؟", en: "What we do?" },
-  svc1: { ar: "تصميم", en: "Design" },
-  svc2: { ar: "تصوير", en: "Film & Photography" },
-  svc3: { ar: "برمجة", en: "Engineering" },
+  svcBanner: { ar: "ماذا نقدم؟", en: "What we do?" },
+  svc1: { ar: "تصميم جرافيكي", en: "Graphic Design" },
+  svc2: { ar: "تصوير احترافي", en: "Professional Photography" },
+  svc3: { ar: "تطوير برمجيات", en: "Software Development" },
 
   /* the example switcher under "what we do" */
   swPrev: { ar: "المثال السابق", en: "Previous example" },
@@ -108,7 +108,7 @@ const I18N = {
   },
   w1Cap: { ar: "من جلسة تصوير — البلدة القديمة", en: "From a shoot — the Old City" },
 
-  w2Title: { ar: "نبحث عن النقطة، ثم نرسم النظام.", en: "We find the point, then draw the system." },
+  w2Title: { ar: "نبحث عن النقطة، ثم نرسم.", en: "We find the point, then draw the system." },
 
   w3ParaA: {
     ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف: في المطبوع، وعلى الشاشة، وبين يديّ من يستعمله كل يوم.",
@@ -166,7 +166,7 @@ const I18N = {
      picture can be anchored between them — a float only wraps text that
      comes after it in the flow. */
   w2BodyA: {
-    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها، وعملنا هو العثور عليها أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها. لا نبدأ من الشكل، بل ننتهي إليه: الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا جميلًا ولا يخصّ أحدًا. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم نعم الغرفة؟",
+    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها، وعملنا هو العثور عليها أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها. لا نبدأ من الشكل، بل ننتهي إليه: الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا جميلًا ولا يخصّ أحدًا. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في الغرفة؟",
     en: "Every brand has an origin point it is built from and returns to, and our work is to find it first — in the name, the story, or the place — then draw the whole system from it. We don't start at the form; we arrive at it: a mark drawn in the first week is usually handsome and belongs to nobody. And because the point is never handed to you in a meeting, we begin with the boring questions: who buys, when, and what gets said about you when you are not in the room.",
   },
   w2BodyB: {
@@ -269,7 +269,7 @@ const I18N = {
 /* one section per service on the about page */
 const SERVICES = [
   {
-    id: "design", tag: "DESIGN", seed: "aliph-svc1",
+    id: "design", tag: "GRAPHIC DESIGN", seed: "aliph-svc1",
     what: {
       ar: "نبني الهويّة من نقطة أصلها، لا من شكلها. نبحث أوّلًا في الاسم والحكاية والمكان عن النقطة التي تُبنى منها العلامة، ثم نرسم منها النظام كاملًا: الشعار، ولوحة الألوان، والخطوط، ونبرة الصوت، والقرطاسيّة، وقواعد الظهور اليوميّة.",
       en: "We build an identity from its origin point, not from its shape. First we look in the name, the story and the place for the point the brand is built from, then we draw the whole system out of it: the mark, the palette, the type, the tone of voice, the stationery, and the rules for showing up every day.",
@@ -284,7 +284,7 @@ const SERVICES = [
     },
   },
   {
-    id: "photo", tag: "FILM & PHOTO", seed: "aliph-svc2",
+    id: "photo", tag: "PROFESSIONAL PHOTOGRAPHY", seed: "aliph-svc2",
     what: {
       ar: "نصوّر ما تحتاجه العلامة لتظهر: جلسات ثابتة للمنتج والمكان والوجوه، وفيديو أفقي للحملات والتعريف، وريلز عموديّة للمنصّات. ومعها التوثيق الكامل للفعاليّات — من أوّل ساعة تجهيز إلى آخر ضيف يغادر.",
       en: "We shoot what a brand needs in order to appear: stills of the product, the place and the faces; horizontal video for campaigns and profiles; vertical reels for the feed. And full coverage of events — from the first hour of setup to the last guest leaving.",
@@ -299,7 +299,7 @@ const SERVICES = [
     },
   },
   {
-    id: "tech", tag: "ENGINEERING", seed: "aliph-svc3",
+    id: "tech", tag: "SOFTWARE DEVELOPMENT", seed: "aliph-svc3",
     what: {
       ar: "نبني المواقع والأنظمة والتطبيقات التي تحتاجها العلامة لتشتغل فعلًا: بورتفوليو أو موقع تعريفي، صفحة هبوط لحملة، متجر، نظام تسجيل أو حجز، لوحة إدارة يفهمها صاحبها، أو تطبيق هاتف.",
       en: "We build the sites, systems and apps a brand needs to actually run: a portfolio or presence site, a campaign landing page, a store, a registration or booking system, an admin panel its owner can understand, or a mobile app.",
@@ -317,9 +317,9 @@ const SERVICES = [
 
 const CATS = [
   { id: "all", ar: "الكل", en: "All" },
-  { id: "design", ar: "تصميم", en: "Design" },
-  { id: "photo", ar: "تصوير", en: "Film & Photography" },
-  { id: "tech", ar: "برمجة", en: "Engineering" },
+  { id: "design", ar: "تصميم جرافيكي", en: "Graphic Design" },
+  { id: "photo", ar: "تصوير احترافي", en: "Professional Photography" },
+  { id: "tech", ar: "تطوير برمجيات", en: "Software Development" },
 ];
 
 /* The example switcher steps through these subcategories, not through
@@ -1154,9 +1154,8 @@ function fitPicks() {
      into a second line at some widths. Half a percent of headroom is
      invisible and keeps it on one line everywhere. */
   const size = ((PROBE * avail) / natural) * 0.996;
-  /* below MIN the line genuinely cannot fit — let it wrap rather than shrink
-     into a caption. English does this on a phone; Arabic never does. */
-  row.style.fontSize = Math.max(MIN, size) + "px";
+  const MAX = 58;                     // cap so service titles don't over-expand
+  row.style.fontSize = Math.min(MAX, Math.max(MIN, size)) + "px";
 }
 
 /* language switch (pill) — click or keyboard */

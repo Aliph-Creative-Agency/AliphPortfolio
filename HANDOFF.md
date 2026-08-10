@@ -69,18 +69,30 @@ is scaled down to compensate, never the other way round.
 
 ---
 
-## Services (three, since 2026-08-08)
+## Services (three, since 2026-08-08 — relabelled 2026-08-10)
 
 | id | Arabic | English |
 |---|---|---|
-| `design` | تصميم | Design |
-| `photo` | تصوير | Film & Photography |
-| `tech` | برمجة | Engineering |
+| `design` | تصميم جرافيكي | Graphic Design |
+| `photo` | تصوير احترافي | Professional Photography |
+| `tech` | تطوير برمجيات | Software Development |
 
 Each has three subcategories (`SUBCATS` in `main.js`). The ids are the join key across
 `CATS`, `SUBCATS`, `PROJECTS[].cat`, `SERVICE_FRAMES`, `SERVICES`, `data-service` in
 the markup, **and `chat-worker/src/services.js`**. Change one without the others and
 classification breaks silently.
+
+⚠️ **The 2026-08-10 rename moved labels, not ids** — and it landed in `I18N.svc1-3`
+only. Five other copies had to be caught by hand: `CATS` (which had a third spelling,
+`تصميم جرافيك`), `SERVICES[].tag`, the `data-i18n` fallbacks in `index.html`,
+`chat-worker/src/services.js`, and two test fixtures. The keyword lists in
+`services.js` keep the **short** forms on purpose — a visitor types "تصميم".
+
+⚠️ **A service name is a substring problem now.** `guardrails.mentionsService()`
+decides "has the bot classified yet" by looking for a full service name in its reply,
+and it is what un-gags the follow-up questions. A model that writes "تصميم" instead of
+"تصميم جرافيكي" now reads as *never classified*. That is dead at stage 2 (the stub
+echoes the exact name) and live the moment a real model answers.
 
 ---
 
@@ -275,8 +287,12 @@ a regex for "we can" also swallows the one sentence the bot exists to say.
    Blocked on the 29LT licence: converting desktop OTFs can breach a foundry
    licence, and the kit may already exist. This is the last big lever on phone
    performance.
-6. **`wb2-rail-media` is tagged `poster` but sized 9:16**, a reel ratio. One of the
-   two is wrong.
+6. **`wb2-rail-media` now points three ways at once.** `data-kind` is `reel` and it
+   holds a `<video>`, the aspect is `9/13` (neither a reel nor a poster), and both the
+   figcaption (`ملصق — ليالي رمضان`) and the paragraph under it (`w2Rail`, "الملصق
+   يُقرأ من عشرة أمتار") are still poster copy. `style.css`'s mobile comment also still
+   claims "a reel is 9:16 and a poster is portrait, and `data-kind` says which".
+   Pick one and make the other three follow.
 
 ---
 
@@ -296,9 +312,46 @@ slot at its own ratio. The Drive is organised by *subject*; the site needs *proj
 with a title, date, service and cover. That mapping cannot be derived from the folder
 names — the studio has to supply it.
 
-Everything on the site is still the `HOLDER` placeholder (an inline SVG data URI).
-Landing real media is a `src` change. The `seed` fields on `PROJECTS` are dead data
-kept on purpose — they are the shopping list.
+Everything on the site is still the `HOLDER` placeholder (an inline SVG data URI),
+with one exception: `wb2-rail-media` is now a `<video>`. The `seed` fields on
+`PROJECTS` are dead data kept on purpose — they are the shopping list.
+
+### The reel trial — it works, and it is deliberately not in the repo
+
+A real reel was put in `wb2-rail-media` on 2026-08-10 and **the treatment holds**:
+1080×1920 H.264, 30.7s, autoplays muted and loops, and `filter: grayscale(1)` reads
+on video exactly as it does on stills. `.holder > video` was already styled alongside
+`.holder > img`, so no CSS was needed.
+
+It is **not committed.** The file is 51.8 MB — past GitHub's 50 MB warning, into
+every clone forever, and into the Worker asset bundle, for something that should be
+served by URL. `prototype/media/` is now gitignored, the placeholder holds the slot,
+and `index.html` carries a comment with the markup to restore. The source lives at
+`C:\Users\Obaida\Desktop\finallllllllllll.mov`.
+
+⚠️ **Two things are still unresolved about it.** The source is **9:16** and the holder
+is **9/13**, so `object-fit: cover` crops ~23% — visibly clipping the top and bottom
+of the frame. And the reel has **burnt-in titles** that land where the figcaption sits.
+
+⚠️ **The R2 URL in the repo was the bucket root** — `https://pub-90bac6014abe49c594f8ac9c1f1899cb.r2.dev`,
+no object key, which 404s. The key is recorded nowhere here; it has to come off the
+Cloudflare dashboard. **`moov` is at the end of the file**, so even served correctly it
+buffers fully before the first frame — remux with `-movflags +faststart` before it
+goes anywhere near a visitor.
+
+Before blaming markup for a video that will not play, check the container:
+
+```bash
+python -c "import struct;d=open('prototype/media/wb2-rail-reel.mov','rb').read();i=0
+while i+8<=len(d):
+    s,t=struct.unpack('>I',d[i:i+4])[0],d[i+4:i+8].decode('latin1');print(t,s)
+    i+=s if s>=8 else len(d)
+print('bytes',len(d),'moov at',d.find(b'moov'))"
+```
+
+That is how a **truncated** copy was caught here: an interrupted copy left 9,354,776
+bytes of a file whose own `mdat` declared 54,265,568, with no `moov` at all. It looked
+identical to a wrong `src` — `error.code === 4`, empty cream box.
 
 ---
 

@@ -8,6 +8,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../src/index.js";
+import { SERVICES } from "../src/services.js";
 
 const ORIGIN = "http://localhost:8321";
 const ENV = { ALLOW_STUB: "1", ALLOWED_ORIGINS: ORIGIN };
@@ -106,7 +107,9 @@ test("classify → offer → capture → done, in Arabic", async () => {
 test("a single-service idea in English is named, not bucketed into everything", async () => {
   const r = await (await post(asUser("we need a booking system for our clinic"))).json();
   assert.deepEqual(r.services, ["tech"]);
-  assert.match(r.reply, /Engineering/);
+  /* The name comes from SERVICES rather than a literal: a typed copy of it
+     here went stale on the last rename and the test kept passing. */
+  assert.ok(r.reply.includes(SERVICES.find((s) => s.id === "tech").en));
 });
 
 test("declining the offer closes warmly and stores nothing", async () => {

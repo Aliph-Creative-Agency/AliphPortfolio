@@ -10,6 +10,12 @@ import {
   pricingCheck, jailbreakCheck, postFilter, capLength,
   directives, conversationState, validateMessages, MAX_REPLY_CHARS,
 } from "../src/guardrails.js";
+import { SERVICES } from "../src/services.js";
+
+/* Fixtures that have to READ as classified must name a service the way
+   the taxonomy spells it today — a typed "تصميم" here went stale on the
+   2026-08-10 rename and took the test red with it. */
+const svcName = (id, l = "ar") => SERVICES.find((s) => s.id === id)[l];
 
 test("norm folds the Arabic spellings that would otherwise miss", () => {
   assert.equal(norm("التَّكْلِفَة"), norm("التكلفه"));
@@ -112,7 +118,7 @@ for (const s of [
 }
 
 test("post-filter allows describing a service, which is not a feasibility read", () => {
-  /* Job #1 in plan §9 is answering questions about the four services.
+  /* Job #1 in plan §9 is answering questions about the services.
      A filter that eats this has eaten the product. */
   const fine = [
     "That falls under تصميم. Would you like the team to get in touch?",
@@ -158,7 +164,7 @@ test("a second clarifying question is forbidden before classification", () => {
 test("questions after classification are not clarifiers — the bot still has to ask for a name", () => {
   const msgs = [
     { role: "user", content: "we need a logo" },
-    { role: "assistant", content: "That falls under تصميم. Would you like the team to get in touch?" },
+    { role: "assistant", content: `That falls under ${svcName("design")}. Would you like the team to get in touch?` },
     { role: "user", content: "yes" },
   ];
   const st = conversationState(msgs);

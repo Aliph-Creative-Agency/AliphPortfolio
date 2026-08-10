@@ -132,8 +132,16 @@
     </div>
 
     <div class="wb2-rail">
-      <figure class="holder wb2-rail-media" data-kind="poster">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
+      <!-- Trialled with the real reel on 2026-08-10 and it works: 1080x1920
+           H.264, grayscales correctly, loops. The file is 51.8 MB, which is
+           too big for this repo, so it stays untracked in prototype/media/
+           and the placeholder holds the slot. Restore with:
+             <video src="<r2-object-url>" autoplay muted loop playsinline></video>
+           once the reel is on R2 (the bucket root alone 404s — it needs the
+           object key). NOTE the source is 9:16 and the holder is 9/13, so
+           object-fit crops ~23%; and the caption below is still poster copy. -->
+      <figure class="holder wb2-rail-media" data-kind="reel">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16' preserveAspectRatio='none'%3E%3Crect width='9' height='16' fill='%23c6c5ba'/%3E%3C/svg%3E" alt="">
           <figcaption data-i18n="w2Cap3">ملصق — ليالي رمضان</figcaption>
         </figure>
       <p class="why-para" data-i18n="w2Rail">الملصق يُقرأ من بعيد ثم من قريب.</p>
@@ -197,15 +205,15 @@
 <section class="services" id="services">
   <div class="svc-picks" role="tablist" aria-label="الخدمات">
     <button class="svc-pick is-active" role="tab" aria-selected="true" data-service="design">
-      <span data-i18n="svc1">تصميم</span>
+      <span data-i18n="svc1">تصميم جرافيكي</span>
     </button>
     <span class="svc-dot" aria-hidden="true">·</span>
     <button class="svc-pick" role="tab" aria-selected="false" data-service="photo">
-      <span data-i18n="svc2">تصوير</span>
+      <span data-i18n="svc2">تصوير احترافي</span>
     </button>
     <span class="svc-dot" aria-hidden="true">·</span>
     <button class="svc-pick" role="tab" aria-selected="false" data-service="tech">
-      <span data-i18n="svc3">برمجة</span>
+      <span data-i18n="svc3">تطوير برمجيات</span>
     </button>
   </div>
 
