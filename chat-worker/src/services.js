@@ -15,9 +15,12 @@
    signage and print → design). A visitor still says "فعالية" though,
    so those keywords are kept and pointed at the service that does it.
 
-   ⚠️ Renamed 2026-08-10: the ids did not move, the labels did —
-   تصميم → تصميم جرافيكي, تصوير → تصوير احترافي, برمجة → تطوير برمجيات.
-   `kw` deliberately keeps the short forms; a visitor types "تصميم".
+   ⚠️ Renamed twice, and the ids did not move either time — only the labels.
+   2026-08-10: تصميم → تصميم جرافيكي, تصوير → تصوير احترافي, برمجة → تطوير
+   برمجيات. 2026-08-11: تصوير احترافي → صناعة محتوى (Media Production), which
+   widened `photo` from photography to everything the feed is made of.
+   `kw` deliberately keeps the short forms; a visitor types "تصميم", and
+   "تصوير" still routes here because they still shoot.
 
    ⚠️ `examples` and `kw` are PLACEHOLDERS written by me, not by the
    studio. Plan §10.1 asks ألف for 2–3 real examples per service, and
@@ -47,8 +50,8 @@ export const SERVICES = [
   },
   {
     id: "photo",
-    ar: "تصوير احترافي",
-    en: "Professional Photography",
+    ar: "صناعة محتوى",
+    en: "Media Production",
     examples: {
       ar: "تصوير منتجات، جلسة تصوير لمطعم، فيديو تعريفي، ريلز للمنصّات، تغطية فعاليّة",
       en: "product photography, a shoot for a restaurant, a profile film, reels for social, event coverage",

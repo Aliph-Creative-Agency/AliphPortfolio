@@ -212,11 +212,19 @@ body.nav-open .nav-overlay { visibility: visible; }
   position: relative;
   z-index: 1;
 }
+/* The separator dots are flex children, so a uniform `gap` sets the
+   name-to-dot distance too and there is no way to tighten one without the
+   other. The gap is on the dot instead: same spacing on desktop, one lever
+   for the phone rule below. */
 .nav-socials {
   display: flex;
-  gap: 1.2rem;
+  gap: 0;
   font-size: 0.68rem;
   color: rgba(217, 217, 206, 0.75);
+}
+.nav-socials > span {
+  margin-inline: var(--soc-gap, 1.2rem);
+  opacity: 0.5;
 }
 .nav-socials a:hover { color: var(--cream); }
 
@@ -414,7 +422,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
 .film-frame {
   position: relative;
   flex: 0 0 auto;
-  width: calc(var(--fh) * 0.839732 - var(--fgap) * 2);
+  width: calc(var(--fh) * 0.826630 - var(--fgap) * 2);
   height: 62%;
   margin-inline: var(--fgap);
   margin-top: calc(var(--fh) * 0.021);   /* nudge onto the window band's centre */
@@ -726,11 +734,12 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
      still               3:2     1.500  (photographs, either way up)
    Nothing in that Drive is square, so no holder should be.
 
-   These used to be per-block — .wb1-media 3/2, .wb2-m1 1/1, .wb2-m2 7/6,
-   .wb2-rail-media 9/13 — each one the shape its grid cell wanted rather than
-   the shape of the thing inside it. A reel came out cropped 23% and design
-   work at 4:5 was squeezed into a square. Ratio belongs to the medium; if a
-   layout needs a different box, change the layout. */
+   These used to be declared per-block, each holder wearing the shape its own
+   grid cell wanted rather than the shape of the thing inside it — a reel came
+   out cropped 23% and design work at 4:5 was squeezed into a square. Ratio
+   belongs to the medium; if a layout needs a different box, change the
+   layout. The gallery wall is the one place that deliberately does not use
+   this: its tiles crop to their cells by design, so they are not holders. */
 .holder[data-kind="reel"]     { aspect-ratio: 9 / 16; }
 .holder[data-kind="video"]    { aspect-ratio: 16 / 9; }
 .holder[data-kind="poster"]   { aspect-ratio: 4 / 5; }
@@ -795,14 +804,9 @@ html[lang="en"] .why { --why-type: 0.85; }
 /* A stretched grid item that also has aspect-ratio resolves its width FROM
    the stretched height and overflows its own track — block 1's film came out
    1140px wide in a 936px column. Media never stretches; text columns do. */
-.wb1-media,
-.wb2-m1,
-.wb2-m2,
-.wb3-media { align-self: start; }
+.wb1-media { align-self: start; }
 
 .wb1 > *,
-.wb2 > *,
-.wb3-body > *,
 .svc-demo > * { min-width: 0; }
 
 .splitter {
@@ -820,22 +824,16 @@ html[lang="en"] .why { --why-type: 0.85; }
   margin: 0 0 var(--why-gap);
   font-size: clamp(1.6rem, 3.4vw, 3.1rem);
 }
-/* a column of stacked paragraphs — a news column rather than one slab */
-.wb-col { display: flex; flex-direction: column; }
 
 /* Solved per column against a 1280px page (2026-08-09): each vw term is the
    size that lands that column's INKED extent at ~99% of its own box — the
    picture beside it, or the centre cut. Tuned for Arabic, the primary
    language. Re-solve with resources/fit_columns.py when the copy changes. */
+/* Block 1 is the only solved column left. Blocks 2 and 3 became a carousel
+   and a gallery wall on 2026-08-11 and carry no body copy at all, so their
+   solved sizes went with them — `fit_columns.py ar` now has one column to
+   fit, not four. */
 .wb1-side  .why-para { font-size: calc(clamp(0.95rem, 2.20vw, 1.50rem) * var(--why-type)); }   /* 28.2px */
-/* Hoisted to a property because .wb2-m2's top margin is expressed as one line
-   of this copy. Two places needing the same solved size is exactly how a typed
-   copy goes stale — state it once. */
-.wb2-flow { --wb2-body: calc(clamp(1.00rem, 2.56vw, 1.75rem) * var(--why-type)); }   /* 32.8px */
-.wb2-flow  .why-para { font-size: var(--wb2-body); }
-.wb2-rail  .why-para { font-size: calc(clamp(1.15rem, 4.32vw, 2.60rem) * var(--why-type)); }   /* 55.3px */
-.wb3-body > .wb-col:first-child .why-para { font-size: calc(clamp(1.00rem, 2.45vw, 1.70rem) * var(--why-type)); } /* 31.4px */
-.wb3-body > .wb-col:last-child  .why-para { font-size: calc(clamp(1.00rem, 2.40vw, 1.65rem) * var(--why-type)); } /* 30.7px */
 .why-para {
   font-size: clamp(0.86rem, 1.8vw, 1.16rem);
   line-height: 1.52;
@@ -882,99 +880,97 @@ html[lang="en"] .why { --why-type: 0.85; }
 .wb1 .why-title { font-size: clamp(1.7rem, 6.25vw, 5.8rem); }
 /* aspect comes from data-kind — see the holder block */
 
-/* ── block 2: rail right (39.9%), everything else left (59.3%) ── */
-.wb2 {
-  display: grid;
-  grid-template-columns: 39.9fr 59.3fr;
-  gap: 0.8%;
-  align-items: start;
-}
-/* Explicit placement so the headline leads in the DOM while the rail renders
-   on the right (column 1 under RTL).
+/* ── block 2: the reel carousel ──
+   Replaced the rail-plus-floated-pictures layout on 2026-08-11. The block is
+   one strip of vertical media now: the playing item centred and its
+   neighbours faded at either side.
 
-   `grid-row: 1` is load-bearing: the main column comes first in the DOM and
-   is placed in column 2, which advances the auto-placement cursor past
-   column 1 — so the rail would be pushed to a second row and the block would
-   render at double height. */
-/* space-between, because the rail no longer matches the text column's height.
-   The poster is 4:5 where the old box was 9/13, so the column comes up ~278px
-   short at 1440 and the slack used to pile up under the paragraph as a dropped
-   foot. Pinning the picture to the top and the line to the bottom spends it as
-   a measured gap between two anchored edges instead. */
-.wb2-rail {
-  grid-column: 1;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.wb2-main { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; }
-/* one line across the left region */
+   ⚠️ This is a SCROLL-SNAP scroller, not a transform rail, and that is a
+   deliberate choice rather than a shortcut. Arabic is the primary direction
+   here, and a hand-rolled translateX carousel has to carry a sign flip for
+   RTL in every calculation — the site already keeps `dirSign()` around for
+   exactly that class of bug. A scroller inverts itself, and it brings native
+   momentum swipe on a phone. main.js reads which slide is centred; it never
+   sets the scroll position except when an arrow is pressed. */
+.wb2 { display: block; }
 .wb2 .why-title { font-size: clamp(1.7rem, 6.5vw, 6.2rem); }
 
-/* Full width of its track, deliberately. This was briefly 81.3%, solved to
-   keep the wireframe's 780px height once the reel went to a true 9:16 — and
-   it was wrong: 18.7% of the track went empty, which reads as a gap between
-   the text column and the reel, and a rail that does not reach its own edge
-   stops being a rail. The block is ~150px taller than the wireframe instead.
-   That is the honest cost of showing a 9:16 reel uncropped, and it is paid
-   in a dimension the eye forgives. */
-.wb2-rail-media { margin-bottom: 0.4rem; }
-
-/* ── block 2's body: one text, the pictures floated into it ──
-   Replaced three stacked grid rows that put copy in separate boxes beside
-   each picture; this is one body wrapping around them.
-
-   Floats were tried once before and blamed: the real cause was placement,
-   not floats — both figures were floated to the same side, so the second
-   cleared past the whole column and opened a hole a picture tall. On
-   opposite sides the text zigzags between them, which is what the wireframe
-   draws.
-
-   `float: inline-start/end` is valid and mirrors with the language on its
-   own, so there is no LTR override to keep in sync. */
-.wb2-flow::after {
-  content: "";
-  display: block;
-  clear: both;
+.reelshow {
+  position: relative;
+  /* "a third-ish" — the centre slide's share of the track. The neighbours
+     take the rest, which is what puts a third of a reel at each edge. */
+  --reel-w: 33.5%;
+  --reel-gap: clamp(8px, 1vw, 18px);
 }
-/* No bottom margin. A float excludes text with its MARGIN box, so a bottom
-   margin pushes the exclusion below the picture and any line box that clips
-   it gets squeezed to the narrow side — measured, a 28px margin made the
-   line under the picture 35% wide instead of running across. The line's own
-   leading is the gap. */
-/* ⚠️ Width is the wireframe's; HEIGHT is whatever the real ratio makes it.
-   Do not invert that.
+.reelshow-track {
+  display: flex;
+  gap: var(--reel-gap);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  /* The first and last slide have to be able to reach the middle of the
+     track, and nothing but padding can put them there. Without this the
+     carousel cannot show slide 1 centred at all — it butts against the edge
+     and the "current" item is never the one under the eye.
 
-   These were briefly narrowed — 38.4% and 34.3%, solved so that 4:5 would
-   reproduce the old 1/1 and 7/6 heights exactly. The arithmetic worked and
-   the result was wrong: the pictures came out 20% narrower, which is the one
-   dimension you actually see in a column of floats. Block 2 is taller than
-   the wireframe now and that is the correct trade. */
-.wb2-m1 {
-  float: inline-end;
-  width: 48%;
-  margin-inline-start: 0.75rem;
-  margin-block-end: 0;
+     This percentage resolves against the PARENT's width, which is the whole
+     track. The slide's flex-basis below resolves against this element's
+     CONTENT box — what is left after this padding. Those are two different
+     numbers, and reading them as one is what made the slides come out at a
+     third of a third (125px in a 1188px track). */
+  padding-inline: calc((100% - var(--reel-w)) / 2);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* main.js clones the slide set either side of the real one to make the
+     carousel loop. Scroll anchoring reacts to those inserts by shifting
+     scrollLeft to "preserve" the view, which fights the centring — it landed
+     the opening slide one place out. The carousel manages its own position. */
+  overflow-anchor: none;
 }
-/* ⚠️ REVERSAL. This was 0 with a comment saying a top margin is "a band of
-   reserved emptiness". That is true of the mechanism and was the wrong call
-   here: with no margin the second picture landed 33px under the first, the
-   two read as one stacked pair, and the zigzag the wireframe draws collapsed.
+.reelshow-track::-webkit-scrollbar { display: none; }
 
-   One line of body copy — 1.52 is `.why-para`'s line-height, and `--wb2-body`
-   is the size fit_columns.py solved — so it tracks the type instead of being
-   a magic pixel value. The band IS reserved on the picture's own side; what
-   lands in it is a short line in the channel the first picture vacated, which
-   is what separates them. */
-.wb2-m2 {
-  float: inline-start;
-  width: 50%;
-  margin-inline-end: 0.75rem;
-  margin-block: calc(var(--wb2-body) * 1.52) var(--why-gap);
+.reel-slide {
+  /* 100% OF THE CONTENT BOX, which the padding above has already made exactly
+     one slide wide — so this IS --reel-w, expressed in the only base a flex
+     item can see. Writing `var(--reel-w)` here instead looks more direct and
+     is wrong: it would take a third of a third. */
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  /* the faded flank. Both properties transition, so a slide arriving at the
+     centre lifts as well as brightens. */
+  opacity: 0.34;
+  transform: scale(0.94);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
+.reel-slide.is-current {
+  opacity: 1;
+  transform: scale(1);
+}
+/* aspect comes from data-kind="reel" — 9:16, see the holder block */
 
-/* ── block 3: full-width head, then text | tall cut | text ── */
+.reel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 2.3rem;
+  background: var(--cream);
+  border: var(--hair);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+.reel-arrow:hover { background: var(--ink); color: var(--cream); }
+.reel-arrow svg { width: 1.4rem; }
+/* logical, so the pair swaps with the language and inline-start is always
+   "the one before" */
+.reel-prev { inset-inline-start: 0.6rem; }
+.reel-next { inset-inline-end: 0.6rem; }
+
+/* ── block 3: the gallery wall ── */
 /* the full-width headline — the biggest type after the section banners */
 .wb3-head {
   /* was 11vw and it collided with the splitter above it */
@@ -983,20 +979,127 @@ html[lang="en"] .why { --why-type: 0.85; }
   text-align: center;
   margin-bottom: var(--why-gap);
 }
-.wb3-body {
+
+/* ⚠️ SQUARE CELLS BY CONSTRUCTION, and every tile's shape depends on it.
+   Equal column and row counts (12 and 12), one gap value both ways, and
+   aspect-ratio:1 on the container — so a row is exactly as tall as a column
+   is wide, and a tile spanning 6x4 is 3:2 with no arithmetic anywhere.
+
+   Break any one of those three and every tile on the wall re-crops at once:
+   change the row count without changing the aspect, or set a row gap that
+   differs from the column gap, and the cells stop being square. */
+.gwall {
   display: grid;
-  grid-template-columns: 29.2fr 44.6fr 23.1fr;
-  gap: 1%;
-  align-items: center;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(12, 1fr);
+  gap: var(--gw-gap, 7px);
+  aspect-ratio: 1;
 }
-.wb3-body > .wb-col {
-  justify-content: center;
-  text-align: center;
+
+/* The twelve tiles cover the field exactly — see the note in index.html.
+   Rows 1-4   F B A      rows 5-6   D E I A
+   Rows 7-10  H G L      rows 11-12 H J K C
+
+   ⚠️ THE THREE MARKS SIT APART ON PURPOSE. They were first written into
+   columns 11-12 — one under another — which under RTL is the entire left
+   edge of the wall, so the agency's own marks read as a sidebar bolted to
+   one side rather than work hung among the photographs. They now run a
+   diagonal: أ top-right (col 1 is the RIGHT one here), the stamp through the
+   middle, the wordmark bottom-left. Keep them on different rows AND
+   different columns if this is ever re-tiled. */
+.gw-f { grid-area:  1 /  1 / span 4 / span 2; }   /* أ — top right */
+.gw-b { grid-area:  1 /  3 / span 4 / span 6; }
+.gw-a { grid-area:  1 /  9 / span 6 / span 4; }
+.gw-d { grid-area:  5 /  1 / span 2 / span 3; }
+.gw-e { grid-area:  5 /  4 / span 2 / span 3; }
+.gw-i { grid-area:  5 /  7 / span 2 / span 2; }   /* stamp — middle */
+.gw-h { grid-area:  7 /  1 / span 6 / span 4; }
+.gw-g { grid-area:  7 /  5 / span 4 / span 6; }
+.gw-l { grid-area:  7 / 11 / span 4 / span 2; }
+.gw-j { grid-area: 11 /  5 / span 2 / span 3; }
+.gw-k { grid-area: 11 /  8 / span 2 / span 3; }
+.gw-c { grid-area: 11 / 11 / span 2 / span 2; }   /* wordmark — bottom left */
+
+.gw-tile {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
 }
-/* the centre cut is the WIDEST element in this block, not the narrowest:
-   44.6% against text columns of 29% and 23% */
-/* aspect comes from data-kind — see the holder block. It was 4/7 here, which
-   was very nearly a reel (0.571 against 0.563) and is now exactly one. */
+.gw-tile > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.06);
+}
+
+/* ── the frames ──
+   Three print treatments, deliberately unlike the about page's `.clip`
+   (a drop-shadowed cutting, pinned at an angle). Nothing here is rotated or
+   shadowed: a wall is hung flat and tight, and a shadow needs a gap to fall
+   into that this grid does not have. */
+
+/* mount board — a broad cream mat with the print ruled inside it */
+.gw-mat {
+  padding: clamp(5px, 0.75vw, 13px);
+  background: var(--cream-warm);
+  box-shadow: inset 0 0 0 1px rgba(15, 24, 32, 0.3);
+}
+.gw-mat > img { outline: 1px solid rgba(15, 24, 32, 0.3); outline-offset: -1px; }
+
+/* darkroom print — a white margin, deeper at the foot, the way a print is
+   trimmed to leave room for a signature */
+.gw-print {
+  padding: clamp(4px, 0.6vw, 10px);
+  padding-bottom: clamp(11px, 1.7vw, 30px);
+  background: var(--cream);
+  box-shadow: inset 0 0 0 1px rgba(15, 24, 32, 0.22);
+}
+
+/* plate — the ink itself is the frame */
+.gw-plate {
+  padding: clamp(4px, 0.55vw, 9px);
+  background: var(--ink);
+}
+
+/* ── the agency's own marks, hung among the photographs ──
+   A LIGHT field with the ink artwork, and no frame — the photographs are
+   matted and ruled, the marks are not. That contrast is what keeps them
+   reading as the agency's own hand rather than as three more pictures.
+
+   cream-warm rather than the page cream: with no border, a tile in the page's
+   own colour would have no edge at all where the wall meets the margin, and
+   two of the three marks sit on the wall's outer corners. */
+.gw-mark {
+  display: grid;
+  background: var(--cream-warm);
+  /* An explicit minmax(0,1fr) track, not the implicit auto one. The tile's
+     own height is definite (the wall's rows are), but an AUTO row is sized
+     from its content, so the image's max-height:100% had nothing definite to
+     resolve against and behaved as `none` — which is what let the أ grow to
+     654px in a 447px tile. A 1fr track inherits the definite height. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  padding: clamp(8px, 1.3vw, 22px);
+}
+/* A mark is not a photograph: it fits inside its tile whole rather than
+   cropping to fill it.
+
+   ⚠️ max-width/max-height, NOT width/height:100% + object-fit. The percentage
+   height does not resolve against a centred grid item, so the browser fell
+   back to the image's intrinsic ratio and sized from the width instead — the
+   أ came out 654px tall in a 447px tile and had its stem cut off by the
+   tile's own overflow:hidden. Capping both axes lets the mark keep its shape
+   and never exceed the box, with no percentage to resolve. */
+.gw-mark > img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  filter: none;
+}
 
 /* Both ovals are sized from the wireframe rather than a global min-width.
    .oval-swap keeps its 1.5em height on purpose — it is the mask the label
@@ -1559,8 +1662,6 @@ body[data-page="index"] .footer { margin-top: 0; }
   opacity: 0.12;
   pointer-events: none;
 }
-/* spin drives .contact-stamp in the shared contact footer */
-@keyframes spin { to { transform: rotate(360deg); } }
 .rule-cream { height: 1px; background: rgba(217, 217, 206, 0.5); margin: 0 var(--pad); }
 .footer-legal {
   position: relative;
@@ -1646,16 +1747,19 @@ body[data-page="index"] .footer { margin-top: 0; }
 a.contact-value:hover .cv-real { transform: translateY(-105%); }
 a.contact-value:hover .cv-ghost { transform: translateY(0); }
 
+/* The spinning stamp used to be the mass in this column and was removed on
+   2026-08-11 at the agency's request. With it gone — and a fourth contact row
+   added beside it — the clock and socials huddled at the top against a column
+   of empty ink. Stretching and spacing them anchors the footer at both
+   corners instead. No-op once the grid is one column on a phone. */
 .contact-side {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: space-between;
+  align-self: stretch;
   gap: 1.2rem;
   text-align: end;
-}
-.contact-stamp {
-  width: clamp(120px, 13vw, 190px);
-  animation: spin 44s linear infinite;
 }
 .contact-clock {
   font-family: var(--font-display);
@@ -1722,52 +1826,30 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   /* the strip's own borders sit inside its height */
   .film-scroll { --fh: calc(var(--film-h) - 6px); }
 
-  /* why aliph — the section's grids collapse to one column.
-     Miss one and it silently stays two columns on a phone, setting text in a
-     180px gutter beside a sliver of picture. */
-  .wb1,
-  .wb2,
-  .wb3-body { grid-template-columns: 1fr; gap: 0; }
-
-  /* Block 2's pictures unfloat on a phone: a 54%-wide float in a 342px column
-     leaves a ~150px measure, three or four words a line. Stacked, the copy
-     keeps its full measure and the pictures read at full width. */
-  .wb2-m1,
-  .wb2-m2 {
-    float: none;
-    width: 100%;
-    margin-inline: 0;
-    margin-block: 0.45rem 0.8rem;
-  }
+  /* why aliph — block 1's grid collapses to one column. Miss it and it
+     silently stays two columns on a phone, setting text in a 180px gutter
+     beside a sliver of picture. */
+  .wb1 { grid-template-columns: 1fr; gap: 0; }
 
   .wb3-head { justify-content: flex-start; text-align: start; }
   .wb3-head::before { display: none; }
   .why-outro .oval-btn,
   .sw-foot .oval-btn { width: auto; aspect-ratio: auto; min-width: 11rem; }
 
-  /* The rail's column can't stay first, or the poster lands above the
-     headline. `grid-row` must be reset with it: the desktop rules pin both
-     children to row 1, and collapsing to one column while they are still
-     explicitly in row 1 stacks them on top of each other — measured 342x440px
-     of overlap. `order` cannot save it; order is ignored for explicitly
-     placed grid items. */
-  .wb2-rail,
-  .wb2-main { grid-column: 1; grid-row: auto; }
-  .wb2-rail { order: 2; }
-
-  /* Each holder keeps its own aspect on a phone. These used to be forced to
-     4/3 once alone in a row, which is wrong for what goes in them — a reel is
-     9:16 and a poster is portrait, and `data-kind` says which. Width is
-     capped by the column and height by the viewport. */
-  .wb1-media,
-  .wb2-rail-media,
-  .wb2-m1,
-  .wb2-m2,
-  .wb3-media {
+  /* Block 1's holder keeps its own aspect on a phone. It used to be forced to
+     4/3 once alone in a row, which is wrong for what goes in it — `data-kind`
+     says the shape. Width is capped by the column and height by the
+     viewport. */
+  .wb1-media {
     width: 100%;
     max-height: 78vh;
     margin-block: 0.45rem 0.8rem;
   }
+
+  /* The carousel widens as the page narrows: the same third that reads as a
+     strip of work at 1440 is a 100px sliver at 900, too small to be the thing
+     the block is about. The flanks still show. */
+  .reelshow { --reel-w: 52%; }
   .why-outro { align-items: flex-start; }
   .why-outro-line { width: auto; max-width: none; }
 
@@ -1811,7 +1893,22 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
     gap: 1rem;
     width: 100%;
   }
-  .nav-socials { flex-wrap: wrap; gap: 0.4rem 1rem; }
+  /* One line, at the SAME font size — measured, the dot margins alone cannot
+     buy it. In a 327px overlay column the three names come to 389.5px, and
+     73px of that is `.latin`'s 0.18em tracking, against only 33px of dot
+     margin. Zeroing the margins still overflows; cutting the tracking is the
+     only lever that does not touch the size.
+
+     0.03em is solved for the NARROWEST phone, not this one: at 360px the row
+     has 312px to live in and lands at 303. `nowrap` is the assertion — if a
+     fourth account is ever added the row overflows visibly instead of
+     silently wrapping to two lines again. */
+  .nav-socials {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    --soc-gap: 0.14rem;
+  }
 
   /* library */
   .lib-bar { flex-wrap: wrap; }
@@ -2190,32 +2287,53 @@ body.sheet-open { overflow: hidden; }
   .wb1-media      { order: 2; }
   .wb1 .why-para  { order: 3; }
 
-  /* Block 2 — everything except the first picture and the first paragraph.
-     The rail goes as a unit: hiding the poster but keeping w2Rail would leave
-     "الملصق يُقرأ من بعيد ثم من قريب" describing a poster that is not there. */
-  .wb2-m2,
-  .wb2-rail,
-  .wb2-flow [data-i18n="w2BodyB"] { display: none; }
+  /* Block 2 — the media is the block, so it takes the screen. At a third the
+     centre reel would be 100px wide on a 375px phone; here it is ~255px and
+     460px tall, which is the size the agency asked for. The flanks are cut
+     to a sliver rather than dropped — a carousel with nothing at its edges
+     stops announcing that there is more. */
+  .reelshow {
+    --reel-w: 78%;
+    --reel-gap: 8px;
+  }
+  /* The arrows would sit ON the reel at this width. Touch has the swipe. */
+  .reel-arrow { display: none; }
 
-  /* Block 3 — media leads, per the wireframe. These children are auto-placed,
-     so `order` works; it would be ignored if they were pinned with grid-row
-     (see the note on .wb2-rail at the 900px breakpoint). */
-  .wb3-media { order: -1; }
-  /* One paragraph, like the other two blocks. Block 3 carries nine on desktop
-     across two columns and they were all still here — the whole remaining
-     length of the section. Hide the lot, then bring one back, so adding a
-     paragraph upstairs cannot silently lengthen the phone view again.
-     It also settles the centring: `text-align: center` on these columns reads
-     fine in two narrow desktop tracks and badly over eight full-width
-     paragraphs, but over one short paragraph it is fine. */
-  .wb3-body .wb-col:last-child { display: none; }
-  .wb3-body .why-para { display: none; }
-  .wb3-body [data-i18n="w3ParaB"] { display: block; }
+  /* Block 3 — the wall re-hangs at 6 columns.
+     ⚠️ Both axes have to be restated. These tiles are explicitly placed, so
+     `order` is ignored and a half-reset leaves twelve tiles stacked in the
+     first cell. The row count changes with the column count, so the
+     container's aspect must change too or the cells stop being square and
+     every tile re-crops (see the note on .gwall).
+
+     Rows 1-3   A F H      rows 4-5   B D      rows 6-7   E G
+     Rows 8-10  I L C      rows 11-12 J K
+
+     ⚠️ Same rule as the desktop field: the three marks were all in the last
+     band, in a row, which read as a footer strip rather than as work on the
+     wall. أ now sits between two portraits at the top and the other two are
+     six rows below with a photograph between them. */
+  .gwall {
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(12, 1fr);
+    aspect-ratio: 6 / 12;
+  }
+  .gw-a { grid-area:  1 / 1 / span 3 / span 2; }
+  .gw-f { grid-area:  1 / 3 / span 3 / span 2; }
+  .gw-h { grid-area:  1 / 5 / span 3 / span 2; }
+  .gw-b { grid-area:  4 / 1 / span 2 / span 3; }
+  .gw-d { grid-area:  4 / 4 / span 2 / span 3; }
+  .gw-e { grid-area:  6 / 1 / span 2 / span 3; }
+  .gw-g { grid-area:  6 / 4 / span 2 / span 3; }
+  .gw-i { grid-area:  8 / 1 / span 3 / span 2; }
+  .gw-l { grid-area:  8 / 3 / span 3 / span 2; }
+  .gw-c { grid-area:  8 / 5 / span 3 / span 2; }
+  .gw-j { grid-area: 11 / 1 / span 2 / span 3; }
+  .gw-k { grid-area: 11 / 4 / span 2 / span 3; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .contact-stamp { animation: none; }
   .curtain { display: none; }
   *, *::before, *::after { transition-duration: 0.01ms !important; }
 }

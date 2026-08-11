@@ -31,6 +31,7 @@ the `-m` phone variants resample, exactly as they already did.
 style.css MUST be retuned to tileAspect / 4. This script prints the value.
 """
 import os
+import numpy as np
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -41,20 +42,30 @@ MIN_W = 4600          # don't shrink the tile more than ~20% chasing a seam
 
 
 def runs_of(im, row):
-    """Perforation runs (start, end) along one row, by luminance."""
-    px = im.convert("RGB").load()
-    W = im.size[0]
-    lum = [sum(px[x, row][:3]) // 3 for x in range(W)]
-    th = (max(lum) + min(lum)) // 2
+    """Perforation runs (start, end) along one row, from the ALPHA channel.
+
+    ⚠️ This read LUMINANCE via `im.convert("RGB")` and it was measuring the
+    wrong thing. Dropping alpha keeps whatever RGB sits under a transparent
+    pixel, and the bright rim around each hole then scores as its own run:
+    the detector reported 43 "holes" where the tile has 21, so the mean gap
+    came out at half the real pitch (128.5 against 258.4) and the seam was
+    scored against a rhythm that does not exist. It declared the tile already
+    optimal at -9.7% while the true seam was +33% — a third of a pitch of
+    extra film between two perforations, once per repeat, which is precisely
+    the break this script exists to remove.
+
+    A hole IS the transparency — 8.1% of the tile, the sprockets the page
+    shows through — so alpha is the ground truth and nothing else is."""
+    a = np.asarray(im.convert("RGBA"))[row, :, 3]
     out, s = [], None
-    for x, v in enumerate(lum):
-        if v > th and s is None:
+    for x, v in enumerate(a < 32):
+        if v and s is None:
             s = x
-        elif v <= th and s is not None:
+        elif not v and s is not None:
             out.append((s, x)); s = None
     if s is not None:
-        out.append((s, W))
-    return [r for r in out if r[1] - r[0] > 8]
+        out.append((s, len(a)))
+    return [r for r in out if r[1] - r[0] > 40]
 
 
 def holes(im, row):

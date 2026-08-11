@@ -83,7 +83,7 @@
         <span class="dot" aria-hidden="true">·</span>
         <span data-i18n="heroMeta2">القدس — جبل الزيتون</span>
         <span class="dot" aria-hidden="true">·</span>
-        <span data-i18n="heroMeta3">تصميم جرافيكي · تصوير احترافي · تطوير برمجيات</span>
+        <span data-i18n="heroMeta3">تصميم جرافيكي · صناعة محتوى · تطوير برمجيات</span>
       </div>
     </div>
   </div>
@@ -114,73 +114,148 @@
 
   <hr class="splitter">
 
-  <!-- block 2 — title over a zigzag of two pictures, tall rail alongside -->
+  <!-- block 2 — a carousel of vertical media. The playing item sits in the
+       middle at full strength; the previous and next flank it faded, so the
+       run of work reads as a strip rather than a single picture.
+
+       The track is a scroll-snap scroller, not a transform rail. That buys
+       native swipe on a phone and correct RTL behaviour for free — the one
+       thing a hand-rolled translateX carousel gets wrong on this site, where
+       Arabic is the primary direction. reelShow in main.js only reads which
+       slide is centred and drives the arrows; it never owns the position.
+
+       Every slide is data-kind="reel" (9:16) per the agency's brief. The
+       photographs behind them are the Drive's 2:3 portraits, so cover crops
+       ~16% off the width — acceptable on a photograph, and the reason no
+       design work (type baked in at 4:5) is in here. -->
   <article class="why-block wb2">
-    <div class="wb2-main">
-      <h3 class="why-title" data-i18n="w2Title">نبحث عن النقطة، ثم نرسم النظام.</h3>
-      <!-- ONE body of text with the two pictures floated INTO it, so the copy
-           wraps around them instead of sitting in separate boxes beside them.
-           Both figures come before the paragraph because a float is placed at
-           the flow position where it is encountered; wb2-m2 is pushed down by
-           its own top margin so the two stagger rather than sit side by side. -->
-      <div class="wb2-flow">
-        <figure class="holder wb2-m1" data-kind="poster">
-          <img src="assets/media/design-grillit-1.webp" alt="" loading="lazy" decoding="async">
-        </figure>
-        <p class="why-para" data-i18n="w2BodyA">لكل علامة نقطة أصل.</p>
-        <figure class="holder wb2-m2" data-kind="poster">
-          <img src="assets/media/design-shawarma-habash-1.webp" alt="" loading="lazy" decoding="async">
-        </figure>
-        <p class="why-para" data-i18n="w2BodyB">ولأنّ النقطة لا تُعطى في اجتماع.</p>
+    <h3 class="why-title" data-i18n="w2Title">نبحث عن النقطة، ثم نرسم النظام.</h3>
+
+    <div class="reelshow" id="reelShow">
+      <div class="reelshow-track" id="reelTrack">
+        <div class="reel-slide">
+          <figure class="holder" data-kind="reel">
+            <img src="assets/media/pics-portraits-46-2j6a5679.webp" alt="" loading="lazy" decoding="async">
+          </figure>
+        </div>
+        <div class="reel-slide">
+          <figure class="holder" data-kind="reel">
+            <img src="assets/media/pics-food-14-dsc00666.webp" alt="" loading="lazy" decoding="async">
+          </figure>
+        </div>
+        <div class="reel-slide">
+          <figure class="holder" data-kind="reel">
+            <img src="assets/media/pics-Queen-retreat-52-copy-of-0c2a0144.webp" alt="" loading="lazy" decoding="async">
+          </figure>
+        </div>
+        <div class="reel-slide">
+          <figure class="holder" data-kind="reel">
+            <img src="assets/media/pics-portraits-47-2j6a5684.webp" alt="" loading="lazy" decoding="async">
+          </figure>
+        </div>
+        <div class="reel-slide">
+          <figure class="holder" data-kind="reel">
+            <img src="assets/media/pics-food-17-dsc00763.webp" alt="" loading="lazy" decoding="async">
+          </figure>
+        </div>
+        <div class="reel-slide">
+          <figure class="holder" data-kind="reel">
+            <img src="assets/media/pics-Queen-retreat-58-copy-of-0c2a9810.webp" alt="" loading="lazy" decoding="async">
+          </figure>
+        </div>
+        <div class="reel-slide">
+          <figure class="holder" data-kind="reel">
+            <img src="assets/media/pics-portraits-48-2j6a5694.webp" alt="" loading="lazy" decoding="async">
+          </figure>
+        </div>
+        <div class="reel-slide">
+          <figure class="holder" data-kind="reel">
+            <img src="assets/media/pics-food-24-dsc03667.webp" alt="" loading="lazy" decoding="async">
+          </figure>
+        </div>
       </div>
-    </div>
 
-    <div class="wb2-rail">
-      <!-- ⚠️ This slot is a REEL — the agency's own video, and the rail is
-           built around it. It was briefly turned into a still because the
-           caption and w2Rail say "ملصق"; that was backwards. The video is the
-           content, the copy is what is wrong, and both are due in the copy
-           pass. Do not swap it back.
-
-           `src` is the local file while the reel moves to R2. That file is
-           51.8 MB and gitignored, so it CANNOT ship from the repo — and
-           Workers caps a single asset at 25 MiB. This src must become the R2
-           object URL before deploy, or the rail 404s in production. -->
-      <figure class="holder wb2-rail-media" data-kind="reel">
-          <video src="media/wb2-rail-reel.mov" autoplay muted loop playsinline preload="metadata"></video>
-        </figure>
-      <p class="why-para" data-i18n="w2Rail">الملصق يُقرأ من بعيد ثم من قريب.</p>
+      <button class="reel-arrow reel-prev" id="reelPrev" type="button">
+        <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <path d="M33 6H2"/><path d="M9 1C7.6 3.4 5.4 5 1 6c4.4 1 6.6 2.6 8 5"/>
+        </svg>
+        <span class="sr-only" data-i18n="reelPrev">الوسيط السابق</span>
+      </button>
+      <button class="reel-arrow reel-next" id="reelNext" type="button">
+        <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <path d="M1 6h31"/><path d="M25 1c1.4 2.4 3.6 4 8 5-4.4 1-6.6 2.6-8 5"/>
+        </svg>
+        <span class="sr-only" data-i18n="reelNext">الوسيط التالي</span>
+      </button>
     </div>
   </article>
 
   <hr class="splitter">
 
-  <!-- block 3 — full-width title, then two text columns flanking a tall cut -->
+  <!-- block 3 — the gallery wall: photographs and the agency's own marks hung
+       tight, the way a wall of prints is hung.
+
+       The tiling is EXPLICIT, not auto-flowed. Every tile names its columns
+       and rows, and the twelve of them cover a 12x12 field exactly with no
+       holes — which is the whole point of a wall. Auto-placement leaves gaps
+       the moment two neighbouring tiles disagree about height.
+
+       Cells are square by construction: equal column and row counts, equal
+       gaps both ways, and aspect-ratio:1 on the container. So a tile's shape
+       is just its span — 6x4 is 3:2, 4x6 is 2:3, 2x2 is square. Change a span
+       and you change the crop; change the container's aspect and you change
+       every tile at once.
+
+       The DOM order below is alphabetical by tile (a..l) and says nothing
+       about position — every tile is placed by grid-area in style.css, and
+       the two breakpoints hang them differently. Read the spans there, not
+       the order here.
+
+       Graphic-design work is deliberately NOT here. Those are finished 4:5
+       layouts with type baked in, and every tile on this wall crops. -->
   <article class="why-block wb3">
     <h3 class="why-title wb3-head" data-i18n="w3Title">أن تبدو النتيجة حتميّة.</h3>
-    <div class="wb3-body">
-      <div class="wb-col">
-        <p class="why-para" data-i18n="w3ParaA">لا نسلّم شعارًا ونمضي.</p>
-        <p class="why-para" data-i18n="w3ParaB">والاختبار الحقيقي يأتي بعد سنة.</p>
-        <p class="why-para" data-i18n="w3ParaC">نكتب القواعد بلغة من سيستعملها.</p>
-        <p class="why-para" data-i18n="w3ParaD">ونقيس ما نستطيع قياسه.</p>
-        <p class="why-para" data-i18n="w3ParaE">وما لا يُقاس نحكم عليه بالعين.</p>
-        <p class="why-para" data-i18n="w3ParaF">ونُبقي النظام مفتوحًا للنموّ.</p>
-      </div>
-      <!-- was data-kind="reel"; the reels are video and live on R2, so until
-           one lands this carries a portrait photograph at the Drive's real
-           2:3 rather than a 9:16 box with nothing 9:16 to put in it. -->
-      <figure class="holder wb3-media" data-kind="portrait">
-          <img src="assets/media/pics-portraits-46-2j6a5679.webp" alt="" loading="lazy" decoding="async">
-        </figure>
-      <div class="wb-col">
-        <p class="why-para" data-i18n="w3Para2A">ونحن فريق صغير عن قصد.</p>
-        <p class="why-para" data-i18n="w3Para2B">نختار المشاريع التي نستطيع.</p>
-        <p class="why-para" data-i18n="w3Para2C">وحين ينتهي المشروع لا تنتهي العلاقة.</p>
-        <p class="why-para" data-i18n="w3Para2D">ونحبّ العمل الطويل.</p>
-        <p class="why-para" data-i18n="w3Para2E">ونكتب كل شيء.</p>
-        <p class="why-para" data-i18n="w3Para2F">وفي النهاية المقياس واحد.</p>
-      </div>
+
+    <div class="gwall">
+      <figure class="gw-tile gw-mat gw-a">
+        <img src="assets/media/pics-Queen-retreat-53-copy-of-0c2a0153.webp" alt="" loading="lazy" decoding="async">
+      </figure>
+      <figure class="gw-tile gw-print gw-b">
+        <img src="assets/media/pics-Interactive-37-dsc03223.webp" alt="" loading="lazy" decoding="async">
+      </figure>
+      <figure class="gw-tile gw-mark gw-c">
+        <img src="assets/img/Aliph-Logo-Main.svg" alt="ألِف">
+      </figure>
+      <figure class="gw-tile gw-plate gw-d">
+        <img src="assets/media/pics-group-pics-26-dsc04631.webp" alt="" loading="lazy" decoding="async">
+      </figure>
+      <figure class="gw-tile gw-mat gw-e">
+        <img src="assets/media/pics-official-visits-43-dsc08794.webp" alt="" loading="lazy" decoding="async">
+      </figure>
+      <figure class="gw-tile gw-mark gw-f">
+        <img src="assets/img/Aliph-Icon.svg" alt="أ">
+      </figure>
+      <figure class="gw-tile gw-mat gw-g">
+        <img src="assets/media/pics-Interactive-40-dsc04052.webp" alt="" loading="lazy" decoding="async">
+      </figure>
+      <figure class="gw-tile gw-print gw-h">
+        <img src="assets/media/pics-food-15-dsc00669.webp" alt="" loading="lazy" decoding="async">
+      </figure>
+      <figure class="gw-tile gw-mark gw-i">
+        <!-- the stamp shipped only in cream; HalfAliph-Stamp.svg is the same
+             artwork with its single fill swapped to ink, the way the other
+             marks already ship as a -cream / ink pair -->
+        <img src="assets/img/HalfAliph-Stamp.svg" alt="ختم ألِف">
+      </figure>
+      <figure class="gw-tile gw-plate gw-j">
+        <img src="assets/media/pics-students-62-dsc07902.webp" alt="" loading="lazy" decoding="async">
+      </figure>
+      <figure class="gw-tile gw-mat gw-k">
+        <img src="assets/media/pics-public-services-49-img.webp" alt="" loading="lazy" decoding="async">
+      </figure>
+      <figure class="gw-tile gw-print gw-l">
+        <img src="assets/media/pics-Queen-retreat-54-copy-of-0c2a0158.webp" alt="" loading="lazy" decoding="async">
+      </figure>
     </div>
   </article>
 
@@ -216,7 +291,7 @@
     </button>
     <span class="svc-dot" aria-hidden="true">·</span>
     <button class="svc-pick" role="tab" aria-selected="false" data-service="photo">
-      <span data-i18n="svc2">تصوير احترافي</span>
+      <span data-i18n="svc2">صناعة محتوى</span>
     </button>
     <span class="svc-dot" aria-hidden="true">·</span>
     <button class="svc-pick" role="tab" aria-selected="false" data-service="tech">
@@ -285,12 +360,24 @@
           </span>
         </a>
       </div>
+      <!-- The phone and the WhatsApp are DIFFERENT numbers (agency-confirmed
+           2026-08-06, and recorded in chat/aliph-chat.js). One row labelled
+           "هاتف / واتساب" carrying only the phone claimed both. -->
       <div class="contact-row">
-        <span class="contact-label" data-i18n="cLabelPhone">هاتف / واتساب</span>
+        <span class="contact-label" data-i18n="cLabelPhone">هاتف</span>
         <a class="contact-value" href="tel:+972528745090" lang="en" dir="ltr">
           <span class="cv-swap">
             <span class="cv-real">052-874-5090</span>
             <span class="cv-ghost" aria-hidden="true">052-874-5090</span>
+          </span>
+        </a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-label" data-i18n="cLabelWhats">واتساب</span>
+        <a class="contact-value" href="https://wa.me/972594097725" target="_blank" rel="noopener noreferrer" lang="en" dir="ltr">
+          <span class="cv-swap">
+            <span class="cv-real">059-409-7725</span>
+            <span class="cv-ghost" aria-hidden="true">059-409-7725</span>
           </span>
         </a>
       </div>
@@ -301,7 +388,6 @@
     </div>
 
     <div class="contact-side">
-      <img class="contact-stamp" src="assets/img/HalfAliph-Stamp-cream.svg" alt="ختم ألِف">
       <p class="contact-clock">
         <span id="clockTime">—</span>
         <small data-i18n="cClock">بتوقيت القدس</small>

@@ -1,23 +1,31 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-10. Read this first._
+_Updated 2026-08-11. Read this first._
 
-> ## 🔴 State on 2026-08-10: real media is in, NOTHING IS COMMITTED
+> ## 🔴 State on 2026-08-11: the why section was rebuilt, NOT COMMITTED
 >
-> The agency needs a shipped version. Real work is on the page for the first
-> time — 63 images derived from the Drive, and the reel playing in the rail —
-> but **none of it is committed and none of it is deployed.** Pushing to GitHub
-> does not deploy; that is `npx.cmd wrangler deploy` from the repo root.
+> The 63 derived images **are** committed (`4605abb`). What is not committed is
+> today's work: blocks 2 and 3 of لماذا ألِف؟ are now a reel carousel and a
+> gallery wall, the footer carries the real WhatsApp number, and the stamp is
+> gone. Five files are dirty. Nothing is deployed — pushing to GitHub does not
+> deploy; that is `npx.cmd wrangler deploy` from the repo root.
 >
-> **The one thing that will break a deploy:** `wb2-rail-media` points at
-> `media/wb2-rail-reel.mov`, a 51.8 MB gitignored local file. Workers caps a
-> single asset at **25 MiB**, so that src MUST become an R2 object URL before
-> deploy or the rail 404s in production.
+> **The reel is out of the page for now.** The old `wb2-rail-media` slot no
+> longer exists, so nothing in the repo points at the 51.8 MB gitignored
+> `media/wb2-rail-reel.mov` any more — the deploy-breaker from 2026-08-10 is
+> gone with it. ⚠️ **It comes straight back the moment a video goes into the
+> carousel**, which is what the carousel is for: Workers caps a single asset at
+> **25 MiB**, so any video must be an R2 object URL, never a repo file.
 >
-> **Still fabricated, still not shippable:** every caption and body paragraph in
-> لماذا ألِف؟ and the project entries on the work page. The captions now sit over
-> real client work and are visibly wrong — "تجارب الخط" labels a Grillit food
-> poster. The copy pass is the last blocker before this is honest.
+> ✅ **The faststart remux is done** (2026-08-11):
+> `prototype/media/wb2-rail-reel.mp4`, `moov` at byte 36, video stream
+> bit-identical to the source (768 packets, matching framemd5). Ready for R2;
+> the upload and the object key are still outstanding.
+>
+> **Still fabricated, still not shippable:** block 1's paragraph, the three
+> block titles, and the project entries on the work page. Blocks 2 and 3 no
+> longer carry any copy at all, so the worst of it — captions sitting over real
+> client work, "تجارب الخط" labelling a Grillit food poster — is gone.
 
 **Standing rule: update this file at the end of every session.**
 
@@ -110,7 +118,7 @@ is scaled down to compensate, never the other way round.
 | id | Arabic | English |
 |---|---|---|
 | `design` | تصميم جرافيكي | Graphic Design |
-| `photo` | تصوير احترافي | Professional Photography |
+| `photo` | صناعة محتوى | Media Production |
 | `tech` | تطوير برمجيات | Software Development |
 
 Each has three subcategories (`SUBCATS` in `main.js`). The ids are the join key across
@@ -118,11 +126,32 @@ Each has three subcategories (`SUBCATS` in `main.js`). The ids are the join key 
 the markup, **and `chat-worker/src/services.js`**. Change one without the others and
 classification breaks silently.
 
-⚠️ **The 2026-08-10 rename moved labels, not ids** — and it landed in `I18N.svc1-3`
-only. Five other copies had to be caught by hand: `CATS` (which had a third spelling,
-`تصميم جرافيك`), `SERVICES[].tag`, the `data-i18n` fallbacks in `index.html`,
-`chat-worker/src/services.js`, and two test fixtures. The keyword lists in
-`services.js` keep the **short** forms on purpose — a visitor types "تصميم".
+⚠️ **Renamed twice now, and neither rename moved an id** — only labels.
+2026-08-10 gave the three their long names; **2026-08-11 changed `photo` from
+تصوير احترافي / Professional Photography to صناعة محتوى / Media Production**,
+which widens it from photography to everything the feed is made of.
+
+**Six live copies, and they must all move together** — this string has gone stale
+twice by being changed in one place:
+
+1. `I18N.svc2` in `main.js`
+2. `SERVICES[].tag` in `main.js` (the uppercase Latin tag)
+3. `CATS` in `main.js` — which once carried a *third* spelling of its own
+4. the `data-i18n` fallback in `index.html` (the `svc2` span)
+5. the `heroMeta3` fallback in `index.html`
+6. `chat-worker/src/services.js`
+
+`I18N.heroMeta3` itself is **derived from `CATS`** and needs no edit. A dead
+literal for it sat in the I18N table carrying the pre-rename short labels until
+2026-08-11; it was overwritten at boot and never rendered. It is gone — don't
+reintroduce one.
+
+The keyword lists in `services.js` keep the **short** forms on purpose: a visitor
+types "تصميم", and "تصوير" still routes to `photo` because they still shoot.
+
+✅ **The rename fixes open question 2.** صناعة محتوى covers *running* a channel,
+which the three-service taxonomy had no home for since `creative` was dropped —
+the social keywords parked on `photo` now sit under a name that admits them.
 
 ⚠️ **A service name is a substring problem now.** `guardrails.mentionsService()`
 decides "has the bot classified yet" by looking for a full service name in its reply,
@@ -155,39 +184,45 @@ python -c "import io,re;s=io.open('prototype/style.css',encoding='utf-8').read()
 null the handle when killing, or a "paused" check resumes a corpse and the animation
 never restarts.
 
-**A float excludes text with its MARGIN box.** A bottom margin is the dangerous one:
-any line box that so much as clips it gets squeezed to the narrow side — measured, a
-28px bottom margin made the line under block 2's first picture 35% wide instead of
-running the column. `.wb2-m1`'s is still `0` for that reason.
+**A percentage does not always resolve against the box you think.** This has now
+cost time three separate ways in one section, so treat any percentage near a
+padded or grid-sized box as suspect until measured:
 
-⚠️ **The same reasoning was wrongly extended to `.wb2-m2`'s TOP margin** and it sat
-at `0` for weeks. Reserved space is the *point* there: with no margin the second
-picture landed 33px below the first, the two read as one stacked pair, and the
-zigzag the wireframe draws collapsed. It is now one line of body copy —
-`calc(var(--wb2-body) * 1.52)`, the solved size times `.why-para`'s line-height, so
-it tracks the type rather than being a magic number. Measured: the gap goes 33 → 89px
-against a 56px line, a full line lands between the two pictures, and block 2's two
-columns come out at 1246 and 1253 instead of 1190 and 1253.
+- `padding-inline` resolves against the **parent's** width; a flex item's
+  `flex-basis` resolves against the **content box** that padding just shrank.
+  Using one variable for both gave a third of a third (125px in a 1188px track).
+- `height: 100%` and `max-height: 100%` **do not resolve at all** against an
+  auto-sized grid row. The browser falls back to the intrinsic ratio and sizes
+  from the width — a 0.279-ratio glyph became 654px tall in a 447px tile. Give
+  the row a definite size (`minmax(0, 1fr)`) or cap with `max-*` and no
+  percentage.
+- A `clamp()` floor is what applies on a phone, not its vw term. At this 150%
+  root, `clamp(1.7rem, …)` is 40.8px at 390px wide.
 
-The lesson is narrower than "no margins on floats": a top margin costs you a band on
-the picture's own side, which is worth paying when the alternative is two pictures
-colliding, and never worth paying at the foot of a column.
+**Floats are gone from the why section** (2026-08-11). The lessons they cost are
+worth keeping if floats ever come back: a float excludes text with its **margin**
+box, so a bottom margin squeezes any line that clips it (a 28px margin made the
+line under a picture 35% wide); and a float only wraps text that comes *after* it
+in the flow, so no margin can put a line *above* one — only markup order can.
 
-**A float only wraps text that comes *after* it in the flow.** No margin can put a
-line of text *above* a float — only markup order can. That is why block 2's body is
-two paragraphs with the second picture between them rather than one.
+**`behavior: "auto"` on a scroll method means "defer to CSS `scroll-behavior`",
+not "jump".** On a container that sets `scroll-behavior: smooth`, an "auto" call
+animates — which silently defeated the reduced-motion branch of the carousel.
+`"instant"` is the one that jumps.
+
+**`scrollLeft` is negative under RTL** and its origin differs between engines.
+Measure centre-to-centre with `getBoundingClientRect` and move with `scrollBy`,
+which takes a visual delta and needs no direction flip.
 
 **Anything that names or counts the services must derive it from `SERVICES`.** Typed
 copies have now survived two taxonomy changes and gone stale both times: the chatbot
 prompt said "four services" and its off-scope reply recited the pre-August four for
 weeks. The brand stamp is still wrong for the same reason (see open questions).
 
-**A `clamp()` floor is what applies on a phone**, not its vw term. At this 150% root,
-`clamp(1.7rem, …)` is 40.8px at 390px wide.
-
 **`order` is ignored for explicitly-placed grid items.** If a mobile query collapses
 a grid, it must reset `grid-row` as well as `grid-column`, or the children stack on
-top of each other.
+top of each other. The gallery wall places all twelve tiles explicitly, so its
+phone rule restates both axes **and** the container's aspect.
 
 **You cannot measure "is this box full" with `getBoundingClientRect()`.** A stretched
 `<p>` is always exactly as tall as its row. Use the inked extent:
@@ -203,9 +238,37 @@ that looks like success. This has silently lost real edits.
 sprocket holes the page shows through. Flattening it to RGB drops the file from
 ~810 KB to ~145 KB, which is the tell. It must say `RGBA`.
 
-**Screenshots:** the Browser pane's `computer{screenshot}` fails here. Use Playwright,
-and scroll with real wheel events before measuring anything ScrollTrigger drives — a
-`gsap.from()` sits at opacity 0 until its trigger fires.
+**🔴 The Browser pane reports `document.visibilityState === "hidden"`, so it never
+runs a frame.** `requestAnimationFrame` never fires, CSS transitions sit frozen at
+`currentTime: 0`, and smooth scrolling does not move. Anything time-based reads as
+broken there when it is fine — a `.is-current` class was correctly applied while
+the computed opacity stayed at the un-transitioned value, which looks exactly like
+a cascade bug. It is still good for **layout** measurement (rects, computed
+styles, the CSSOM); it cannot verify motion.
+
+**Use Playwright for anything animated, and for screenshots.** Neither the
+`playwright` npm package nor the `chrome` channel is installed, but the browser
+builds are cached and `playwright-core` is in the npx cache, so drive it directly:
+
+```bash
+node -e "const {chromium}=require(process.env.LOCALAPPDATA+'/npm-cache/_npx/9833c18b2d85bc59/node_modules/playwright-core');chromium.launch({executablePath:process.env.LOCALAPPDATA+'/ms-playwright/chromium-1234/chrome-win64/chrome.exe'})"
+```
+
+The `executablePath` override is required — `playwright-core` asks for a build
+number the cache does not have and tells you to run `npx playwright install`,
+which is not necessary. Scroll with real wheel events before measuring anything
+ScrollTrigger drives: a `gsap.from()` sits at opacity 0 until its trigger fires.
+
+⚠️ **Two test techniques that produce false failures here**, both of which cost a
+round of debugging:
+
+- `document.elementFromPoint` takes **viewport** coordinates. The gallery wall is
+  taller than the viewport, so sampling its cells reported all 144 uncovered.
+  Verify tiling geometrically from rects instead.
+- A synthetic **mouse** drag does not scroll an overflow container — browsers only
+  drag-to-scroll for touch. A "swipe" test built on `mouse.down/move/up` scrolls
+  nothing and reads as a broken carousel. Drive `scrollBy` instead; it exercises
+  the same scroll → handler path.
 
 **A stray terracotta rectangle on the page is the focus ring**, not a bug —
 `:focus-visible { outline: 2px solid var(--accent) }`. It appears around whatever last
@@ -218,34 +281,166 @@ took keyboard focus and has been mistaken for a stray border.
 **Hero** — a film strip loops behind a cream panel. `filmLoop` in `main.js` travels
 exactly one period at 34 px/s and repeats, so the restart is pixel-identical. The
 film tile's aspect divided by 4 is the frame-slot constant in `style.css`
-(`0.839732`); re-cut the tile and that number must change with it. The strip pauses
-off screen. **It has been blamed for four bugs and caused none of them** — check the
-callers first.
+(**`0.826630`** since the 2026-08-11 re-cut); re-cut the tile and that number must
+change with it. The strip pauses off screen. **It has been blamed for four bugs and
+caused none of them** — check the callers first.
+
+🔴 **`recut_film.py` was scoring the wrong feature until 2026-08-11, and it is the
+reason the loop looked broken for weeks.** Its perforation detector read
+*luminance* through `im.convert("RGB")`, which drops alpha and leaves the bright
+rim around each hole scoring as its own run: it counted **43 holes where the tile
+has 21**, so the mean pitch came out at half the truth (128.5 against 258.4) and
+the seam was graded against a rhythm that does not exist. It pronounced the tile
+already optimal at −9.7% while the real seam was **+33%** — a third of a pitch of
+extra film between two perforations, once per repeat.
+
+A hole *is* the transparency (8.1% of the tile), so **alpha is the only ground
+truth**; the detector reads it now. Re-cut to 5426px (86px off the right), the
+seam is **−0.4% top / +0.0% bottom**, and the constant moved 0.839732 → 0.826630.
+`film-shadow.webp` and both `-m` variants were regenerated with it; all four are
+still RGBA and `film.webp` is 795 KB, nowhere near the ~145 KB that means the
+alpha is gone.
+
+The lesson generalises past this file: **measure the thing itself, not a proxy
+that happens to correlate.** Two scripts had been tuned against that phantom
+rhythm, and both looked like they were working.
 
 The headline's أ (and Latin A) are photographed paper scraps that re-cut themselves
 every second or so. `splitSafe()` refuses to split a word where Arabic shaping would
 break it. Only the two verbs نبدأ and تبدأ.
 
-**لماذا ألِف؟** — three editorial blocks, laid out to the user's annotated wireframe.
-Deliberately unanimated.
+**لماذا ألِف؟** — three blocks. Block 1 is still the editorial layout from the
+user's annotated wireframe, deliberately unanimated. **Blocks 2 and 3 were
+replaced on 2026-08-11** at the agency's request and no longer follow the
+wireframe at all — see the two sections below.
 
-Block 2's copy reads as one body wrapping around two floated pictures, but it is
-**two paragraphs with the second picture between them** — a float only wraps what
-follows it, so that is the only way to get a line of text above that picture. The
-pictures float to opposite edges so the text zigzags, and both have zero block
-margins so no line gets squeezed. On a phone they unfloat: a 54% float in a 342px
-column leaves three or four words a line.
-
-Per-column type sizes are **solved, not chosen** — each column's size is the one that
-fills its own box:
+Block 1's type size is **solved, not chosen** — the size that fills its own box:
 
 ```bash
 python resources/fit_columns.py ar
 ```
 
-Re-run it whenever the copy changes length. `--why-type` on `.why` is the single
-lever for the language difference (English runs longer; text area grows with the
-*square* of the size, so a 1.37× overflow takes a 0.85 scale).
+⚠️ **It now has one column to fit, not four.** Blocks 2 and 3 lost their copy, so
+`--wb2-body`, the rail size and both wb3 column sizes are gone. `--why-type` on
+`.why` is still the single lever for the language difference (English runs longer;
+text area grows with the *square* of the size, so a 1.37× overflow takes a 0.85
+scale).
+
+### Block 2 — the reel carousel (2026-08-11)
+
+Vertical media at 9:16, the playing item centred and its neighbours faded either
+side. No copy. `--reel-w` is the centre slide's share of the track: **33.5%
+desktop** ("a third-ish"), 52% under 900px, **78% on a phone**, where the media
+being big is the point and the flanks are cut to a sliver rather than dropped.
+
+⚠️ **It is a scroll-snap scroller, not a transform rail, and that is deliberate.**
+Arabic is the primary direction; a hand-rolled `translateX` carousel needs a sign
+flip in every calculation, and a scroller inverts itself and brings native swipe.
+`reelShow` in `main.js` reads which slide is centred and drives the arrows — it
+never owns the position.
+
+**It loops (2026-08-11).** `main.js` clones the slide set either side of the real
+one at runtime — **8 slides in the HTML, 24 in the DOM** — and the carousel lives
+in the middle set. That is what puts a neighbour on both sides of *every* slide
+including the first and last, and what lets "next" past the end carry on in the
+same direction instead of rewinding the track. On settle (140ms after the last
+scroll event, and never while a finger is down) `recentre()` jumps instantly to
+the equivalent slide in the middle set; the jump is invisible because both clones
+show the same picture at the same offset. Verified: forward and back both cycle
+0→7→0 with **three slides visible at every step**, and each image is still
+requested **once** — the browser dedupes the clones by URL.
+
+⚠️ **Prepending the leading clone set shifts an RTL scroller under you.** The
+browser's scroll anchoring adjusts `scrollLeft` *after* the insert, so a centre
+computed in the same tick lands one slide out — measured, the carousel opened on
+slide 7 of 8. Two things fix it and both are load-bearing: the track sets
+`overflow-anchor: none`, and the home position is asserted again inside a
+`requestAnimationFrame`, after the adjustment has happened.
+
+⚠️ **`go()` re-homes BEFORE it steps, and that is not belt-and-braces either.**
+Recentring only on settle is not enough: anyone clicking faster than the 140ms
+settle never lets it fire, and the index walks straight out of the middle set —
+measured, sixteen fast clicks reached slide 23 of 24 and opened a **319px hole**
+where the track runs out of slides. That is the blank flank in the 2026-08-11
+screen recording.
+
+⚠️ And `recentre()` **translates** by the distance between two equivalent slides
+rather than re-centring the target. They are the same thing only at rest, and it
+now fires mid-flight: re-centring would snap a running animation to a stop, where
+a translation preserves the exact visual offset and stays invisible.
+
+Three things about it that are easy to get wrong, all of them measured:
+
+- ⚠️ **The two percentages resolve against different bases.** `padding-inline` on
+  the track resolves against the parent's width; a slide's `flex-basis` resolves
+  against the *content* box that padding just shrank. Writing `flex: 0 0
+  var(--reel-w)` looks right and gives you **a third of a third** — 125px in a
+  1188px track. The slide is `flex: 0 0 100%`, because the padding has already
+  made the content box exactly one slide wide.
+- ⚠️ **`scrollLeft` is negative under RTL** and its origin differs between
+  engines. Everything is measured with `getBoundingClientRect` centre-to-centre
+  and moved with `scrollBy`, which takes a visual delta — neither needs
+  `dirSign()`. Verified: after "next", the centred slide is 0.1px off centre and
+  `scrollLeft` is −468.
+- ⚠️ **`behavior: "auto"` is not "instant".** It means "defer to CSS
+  `scroll-behavior`", which this track sets to `smooth` — so the reduced-motion
+  branch animated exactly like the other one and the setting did nothing. It is
+  `"instant"` now.
+
+Autoplay is a self-resetting timeout, not an interval, so every scroll re-arms it
+and it cannot yank itself forward out of a swipe someone is mid-way through. It
+holds on hover (bound only for `(hover: hover)` — on touch, `pointerenter` fires
+once and `pointerleave` never does, which would stop it for good) and stops off
+screen, same rule as the film strip.
+
+### Block 3 — the gallery wall (2026-08-11)
+
+Photographs and the agency's own marks hung tight — 7px gaps. Twelve tiles cover
+a **12×12** field exactly on desktop and a **6×11** field on a phone; verified
+programmatically at **0 holes, 0 overlaps**.
+
+⚠️ **Cells are square by construction and every tile's shape depends on it:**
+equal column and row counts, one gap value both ways, and `aspect-ratio: 1` on the
+container. A tile spanning 6×4 is therefore 3:2 with no arithmetic anywhere.
+Break any one of those three — change the row count without the aspect, or set a
+row gap that differs from the column gap — and every tile on the wall re-crops at
+once. The phone rule restates **both axes and the aspect** for that reason.
+
+The tiles are explicitly placed, so `order` is ignored and a half-reset stacks all
+twelve in the first cell. Three frame treatments — `gw-mat` (mount board),
+`gw-print` (darkroom margin, deeper at the foot), `gw-plate` (ink) — deliberately
+unlike the about page's `.clip`, which is a shadowed cutting pinned at an angle.
+Nothing here is rotated or shadowed: a wall is hung flat, and a shadow needs a gap
+to fall into that this grid does not have.
+
+⚠️ **No graphic-design work on the wall.** Those are finished 4:5 layouts with
+type baked in and every tile crops. The three marks are the brand instead.
+
+⚠️ **The three marks sit apart on purpose.** They were first written into columns
+11-12, one under another — which under RTL is the entire left edge — so the
+agency's own marks read as a sidebar bolted to one side. They now run a diagonal:
+أ top-right, the stamp through the middle, the wordmark bottom-left, on three
+different rows *and* three different columns. The phone field had the same fault
+(all three in the last band) and got the same treatment. Keep them separated if
+this is ever re-tiled.
+
+They are **ink artwork on a light `--cream-warm` field, with no frame** — the
+photographs are matted and ruled, the marks are not. `--cream-warm` rather than
+the page cream because, with no border, a tile in the page's own colour would
+have no edge where the wall meets the margin, and two of the three sit on the
+wall's outer corners.
+
+⚠️ **`HalfAliph-Stamp.svg` is new (2026-08-11).** The stamp shipped only in cream,
+which is invisible on a light field; the ink version is the same artwork with its
+single `#D9D9CE` fill swapped to `#101820`, the way the other marks already ship
+as a `-cream` / ink pair. No pixel invented.
+
+⚠️ **A mark is capped with `max-width`/`max-height`, never `width/height: 100%` +
+`object-fit`.** A percentage height does not resolve against an auto-sized grid
+row, so the browser fell back to the intrinsic ratio and sized from the width —
+the أ came out **654px tall in a 447px tile** and had its stem cut off by the
+tile's own `overflow: hidden`. The inner grid declares `minmax(0, 1fr)` tracks so
+there is a definite height to resolve against.
 
 **ماذا نفعل؟** — three service names on one line, sized by `fitPicks()` to fill the
 column exactly. Not a fixed vw: the strings differ too much between languages. Below
@@ -268,37 +463,20 @@ be honoured and the cap wins silently: 78vh is 520px on a 667px phone, while a
 full-width 9:16 reel needs 581px. It was re-cropping the exact media the ratios
 exist to protect, on the smallest screens.
 
-⚠️ **Width is the wireframe's; HEIGHT is whatever the real ratio makes it. Do not
-invert that — it was tried and reverted the same day.** The widths were briefly
-re-solved so the true ratios would reproduce the old heights exactly:
-`w_new = w_old × ratio_new / ratio_old`, giving 38.4%, 34.3% and 81.3%. The
-arithmetic was right and the result was wrong on both counts: the two pictures came
-out 20% narrower, which is the dimension you actually see in a column of floats, and
-the rail left 18.7% of its track empty, which reads as a gap between the text and the
-reel — a rail that does not reach its own edge stops being a rail.
+⚠️ The gallery wall is the **one place that deliberately does not use `data-kind`**.
+Its tiles crop to their cells by design, so they are not holders.
 
-So the widths stayed at 48%, 50% and 100%, and **block 2 is ~180px taller than the
-wireframe**. That is the honest cost of showing a 9:16 reel uncropped, paid in the
-dimension the eye forgives. Its two columns still balance: 1246 against 1253.
+**What is left of the phone edit.** Blocks 2 and 3 were rebuilt on 2026-08-11 and
+most of this breakpoint went with them — the rules that hid `.wb2-m2`, `.wb2-rail`
+and eight of block 3's paragraphs are gone because none of those elements exist.
+What remains is block 1's reorder (`.wb1-side` becomes `display: contents` so the
+picture can be ordered *between* the title and the paragraph, which is impossible
+while they share a wrapper), plus the carousel's `--reel-w: 78%` and the wall's
+6-column re-hang.
 
-**One medium and one text field per block**, to the studio's sketch: block 1 is
-title → `wb1-media` → text (`.wb1-side` becomes `display: contents` so the picture
-can be ordered *between* the title and the paragraph, which is impossible while they
-share a wrapper); block 2 keeps only `wb2-m1` and `w2BodyA`; block 3 leads with the
-media and drops `w3ParaA`.
-
-`.wb2-rail` is hidden **as a unit** on purpose — hiding the poster but keeping
-`w2Rail` would leave "الملصق يُقرأ من بعيد ثم من قريب" describing a poster that is
-not on the screen.
-
-Block 3 keeps **one paragraph** (`w3ParaB`). It is done by hiding every `.why-para`
-in the block and bringing one back by name, so adding a paragraph to the desktop
-columns cannot silently lengthen the phone view again. That also settles the
-`text-align: center` on those columns: fine over one short paragraph, bad over eight
-full-width ones.
-
-Measured effect at 375px: the section went **4,493px → 2,509px** (5.5 screens →
-3.1) and the page **7,701px → 5,717px**. Verified at 375, 390 and 360 wide.
+Measured at 375px across the three edits: the section went **4,493 → 2,509
+(2026-08-10) → 2,131px**, and the page **7,701 → 5,717 → 5,236px**. Verified at
+360, 375 and 390 wide, in both languages.
 
 ---
 
@@ -384,6 +562,26 @@ a regex for "we can" also swallows the one sentence the bot exists to say.
 ⚠️ **The reel is not optional.** It was swapped for a still because the caption
 said "ملصق" and R2 was unsolved; that was wrong and was reverted. The video is
 the content and the caption is what needs fixing. Do not make that trade again.
+**Still true after 2026-08-11** — the carousel is built for vertical video and is
+carrying portrait photographs only until the reels are on R2.
+
+## Asked by the agency, 2026-08-11
+
+| ask | done |
+|---|---|
+| Contact numbers in the footer were wrong | **Fixed on all three pages.** The phone and the WhatsApp are different numbers and one row labelled `هاتف / واتساب` carried only the phone. Now two rows, `tel:` and `wa.me`, from the values `chat/aliph-chat.js` has had since 2026-08-06 |
+| Remove the ألِف stamp from the footer | **Removed**, all three pages, plus its CSS and the `spin` keyframes it was the only user of |
+| Block 2 → a slideshow of vertical media at reel ratio, current centred, neighbours faded, "3rd-ish", no description | **Built.** See _Block 2 — the reel carousel_ |
+| Block 3 → a calm gallery wall, photos + our own marks, tight spacing, no descriptions, framed unlike the about page | **Built.** See _Block 3 — the gallery wall_ |
+| Phone: socials on one line, keep the font size, tighten the dot spacing | **One line at 360/375/390.** ⚠️ See the note below — the dot spacing alone was not enough |
+
+⚠️ **The socials needed more than the dot spacing, and the trade is worth
+confirming.** At the current size the three names measure 389.5px inside a 327px
+column: 73px of that is `.latin`'s `letter-spacing: 0.18em` against only 33px of
+dot margin, so zeroing the margins still overflows. The **font size is
+unchanged**; the phone rule cuts tracking to `0.03em` and the dot margin to
+0.14rem, landing at 304.3px. If the agency would rather keep the wide tracking,
+the alternative is a smaller font — it cannot be neither.
 
 ## Open questions for the agency
 
@@ -401,12 +599,20 @@ the content and the caption is what needs fixing. Do not make that trade again.
    Blocked on the 29LT licence: converting desktop OTFs can breach a foundry
    licence, and the kit may already exist. This is the last big lever on phone
    performance.
-6. **`wb2-rail-media` now points three ways at once.** `data-kind` is `reel` and it
-   holds a `<video>`, the aspect is `9/13` (neither a reel nor a poster), and both the
-   figcaption (`ملصق — ليالي رمضان`) and the paragraph under it (`w2Rail`, "الملصق
-   يُقرأ من عشرة أمتار") are still poster copy. `style.css`'s mobile comment also still
-   claims "a reel is 9:16 and a poster is portrait, and `data-kind` says which".
-   Pick one and make the other three follow.
+6. ~~`wb2-rail-media` points three ways at once.~~ **Resolved 2026-08-11** — the
+   element and all three of its contradictory labels went with the rebuild.
+7. **The carousel is showing photographs, not reels.** It is built for 9:16 video
+   and the agency has reels; they are on R2's side of the line, so the eight
+   slides are portrait photographs at 2:3 cropped ~16% on the width. Landing the
+   real reels is a `src` change per slide, nothing more — edit the **eight slides
+   in `index.html`**, never the clones, which are built from them at runtime.
+   ⚠️ Three of the eight (`portraits-46/47/48`) are frames from one session and
+   read as near-duplicates, which is most visible at the wrap where 6 and 0 flank
+   7 together. Worth swapping when the reels land.
+8. **Which work goes on the gallery wall?** The twelve tiles are a curated
+   composition, not a feed — the shapes are fixed and the pictures were chosen to
+   fill them. Swapping a photograph is one `src`; changing how many there are
+   means re-tiling both the 12×12 and the 6×11 fields.
 
 ---
 
@@ -497,9 +703,12 @@ slot at its own ratio. The Drive is organised by *subject*; the site needs *proj
 with a title, date, service and cover. That mapping cannot be derived from the folder
 names — the studio has to supply it.
 
-Everything on the site is still the `HOLDER` placeholder (an inline SVG data URI),
-with one exception: `wb2-rail-media` is now a `<video>`. The `seed` fields on
-`PROJECTS` are dead data kept on purpose — they are the shopping list.
+⚠️ **That paragraph is now half-expired.** The home page carries real photographs
+throughout — block 1's still, the carousel's eight slides and the gallery wall's
+nine tiles. `HOLDER` (an inline SVG data URI) is still what `setHolder()` paints
+when an item has no `src`, which is everything the **library and about pages**
+show. The `seed` fields on `PROJECTS` are dead data kept on purpose — they are the
+shopping list.
 
 ### The reel trial — it works, and it is deliberately not in the repo
 
@@ -510,13 +719,13 @@ old grayscale grade and read correctly there too, for whatever that is now worth
 
 It is **not committed.** The file is 51.8 MB — past GitHub's 50 MB warning, into
 every clone forever, and into the Worker asset bundle, for something that should be
-served by URL. `prototype/media/` is now gitignored, the placeholder holds the slot,
-and `index.html` carries a comment with the markup to restore. The source lives at
+served by URL. `prototype/media/` is gitignored. The source lives at
 `C:\Users\Obaida\Desktop\finallllllllllll.mov`.
 
-⚠️ **Two things are still unresolved about it.** The source is **9:16** and the holder
-is **9/13**, so `object-fit: cover` crops ~23% — visibly clipping the top and bottom
-of the frame. And the reel has **burnt-in titles** that land where the figcaption sits.
+⚠️ **The 9/13 crop is fixed** — the holder that caused it is gone and every
+carousel slide is a true 9:16, so a reel now plays uncropped. **The burnt-in
+titles are still there**, and with the figcaption gone they no longer collide with
+anything, but they will still read as part of the page rather than part of the film.
 
 ### Decided 2026-08-10: video lives on R2, at full quality
 
@@ -534,16 +743,27 @@ it is the only one.
 The key is recorded nowhere here; it comes off the Cloudflare dashboard, or from
 `npx.cmd wrangler r2 object put <bucket>/<key> --file …`, which prints it.
 
-⚠️ **Full quality still needs one lossless step: `moov` is at the end of the file.**
-Nothing plays until all 51.8 MB has arrived. The fix re-encodes nothing —
+✅ **The faststart remux is DONE (2026-08-11).** `moov` was the last 12 KB of the
+file, so nothing played until all 51.8 MB had arrived.
 
 ```bash
 ffmpeg -i finallllllllllll.mov -c copy -movflags +faststart wb2-rail-reel.mp4
 ```
 
-`-c copy` remuxes: every video bit is byte-identical, the index just moves to the
-front so it streams. Do this to anything before it goes on R2. It is not compression
-and does not cost a pixel.
+Result: `prototype/media/wb2-rail-reel.mp4`, `moov` at byte 36, ahead of `mdat`.
+**Verified lossless** — the video stream is 768 packets with framemd5 checksums
+and timestamps identical to the source. Do this to anything before it goes on R2;
+it is not compression and does not cost a pixel.
+
+⚠️ **ffmpeg is installed but not on PATH.** It is at
+`%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-9.0-full_build\bin\ffmpeg.exe`
+— call it by full path rather than concluding it is missing.
+
+⚠️ Two harmless differences that will show up if you diff the files and should not
+be mistaken for quality loss: the `.mp4` is **8 KB larger** (the relocated index
+needs 32-bit offsets), and **3 of 1477 audio packets** differ where ffmpeg
+re-split the last ~0.07s into uniform 1024-sample packets. Total sample count is
+identical and the reel plays muted anyway.
 
 ⚠️ **A rail loop and a showcase piece are different assets.** The rail box is
 474×685 CSS px; a 1080×1920 master is downscaled by the browser to fill it, so the

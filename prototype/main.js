@@ -84,19 +84,23 @@ const I18N = {
   dropLetter: { ar: "أ", en: "A" },
   heroMeta1: { ar: "منذ ٢٠٢٤", en: "Since 2024" },
   heroMeta2: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
-  heroMeta3: { ar: "تصميم · تصوير · برمجة", en: "Design · Film · Engineering" },
+  /* heroMeta3 is assigned below, derived from CATS — the literal that used to
+     sit here was dead (overwritten at boot) and still carried the pre-rename
+     short labels. A second copy of this list has gone stale twice already. */
   btnWork: { ar: "كل الأعمال", en: "ALL WORK" },
   btnAbout: { ar: "تعرّف على ألِف", en: "Get to know Aliph" },
 
   /* services */
   svcBanner: { ar: "ماذا نقدم؟", en: "What we do?" },
   svc1: { ar: "تصميم جرافيكي", en: "Graphic Design" },
-  svc2: { ar: "تصوير احترافي", en: "Professional Photography" },
+  svc2: { ar: "صناعة محتوى", en: "Media Production" },
   svc3: { ar: "تطوير برمجيات", en: "Software Development" },
 
   /* the example switcher under "what we do" */
   swPrev: { ar: "المثال السابق", en: "Previous example" },
   swNext: { ar: "المثال التالي", en: "Next example" },
+  reelPrev: { ar: "الوسيط السابق", en: "Previous item" },
+  reelNext: { ar: "الوسيط التالي", en: "Next item" },
 
   /* why aliph — three editorial blocks, each carrying work in its holders */
   storyBanner: { ar: "لماذا ألِف؟", en: "Why Aliph?" },
@@ -106,83 +110,15 @@ const I18N = {
     ar: "ألِف أوّل الحروف، والنقطة التي يبدأ منها كل شيء. اسمٌ من حرفين، وصوتٌ واحد في لغتين: نكتب بالعربيّة أوّلًا، ثم باللاتينيّة — لا ترجمةً حرفيّة، بل نصّين يقولان الشيء نفسه بالطريقة التي تليق بكلٍّ منهما. ما يصلح في اتّجاهٍ واحد لا يصلح تلقائيًّا في الآخر، والفرق بينهما هو نصف العمل.",
     en: "Alif is the first letter, and the point everything starts from. A name of two letters and one voice in two languages: we write Arabic first, then Latin — not a literal translation but two texts saying the same thing the way each one should. What works in one direction does not automatically work in the other, and that difference is half the work.",
   },
-  w1Cap: { ar: "من جلسة تصوير — البلدة القديمة", en: "From a shoot — the Old City" },
-
   w2Title: { ar: "نبحث عن النقطة، ثم نرسم.", en: "We find the point, then draw the system." },
 
-  w3ParaA: {
-    ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف: في المطبوع، وعلى الشاشة، وبين يديّ من يستعمله كل يوم.",
-    en: "We don't hand over a logo and walk away. We hand over a system that knows how to behave: in print, on screen, and in the hands of whoever uses it daily.",
-  },
-  w3ParaB: {
-    ar: "والاختبار الحقيقي بعد سنة: حين تُطبع لافتة لم نرها، ويُكتب منشور لم نكتبه، ويظلّ الكلّ يشبه بعضه.",
-    en: "The real test comes a year later: a sign gets printed we never saw, a post goes out we never wrote, and all of it still looks like the same brand.",
-  },
-  w3ParaC: {
-    ar: "لذلك نكتب القواعد بلغة من سيستعملها، لا بلغة المصمّمين — بأمثلة تُرى، لا بمصطلحات تُحفظ. النظام الذي لا يُفهم لا يُتّبع.",
-    en: "So we write the rules in the language of whoever will use them, not of designers — shown as examples rather than stated as terms. A system nobody understands is a system nobody follows.",
-  },
-
-  w3Para2A: {
-    ar: "ونحن فريق صغير عن قصد: من تُحدّثه في الاجتماع الأوّل هو نفسه من يعمل على مشروعك.",
-    en: "We are small on purpose: the person you meet first is the person who does the work.",
-  },
-  w3Para2B: {
-    ar: "نصمّم ونصوّر ونبرمج تحت سقف واحد، فلا يضيع شيء في الانتقال من يدٍ إلى يد.",
-    en: "We design, shoot and build under one roof, so nothing gets lost handing off.",
-  },
-  w3Para2C: {
-    ar: "وحين ينتهي المشروع لا تنتهي العلاقة: تبقى الملفّات مرتّبة ومسلَّمة كاملةً، والباب مفتوح للسؤال بعد شهر أو بعد سنة.",
-    en: "And when a project ends the relationship doesn't: the files stay ordered and are handed over in full, and the door stays open a month or a year later.",
-  },
-
-  w3ParaD: {
-    ar: "ونقيس ما نستطيع قياسه: كم استغرق الموظّف الجديد حتى أخرج منشورًا صحيحًا وحده؟ أرقام مملّة، وتقول أكثر ممّا يقوله أيّ إعجاب.",
-    en: "And we measure what can be measured: how long before a new employee produced a correct post on their own? Boring numbers, and they say more than any compliment.",
-  },
-  w3ParaE: {
-    ar: "وما لا يُقاس نحكم عليه بالعين: هل تبدو النتيجة كأنّها كانت هناك دائمًا، أم كأنّها أُلبست العلامة من الخارج؟",
-    en: "And what can't be measured we judge by eye: does the result look like it was always there, or like it was put on the brand from outside?",
-  },
-  w3ParaF: {
-    ar: "ونُبقي النظام مفتوحًا للنموّ. العلامة التي لا تحتمل منتجًا جديدًا بعد سنتين نظامٌ أُغلق مبكرًا.",
-    en: "And we keep the system open to growth. A brand that can't take a new product two years later is a system that was closed too early.",
-  },
-
-  w3Para2D: {
-    ar: "ونحبّ العمل الطويل أكثر من الحملة الواحدة — لأنّ النظام لا يُختبر إلّا بالتكرار.",
-    en: "And we prefer long work to a single campaign — a system is only tested by repetition.",
-  },
-  w3Para2E: {
-    ar: "ونكتب كل شيء: القرار الذي اتُّخذ، والسبب، والبديل الذي رُفض. الذاكرة التي لا تُكتب تُنسى.",
-    en: "And we write everything down: the decision, the reason, and the option refused. Memory that isn't written gets forgotten.",
-  },
-  w3Para2F: {
-    ar: "وفي النهاية المقياس واحد: أن تبدو النتيجة حتميّة — كأنّها لم تكن لتكون غير ذلك.",
-    en: "And in the end there is one measure: that the result looks inevitable — as if it could not have been anything else.",
-  },
-
-  /* Block 2 reads as one body, but it is two paragraphs so the second
-     picture can be anchored between them — a float only wraps text that
-     comes after it in the flow. */
-  w2BodyA: {
-    ar: "لكل علامة نقطة أصل تُبنى منها وتعود إليها، وعملنا هو العثور عليها أوّلًا — في الاسم، أو في الحكاية، أو في المكان — ثم رسم النظام كاملًا منها. لا نبدأ من الشكل، بل ننتهي إليه: الشعار الذي يخرج في الأسبوع الأوّل يكون غالبًا جميلًا ولا يخصّ أحدًا. ولأنّ النقطة لا تُعطى في اجتماع، نبدأ بالأسئلة المملّة: من يشتري؟ ومتى؟ وما الذي يُقال عنكم حين لا تكونون في الغرفة؟",
-    en: "Every brand has an origin point it is built from and returns to, and our work is to find it first — in the name, the story, or the place — then draw the whole system from it. We don't start at the form; we arrive at it: a mark drawn in the first week is usually handsome and belongs to nobody. And because the point is never handed to you in a meeting, we begin with the boring questions: who buys, when, and what gets said about you when you are not in the room.",
-  },
-  w2BodyB: {
-    ar: "ثم يثبّت النظام نفسه — لونٌ يمسك البنية، وخطٌّ يحمل الصوت، ودفترٌ يشرح ما يُفعل وما لا يُفعل، حتّى يكمل من يأتي بعدنا دون أن يسأل.",
-    en: "Then the system settles — a colour that holds the structure, a typeface that carries the voice, and a book explaining what to do and what not to, so whoever comes after us can carry on without asking.",
-  },
-  w2Rail: {
-    ar: "الملصق يُقرأ من عشرة أمتار ثم من نصف متر: شيء واحد من بعيد، وتفصيلٌ يكافئ من اقترب.",
-    en: "A poster is read from ten metres, then from half a metre: one thing from far away, and a detail that rewards whoever steps closer.",
-  },
-  w2Cap1: { ar: "تجارب الخط", en: "Type trials" },
-  w2Cap2: { ar: "المطبوعات", en: "Printed matter" },
-  w2Cap3: { ar: "ملصق — ليالي رمضان", en: "Poster — Ramadan Nights" },
+  /* ⚠️ Blocks 2 and 3 lost their body copy on 2026-08-11 when they became a
+     carousel and a gallery wall, and the twenty orphaned entries went with
+     it — w1Cap, w2BodyA/B, w2Rail, w2Cap1-3, w3Cap and the twelve w3Para*.
+     They are in git history if the copy pass wants them back. Block 1 is the
+     only why-block still carrying a paragraph. */
 
   w3Title: { ar: "أن تبدو النتيجة حتميّة.", en: "That the result feels inevitable." },
-  w3Cap: { ar: "الختم على العمل", en: "The seal on the work" },
   whyOutro: {
     ar: "الحكاية كاملةً — كيف بدأت الوكالة، وكيف نشتغل، وما الذي نقيس عليه عملنا.",
     en: "The whole story — how the agency started, how we work, and what we measure the work against.",
@@ -191,7 +127,8 @@ const I18N = {
   /* contact */
   cBand: { ar: "لنبدأ من الألِف", en: "Let's start from the Aliph" },
   cLabelMail: { ar: "للمشاريع والتعاون", en: "Projects & collaboration" },
-  cLabelPhone: { ar: "هاتف / واتساب", en: "Phone / WhatsApp" },
+  cLabelPhone: { ar: "هاتف", en: "Phone" },
+  cLabelWhats: { ar: "واتساب", en: "WhatsApp" },
   cLabelPlace: { ar: "الوكالة", en: "The agency" },
   cPlace: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
   cClock: { ar: "بتوقيت القدس", en: "Jerusalem time" },
@@ -284,7 +221,7 @@ const SERVICES = [
     },
   },
   {
-    id: "photo", tag: "PROFESSIONAL PHOTOGRAPHY", seed: "aliph-svc2",
+    id: "photo", tag: "MEDIA PRODUCTION", seed: "aliph-svc2",
     what: {
       ar: "نصوّر ما تحتاجه العلامة لتظهر: جلسات ثابتة للمنتج والمكان والوجوه، وفيديو أفقي للحملات والتعريف، وريلز عموديّة للمنصّات. ومعها التوثيق الكامل للفعاليّات — من أوّل ساعة تجهيز إلى آخر ضيف يغادر.",
       en: "We shoot what a brand needs in order to appear: stills of the product, the place and the faces; horizontal video for campaigns and profiles; vertical reels for the feed. And full coverage of events — from the first hour of setup to the last guest leaving.",
@@ -318,7 +255,7 @@ const SERVICES = [
 const CATS = [
   { id: "all", ar: "الكل", en: "All" },
   { id: "design", ar: "تصميم جرافيكي", en: "Graphic Design" },
-  { id: "photo", ar: "تصوير احترافي", en: "Professional Photography" },
+  { id: "photo", ar: "صناعة محتوى", en: "Media Production" },
   { id: "tech", ar: "تطوير برمجيات", en: "Software Development" },
 ];
 
@@ -1756,6 +1693,177 @@ if (page === "about" && !prefersReduced) {
     });
   });
 }
+
+/* ══════════ block 2's reel carousel ══════════
+   The DOM position belongs to the scroller; this only reads it.
+
+   ⚠️ Everything here is measured with getBoundingClientRect, never with
+   scrollLeft. Under RTL, scrollLeft's origin and sign still differ between
+   engines — it is negative in some, counts down from the maximum in others —
+   and Arabic is this site's default direction, so the buggy path would be
+   the normal one. A centre-to-centre distance between two rects is the same
+   number whichever way the document runs, and scrollBy takes a visual delta,
+   so neither needs the dirSign() flip the rest of the file carries. */
+const reelShow = (() => {
+  const root = document.getElementById("reelShow");
+  const track = document.getElementById("reelTrack");
+  if (!root || !track) return { remeasure() { } };
+
+  const real = Array.from(track.querySelectorAll(".reel-slide"));
+  const n = real.length;
+  if (!n) return { remeasure() { } };
+
+  /* ── the loop ──
+     Three copies of the set, with the carousel living in the middle one.
+     That is what puts a neighbour on BOTH sides of every slide including the
+     first and the last, and what lets "next" past the end carry on in the
+     same direction instead of rewinding the whole track to slide 1.
+
+     The wrap is invisible because the jump is between two clones showing the
+     same picture at the same offset — the scroll position changes and not a
+     pixel on screen does. It only ever happens once scrolling has settled,
+     never mid-scroll and never under a live finger. */
+  if (n > 1) {
+    const copy = () => real.map((s) => {
+      const c = s.cloneNode(true);
+      c.setAttribute("aria-hidden", "true");   // the same eight pictures, thrice
+      return c;
+    });
+    track.prepend(...copy());
+    track.append(...copy());
+  }
+  const slides = Array.from(track.querySelectorAll(".reel-slide"));
+
+  const DWELL = 4200;
+  let idx = -1, timer = null, raf = 0, settle = 0;
+  let onScreen = true, held = false, dragging = false;
+
+  function mark() {
+    const t = track.getBoundingClientRect();
+    const mid = t.left + t.width / 2;
+    let best = 0, bestD = Infinity;
+    slides.forEach((s, i) => {
+      const r = s.getBoundingClientRect();
+      const d = Math.abs(r.left + r.width / 2 - mid);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    if (best === idx) return;
+    idx = best;
+    slides.forEach((s, i) => s.classList.toggle("is-current", i === idx));
+  }
+
+  function centerOn(i, instant) {
+    const s = slides[i];
+    if (!s) return;
+    const t = track.getBoundingClientRect();
+    const r = s.getBoundingClientRect();
+    track.scrollBy({
+      left: (r.left + r.width / 2) - (t.left + t.width / 2),
+      /* "instant", not "auto". `auto` means "defer to CSS scroll-behavior",
+         which this track sets to smooth — so the reduced-motion branch would
+         animate exactly like the other one and the setting would do nothing.
+         Only "instant" actually jumps. */
+      behavior: instant || prefersReduced ? "instant" : "smooth",
+    });
+  }
+
+  /* Move the centred slide back into the middle set without moving anything
+     on screen. Deferred while a finger is down: a jump under a live drag
+     fights the touch and reads as the carousel snatching itself away.
+
+     ⚠️ This TRANSLATES by the distance between two equivalent slides — one
+     whole set — rather than re-centring the target. The two are the same
+     thing only when the track is already at rest, and this fires mid-flight
+     as well: re-centring then would snap a running animation to a stop,
+     where a translation preserves the exact visual offset and stays
+     invisible. */
+  function recentre() {
+    if (n < 2 || dragging) return;
+    mark();
+    if (idx >= n && idx < 2 * n) return;
+    const target = n + ((idx % n) + n) % n;
+    const from = slides[idx].getBoundingClientRect().left;
+    const to = slides[target].getBoundingClientRect().left;
+    track.scrollBy({ left: to - from, behavior: "instant" });
+    mark();
+  }
+
+  function go(step) {
+    /* Come home BEFORE stepping, not on the next settle. Anyone clicking
+       faster than the 140ms settle never lets it fire, and the index walks
+       straight out of the middle set — measured, sixteen fast clicks reached
+       slide 23 of 24 and opened a 319px hole where the track runs out. */
+    recentre();
+    centerOn(idx + step);
+  }
+
+  /* A self-resetting timeout rather than an interval, because every scroll
+     re-arms it. That is what stops the carousel yanking itself forward out
+     of a swipe the visitor is still in the middle of. */
+  function arm() {
+    disarm();
+    if (prefersReduced || !onScreen || held || n < 2) return;
+    timer = setTimeout(() => { timer = null; go(1); arm(); }, DWELL);
+  }
+  function disarm() {
+    clearTimeout(timer);
+    timer = null;
+  }
+
+  const settleSoon = () => {
+    clearTimeout(settle);
+    settle = setTimeout(recentre, 140);
+  };
+
+  track.addEventListener("scroll", () => {
+    settleSoon();
+    if (raf) return;
+    raf = requestAnimationFrame(() => { raf = 0; mark(); arm(); });
+  }, { passive: true });
+
+  /* A touch scroll keeps firing `scroll` while the finger rests, so the
+     settle timer alone would fire mid-drag. These bracket the gesture. */
+  track.addEventListener("touchstart", () => { dragging = true; }, { passive: true });
+  ["touchend", "touchcancel"].forEach((e) =>
+    track.addEventListener(e, () => { dragging = false; settleSoon(); }, { passive: true }));
+
+  document.getElementById("reelNext")?.addEventListener("click", () => go(1));
+  document.getElementById("reelPrev")?.addEventListener("click", () => go(-1));
+
+  /* Hover-to-hold is bound only for a real pointer. On touch, pointerenter
+     fires on first tap and pointerleave never does, so binding it there
+     would stop the carousel for good the moment anyone touched it. */
+  if (window.matchMedia("(hover: hover)").matches) {
+    root.addEventListener("pointerenter", () => { held = true; disarm(); });
+    root.addEventListener("pointerleave", () => { held = false; arm(); });
+  }
+
+  /* same rule as the film strip and the ransom letters: no timer runs for a
+     section nobody is looking at */
+  if (window.IntersectionObserver) {
+    new IntersectionObserver((e) => {
+      onScreen = e[0].isIntersecting;
+      onScreen ? arm() : disarm();
+    }, { rootMargin: "120px" }).observe(root);
+  }
+
+  /* Open on the first slide of the MIDDLE set, so there is already a
+     neighbour on both sides before anyone touches anything.
+
+     ⚠️ Asserted TWICE, and the second one is not belt-and-braces. Prepending
+     the leading clone set shifts an RTL scroller under us: the browser's
+     scroll anchoring adjusts scrollLeft after the insert, so a centre
+     computed in the same tick lands one slide out — measured, the carousel
+     opened on slide 7 of 8. The rAF pass runs after that adjustment.
+     `overflow-anchor: none` on the track stops it happening again later. */
+  if (n > 1) {
+    centerOn(n, true);
+    requestAnimationFrame(() => { centerOn(n, true); mark(); });
+  }
+  mark();
+  arm();
+  return { remeasure: mark };
+})();
 
 /* ══════════ boot ══════════ */
 applyI18n();
