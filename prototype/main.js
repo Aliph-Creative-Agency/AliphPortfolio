@@ -137,6 +137,7 @@ const I18N = {
   /* library + about */
   libTitle: { ar: "الأرشيف", en: "Archive" },
   libStats: { ar: "الأحدث أوّلًا", en: "Newest first" },
+  mPlay: { ar: "شغّل الفيلم", en: "Play film" },
   libIndex: { ar: "فهرس", en: "Index" },
   libGallery: { ar: "معرض", en: "Gallery" },
   aboutBanner: { ar: "من نحن؟", en: "Who are we?" },
@@ -342,6 +343,98 @@ const SUBCATS = {
     },
   ],
 };
+
+/* ══════════ the media archive ══════════
+   Every file the agency put in the Drive, served from R2.
+
+   ⚠️ GENERATED. Do not hand-edit: `d` is read out of each file's own metadata
+   — EXIF DateTimeOriginal for a photograph, the container's creation_time for
+   a film — and a typed copy of seventy dates is wrong the first time anything
+   is added. Rebuild it from the originals rather than patching a row.
+
+   ⚠️ `d: null` is the truth, not a gap to fill. The nine design pieces are
+   1080x1350 PNG exports with an empty EXIF block: there is no date in them to
+   read. They sort to the end of the run and show no date. A real one has to
+   come from the agency — see HANDOFF.
+
+   Video is on R2 because it has to be: Workers cap a single static asset at
+   25 MiB and these run 28-84 MB. The photographs are there too, so the
+   archive has one address. `r` is width/height, used to give each tile the
+   shape of the thing inside it — the design work is 4:5 and does NOT crop,
+   which is why this page sizes from the ratio instead of forcing a grid. */
+const R2 = "https://pub-0b1a78477e8542a28db190d86f861426.r2.dev";
+const MEDIA = [
+  { f: "design-grillit-1.webp", c: "design", r: 0.8, d: null },
+  { f: "design-grillit-2.webp", c: "design", r: 0.8, d: null },
+  { f: "design-grillit-3.webp", c: "design", r: 0.8, d: null },
+  { f: "design-shawarma-habash-1.webp", c: "design", r: 0.8, d: null },
+  { f: "design-shawarma-habash-2.webp", c: "design", r: 0.8, d: null },
+  { f: "design-shawarma-mix-1.webp", c: "design", r: 0.8, d: null },
+  { f: "design-shawarma-mix-2.webp", c: "design", r: 0.8, d: null },
+  { f: "design-shawarma-veal-1.webp", c: "design", r: 0.8, d: null },
+  { f: "design-shawarma-veal-2.webp", c: "design", r: 0.8, d: null },
+  { f: "pics-Agreements-09-dsc05463.webp", c: "photo", r: 1.4995, d: "2026-07-28" },
+  { f: "pics-Agreements-10-dsc05514.webp", c: "photo", r: 1.4995, d: "2026-07-28" },
+  { f: "pics-Agreements-11-dsc05764.webp", c: "photo", r: 1.4995, d: "2026-07-28" },
+  { f: "pics-Agreements-12-dsc05824.webp", c: "photo", r: 1.4995, d: "2026-07-28" },
+  { f: "pics-Interactive-36-dsc02566.webp", c: "photo", r: 1.4995, d: "2026-07-18" },
+  { f: "pics-Interactive-37-dsc03223.webp", c: "photo", r: 1.4995, d: "2026-07-18" },
+  { f: "pics-Interactive-38-dsc03254.webp", c: "photo", r: 1.4995, d: "2026-07-18" },
+  { f: "pics-Interactive-39-dsc03986.webp", c: "photo", r: 1.4995, d: "2026-07-18" },
+  { f: "pics-Interactive-40-dsc04052.webp", c: "photo", r: 1.4995, d: "2026-06-04" },
+  { f: "pics-Interactive-41-dsc04135.webp", c: "photo", r: 1.4995, d: "2026-06-04" },
+  { f: "pics-Interactive-42-dsc04152.webp", c: "photo", r: 1.4995, d: "2026-06-04" },
+  { f: "pics-Queen-retreat-52-copy-of-0c2a0144.webp", c: "photo", r: 0.6669, d: "2026-07-21" },
+  { f: "pics-Queen-retreat-53-copy-of-0c2a0153.webp", c: "photo", r: 0.6669, d: "2026-07-21" },
+  { f: "pics-Queen-retreat-54-copy-of-0c2a0158.webp", c: "photo", r: 0.6669, d: "2026-07-21" },
+  { f: "pics-Queen-retreat-55-copy-of-0c2a0240.webp", c: "photo", r: 1.4995, d: "2026-07-21" },
+  { f: "pics-Queen-retreat-56-copy-of-0c2a0257.webp", c: "photo", r: 1.4995, d: "2026-07-21" },
+  { f: "pics-Queen-retreat-57-copy-of-0c2a9757.webp", c: "photo", r: 1.4995, d: "2026-07-21" },
+  { f: "pics-Queen-retreat-58-copy-of-0c2a9810.webp", c: "photo", r: 0.6669, d: "2026-07-21" },
+  { f: "pics-Queen-retreat-59-copy-of-0c2a9812.webp", c: "photo", r: 1.4995, d: "2026-07-21" },
+  { f: "pics-Queen-retreat-60-copy-of-copy-of-0c2a0144.webp", c: "photo", r: 0.6669, d: "2026-07-21" },
+  { f: "pics-food-14-dsc00666.webp", c: "photo", r: 0.6669, d: "2026-03-22" },
+  { f: "pics-food-15-dsc00669.webp", c: "photo", r: 0.6669, d: "2026-03-22" },
+  { f: "pics-food-16-dsc00710.webp", c: "photo", r: 0.6669, d: "2026-03-22" },
+  { f: "pics-food-17-dsc00763.webp", c: "photo", r: 0.6669, d: "2026-03-22" },
+  { f: "pics-food-18-dsc00778.webp", c: "photo", r: 0.6669, d: "2026-03-22" },
+  { f: "pics-food-19-dsc00812-2.webp", c: "photo", r: 1.4995, d: "2026-03-22" },
+  { f: "pics-food-20-dsc00890.webp", c: "photo", r: 1.4995, d: "2026-03-22" },
+  { f: "pics-food-21-dsc03454.webp", c: "photo", r: 1.4995, d: "2026-05-29" },
+  { f: "pics-food-22-dsc03532.webp", c: "photo", r: 1.4995, d: "2026-05-29" },
+  { f: "pics-food-23-dsc03582.webp", c: "photo", r: 1.4995, d: "2026-05-29" },
+  { f: "pics-food-24-dsc03667.webp", c: "photo", r: 0.6669, d: "2026-05-29" },
+  { f: "pics-group-pics-25-img.webp", c: "photo", r: 1.4995, d: "2026-03-17" },
+  { f: "pics-group-pics-26-dsc04631.webp", c: "photo", r: 1.4995, d: "2026-05-17" },
+  { f: "pics-group-pics-27-dsc07110.webp", c: "photo", r: 1.4995, d: "2026-06-05" },
+  { f: "pics-idk-category-28-dsc00020.webp", c: "photo", r: 1.4995, d: "2026-06-19" },
+  { f: "pics-idk-category-29-dsc00032.webp", c: "photo", r: 1.4995, d: "2026-06-19" },
+  { f: "pics-idk-category-30-dsc00036.webp", c: "photo", r: 1.4995, d: "2026-06-19" },
+  { f: "pics-idk-category-31-dsc00405.webp", c: "photo", r: 1.4995, d: "2026-06-19" },
+  { f: "pics-idk-category-32-dsc00644.webp", c: "photo", r: 1.4995, d: "2026-06-19" },
+  { f: "pics-idk-category-33-dsc00914.webp", c: "photo", r: 1.4995, d: "2026-06-19" },
+  { f: "pics-idk-category-34-dsc00968.webp", c: "photo", r: 1.4995, d: "2026-06-19" },
+  { f: "pics-idk-category-35-dsc01002.webp", c: "photo", r: 1.4995, d: "2026-06-19" },
+  { f: "pics-official-visits-43-dsc08794.webp", c: "photo", r: 1.4995, d: "2026-06-09" },
+  { f: "pics-official-visits-44-dsc08817.webp", c: "photo", r: 1.4995, d: "2026-06-09" },
+  { f: "pics-official-visits-45-dsc09024.webp", c: "photo", r: 1.4995, d: "2026-06-09" },
+  { f: "pics-portraits-46-2j6a5679.webp", c: "photo", r: 0.6669, d: "2026-07-15" },
+  { f: "pics-portraits-47-2j6a5684.webp", c: "photo", r: 0.6669, d: "2026-07-15" },
+  { f: "pics-portraits-48-2j6a5694.webp", c: "photo", r: 0.6669, d: "2026-07-15" },
+  { f: "pics-public-services-49-img.webp", c: "photo", r: 1.4995, d: "2026-03-17" },
+  { f: "pics-public-services-50-img.webp", c: "photo", r: 1.4995, d: "2026-03-17" },
+  { f: "pics-public-services-51-img.webp", c: "photo", r: 1.4995, d: "2026-03-17" },
+  { f: "pics-students-61-dsc04057.webp", c: "photo", r: 1.4995, d: "2026-07-18" },
+  { f: "pics-students-62-dsc07902.webp", c: "photo", r: 1.4995, d: "2026-06-05" },
+  { f: "pics-students-63-dsc07931.webp", c: "photo", r: 1.4995, d: "2026-06-05" },
+  { f: "horizontal-film-bader.mp4", c: "photo", r: 1.7778, d: "2026-05-25", v: 1, p: "horizontal-film-bader.webp" },
+  { f: "reels-copy-of-bader-4.mp4", c: "photo", r: 0.5625, d: "2026-07-03", v: 1, p: "reels-copy-of-bader-4.webp" },
+  { f: "reels-irth-draft1.mp4", c: "photo", r: 0.5625, d: "2026-05-17", v: 1, p: "reels-irth-draft1.webp" },
+  { f: "reels-child-section-final.mp4", c: "photo", r: 0.5625, d: "2026-03-27", v: 1, p: "reels-child-section-final.webp" },
+  { f: "reels-draft2-show.mp4", c: "photo", r: 0.5625, d: "2026-05-25", v: 1, p: "reels-draft2-show.webp" },
+  { f: "reels-finallllllllllll.mp4", c: "photo", r: 0.5625, d: "2026-03-18", v: 1, p: "reels-finallllllllllll.webp" },
+  { f: "reels-dardashat.mp4", c: "photo", r: 0.5625, d: "2025-02-20", v: 1, p: "reels-dardashat.webp" },
+];
 
 /* `date` is "YYYY-MM"; the archive is one continuous run, newest first,
    with no year sections and no piece counts. A `profile` is what opens the
@@ -1396,36 +1489,57 @@ if (page === "index" && !prefersReduced) {
 const accRoot = document.getElementById("accRoot");
 let openCat = "all";
 
-/* One continuous run, newest first. A project with a `profile` gets an
-   open-the-sheet affordance and its PROJECTS index on the node, which is how
-   the overlay finds it again. */
+/* One continuous run, newest first — the media itself and its date, nothing
+   else. The agency's call (2026-08-12): show the work now, organise it into
+   named projects later. So there are no titles, no captions and no profile
+   sheet here; PROJECTS is still in this file and is what the sheet will read
+   when those exist.
+
+   ⚠️ Each tile is sized from `r`, the medium's own ratio, NOT from a shared
+   grid aspect. The design work is 4:5 with type baked in and every crop cuts
+   the words — the one thing this archive must not do (see HANDOFF). Mixed
+   ratios are why the run is a column layout rather than a grid of equal
+   cells. */
 function renderLibrary() {
   if (!accRoot) return;
   accRoot.innerHTML = "";
+
+  /* Undated sorts LAST, not to 1970. The nine design pieces carry no date at
+     all, and an empty string compares below every real one — which would file
+     the newest work as the oldest. Ties break on filename so the order is
+     stable between renders. */
+  const byNewest = (a, b) =>
+    (b.d || "").localeCompare(a.d || "") || a.f.localeCompare(b.f);
+
   CATS.forEach((cat) => {
-    const items = (cat.id === "all" ? PROJECTS : PROJECTS.filter((p) => p.cat === cat.id))
-      .slice().sort(byDate);
+    const items = (cat.id === "all" ? MEDIA : MEDIA.filter((m) => m.c === cat.id))
+      .slice().sort(byNewest);
+
+    /* `tech` has no media: the software work is sites and systems, and a
+       screenshot of one is not in the Drive. The taxonomy keeps it because
+       the services do; the archive shows only what exists rather than opening
+       a spine onto an empty panel. */
+    if (!items.length) return;
 
     const panel = document.createElement("section");
     panel.className = "acc-panel" + (cat.id === openCat ? " open" : "");
     panel.dataset.cat = cat.id;
 
-    const hasProfile = (p) => !!p.profile;
-    const at = (p) => PROJECTS.indexOf(p);
-
-    const tiles = items.map((p) => `
-      <figure class="tile${hasProfile(p) ? " has-profile" : ""}"${hasProfile(p) ? ` data-project="${at(p)}" role="button" tabindex="0"` : ""}>
-        <div class="tile-img">
-          <img src="${HOLDER}" alt="${p[lang]}" loading="lazy">
-          ${hasProfile(p) ? `<span class="tile-open" aria-hidden="true">${I18N.pfOpen[lang]}</span>` : ""}
+    const tiles = items.map((m) => {
+      /* Film shows its poster frame and nothing else until asked. Seven muted
+         loops on one screen is the exact load the phone pass spent a week
+         removing, and these run 28-84 MB. */
+      const src = m.v ? `${R2}/poster/${m.p}` : `${R2}/img/${m.f}`;
+      const date = m.d ? `<figcaption><span class="t-date">${fmtDate(m.d)}</span></figcaption>` : "";
+      return `
+      <figure class="tile${m.v ? " is-film" : ""}"${m.v ? ` data-film="${m.f}" role="button" tabindex="0" aria-label="${I18N.mPlay[lang]}"` : ""}>
+        <div class="tile-img" style="aspect-ratio:${m.r}">
+          <img src="${src}" alt="" loading="lazy" decoding="async">
+          ${m.v ? '<span class="tile-play" aria-hidden="true"></span>' : ""}
         </div>
-        <figcaption><span>${p[lang]}</span><span class="t-date">${fmtDate(p.date)}</span></figcaption>
-      </figure>`).join("");
-
-    const rows = items.map((p) => `
-      <div class="lib-list-row${hasProfile(p) ? " has-profile" : ""}"${hasProfile(p) ? ` data-project="${at(p)}" role="button" tabindex="0"` : ""}>
-        <span>${p[lang]}</span><span class="t-date">${fmtDate(p.date)}</span>
-      </div>`).join("");
+        ${date}
+      </figure>`;
+    }).join("");
 
     panel.innerHTML = `
       <button class="spine" aria-expanded="${cat.id === openCat}">
@@ -1434,10 +1548,10 @@ function renderLibrary() {
       <div class="panel-body">
         <div class="panel-head">
           <h2>${cat[lang]}</h2>
+          <span class="panel-count">${num(items.length)}</span>
         </div>
         <div class="lib-run">
           <div class="lib-grid">${tiles}</div>
-          <div class="lib-list">${rows}</div>
         </div>
       </div>`;
 
@@ -1456,18 +1570,37 @@ function renderLibrary() {
   });
 }
 
-/* delegated once on the root, which survives every re-render */
+/* Delegated once on the root, which survives every re-render.
+   A film is inert until it is asked for: the tile shows a ~25 KB poster, and
+   only a click swaps in the <video> and fetches any of the 28-84 MB behind
+   it. `controls` rather than an autoplay loop, because on this page the
+   visitor is choosing what to watch, not being shown a texture. */
 if (accRoot) {
+  const playFilm = (node) => {
+    if (node.classList.contains("is-playing")) return;
+    node.classList.add("is-playing");
+    const box = node.querySelector(".tile-img");
+    const v = document.createElement("video");
+    v.poster = node.querySelector("img").src;   /* no black flash while it loads */
+    v.src = `${R2}/video/${node.dataset.film}`;
+    v.controls = true;
+    v.playsInline = true;
+    v.preload = "auto";
+    box.textContent = "";
+    box.appendChild(v);
+    v.play().catch(() => { });
+  };
+
   accRoot.addEventListener("click", (e) => {
-    const node = e.target.closest("[data-project]");
-    if (node) projectSheet.open(+node.dataset.project);
+    const node = e.target.closest("[data-film]");
+    if (node) playFilm(node);
   });
   accRoot.addEventListener("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
-    const node = e.target.closest("[data-project]");
+    const node = e.target.closest("[data-film]");
     if (!node) return;
     e.preventDefault();
-    projectSheet.open(+node.dataset.project);
+    playFilm(node);
   });
 }
 
@@ -1863,6 +1996,27 @@ const reelShow = (() => {
   mark();
   arm();
   return { remeasure: mark };
+})();
+
+/* ══════════ gallery wall: tap to lift ══════════
+   The lift itself is CSS `:hover`, gated behind `(hover: hover)`. Touch never
+   fires that, and a `:hover` left ungated on a phone is worse than nothing —
+   it latches on tap and stays until you touch something else. So touch gets an
+   explicit toggle, and only one tile is ever raised: a wall where every tile
+   you passed is still standing off it reads as a bug.
+
+   Delegated on the wall rather than bound per tile, so it costs one listener
+   and survives any future re-tiling. */
+(() => {
+  const wall = document.querySelector(".gwall");
+  if (!wall || window.matchMedia("(hover: hover)").matches) return;
+
+  wall.addEventListener("click", (e) => {
+    const tile = e.target.closest(".gw-tile");
+    const up = wall.querySelector(".gw-tile.is-lifted");
+    if (up && up !== tile) up.classList.remove("is-lifted");
+    if (tile) tile.classList.toggle("is-lifted");
+  });
 })();
 
 /* ══════════ boot ══════════ */

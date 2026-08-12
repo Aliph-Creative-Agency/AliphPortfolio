@@ -21,6 +21,16 @@
 </button>
 
 <div class="nav-overlay" id="navOverlay">
+  <!-- A corner control, not part of the footer row — it is pinned to the
+       overlay's top-left, mirroring the burger. It has to be a direct child of
+       the overlay: .nav-foot is position:relative, so leaving it in there made
+       it the containing block and the pill measured its offset from the bottom
+       of the screen instead of the top. -->
+  <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
+    <span class="ls-knob" aria-hidden="true"></span>
+    <span class="ls-opt" data-l="ar">ع</span>
+    <span class="ls-opt" data-l="en">EN</span>
+  </div>
   <a class="nav-brand" href="index.html"><img src="assets/img/Aliph-Logo-Main-cream.svg" alt="ألِف ALIPH"></a>
   <nav class="nav-big" aria-label="التنقّل الرئيسي">
     <a href="index.html" class="nav-item is-current" data-i18n="navHome">الرئيسيّة</a>
@@ -34,11 +44,6 @@
       <a href="https://www.instagram.com/aliph.creative" target="_blank" rel="noopener noreferrer">INSTAGRAM</a><span>·</span>
       <a href="https://www.facebook.com/share/19F5j4XM6g/" target="_blank" rel="noopener noreferrer">FACEBOOK</a><span>·</span>
       <a href="https://www.linkedin.com/company/aliph-creative/" target="_blank" rel="noopener noreferrer">LINKEDIN</a>
-    </div>
-    <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
-      <span class="ls-knob" aria-hidden="true"></span>
-      <span class="ls-opt" data-l="ar">ع</span>
-      <span class="ls-opt" data-l="en">EN</span>
     </div>
   </div>
 </div>
@@ -78,12 +83,20 @@
         </span>
         <p data-i18n="heroPara">لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، ثم رسم النظام كاملًا منها: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم. نصنع الهويّات والحملات والفعاليّات، ونبني المواقع والأنظمة التي تُشغّلها — من الألِف إلى الياء.</p>
       </div>
+      <!-- Two rows so the phone can break the line between the place and the
+           services. `.hm-row` is display:contents above 640px, so the desktop
+           flex line is exactly what it was; on a phone each row takes a full
+           basis and the seam dot between them is dropped. -->
       <div class="hero-meta">
-        <span data-i18n="heroMeta1">منذ ٢٠٢٤</span>
-        <span class="dot" aria-hidden="true">·</span>
-        <span data-i18n="heroMeta2">القدس — جبل الزيتون</span>
-        <span class="dot" aria-hidden="true">·</span>
-        <span data-i18n="heroMeta3">تصميم جرافيكي · صناعة محتوى · تطوير برمجيات</span>
+        <span class="hm-row">
+          <span data-i18n="heroMeta1">منذ ٢٠٢٤</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <span data-i18n="heroMeta2">القدس — جبل الزيتون</span>
+        </span>
+        <span class="dot hm-seam" aria-hidden="true">·</span>
+        <span class="hm-row">
+          <span data-i18n="heroMeta3">تصميم جرافيكي · صناعة محتوى · تطوير برمجيات</span>
+        </span>
       </div>
     </div>
   </div>
@@ -175,15 +188,20 @@
         </div>
       </div>
 
+      <!-- Bare chevrons, drawn pointing the way they point in LTR. The pair is
+           mirrored under RTL in one CSS rule, so each one always points away
+           from the centre and inline-start stays "the one before". -->
       <button class="reel-arrow reel-prev" id="reelPrev" type="button">
-        <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-          <path d="M33 6H2"/><path d="M9 1C7.6 3.4 5.4 5 1 6c4.4 1 6.6 2.6 8 5"/>
+        <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 1 2 11l7 10"/>
         </svg>
         <span class="sr-only" data-i18n="reelPrev">الوسيط السابق</span>
       </button>
       <button class="reel-arrow reel-next" id="reelNext" type="button">
-        <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-          <path d="M1 6h31"/><path d="M25 1c1.4 2.4 3.6 4 8 5-4.4 1-6.6 2.6-8 5"/>
+        <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 1l7 10-7 10"/>
         </svg>
         <span class="sr-only" data-i18n="reelNext">الوسيط التالي</span>
       </button>
@@ -217,43 +235,45 @@
     <h3 class="why-title wb3-head" data-i18n="w3Title">أن تبدو النتيجة حتميّة.</h3>
 
     <div class="gwall">
-      <figure class="gw-tile gw-mat gw-a">
+      <!-- One treatment across the whole wall (agency's call, 2026-08-12):
+           every tile is an ink plate, and the three marks are the -cream
+           artwork because ink on ink is invisible. The mixed mount/print/plate
+           hang is in git history if it is ever wanted back.
+           Hovering lifts the whole framed tile off the wall — see .gw-tile. -->
+      <figure class="gw-tile gw-a">
         <img src="assets/media/pics-Queen-retreat-53-copy-of-0c2a0153.webp" alt="" loading="lazy" decoding="async">
       </figure>
-      <figure class="gw-tile gw-print gw-b">
+      <figure class="gw-tile gw-b">
         <img src="assets/media/pics-Interactive-37-dsc03223.webp" alt="" loading="lazy" decoding="async">
       </figure>
       <figure class="gw-tile gw-mark gw-c">
-        <img src="assets/img/Aliph-Logo-Main.svg" alt="ألِف">
+        <img src="assets/img/Aliph-Logo-Main-cream.svg" alt="ألِف">
       </figure>
-      <figure class="gw-tile gw-plate gw-d">
+      <figure class="gw-tile gw-d">
         <img src="assets/media/pics-group-pics-26-dsc04631.webp" alt="" loading="lazy" decoding="async">
       </figure>
-      <figure class="gw-tile gw-mat gw-e">
+      <figure class="gw-tile gw-e">
         <img src="assets/media/pics-official-visits-43-dsc08794.webp" alt="" loading="lazy" decoding="async">
       </figure>
       <figure class="gw-tile gw-mark gw-f">
-        <img src="assets/img/Aliph-Icon.svg" alt="أ">
+        <img src="assets/img/Aliph-Icon-cream.svg" alt="أ">
       </figure>
-      <figure class="gw-tile gw-mat gw-g">
+      <figure class="gw-tile gw-g">
         <img src="assets/media/pics-Interactive-40-dsc04052.webp" alt="" loading="lazy" decoding="async">
       </figure>
-      <figure class="gw-tile gw-print gw-h">
+      <figure class="gw-tile gw-h">
         <img src="assets/media/pics-food-15-dsc00669.webp" alt="" loading="lazy" decoding="async">
       </figure>
       <figure class="gw-tile gw-mark gw-i">
-        <!-- the stamp shipped only in cream; HalfAliph-Stamp.svg is the same
-             artwork with its single fill swapped to ink, the way the other
-             marks already ship as a -cream / ink pair -->
-        <img src="assets/img/HalfAliph-Stamp.svg" alt="ختم ألِف">
+        <img src="assets/img/HalfAliph-Stamp-cream.svg" alt="ختم ألِف">
       </figure>
-      <figure class="gw-tile gw-plate gw-j">
+      <figure class="gw-tile gw-j">
         <img src="assets/media/pics-students-62-dsc07902.webp" alt="" loading="lazy" decoding="async">
       </figure>
-      <figure class="gw-tile gw-mat gw-k">
+      <figure class="gw-tile gw-k">
         <img src="assets/media/pics-public-services-49-img.webp" alt="" loading="lazy" decoding="async">
       </figure>
-      <figure class="gw-tile gw-print gw-l">
+      <figure class="gw-tile gw-l">
         <img src="assets/media/pics-Queen-retreat-54-copy-of-0c2a0158.webp" alt="" loading="lazy" decoding="async">
       </figure>
     </div>
@@ -323,14 +343,16 @@
       <div class="sw-media" id="swMedia"></div>
 
       <button class="sw-arrow sw-prev" id="swPrev" type="button">
-        <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-          <path d="M33 6H2"/><path d="M9 1C7.6 3.4 5.4 5 1 6c4.4 1 6.6 2.6 8 5"/>
+        <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 1 2 11l7 10"/>
         </svg>
         <span class="sr-only" data-i18n="swPrev">المثال السابق</span>
       </button>
       <button class="sw-arrow sw-next" id="swNext" type="button">
-        <svg viewBox="0 0 34 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-          <path d="M1 6h31"/><path d="M25 1c1.4 2.4 3.6 4 8 5-4.4 1-6.6 2.6-8 5"/>
+        <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 1l7 10-7 10"/>
         </svg>
         <span class="sr-only" data-i18n="swNext">المثال التالي</span>
       </button>

@@ -86,6 +86,42 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
+/* ── selection ──────────────────────────────────────────────────────
+   The browser default is a system blue that belongs to no palette on this
+   page. Selection is terracotta at low alpha instead — the same role the
+   accent already plays for focus, and transparent enough that the ink under
+   it keeps its contrast.
+
+   No `color` is set: forcing a foreground here would flatten the secondary
+   text tiers, and the tint is light enough that it does not need to. */
+::selection { background: rgba(187, 92, 57, 0.28); }
+
+/* Selection is for reading. Chrome, controls and pictures have nothing to
+   copy, so highlighting them is never intentional — it is the flash you get
+   from a double-tap or a drag that started on a button, and it reads as a
+   rendering fault. Real copy is untouched. */
+button,
+img,
+svg,
+.oval-btn,
+.masthead-logo,
+.nav-brand,
+.nav-item,
+.gw-tile,
+.film-frame,
+.dropcap,
+.ransom,
+.reel-arrow,
+.sw-arrow,
+.hero-meta .dot,
+.svc-dot {
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* the grey/blue box mobile browsers paint on a tapped control — same fault,
+   different platform */
+body { -webkit-tap-highlight-color: transparent; }
+
 /* ── page transition curtain ─────────────── */
 .curtain {
   position: fixed;
@@ -321,8 +357,25 @@ html[lang="ar"] .lang-switch.on-dark .ls-opt[data-l="ar"],
 html[lang="en"] .lang-switch.on-dark .ls-opt[data-l="en"] { color: var(--ink); }
 .lang-switch.on-dark:hover { background: rgba(217, 217, 206, 0.12); }
 
-/* overlay copy sits on ink, so the whole pill inverts */
-.nav-overlay .lang-switch { border-color: var(--cream); flex: 0 0 auto; }
+/* Overlay copy sits on ink, so the whole pill inverts — and it is pinned to
+   the overlay's top-left rather than left in the footer row. Same physical
+   corner and same centre line as the masthead's copy, so opening the menu
+   inverts the pill in place instead of sending it to the bottom of the screen.
+   Physical left in both directions for the same reason as the masthead: the
+   burger is physically right, so a logical start would stack the two in RTL.
+
+   Absolute, not fixed — the overlay is already fixed, and z-index clears its
+   ::after linen wash the same way the other children do. */
+.nav-overlay .lang-switch {
+  position: absolute;
+  left: var(--pad);
+  right: auto;
+  top: calc(1.1rem + 22px);
+  transform: translateY(-50%);
+  z-index: 2;
+  border-color: var(--cream);
+  flex: 0 0 auto;
+}
 .nav-overlay .ls-knob { background: var(--cream); }
 .nav-overlay .ls-opt { color: var(--cream); }
 html[lang="ar"] .nav-overlay .ls-opt[data-l="ar"],
@@ -632,10 +685,18 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   margin-top: 1.1rem;
   padding-top: 0.85rem;
   border-top: 1px solid rgba(15, 24, 32, 0.3);
-  font-size: 0.76rem;
-  font-weight: 500;
+  font-size: 0.84rem;
+  font-weight: 700;
   color: rgba(15, 24, 32, 0.68);
 }
+/* The rows are a phone device. Dissolving them here leaves .hero-meta's five
+   children exactly as they were, so the desktop line keeps its single flex
+   run and its one gap. */
+.hm-row { display: contents; }
+/* The separators stay at body weight while the words go bold — the file's
+   rule is that punctuation sits a tier below the text it divides, and
+   bolding it with everything else inverts that. */
+.hero-meta .dot { font-weight: 400; }
 /* ── decorative separators ──────────────────────────────────────────
    The · and / marks are punctuation, not content, and are aria-hidden. They
    sit a tier below body text on purpose: raising them to AA would make the
@@ -948,6 +1009,9 @@ html[lang="en"] .why { --why-type: 0.85; }
 }
 /* aspect comes from data-kind="reel" — 9:16, see the holder block */
 
+/* A bare chevron, no box. The cream-filled bordered square read as a button
+   pasted onto the picture; the mark alone is enough to say "there is more
+   this way", which is all the control has to do. */
 .reel-arrow {
   position: absolute;
   top: 50%;
@@ -955,20 +1019,27 @@ html[lang="en"] .why { --why-type: 0.85; }
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 3rem;
-  height: 2.3rem;
-  background: var(--cream);
-  border: var(--hair);
+  padding: 0.5rem 0.35rem;
+  background: none;
+  border: 0;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.3s, color 0.3s;
+  opacity: 0.5;
+  transition: opacity 0.3s;
 }
-.reel-arrow:hover { background: var(--ink); color: var(--cream); }
-.reel-arrow svg { width: 1.4rem; }
+.reel-arrow:hover { opacity: 1; }
+.reel-arrow svg { width: 0.85rem; height: auto; }
 /* logical, so the pair swaps with the language and inline-start is always
    "the one before" */
 .reel-prev { inset-inline-start: 0.6rem; }
 .reel-next { inset-inline-end: 0.6rem; }
+
+/* The chevrons are drawn for LTR. Mirroring the pair under RTL keeps each one
+   pointing away from the centre — the same trick .ob-arrow already uses.
+   It has to be on the svg, not the button: the button's own transform is the
+   translateY that centres it. */
+html[dir="rtl"] .reel-arrow svg,
+html[dir="rtl"] .sw-arrow svg { transform: scaleX(-1); }
 
 /* ── block 3: the gallery wall ── */
 /* the full-width headline — the biggest type after the section banners */
@@ -1027,7 +1098,7 @@ html[lang="en"] .why { --why-type: 0.85; }
   min-width: 0;
   min-height: 0;
 }
-.gw-tile > img {
+.gw-tile img {
   display: block;
   width: 100%;
   height: 100%;
@@ -1035,46 +1106,60 @@ html[lang="en"] .why { --why-type: 0.85; }
   filter: contrast(1.06);
 }
 
-/* ── the frames ──
-   Three print treatments, deliberately unlike the about page's `.clip`
-   (a drop-shadowed cutting, pinned at an angle). Nothing here is rotated or
-   shadowed: a wall is hung flat and tight, and a shadow needs a gap to fall
-   into that this grid does not have. */
+/* ── the frame: ONE treatment across the whole wall ──
+   The agency chose the dark hang (2026-08-12) out of three: a cream mount, a
+   darkroom print with a deeper foot, and this — the ink plate. The other two
+   are in git history.
 
-/* mount board — a broad cream mat with the print ruled inside it */
-.gw-mat {
-  padding: clamp(5px, 0.75vw, 13px);
-  background: var(--cream-warm);
-  box-shadow: inset 0 0 0 1px rgba(15, 24, 32, 0.3);
-}
-.gw-mat > img { outline: 1px solid rgba(15, 24, 32, 0.3); outline-offset: -1px; }
-
-/* darkroom print — a white margin, deeper at the foot, the way a print is
-   trimmed to leave room for a signature */
-.gw-print {
-  padding: clamp(4px, 0.6vw, 10px);
-  padding-bottom: clamp(11px, 1.7vw, 30px);
-  background: var(--cream);
-  box-shadow: inset 0 0 0 1px rgba(15, 24, 32, 0.22);
-}
-
-/* plate — the ink itself is the frame */
-.gw-plate {
-  padding: clamp(4px, 0.55vw, 9px);
+   Unified is the point. With three treatments mixed, the two dark tiles took
+   the eye first wherever they happened to fall, so the composition was being
+   decided by the frames rather than by the pictures. One plate everywhere and
+   the photographs are the only thing that varies. */
+.gw-tile {
+  padding: clamp(5px, 0.7vw, 11px);
   background: var(--ink);
+  /* the lift, below, is what these are for */
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── lift the print off the wall ──
+   The whole framed tile rises and casts, rather than the picture moving
+   inside a fixed frame — the gesture is taking a print down to look at it,
+   not zooming a photograph.
+
+   ⚠️ This is the one thing on this wall that is shadowed, and the rest state
+   is still flat and tight: at rest a shadow has no gap to fall into across a
+   7px grid. Lifting is what creates the gap, which is why the shadow arrives
+   with the transform and not before it. `z-index` is what puts the raised
+   tile over its neighbours — .gw-tile is already positioned, so it applies. */
+@media (hover: hover) {
+  .gw-tile:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 26px 46px -14px rgba(5, 9, 13, 0.66),
+                0 6px 14px rgba(5, 9, 13, 0.34);
+    z-index: 3;
+  }
+}
+/* Touch has no hover, and a :hover left ungated there latches on tap and
+   stays. main.js toggles this instead, one tile at a time. */
+.gw-tile.is-lifted {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 26px 46px -14px rgba(5, 9, 13, 0.66),
+              0 6px 14px rgba(5, 9, 13, 0.34);
+  z-index: 3;
 }
 
 /* ── the agency's own marks, hung among the photographs ──
-   A LIGHT field with the ink artwork, and no frame — the photographs are
-   matted and ruled, the marks are not. That contrast is what keeps them
-   reading as the agency's own hand rather than as three more pictures.
+   Same ink plate as everything else now, so they sit in the wall rather than
+   on it. What still separates them is that a mark is never cropped: it is
+   fitted whole inside its tile while every photograph fills its own.
 
-   cream-warm rather than the page cream: with no border, a tile in the page's
-   own colour would have no edge at all where the wall meets the margin, and
-   two of the three marks sit on the wall's outer corners. */
+   ⚠️ These point at the -cream artwork, not the ink files the rest of the site
+   uses. On an ink plate the ink versions are invisible. Real assets rather
+   than a CSS invert — all three ship as a -cream / ink pair. */
 .gw-mark {
   display: grid;
-  background: var(--cream-warm);
   /* An explicit minmax(0,1fr) track, not the implicit auto one. The tile's
      own height is definite (the wall's rows are), but an AUTO row is sized
      from its content, so the image's max-height:100% had nothing definite to
@@ -1206,24 +1291,34 @@ html[lang="en"] .why { --why-type: 0.85; }
 }
 .sw-bar { display: block; height: 6px; background: var(--ink); }
 
+/* Same treatment as the carousel's — bare chevron, no box. The two pairs are
+   the one control repeated, so they change together. */
 .sw-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
   appearance: none;
-  border: 1px solid rgba(15, 24, 32, 0.3);
-  background: var(--cream);
-  color: var(--ink);
+  border: 0;
+  background: none;
+  /* ⚠️ Cream, not ink: unlike the carousel's, these two sit ON the picture,
+     and the box that used to guarantee their contrast is gone. A cream mark
+     with a dark cast under it is the one combination that survives both a
+     bright frame and a dark one. */
+  color: var(--cream);
   cursor: pointer;
-  width: 3rem;
-  height: 2.2rem;
+  padding: 0.5rem 0.35rem;
   display: grid;
   place-items: center;
-  transition: background 0.25s ease, color 0.25s ease;
+  opacity: 0.75;
+  transition: opacity 0.25s ease;
 }
-.sw-arrow svg { width: 1.6rem; height: auto; }
-.sw-arrow:hover { background: var(--ink); color: var(--cream); }
+.sw-arrow svg {
+  width: 0.85rem;
+  height: auto;
+  filter: drop-shadow(0 1px 3px rgba(5, 9, 13, 0.8));
+}
+.sw-arrow:hover { opacity: 1; }
 .sw-prev { inset-inline-start: 0.7rem; }
 .sw-next { inset-inline-end: 0.7rem; }
 
@@ -1262,6 +1357,9 @@ html[lang="en"] .why { --why-type: 0.85; }
 .lib-bar .lib-title { font-weight: 700; }
 .lib-stats { color: var(--ink-mute); }
 .lib-toggle { display: flex; gap: 0.4rem; align-items: baseline; }
+/* `display: flex` above outranks the UA sheet's [hidden] rule, so the
+   attribute alone would not hide it */
+.lib-toggle[hidden] { display: none; }
 .lib-toggle button { color: var(--ink-mute); transition: color 0.3s; }
 .lib-toggle button.on { color: var(--ink); font-weight: 700; }
 .lib-toggle button:hover { color: var(--ink); }
@@ -1340,26 +1438,88 @@ html[lang="en"] .why { --why-type: 0.85; }
   font-size: clamp(1.6rem, 2.6vw, 2.4rem);
   line-height: 1.3;
 }
-/* one continuous run — no year headings, no counts, newest first */
+.panel-count {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+/* one continuous run — no year headings, newest first */
 .lib-run { padding-bottom: 0.8rem; }
+
+/* ⚠️ COLUMNS, not a grid of equal cells, and that is the whole point.
+   The archive holds four different shapes at once — 4:5 design work, 3:2 and
+   2:3 photographs, 9:16 reels, 16:9 film — and a fixed-aspect cell crops every
+   one of them to fit. On the design work that crop cuts the type baked into
+   the layout, which is the one thing this page exists not to do.
+
+   Each tile keeps its own ratio and the columns take whatever height follows.
+   The trade is reading order: columns fill down and then across, so "newest
+   first" runs down column one before it reaches column two. */
 .lib-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  columns: 4;
+  column-gap: 10px;
   padding: 1.1rem 1.4rem 1rem;
 }
-.tile { position: relative; }
+.tile {
+  position: relative;
+  break-inside: avoid;      /* a tile split across two columns is a torn print */
+  margin-bottom: 10px;
+}
 .tile .tile-img {
-  aspect-ratio: 3 / 2;
   background: var(--ink);
   overflow: hidden;
 }
-.tile img {
+.tile img,
+.tile video {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   filter: contrast(1.05);
 }
+/* the film, once it has been asked for, is shown whole rather than cropped —
+   it is the work now, not a thumbnail of it */
+.tile video { object-fit: contain; background: var(--ink); }
+
+/* ── film tiles ── */
+.tile.is-film { cursor: pointer; }
+.tile.is-film .tile-img { position: relative; }
+.tile-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid rgba(217, 217, 206, 0.85);
+  border-radius: 50%;
+  background: rgba(15, 24, 32, 0.42);
+  transition: background 0.3s, transform 0.3s;
+}
+/* the triangle, drawn rather than shipped as an asset */
+.tile-play::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  /* nudged off centre: a triangle's optical centre is not its bounding box's */
+  border-width: 0.45rem 0 0.45rem 0.72rem;
+  border-color: transparent transparent transparent var(--cream);
+  transform: translateX(0.08rem);
+}
+html[dir="rtl"] .tile-play::after { transform: translateX(0.08rem); }
+.tile.is-film:hover .tile-play {
+  background: rgba(15, 24, 32, 0.72);
+  transform: scale(1.08);
+}
+.tile.is-film:hover img { filter: contrast(1.05) saturate(1.12); }
+.tile.is-film:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* once it is playing the tile is a player, not a button */
+.tile.is-playing { cursor: default; }
 .tile figcaption {
   display: flex;
   justify-content: space-between;
@@ -1872,7 +2032,6 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .sw-foot { justify-content: center; }
   .svc-demo { grid-template-columns: 1fr; }
   .sw-stage { order: -1; }
-  .sw-arrow { width: 2.6rem; height: 2rem; }
   .banner h2 { white-space: normal; }
 
   /* about */
@@ -1884,13 +2043,12 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .clippings { display: flex; flex-direction: column; }
   .clip { transform: none !important; margin: 0 !important; }
 
-  /* The nav overlay's footer does not fit one phone line — measured 608px
-     inside a 390px overlay, which put the language pill off-screen and
-     clipped the last social. Stack the two and let the socials wrap. */
+  /* The footer row is only the socials now — the language pill moved to the
+     overlay's top-left corner, which is what used to push this row past the
+     phone's width (measured 608px inside a 390px overlay). Centred, because
+     everything else in the overlay is. */
   .nav-foot {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    justify-content: center;
     width: 100%;
   }
   /* One line, at the SAME font size — measured, the dot margins alone cannot
@@ -1930,7 +2088,10 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .spine .spine-name { writing-mode: horizontal-tb; font-size: 1.6rem; }
   .acc-panel.open .spine { display: none; }
   .panel-body { position: relative; inset: auto; height: 74vh; }
-  .lib-grid { grid-template-columns: repeat(2, 1fr); }
+  /* the archive is a column layout now, so this is a count, not a template —
+     `grid-template-columns` here did nothing once .lib-grid stopped being a
+     grid, and left four ~90px columns on a phone */
+  .lib-grid { columns: 2; }
 }
 
 /* ═══════════════════════════════════════════
@@ -2276,6 +2437,67 @@ body.sheet-open { overflow: hidden; }
      needs 581px. The cap was re-cropping the exact media this rule exists to
      show, on precisely the small screens where it hurts most. */
   .why .holder { max-height: none; }
+
+  /* ── everything down the middle ──────────────────────────────────────
+     At one column there is no column edge left to hang things off, and copy
+     ragged against a full-bleed picture reads as a mistake rather than as a
+     measure. Titles, copy and both ways out are centred.
+
+     ⚠️ The hero and the footer are deliberately NOT in here. The hero panel
+     is a masthead with a dropcap floated into its lede — centring it would
+     strand the float — and the footer is a contact table whose labels and
+     values have to line up. The hero's META line is the one exception and is
+     handled at the bottom of this block. */
+  .why-title,
+  .why-para,
+  .why-outro-line,
+  .sw-name,
+  .sw-desc { text-align: center; }
+
+  /* Blocks 2 and 3 hang a hairline off their titles, and a centred title
+     needs one on BOTH sides or `flex: 1 1 auto` eats the slack and the words
+     stay pinned to the start whatever `text-align` says. Two rules do not fit
+     here: a hairline needs slack to read as a rule, and at 327px it either
+     squeezes the words into a third of the line or collapses to a stub. The
+     centring is the alignment; it does not need the furniture. */
+  .wb2 .why-title,
+  .wb3-head { justify-content: center; text-align: center; }
+  .wb2 .why-title::after,
+  .wb3-head::before,
+  .wb3-head::after { display: none; }
+
+  .why-outro {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .why-outro-line { width: 100%; }
+  /* The line and the button were touching, with most of a screen of cream
+     sitting under the pair. The air belongs between the two. */
+  .why-outro .oval-btn { margin-top: 1.6rem; }
+
+  .sw-text { align-items: center; }
+  .sw-foot { justify-content: center; }
+
+  /* ── the hero's meta line ──
+     The one part of the hero that centres. It also breaks in two: the date
+     and the place on one line, the three services on the next. `.hm-row`
+     stops being display:contents so each row takes a full basis, and the dot
+     that used to join them has nothing left to separate. */
+  .hero-meta { justify-content: center; text-align: center; }
+  .hm-row {
+    display: flex;
+    flex: 0 0 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1rem;
+  }
+  .hm-seam { display: none; }
+
+  /* The pill is chrome pinned over the page at the one width where the page
+     has no room to spare. Only the type inside it shrinks — the 3px frame and
+     the knob that rides in it stay as they are. */
+  .ls-opt { padding: 0.05rem 0.52rem; font-size: 0.54rem; }
 
   /* Block 1 — title, then media, then text. The title and the paragraph live
      in one wrapper, so there is no way to put the picture between them by

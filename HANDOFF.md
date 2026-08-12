@@ -1,31 +1,30 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-11. Read this first._
+_Updated 2026-08-12. Read this first._
 
-> ## 🔴 State on 2026-08-11: the why section was rebuilt, NOT COMMITTED
+> ## 🔴 State on 2026-08-12: R2 is live and the work page is full. NOT COMMITTED.
 >
-> The 63 derived images **are** committed (`4605abb`). What is not committed is
-> today's work: blocks 2 and 3 of لماذا ألِف؟ are now a reel carousel and a
-> gallery wall, the footer carries the real WhatsApp number, and the stamp is
-> gone. Five files are dirty. Nothing is deployed — pushing to GitHub does not
-> deploy; that is `npx.cmd wrangler deploy` from the repo root.
+> The 2026-08-11 why-section rebuild **is** committed (`40fa851`). Today's work
+> is not: eight phone/chrome edits, the gallery wall re-hung dark, and the whole
+> media archive on the work page. Nothing is deployed — pushing to GitHub does
+> not deploy; that is `npx.cmd wrangler deploy` from the repo root.
 >
-> **The reel is out of the page for now.** The old `wb2-rail-media` slot no
-> longer exists, so nothing in the repo points at the 51.8 MB gitignored
-> `media/wb2-rail-reel.mov` any more — the deploy-breaker from 2026-08-10 is
-> gone with it. ⚠️ **It comes straight back the moment a video goes into the
-> carousel**, which is what the carousel is for: Workers caps a single asset at
-> **25 MiB**, so any video must be an R2 object URL, never a repo file.
+> ✅ **R2 is solved and no longer a blocker.** The bucket is `aliph-media` on the
+> agency's account, public access is ON, and the base URL is
+> `https://pub-0b1a78477e8542a28db190d86f861426.r2.dev`. **77 objects, 404 MB**,
+> every one verified readable at that address with the right length and
+> content-type: `img/` 63 WebP, `video/` 7 faststart MP4, `poster/` 7 frames.
+> All seven videos were remuxed `moov`-first before upload.
 >
-> ✅ **The faststart remux is done** (2026-08-11):
-> `prototype/media/wb2-rail-reel.mp4`, `moov` at byte 36, video stream
-> bit-identical to the source (768 packets, matching framemd5). Ready for R2;
-> the upload and the object key are still outstanding.
+> ⚠️ **The old bucket-root URL in this file was a different bucket** and is dead.
+> The one above is the only live base.
 >
-> **Still fabricated, still not shippable:** block 1's paragraph, the three
-> block titles, and the project entries on the work page. Blocks 2 and 3 no
-> longer carry any copy at all, so the worst of it — captions sitting over real
-> client work, "تجارب الخط" labelling a Grillit food poster — is gone.
+> ⚠️ **r2.dev is not a production CDN.** Cloudflare rate-limits it and says so.
+> A custom domain (`media.aliphcreative.com`) is the real answer before launch.
+>
+> **Still fabricated, still not shippable:** block 1's paragraph and the three
+> block titles. The work page no longer carries invented project entries — it
+> shows the media itself, which is what the agency asked for.
 
 **Standing rule: update this file at the end of every session.**
 
@@ -393,11 +392,37 @@ holds on hover (bound only for `(hover: hover)` — on touch, `pointerenter` fir
 once and `pointerleave` never does, which would stop it for good) and stops off
 screen, same rule as the film strip.
 
-### Block 3 — the gallery wall (2026-08-11)
+### Block 3 — the gallery wall (2026-08-11, re-hung dark 2026-08-12)
 
 Photographs and the agency's own marks hung tight — 7px gaps. Twelve tiles cover
 a **12×12** field exactly on desktop and a **6×11** field on a phone; verified
 programmatically at **0 holes, 0 overlaps**.
+
+⚠️ **ONE treatment now, and it is the ink plate.** The three frames (cream
+mount, darkroom print, ink plate) were offered side by side as a comparison and
+the agency chose unified dark on 2026-08-12. Two knock-ons that are easy to
+miss if this is ever re-styled:
+
+- **The three marks point at `-cream` artwork**, not the ink files the rest of
+  the site uses. Ink on an ink plate is invisible. All three ship as a
+  `-cream` / ink pair, so this is real assets rather than a CSS `invert()`.
+- The mixed hang is in git history if it is ever wanted back.
+
+**Hover lifts the whole tile, not the picture.** `translateY(-10px)
+scale(1.02)` plus a cast shadow and `z-index: 3` — the gesture is taking a
+print down off the wall, not zooming a photograph inside a frame that stays
+put. ⚠️ This is the one shadow on the wall, and the rest state is still flat:
+across a 7px grid a shadow has nowhere to fall until something lifts, which is
+why the shadow arrives *with* the transform.
+
+⚠️ An earlier pass zoomed the image inside the tile instead, which needed a
+`.gw-win` wrapper because `overflow: hidden` clips at the **padding** box — so
+a picture scaled on the tile itself rides up over its own mount. That wrapper
+is gone with the zoom. If an inner zoom ever comes back, the wrapper has to
+come back with it.
+
+Touch has no hover, so `main.js` toggles `.is-lifted` on tap, one tile at a
+time — a `:hover` left ungated on a phone latches and stays.
 
 ⚠️ **Cells are square by construction and every tile's shape depends on it:**
 equal column and row counts, one gap value both ways, and `aspect-ratio: 1` on the
@@ -583,6 +608,94 @@ unchanged**; the phone rule cuts tracking to `0.03em` and the dot margin to
 0.14rem, landing at 304.3px. If the agency would rather keep the wide tracking,
 the alternative is a smaller font — it cannot be neither.
 
+## Asked by the agency, 2026-08-12
+
+| ask | done |
+|---|---|
+| Phone: centre everything on the home page and the nav, **except** the hero and the footer | **Done** in the ≤640px block. Titles, copy, both ways out, and the switcher column. The hero panel stays ragged on purpose — it is a masthead with a dropcap floated into its lede, and centring strands the float |
+| Language pill a little smaller on phone; move it to the nav menu's top left | **Done.** Only `.ls-opt`'s type shrinks (14.9 → 13.0px), so the 3px frame and the knob geometry are untouched. ⚠️ The pill had to **move in the markup** — see below |
+| Hero meta: centre it on phone, break into two lines, drop the joining dot; bigger and bold everywhere | **Done.** 18.2 → 20.2px, weight 500 → 700, two centred rows at ≤640px |
+| Unify the gallery wall's frames — dark or light? | **Compared, then built dark.** See _Block 3_ |
+| Zoom on hover in block 3 | **Built as a lift**, not an inner zoom — the whole framed box rises with a shadow behind it |
+| Replace the boxed hand-drawn arrow with a plain `>`, no square | **Done, on both pairs** — the carousel's and the service switcher's. They were the same control drawn twice |
+| Kill the blue selection flash on buttons/images/chrome, keep it on text, tint it terracotta | **Done.** `::selection` is terracotta at 0.28 alpha; `user-select: none` on chrome only; `-webkit-tap-highlight-color: transparent` for the mobile equivalent |
+| Move the outro button down on phone — it was stuck to the text | **Done**, 1.6rem above it |
+| Upload all the Drive media to R2 and fill the work page — media only, no titles, dated from metadata | **Done.** See the banner and _The work page_ |
+
+⚠️ **The nav language pill needed a markup move, not a CSS rule.** It lived
+inside `.nav-foot`, which is `position: relative` — so an absolutely positioned
+pill measured its `top` from the **footer row**, not the overlay, and landed
+763px down a 800px screen with `top: 48px` computed exactly as written. It is a
+direct child of `.nav-overlay` on all three pages now. Its centre line matches
+the burger's to the pixel (both 48.4px), so the pill inverts in place when the
+menu opens instead of jumping.
+
+⚠️ **The switcher arrows are cream with a drop shadow; the carousel's are ink.**
+Not an inconsistency — `.sw-arrow` sits **on** the picture, and the cream box
+that used to guarantee its contrast is gone with the redesign. A cream mark
+over a dark cast is the one combination that survives both a bright frame and a
+dark one. The carousel's sit at the track edges over faded flanks, where ink
+reads.
+
+## The work page (2026-08-12)
+
+One continuous run of **the media itself** — no titles, no captions, no profile
+sheet. The agency's call: show the work now, organise it into named projects
+later. `PROJECTS` is still in `main.js` and is what the sheet will read when
+those exist.
+
+- **70 items**: 9 design pieces, 54 photographs, 7 films. Categories render
+  `all` / `design` / `photo`; **`tech` is skipped because it has no media** —
+  the software work is sites and systems and there is no screenshot of one in
+  the Drive. A spine opening onto an empty panel reads as broken.
+- ⚠️ **`MEDIA` in `main.js` is GENERATED. Do not hand-edit it.** Every `d` is
+  read out of the file's own metadata — EXIF `DateTimeOriginal` for a
+  photograph, the container's `creation_time` for a film. Hand-transcribing
+  this table went wrong once already: **47 of 70 rows came back with invented
+  filenames, dates and ratios**, every one of them plausible, and only a
+  line-by-line diff against the generator caught it.
+- ⚠️ **The nine design pieces genuinely have no date.** They are 1080×1350 PNG
+  exports with an empty EXIF block — checked, not missing. They carry `d: null`,
+  show no date, and sort to the **end** of the run rather than to 1970. A real
+  date has to come from the agency.
+- ⚠️ **The archive is a COLUMN layout, not a grid of equal cells**, and that is
+  load-bearing. It holds four shapes at once — 4:5 design work, 3:2 and 2:3
+  photographs, 9:16 reels, 16:9 film — and a fixed-aspect cell crops every one.
+  On the design work that crop cuts the type baked into the layout, which is the
+  one thing this page exists not to do. Each tile is sized from its own ratio.
+  The trade is reading order: columns fill down then across. 4 columns desktop,
+  2 on a phone.
+- **Film is inert until asked for.** The tile shows a ~25 KB poster frame; only
+  a click swaps in a `<video>` and fetches any of the 28–84 MB behind it. Seven
+  muted loops on one screen is the exact load the phone pass spent a week
+  removing.
+- The **فهرس / معرض toggle is `hidden`**, not deleted. An index is a list of
+  titles and there are none yet; it rendered a column of bare dates. It comes
+  back with the project names.
+
+### The R2 pipeline (2026-08-12)
+
+Everything derives from the cached Drive originals, which are **still on disk**
+at `…\58773dc5-…\scratchpad\orig` (64 files, 938 MB) and `…\videos` (12 files).
+⚠️ **5 of those 12 "videos" are ~2.4 KB of Google interstitial HTML, not media**
+— failed downloads that look like files. They are skipped by size. Only 7 reels
+and horizontal videos actually came down.
+
+Scripts are in this session's scratchpad and are worth keeping together:
+`prep_video.py` (faststart remux + probe), `build_index.py` (EXIF dates),
+`posters.py`, `upload_r2.py`, `verify_r2.py`, `splice_media.py`.
+
+⚠️ **`wrangler r2 object put` needs `CLOUDFLARE_ACCOUNT_ID` set explicitly.**
+This login reaches two accounts and stops to ask otherwise — which is a hard
+failure non-interactively, and publishes into the personal account if answered
+wrong. Same reasoning as the pin in `wrangler.toml`.
+
+⚠️ **r2.dev 403s a request carrying a scripting library's default user-agent.**
+It is Cloudflare bot protection, and it looks exactly like "public access is
+disabled" — all 70 objects reported 403 while being perfectly readable. Send a
+browser UA from any verification script. A check that fails for *every* item is
+more likely broken than the thing it checks.
+
 ## Open questions for the agency
 
 1. **The لماذا ألِف؟ copy is mine, not the studio's.** It is deliberately about
@@ -613,6 +726,19 @@ the alternative is a smaller font — it cannot be neither.
    composition, not a feed — the shapes are fixed and the pictures were chosen to
    fill them. Swapping a photograph is one `src`; changing how many there are
    means re-tiling both the 12×12 and the 6×11 fields.
+9. **The nine design pieces have no date**, and the archive shows them undated
+   at the end of the run. Their PNGs carry no EXIF at all — this is checked,
+   not missing. Either the agency supplies dates, or they stay as they are.
+10. **Five Drive videos never downloaded.** The cache holds Google's error page
+    instead of the file for `المقاصد`, `tone-colored-1`, `كونكت-معدل`,
+    `einar-edited-final` and `الف-للتوكتوك`. Worth a retry if any of them matter.
+11. **The 938 MB of camera originals are not on R2** — only the web
+    derivatives the site serves. Say if the masters should be archived there too.
+12. **A custom domain for the media.** `r2.dev` is rate-limited by design and
+    Cloudflare says not to ship production on it.
+13. **The home page still serves its own images from the repo**, not R2 — they
+    were already committed and working, and churning them buys nothing. The
+    work page is the only R2 consumer. Worth unifying if one address is wanted.
 
 ---
 
@@ -738,22 +864,33 @@ assets cap a single file at 25 MiB**, so a 51.8 MB reel cannot ship in the site
 bundle whatever anyone thinks about repo size. R2 is not the convenient option here,
 it is the only one.
 
-⚠️ **The R2 URL already in the repo was the bucket root** —
-`https://pub-90bac6014abe49c594f8ac9c1f1899cb.r2.dev`, no object key, which 404s.
-The key is recorded nowhere here; it comes off the Cloudflare dashboard, or from
-`npx.cmd wrangler r2 object put <bucket>/<key> --file …`, which prints it.
+~~⚠️ The R2 URL already in the repo was the bucket root —
+`https://pub-90bac6014abe49c594f8ac9c1f1899cb.r2.dev`~~ **Dead — that was a
+different bucket.** ✅ **Resolved 2026-08-12:** the live base is
+`https://pub-0b1a78477e8542a28db190d86f861426.r2.dev` on bucket `aliph-media`,
+and 77 objects are on it. See the banner at the top.
 
-✅ **The faststart remux is DONE (2026-08-11).** `moov` was the last 12 KB of the
-file, so nothing played until all 51.8 MB had arrived.
+✅ **The faststart remux is DONE — for all seven videos (2026-08-12).** `moov`
+was the last 12 KB of each file, so nothing played until the whole 28–84 MB had
+arrived.
 
 ```bash
-ffmpeg -i finallllllllllll.mov -c copy -movflags +faststart wb2-rail-reel.mp4
+ffmpeg -i <source> -c copy -movflags +faststart <out>.mp4
 ```
 
-Result: `prototype/media/wb2-rail-reel.mp4`, `moov` at byte 36, ahead of `mdat`.
-**Verified lossless** — the video stream is 768 packets with framemd5 checksums
-and timestamps identical to the source. Do this to anything before it goes on R2;
-it is not compression and does not cost a pixel.
+Every one is asserted `moov`-before-`mdat` by the script that made it. **Lossless
+by construction** — `-c copy` remuxes the container and re-encodes nothing.
+Do this to anything before it goes on R2; it does not cost a pixel.
+
+⚠️ Two harmless differences if you diff a remux against its source, neither of
+which is quality loss: the output is a few KB **larger** (the relocated index
+needs 32-bit offsets), and a handful of audio packets differ where ffmpeg
+re-split the tail into uniform 1024-sample packets. Total sample count is
+identical.
+
+⚠️ **`prototype/media/` is empty now** and the old hand-made
+`wb2-rail-reel.mp4` is gone with the rail that used it. The remuxed files live
+in the session scratchpad and on R2; the directory stays gitignored.
 
 ⚠️ **ffmpeg is installed but not on PATH.** It is at
 `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-9.0-full_build\bin\ffmpeg.exe`

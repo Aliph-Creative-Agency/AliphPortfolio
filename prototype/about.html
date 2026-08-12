@@ -21,6 +21,13 @@
 </button>
 
 <div class="nav-overlay" id="navOverlay">
+  <!-- A corner control, not part of the footer row — see the note in
+       index.html: .nav-foot is position:relative and would capture it. -->
+  <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
+    <span class="ls-knob" aria-hidden="true"></span>
+    <span class="ls-opt" data-l="ar">ع</span>
+    <span class="ls-opt" data-l="en">EN</span>
+  </div>
   <a class="nav-brand" href="index.html"><img src="assets/img/Aliph-Logo-Main-cream.svg" alt="ألِف ALIPH"></a>
   <nav class="nav-big" aria-label="التنقّل الرئيسي">
     <a href="index.html" class="nav-item" data-i18n="navHome">الرئيسيّة</a>
@@ -32,11 +39,6 @@
       <a href="https://www.instagram.com/aliph.creative" target="_blank" rel="noopener noreferrer">INSTAGRAM</a><span>·</span>
       <a href="https://www.facebook.com/share/19F5j4XM6g/" target="_blank" rel="noopener noreferrer">FACEBOOK</a><span>·</span>
       <a href="https://www.linkedin.com/company/aliph-creative/" target="_blank" rel="noopener noreferrer">LINKEDIN</a>
-    </div>
-    <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
-      <span class="ls-knob" aria-hidden="true"></span>
-      <span class="ls-opt" data-l="ar">ع</span>
-      <span class="ls-opt" data-l="en">EN</span>
     </div>
   </div>
 </div>
