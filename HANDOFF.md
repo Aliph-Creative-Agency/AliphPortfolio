@@ -1,30 +1,38 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-12. Read this first._
+_Updated 2026-08-16. Read this first._
 
-> ## 🔴 State on 2026-08-12: R2 is live and the work page is full. NOT COMMITTED.
+> ## 🟡 State on 2026-08-16: committed, NOT pushed, NOT deployed
 >
-> The 2026-08-11 why-section rebuild **is** committed (`40fa851`). Today's work
-> is not: eight phone/chrome edits, the gallery wall re-hung dark, and the whole
-> media archive on the work page. Nothing is deployed — pushing to GitHub does
-> not deploy; that is `npx.cmd wrangler deploy` from the repo root.
+> `5a5a0d3` — lightbox, the tech section back, six recovered films, horizontal
+> button swap, the nav close animation, and the paper texture. **It is committed
+> and nothing else. Not pushed, not deployed.**
 >
-> ✅ **R2 is solved and no longer a blocker.** The bucket is `aliph-media` on the
-> agency's account, public access is ON, and the base URL is
-> `https://pub-0b1a78477e8542a28db190d86f861426.r2.dev`. **77 objects, 404 MB**,
-> every one verified readable at that address with the right length and
-> content-type: `img/` 63 WebP, `video/` 7 faststart MP4, `poster/` 7 frames.
-> All seven videos were remuxed `moov`-first before upload.
+> The previous round (`042a402` — phone centring, the dark wall, the media
+> archive) **is** pushed and live. Deploy is not automatic: `npx.cmd wrangler
+> deploy` from the repo root, and pushing to GitHub does nothing.
 >
-> ⚠️ **The old bucket-root URL in this file was a different bucket** and is dead.
-> The one above is the only live base.
+> ✅ **R2 carries the media.** Bucket `aliph-media` on the agency's account,
+> public access ON, base URL
+> `https://pub-0b1a78477e8542a28db190d86f861426.r2.dev`. Four prefixes:
+> `img/` 63 WebP · `video/` 13 web-ready MP4 · `poster/` 13 frames ·
+> `master/` 5 full-quality originals. Every object verified readable at the
+> right length and content-type.
 >
-> ⚠️ **r2.dev is not a production CDN.** Cloudflare rate-limits it and says so.
-> A custom domain (`media.aliphcreative.com`) is the real answer before launch.
+> 🔴 **One object is still missing: `master/horizontal-maqasid.mp4`.** It is
+> 384 MiB and `wrangler r2 object put` refuses anything over **300 MiB**. Its
+> *web* version is up and playing — only the master needs a drag-and-drop into
+> the R2 dashboard, which has no such cap. Nothing on the site is broken by it.
 >
-> **Still fabricated, still not shippable:** block 1's paragraph and the three
-> block titles. The work page no longer carries invented project entries — it
-> shows the media itself, which is what the agency asked for.
+> ⚠️ **r2.dev is not a production CDN.** Cloudflare rate-limits it, documents it
+> as development-only, and gives it no edge caching — which now matters, because
+> the archive serves 224 MB of video. `media.aliphcreative.com` is the answer;
+> the steps are in _Moving media to a custom domain_ below.
+>
+> **Still fabricated, still not shippable:** block 1's paragraph, the three
+> block titles, and — newly back on the page — the four **tech projects and
+> their screenshots**. The sheet that displays them is real; its contents are
+> invented. See open question 1.
 
 **Standing rule: update this file at the end of every session.**
 
@@ -163,6 +171,31 @@ echoes the exact name) and live the moment a real model answers.
 ## Things that will bite you
 
 Ordered by how much time each one cost.
+
+**A 200 and a file on disk is not proof you got the file.** Google Drive answers
+a large-file request with an HTML "can't scan for viruses" page — same status
+code, real bytes, and the old downloader wrote it out as a `.mp4`. Five of
+twelve videos were that page for six days and nobody noticed, because a
+directory listing shows twelve files. **Check sizes, not existence.** The same
+shape of bug hid a sixth video that produced no file at all and so never
+appeared in any list of failures. Anything fetched over a network needs a
+plausibility check on what came back.
+
+**A check that fails for EVERY item is more likely broken than the thing it
+checks.** All 70 R2 objects reported 403 while being perfectly readable —
+`r2.dev` sits behind bot protection and rejects a scripting library's default
+User-Agent. It looks exactly like "public access is disabled", and it sent a
+round of diagnosis into settings that were already correct. Real failures are
+usually partial; send the same headers the real consumer sends, and keep a
+known-good probe object to test the checker itself.
+
+**Model-generated data is plausible in every local detail and still wrong.** A
+70-row table read out of file metadata was retyped from a truncated terminal
+view: **47 of the 70 rows came back with invented filenames, dates and ratios**,
+all correctly formatted, all fake. Nothing looked wrong on inspection and only a
+line-by-line diff against the generator caught it. Never retype generated data —
+splice it in with a script that asserts the anchor, asserts the row count, and
+re-reads the file to diff it afterwards.
 
 **A `var()` naming a token that doesn't exist fails silently.** `font-family` is
 inherited, so an undefined custom property makes the element inherit instead of
@@ -637,17 +670,42 @@ over a dark cast is the one combination that survives both a bright frame and a
 dark one. The carousel's sit at the track edges over faded flanks, where ink
 reads.
 
-## The work page (2026-08-12)
+## Asked by the agency, 2026-08-16
 
-One continuous run of **the media itself** — no titles, no captions, no profile
-sheet. The agency's call: show the work now, organise it into named projects
-later. `PROJECTS` is still in `main.js` and is what the sheet will read when
-those exist.
+| ask | done |
+|---|---|
+| Re-download the videos that failed, upload them, put them on the site | **All six in.** Five recovered past Google's scan interstitial; `الف للتوكتوك` was a dead Drive file the agency fetched by hand. See _The six recovered films_ |
+| A task list for moving the media to a custom domain | **Written** — see _Moving media to a custom domain_ |
+| A lightbox on every image and video, except the ماذا نفعل؟ switcher | **Built.** See _The lightbox_ |
+| Bring Software Development back on the work page, with a profile view per item | **Restored**, rendering from `PROJECTS` into the existing profile sheet. ⚠️ Its content is still placeholder |
+| The button animation visibly cuts off the text — make it horizontal | **Done.** The vertical mask was the cause, not the timing — see _Two animation fixes_ |
+| Crumpled paper texture: on the hero area, inside the big titles only, and a whole-site version to judge | **Done**, from the agency's own scan, three separate crops. Whole-site version is at `?paper=1` |
+| The nav animates open but not closed | **Fixed.** The exit tween existed and was running on an invisible element |
 
-- **70 items**: 9 design pieces, 54 photographs, 7 films. Categories render
-  `all` / `design` / `photo`; **`tech` is skipped because it has no media** —
-  the software work is sites and systems and there is no screenshot of one in
-  the Drive. A spine opening onto an empty panel reads as broken.
+⚠️ **The agency supplied the paper scan after three procedural attempts were
+rejected.** Recorded because the instinct to generate a texture will come back:
+don't. It is in `resources/` now.
+
+## The work page (2026-08-12, tech restored 2026-08-16)
+
+One continuous run of **the media itself** — no titles, no captions. The
+agency's call: show the work now, organise it into named projects later.
+
+⚠️ **TWO different kinds of thing share this run and they are not
+interchangeable.** `design` and `photo` come from `MEDIA`: the Drive, shown as
+itself with a date and nothing else. `tech` cannot — the software work is
+sites, systems and apps, and there is no photograph of a booking system. It
+renders from `PROJECTS` instead, and each entry opens the **profile sheet**,
+which is the only way that work can actually be shown. Same tile, different
+payload; `row.kind` is the switch.
+
+- **80 items**: 9 design pieces, 54 photographs, 13 films, 4 software projects.
+  All four categories render now. A category with nothing in it is still
+  skipped — a spine opening onto cream reads as broken.
+- 🔴 **The four tech entries are PLACEHOLDER content**, and so are their
+  screenshots (`HOLDER`, the grey data URI). The sheet around them is real and
+  works; what it displays is invented. This is the most visible piece of
+  fabricated content on the site now that the archive is real.
 - ⚠️ **`MEDIA` in `main.js` is GENERATED. Do not hand-edit it.** Every `d` is
   read out of the file's own metadata — EXIF `DateTimeOriginal` for a
   photograph, the container's `creation_time` for a film. Hand-transcribing
@@ -665,25 +723,88 @@ those exist.
   one thing this page exists not to do. Each tile is sized from its own ratio.
   The trade is reading order: columns fill down then across. 4 columns desktop,
   2 on a phone.
-- **Film is inert until asked for.** The tile shows a ~25 KB poster frame; only
-  a click swaps in a `<video>` and fetches any of the 28–84 MB behind it. Seven
-  muted loops on one screen is the exact load the phone pass spent a week
-  removing.
+- **Film is inert until asked for.** The tile shows a ~25 KB poster frame;
+  nothing of the film itself is fetched until it is opened. A screen of muted
+  loops is the exact load the phone pass spent a week removing.
 - The **فهرس / معرض toggle is `hidden`**, not deleted. An index is a list of
   titles and there are none yet; it rendered a column of bare dates. It comes
   back with the project names.
 
-### The R2 pipeline (2026-08-12)
+## The lightbox (2026-08-16)
 
-Everything derives from the cached Drive originals, which are **still on disk**
-at `…\58773dc5-…\scratchpad\orig` (64 files, 938 MB) and `…\videos` (12 files).
-⚠️ **5 of those 12 "videos" are ~2.4 KB of Google interstitial HTML, not media**
-— failed downloads that look like files. They are skipped by size. Only 7 reels
-and horizontal videos actually came down.
+Click any picture or film and it opens full size over a dimmed page. Built
+entirely in `main.js` — it is chrome, it is identical on all three pages, and
+three copies of the same markup is three places to forget one.
 
-Scripts are in this session's scratchpad and are worth keeping together:
-`prep_video.py` (faststart remux + probe), `build_index.py` (EXIF dates),
-`posters.py`, `upload_r2.py`, `verify_r2.py`, `splice_media.py`.
+Covers `.why .holder` (block 1 and every carousel slide), `.gw-tile`,
+`.lib-grid .tile`, `.sheet-shot`, `.clip-photo`, `.asvc-media`.
+
+⚠️ **The ماذا نفعل؟ switcher is deliberately excluded.** Its stage is a
+control: the arrows step through examples, so a click there means "next", not
+"bigger". `.sw-stage` is in the handler's skip list — don't add it back.
+
+Three things in it that are load-bearing:
+
+- ⚠️ **A drag guard.** The carousel is a scroll-snap scroller, so a swipe that
+  starts on a slide ends in a `click` on it. Without the 10px movement check,
+  every swipe on a phone would open the overlay.
+- ⚠️ **The `<video>` is created on open and destroyed on close**, not paused.
+  A paused element that still has a `src` keeps its buffer and on some browsers
+  keeps filling it behind a closed overlay.
+- ⚠️ **Arrow keys follow READING order**, so ← and → swap meaning with the
+  language. Grouping is by nearest container (`.gwall`, `.lib-grid`,
+  `.reelshow-track`, `.clippings`, `.wb1`), which is what makes "3 / 12" mean
+  anything.
+
+**Film no longer plays inside its own tile.** It opens here like every other
+piece of media — one behaviour instead of two, and much bigger. The gallery
+wall's tap-to-lift went at the same time: a tap opens the picture now, and the
+lift is a pointer affordance gated behind `(hover: hover)`.
+
+### The R2 pipeline (2026-08-12, extended 2026-08-16)
+
+Everything derives from the cached Drive originals, **still on disk** at
+`…\58773dc5-…\scratchpad\orig` (64 files, 938 MB) and `…\videos`, plus this
+session's `…\7afe1974-…\scratchpad\{videos2,r2-video2,r2-web,tuktuk}`.
+
+⚠️ **All of that is under `%LOCALAPPDATA%\Temp`** and can be cleared by Windows
+without warning. The 938 MB of camera originals is the only copy outside the
+Drive. Only the derived WebPs in `prototype/assets/media/` are safe.
+
+Scripts worth keeping together (scratchpad): `prep_video.py` (faststart remux +
+probe), `build_index.py` (EXIF dates), `posters.py`, `upload_r2.py`,
+`verify_r2.py`, `splice_media.py`, `refetch.py`, `derive.py`, `upload_web.py`,
+`tuktuk.py`. `cut_paper.py` is in `resources/` with the rest of the asset
+scripts.
+
+### The six recovered films (2026-08-16)
+
+🔴 **Five of the twelve Drive videos had never actually downloaded.** What was
+on disk was ~2.4 KB of Google's "can't scan this file for viruses"
+interstitial, written out as a `.mp4`. The request returned 200 and produced a
+file, so nothing looked wrong until the sizes were compared. A sixth
+(`Final Hasoub`) had produced no file at all and so was invisible even in a
+list of failures.
+
+Getting past it needs two things the first attempt had neither of: a **cookie
+jar** (the confirm token is bound to a session cookie) and the interstitial's
+**hidden form fields replayed back** to the endpoint. `refetch.py` does both.
+
+⚠️ One file — `الف للتوكتوك.mp4` — answers **"Google Drive - Can't download
+file"**, which is a different thing entirely: not the scan gate but a dead
+file (quota spent, sharing changed, or removed). No amount of token replay
+fixes it. The agency downloaded that one by hand.
+
+⚠️ **They arrived as EDIT MASTERS, 11–25 Mbps.** `final-hasoub` was 209 MB for
+68 seconds — a 10 Mbps visitor cannot stream that in real time, it just
+buffers. So `video/` holds a **web derivative** (CRF 22 under a 5.5 Mbps
+ceiling, same resolution and length: **1125 MB → 224 MB**) and `master/` holds
+the untouched original.
+
+That split is the whole point, and it is consistent with the no-compression
+position rather than a departure from it: **a slot and an archive are different
+assets.** The argument for a derivative was never an argument for discarding
+the original. Don't "fix" this by pointing the page at `master/`.
 
 ⚠️ **`wrangler r2 object put` needs `CLOUDFLARE_ACCOUNT_ID` set explicitly.**
 This login reaches two accounts and stops to ask otherwise — which is a hard
@@ -695,6 +816,107 @@ It is Cloudflare bot protection, and it looks exactly like "public access is
 disabled" — all 70 objects reported 403 while being perfectly readable. Send a
 browser UA from any verification script. A check that fails for *every* item is
 more likely broken than the thing it checks.
+
+## Crumpled paper (2026-08-16)
+
+Cut from **the agency's own scan**, `resources/Free_crumpled_paper_texture…jpg`
+(2848×4272), by `resources/cut_paper.py`. Three tiles from three
+**non-overlapping** regions of the same sheet, at the agency's request — the
+same creases in the hero, the headlines and the page background would read as
+one repeated stamp rather than as a material.
+
+| tile | where | note |
+|---|---|---|
+| `paper-panel.webp` | `.hero-panel::before`, multiply 0.55 | broad calm folds |
+| `paper-title.webp` | `.banner h2`, clipped to the glyphs | most contrast, smallest size |
+| `paper-page.webp` | `body.paper::after`, whole site | softest of the three |
+
+**The whole-site version is behind a switch:** load any page with **`?paper=1`**
+to see it, so the agency can judge it before committing. Same query-string
+convention as the chat widget's `?chat=up`. Off by default.
+
+⚠️ **The headline tile needs far more contrast at a far smaller size than the
+other two, and it is easy to get wrong** — it was rejected twice. The texture is
+clipped to the LETTERS, so almost all of the tile is thrown away and only what
+falls inside a stroke survives. A curve that reads beautifully across a whole
+panel is invisible inside a letterform. Hence `background-size: 240px` (not the
+600px that "looks right" on its own) and a hard gamma.
+
+⚠️ **But crease DEPTH is what decides the colour.** The tile is multiplied into
+the cream, so a strong setting stops the type being cream at all — at strength
+0.92 the folds hit 20/255 and the headline read as grey paper on ink, which the
+agency rejected. Contrast comes from the **gamma**, which lifts the flats toward
+white; depth stays low. Flats land at ≈`#D2D2C7`, the deepest fold at
+≈`#9C9C94`.
+
+⚠️ **`background-clip: text` is guarded by `@supports`, and that guard matters.**
+The technique needs `color: transparent` to let the background through, so
+anywhere the clip is unsupported an unguarded rule gives you *invisible*
+headlines rather than untextured ones.
+
+Two things `cut_paper.py` does that are not obvious:
+
+- **Curve first, then blend.** The tile is made seamless by cross-fading a
+  surplus band back over the opposite edge. Applying the contrast curve
+  *afterwards* amplifies the tiny residual difference across the join into a
+  visible line — which is exactly what happened. The blend must be the last
+  thing to touch the pixels.
+- **It picks where to cut.** The blend guarantees the wrap is *continuous*, not
+  that it is *inconspicuous*: a join landing along a strong fold repeats that
+  fold at every tile boundary and reads as a grid. The script tries a few
+  nearby origins and keeps whichever puts the join in the quietest part of the
+  sheet, scored by how the join ranks among every other join in the tile.
+
+⚠️ **Three procedural attempts failed before the scan arrived** — contour rings,
+quilted leather, cracked stone. They are not in the repo. Worth knowing only so
+nobody tries generating it again: crumpled paper is flat facets meeting at sharp
+creases, and *summing* smooth noise can never produce a sharp edge.
+
+## Two animation fixes (2026-08-16)
+
+**Closing the nav is animated now, and the tween was always there.** The
+overlay is only painted while the body carries `.nav-open` — and that class
+comes off on the same frame the burger is clicked, so a 0.55s slide ran on
+something already invisible. `.nav-closing` keeps it painted for exactly as long
+as the tween needs and comes off in `onComplete`. Scroll is released
+immediately; only the paint is held. `gsap.killTweensOf` on every toggle, or a
+fast double-click strands `.nav-closing` on the body and pins the overlay over
+the page.
+
+**The oval buttons swap sideways.** They used to slide on Y inside a
+`height: 1.5em` mask — so the mask was only as tall as the travel needed, and
+Arabic paid for it: تعرّف على ألِف has a hamza above and a descender below and
+`overflow: hidden` sliced both off flat. **A vertical mask cannot clip the
+travel without also clipping the letters.** Horizontal travel decouples them:
+padding gives the glyphs room, a matching negative margin keeps the button's
+height unchanged, and the overflow now only ever cuts left/right where there is
+nothing but the face waiting off stage. `--swap` flips the direction with the
+language.
+
+## Moving media to a custom domain
+
+`r2.dev` is rate-limited by design, documented as development-only, and gets no
+edge caching — which matters now that the archive serves 224 MB of video.
+
+Dashboard/registrar work (needs an account holder):
+
+1. Confirm `aliphcreative.com` is on Cloudflare **in the same account as the
+   bucket** (`6c60bd77…`). If not, add the site and repoint nameservers.
+2. R2 → `aliph-media` → Settings → Public access → **Connect Custom Domain** →
+   `media.aliphcreative.com`. Same-account zones get the DNS record written
+   automatically.
+3. Wait for the certificate.
+4. **Then disable the `r2.dev` URL.** Leaving it on keeps a second, slower,
+   uncached door to the same objects.
+
+Then, in the repo:
+
+5. Verify every object over the new host — 200s, lengths, content-types.
+6. Change **one constant**: `R2` in `main.js`. That is the only reference.
+7. Add a Cache Rule so media is edge-cached. The objects already carry
+   `max-age=31536000, immutable`; a custom domain is what lets Cloudflare
+   honour it.
+8. Redeploy and re-verify live.
 
 ## Open questions for the agency
 
@@ -729,16 +951,28 @@ more likely broken than the thing it checks.
 9. **The nine design pieces have no date**, and the archive shows them undated
    at the end of the run. Their PNGs carry no EXIF at all — this is checked,
    not missing. Either the agency supplies dates, or they stay as they are.
-10. **Five Drive videos never downloaded.** The cache holds Google's error page
-    instead of the file for `المقاصد`, `tone-colored-1`, `كونكت-معدل`,
-    `einar-edited-final` and `الف-للتوكتوك`. Worth a retry if any of them matter.
+10. ~~Five Drive videos never downloaded.~~ **Resolved 2026-08-16** — all six
+    are in. Five were recovered past the scan interstitial; `الف للتوكتوك` was
+    a dead Drive file and the agency supplied it by hand.
 11. **The 938 MB of camera originals are not on R2** — only the web
-    derivatives the site serves. Say if the masters should be archived there too.
+    derivatives the site serves. Say if the masters should be archived there
+    too. ⚠️ They live in a **temp folder** that Windows can clear; the Drive is
+    the only other copy.
 12. **A custom domain for the media.** `r2.dev` is rate-limited by design and
-    Cloudflare says not to ship production on it.
+    Cloudflare says not to ship production on it. Steps are written up above.
 13. **The home page still serves its own images from the repo**, not R2 — they
     were already committed and working, and churning them buys nothing. The
     work page is the only R2 consumer. Worth unifying if one address is wanted.
+14. **Do the tech projects get real content?** Four entries and their
+    screenshots are invented, and they are now on the work page behind a
+    profile sheet that presents them as real. Needs titles, dates, write-ups
+    and actual screenshots — or the section comes back off.
+15. **Does the whole-site paper texture ship?** Built and switchable at
+    `?paper=1`, deliberately not enabled. The hero panel and the two banner
+    headlines carry it either way.
+16. **`master/horizontal-maqasid.mp4` is not in the bucket.** 384 MiB against
+    wrangler's 300 MiB single-upload cap; needs a dashboard drag-and-drop. The
+    web version is up and playing, so nothing is broken meanwhile.
 
 ---
 
@@ -843,32 +1077,44 @@ A real reel was put in `wb2-rail-media` on 2026-08-10 and **the treatment holds*
 styled alongside `.holder > img`, so no CSS was needed. (It was trialled under the
 old grayscale grade and read correctly there too, for whatever that is now worth.)
 
-It is **not committed.** The file is 51.8 MB — past GitHub's 50 MB warning, into
-every clone forever, and into the Worker asset bundle, for something that should be
-served by URL. `prototype/media/` is gitignored. The source lives at
-`C:\Users\Obaida\Desktop\finallllllllllll.mov`.
+It was **never committed** — 51.8 MB, past GitHub's 50 MB warning and into every
+clone forever, for something that should be served by URL. `prototype/media/` is
+gitignored and is now **empty**; that reel lives on R2 as
+`video/reels-finallllllllllll.mp4` like the rest.
 
 ⚠️ **The 9/13 crop is fixed** — the holder that caused it is gone and every
 carousel slide is a true 9:16, so a reel now plays uncropped. **The burnt-in
 titles are still there**, and with the figcaption gone they no longer collide with
 anything, but they will still read as part of the page rather than part of the film.
 
-### Decided 2026-08-10: video lives on R2, at full quality
+### Decided 2026-08-10: video lives on R2 — refined 2026-08-16
 
-**Compression is off the table** — the studio's position is that the work has to be
-shown at the quality it was made at, and that is a brand call, not a technical one.
-So: R2 for video, long term, uncompressed.
+**Compression is off the table for the MASTER** — the agency's position is that
+the work is shown at the quality it was made at, and that is a brand call.
 
-That also settles a constraint that had no other answer. **Cloudflare Workers static
-assets cap a single file at 25 MiB**, so a 51.8 MB reel cannot ship in the site
-bundle whatever anyone thinks about repo size. R2 is not the convenient option here,
-it is the only one.
+⚠️ **That was never a decision to stream a 25 Mbps edit master to a browser**,
+and it was read that way once. The recovered films arrived at 11–25 Mbps;
+`final-hasoub` was 209 MB for 68 seconds, which a 10 Mbps visitor cannot play in
+real time. **The masters are kept, untouched, under `master/`. The page plays a
+derivative from `video/`.** A slot and an archive are different assets — the
+same distinction this file already drew for the rail loop.
+
+Three size limits, all real, all different:
+
+- **Cloudflare Workers static assets: 25 MiB per file.** A 51.8 MB reel cannot
+  ship in the site bundle whatever anyone thinks about repo size. This is why
+  R2 exists here at all.
+- **`wrangler r2 object put`: 300 MiB per object.** Anything larger has to go
+  through the dashboard. `master/horizontal-maqasid.mp4` (384 MiB) is stuck on
+  exactly this.
+- **GitHub: 50 MB warning per file.** Which is why `resources/*.mp4` is now
+  gitignored.
 
 ~~⚠️ The R2 URL already in the repo was the bucket root —
 `https://pub-90bac6014abe49c594f8ac9c1f1899cb.r2.dev`~~ **Dead — that was a
 different bucket.** ✅ **Resolved 2026-08-12:** the live base is
-`https://pub-0b1a78477e8542a28db190d86f861426.r2.dev` on bucket `aliph-media`,
-and 77 objects are on it. See the banner at the top.
+`https://pub-0b1a78477e8542a28db190d86f861426.r2.dev` on bucket `aliph-media`.
+See the banner at the top.
 
 ✅ **The faststart remux is DONE — for all seven videos (2026-08-12).** `moov`
 was the last 12 KB of each file, so nothing played until the whole 28–84 MB had
@@ -941,6 +1187,7 @@ output.
 | `build_assistant.py` | Lifts the launcher's ring and double-alif mark out of the studio's artwork into transparent PNGs. |
 | `cut_ransom.py` | Cuts the 16 torn paper scraps per language for the headline letters. |
 | `build_crumple.py` | Bakes the dropcap's 24-frame sprite from the crumple clip. |
+| `cut_paper.py` | Cuts the three paper tiles out of the agency's crumpled-paper scan. Picks each crop's origin by measuring where the wrap is least visible, and curves before blending — see _Crumpled paper_. |
 | `extract.py` | Pulls the wireframe's colour-coded boxes out as percentages of the page column. |
 
 ⚠️ Several of these **overwrite their output in place**. Back the file up before
@@ -960,6 +1207,12 @@ hardcoded absolute paths; `build_assistant.py` replaced it). Both are in git his
 - `Brand/` is **not** in the repo (too large for GitHub) but is on the user's disk.
   `prototype/assets/` carries its own copies of everything the site needs.
 - `resources/` **is** tracked — it holds the inputs the derived assets come from.
+  ⚠️ **Which means anything large dropped in there goes straight into the repo
+  and into every clone forever.** A 111 MB reel landed there on 2026-08-16 and
+  would have been committed silently. `.gitignore` now excludes
+  `resources/*.mp4` and `*.mov`, with the small green-screen crumple clip
+  exempted by name because it predates the rule and is already tracked. Video
+  belongs on R2, served by URL.
 - End commit messages with the Claude co-author trailer.
 - ⚠️ **`git add -A` is a trap here, twice over.** Run from the wrong directory it
   stages a *different repo* (there is one at `C:\Users\Obaida`). Run at the right
