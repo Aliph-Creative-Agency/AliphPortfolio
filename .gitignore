@@ -22,6 +22,17 @@ prototype/media/
 # go into style.css and that is what is kept.
 why_fitted_*.png
 
+# ⚠️ resources/ IS tracked — it holds the source art the derived assets come
+# from — so anything large dropped in there goes straight into the repo and
+# into every clone forever. Video does not belong in git at all: it lives on
+# R2 and is served by URL. One 111 MB reel landed here on 2026-08-16 and would
+# have been committed silently.
+# The small green-screen clip the dropcap sprite is baked from predates this
+# and is already tracked, so it is excluded from the rule by name.
+resources/*.mp4
+resources/*.mov
+!resources/Paper Crumple Effect Green Screen.mp4
+
 # Python bytecode from the resources/ build scripts
 __pycache__/
 *.pyc

@@ -434,6 +434,29 @@ const MEDIA = [
   { f: "reels-draft2-show.mp4", c: "photo", r: 0.5625, d: "2026-05-25", v: 1, p: "reels-draft2-show.webp" },
   { f: "reels-finallllllllllll.mp4", c: "photo", r: 0.5625, d: "2026-03-18", v: 1, p: "reels-finallllllllllll.webp" },
   { f: "reels-dardashat.mp4", c: "photo", r: 0.5625, d: "2025-02-20", v: 1, p: "reels-dardashat.webp" },
+  /* Recovered 2026-08-15. These five had come down as ~2.4 KB of Google's
+     "can't scan for viruses" interstitial rather than the film — a 200 that
+     wrote a plausible-looking file. Getting past it needs a cookie jar and the
+     hidden confirm token replayed back.
+     ⚠️ What `video/` holds for these five is a WEB DERIVATIVE, not the master.
+     They arrived as edit masters at 11-25 Mbps — final-hasoub was 209 MB for
+     68 seconds, which a 10 Mbps visitor cannot stream in real time. Re-encoded
+     at CRF 22 under a 5.5 Mbps ceiling: same resolution, same length, and
+     1125 MB down to 224 MB.
+
+     The masters are NOT gone. They are on R2 under `master/` at full quality,
+     which is the distinction the no-compression position actually turns on —
+     a slot and an archive are different assets, and the argument for a
+     derivative was never an argument for discarding the original. */
+  /* The sixth. Drive refused this one outright — "Can't download file", not
+     the scan interstitial — so the agency fetched it by hand. Same treatment
+     as the rest. */
+  { f: "reels-alif-tuktuk.mp4", c: "photo", r: 0.5625, d: "2026-08-01", v: 1, p: "reels-alif-tuktuk.webp" },
+  { f: "reels-connect-edited.mp4", c: "photo", r: 0.5625, d: "2026-08-02", v: 1, p: "reels-connect-edited.webp" },
+  { f: "reels-einar-edited.mp4", c: "photo", r: 0.5625, d: "2026-05-19", v: 1, p: "reels-einar-edited.webp" },
+  { f: "horizontal-maqasid.mp4", c: "photo", r: 1.7778, d: "2026-08-04", v: 1, p: "horizontal-maqasid.webp" },
+  { f: "horizontal-final-hasoub.mp4", c: "photo", r: 1.7778, d: "2026-03-04", v: 1, p: "horizontal-final-hasoub.webp" },
+  { f: "horizontal-tone-colored.mp4", c: "photo", r: 1.7778, d: "2026-02-08", v: 1, p: "horizontal-tone-colored.webp" },
 ];
 
 /* `date` is "YYYY-MM"; the archive is one continuous run, newest first,
@@ -1266,19 +1289,50 @@ if (menuBtn && overlay) {
     menuBtn.setAttribute("aria-expanded", String(open));
     /* the overlay forces cream bars; on close, re-read what's underneath */
     if (!open) queueMenuSync();
-    if (prefersReduced) return;
+    if (prefersReduced) {
+      document.body.classList.remove("nav-closing");
+      return;
+    }
+    /* a second click mid-flight must not leave two tweens fighting over the
+       same element — or .nav-closing stranded on the body by a cancelled
+       onComplete, which would pin the overlay visible over the page */
+    gsap.killTweensOf([overlay, ...items]);
+
     if (open) {
+      document.body.classList.remove("nav-closing");
       gsap.fromTo(overlay, { yPercent: -100 }, { yPercent: 0, duration: 0.65, ease: "power4.inOut" });
       gsap.fromTo(items,
         { yPercent: 60, opacity: 0 },
         { yPercent: 0, opacity: 1, duration: 0.6, stagger: 0.07, delay: 0.3, ease: "power3.out" }
       );
     } else {
+      /* ⚠️ The exit tween was already here and did nothing visible. The
+         overlay is only painted while the body carries .nav-open, and that
+         class comes off on this same frame — so the panel vanished instantly
+         and the 0.55s slide ran on something nobody could see. `.nav-closing`
+         keeps it painted for exactly as long as the tween needs, and comes
+         off in onComplete.
+
+         The items leave in the reverse order they arrived, and faster: an
+         exit that takes as long as the entrance reads as hesitation. */
+      document.body.classList.add("nav-closing");
+      gsap.to(items, {
+        yPercent: 40,
+        opacity: 0,
+        duration: 0.26,
+        stagger: { each: 0.05, from: "end" },
+        ease: "power3.in",
+      });
       gsap.to(overlay, {
         yPercent: -100,
-        duration: 0.55,
+        duration: 0.5,
+        delay: 0.14,
         ease: "power4.inOut",
-        onComplete: () => gsap.set(overlay, { yPercent: 0 }),
+        onComplete: () => {
+          gsap.set(overlay, { yPercent: 0 });
+          gsap.set(items, { clearProps: "transform,opacity" });
+          document.body.classList.remove("nav-closing");
+        },
       });
     }
   });
@@ -1466,6 +1520,160 @@ function initDropCap() {
   cap.addEventListener("mouseleave", () => play(CRUMPLE.rest, 0.85));
 }
 
+/* ══════════ lightbox ══════════
+   Click any picture or film and it opens full size over a dimmed page.
+
+   ⚠️ The ماذا نفعل؟ switcher is deliberately excluded. Its stage is a control
+   — the arrows step through examples and a click there means "next", not
+   "bigger". Everything else on the site is in.
+
+   Built in JS rather than written into all three pages: it is chrome, it is
+   identical everywhere, and three copies of the same markup is three places to
+   forget. The <video> is created per open and destroyed on close so nothing
+   keeps buffering behind a closed overlay. */
+const lightbox = (() => {
+  /* Every media surface that should open, and the container that decides what
+     counts as "the same set" for the arrow keys. */
+  const OPENS = ".why .holder, .gw-tile, .lib-grid .tile, .sheet-shot, .clip-photo, .asvc-media";
+  const GROUPS = ".gwall, .lib-grid, .reelshow-track, .clippings, .wb1, main";
+
+  let root, stage, capEl, countEl, group = [], at = 0, lastFocus = null;
+
+  function build() {
+    root = document.createElement("div");
+    root.className = "lb";
+    root.hidden = true;
+    root.innerHTML = `
+      <div class="lb-scrim" data-lb-close></div>
+      <button class="lb-close" data-lb-close type="button" aria-label="${I18N.pfClose[lang]}">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M4 4l12 12M16 4L4 16"/>
+        </svg>
+      </button>
+      <button class="lb-step lb-prev" type="button" aria-label="${I18N.reelPrev[lang]}">
+        <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 1 2 11l7 10"/></svg>
+      </button>
+      <button class="lb-step lb-next" type="button" aria-label="${I18N.reelNext[lang]}">
+        <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 1l7 10-7 10"/></svg>
+      </button>
+      <div class="lb-body" role="dialog" aria-modal="true">
+        <div class="lb-stage"></div>
+        <p class="lb-cap"><span class="lb-count"></span><span class="lb-date"></span></p>
+      </div>`;
+    document.body.appendChild(root);
+    stage = root.querySelector(".lb-stage");
+    capEl = root.querySelector(".lb-date");
+    countEl = root.querySelector(".lb-count");
+
+    root.addEventListener("click", (e) => {
+      if (e.target.closest("[data-lb-close]")) return close();
+      if (e.target.closest(".lb-prev")) return step(-1);
+      if (e.target.closest(".lb-next")) return step(1);
+    });
+  }
+
+  /* What should the overlay show for this tile? A film tile names its file on
+     the node; everything else is just the picture already on screen. */
+  function itemOf(node) {
+    const film = node.dataset && node.dataset.film;
+    const img = node.querySelector("img");
+    const date = node.querySelector(".t-date");
+    if (film) {
+      return { video: `${R2}/video/${film}`, poster: img && img.src,
+               date: date && date.textContent };
+    }
+    const vid = node.querySelector("video");
+    if (vid) return { video: vid.currentSrc || vid.src, poster: vid.poster };
+    if (!img) return null;
+    /* a placeholder holder has nothing worth enlarging */
+    if (img.src.startsWith("data:")) return null;
+    return { img: img.currentSrc || img.src, alt: img.alt,
+             date: date && date.textContent };
+  }
+
+  function paint() {
+    const it = itemOf(group[at]);
+    stage.textContent = "";
+    if (!it) return;
+    if (it.video) {
+      const v = document.createElement("video");
+      v.src = it.video;
+      if (it.poster) v.poster = it.poster;
+      v.controls = true;
+      v.playsInline = true;
+      v.autoplay = !prefersReduced;
+      v.preload = "auto";
+      stage.appendChild(v);
+    } else {
+      const i = document.createElement("img");
+      i.src = it.img;
+      i.alt = it.alt || "";
+      stage.appendChild(i);
+    }
+    capEl.textContent = it.date || "";
+    countEl.textContent = group.length > 1
+      ? `${num(at + 1)} / ${num(group.length)}` : "";
+    root.classList.toggle("has-steps", group.length > 1);
+  }
+
+  function step(d) {
+    if (group.length < 2) return;
+    at = (at + d + group.length) % group.length;
+    paint();
+  }
+
+  function open(node) {
+    if (!root) build();
+    const host = node.closest(GROUPS) || document.body;
+    group = [...host.querySelectorAll(OPENS)].filter(itemOf);
+    at = Math.max(0, group.indexOf(node));
+    if (!group.length) return;
+    lastFocus = document.activeElement;
+    root.hidden = false;
+    document.body.classList.add("lb-open");
+    paint();
+    root.querySelector(".lb-close").focus();
+  }
+
+  function close() {
+    if (!root || root.hidden) return;
+    /* drop the <video> rather than pause it — a paused element with a src
+       keeps its buffer and, on some browsers, keeps filling it */
+    stage.textContent = "";
+    root.hidden = true;
+    document.body.classList.remove("lb-open");
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (!root || root.hidden) return;
+    if (e.key === "Escape") return close();
+    /* the arrows follow READING order, so they flip with the language */
+    if (e.key === "ArrowLeft") return step(document.documentElement.dir === "rtl" ? 1 : -1);
+    if (e.key === "ArrowRight") return step(document.documentElement.dir === "rtl" ? -1 : 1);
+  });
+
+  /* ⚠️ Delegated with a drag guard. The carousel is a scroll-snap scroller, so
+     a swipe that starts on a slide ends with a click on it — without this,
+     every swipe on a phone would open the overlay. */
+  let downX = 0, downY = 0;
+  document.addEventListener("pointerdown", (e) => { downX = e.clientX; downY = e.clientY; }, true);
+  document.addEventListener("click", (e) => {
+    if (Math.abs(e.clientX - downX) > 10 || Math.abs(e.clientY - downY) > 10) return;
+    if (e.target.closest(".lb")) return;
+    /* the switcher stage is a control, not a picture */
+    if (e.target.closest(".sw-stage, .sheet-thumbs, .lb-open")) return;
+    const node = e.target.closest(OPENS);
+    if (!node || !itemOf(node)) return;
+    e.preventDefault();
+    open(node);
+  });
+
+  return { open, close };
+})();
+
 /* ══════════ index page motion ══════════ */
 const page = document.body.dataset.page;
 
@@ -1509,26 +1717,60 @@ function renderLibrary() {
      the newest work as the oldest. Ties break on filename so the order is
      stable between renders. */
   const byNewest = (a, b) =>
-    (b.d || "").localeCompare(a.d || "") || a.f.localeCompare(b.f);
+    (b.d || "").localeCompare(a.d || "") || (a.key || "").localeCompare(b.key || "");
+
+  /* ⚠️ Two different kinds of thing share this run, and they are not
+     interchangeable.
+
+     `design` and `photo` come from MEDIA — the Drive, shown as itself with a
+     date and nothing else. `tech` cannot: the software work is sites, systems
+     and apps, and there is no photograph of a booking system. It comes from
+     PROJECTS instead and each entry opens the profile sheet, which is the only
+     way to actually show that work — what it is, what it runs on, what it was
+     for. Same tile, different payload.
+
+     ⚠️ The tech entries and their screenshots are still PLACEHOLDER content
+     (see HANDOFF). The sheet is real; what it currently displays is not. */
+  const rows = (catId) => {
+    const media = (catId === "all" ? MEDIA : MEDIA.filter((m) => m.c === catId))
+      .map((m) => ({ kind: "media", d: m.d, key: m.f, m }));
+    const projects = (catId === "all" || catId === "tech")
+      ? PROJECTS.filter((p) => p.cat === "tech" && p.profile)
+        .map((p) => ({ kind: "project", d: p.date, key: p.en,
+                       p, at: PROJECTS.indexOf(p) }))
+      : [];
+    return [...media, ...projects].sort(byNewest);
+  };
 
   CATS.forEach((cat) => {
-    const items = (cat.id === "all" ? MEDIA : MEDIA.filter((m) => m.c === cat.id))
-      .slice().sort(byNewest);
-
-    /* `tech` has no media: the software work is sites and systems, and a
-       screenshot of one is not in the Drive. The taxonomy keeps it because
-       the services do; the archive shows only what exists rather than opening
-       a spine onto an empty panel. */
+    const items = rows(cat.id);
+    /* a category with nothing in it is a spine opening onto cream */
     if (!items.length) return;
 
     const panel = document.createElement("section");
     panel.className = "acc-panel" + (cat.id === openCat ? " open" : "");
     panel.dataset.cat = cat.id;
 
-    const tiles = items.map((m) => {
-      /* Film shows its poster frame and nothing else until asked. Seven muted
-         loops on one screen is the exact load the phone pass spent a week
-         removing, and these run 28-84 MB. */
+    const tiles = items.map((row) => {
+      /* A software project has no photograph of itself — it gets a named tile
+         that opens the profile sheet, which is where that work can actually
+         be shown. It is the one kind of tile here that carries a title. */
+      if (row.kind === "project") {
+        const p = row.p;
+        return `
+      <figure class="tile has-profile" data-project="${row.at}" role="button" tabindex="0">
+        <div class="tile-img" style="aspect-ratio:1.6">
+          <img src="${HOLDER}" alt="${p[lang]}" loading="lazy">
+          <span class="tile-open" aria-hidden="true">${I18N.pfOpen[lang]}</span>
+        </div>
+        <figcaption><span>${p[lang]}</span><span class="t-date">${fmtDate(p.date)}</span></figcaption>
+      </figure>`;
+      }
+
+      /* Film shows its poster frame and nothing else until asked. A screen of
+         muted loops is the exact load the phone pass spent a week removing,
+         and these run 28-209 MB. */
+      const m = row.m;
       const src = m.v ? `${R2}/poster/${m.p}` : `${R2}/img/${m.f}`;
       const date = m.d ? `<figcaption><span class="t-date">${fmtDate(m.d)}</span></figcaption>` : "";
       return `
@@ -1571,36 +1813,26 @@ function renderLibrary() {
 }
 
 /* Delegated once on the root, which survives every re-render.
-   A film is inert until it is asked for: the tile shows a ~25 KB poster, and
-   only a click swaps in the <video> and fetches any of the 28-84 MB behind
-   it. `controls` rather than an autoplay loop, because on this page the
-   visitor is choosing what to watch, not being shown a texture. */
+
+   Only the project tiles are handled here. Film used to play inline in its own
+   tile; it opens in the lightbox now like every other piece of media, which is
+   both bigger and one behaviour instead of two. The lightbox binds itself at
+   the document and ignores anything it cannot enlarge — a project tile carries
+   the placeholder data URI, so it falls through to this. */
 if (accRoot) {
-  const playFilm = (node) => {
-    if (node.classList.contains("is-playing")) return;
-    node.classList.add("is-playing");
-    const box = node.querySelector(".tile-img");
-    const v = document.createElement("video");
-    v.poster = node.querySelector("img").src;   /* no black flash while it loads */
-    v.src = `${R2}/video/${node.dataset.film}`;
-    v.controls = true;
-    v.playsInline = true;
-    v.preload = "auto";
-    box.textContent = "";
-    box.appendChild(v);
-    v.play().catch(() => { });
-  };
+  const openSheet = (node) => projectSheet.open(+node.dataset.project);
 
   accRoot.addEventListener("click", (e) => {
-    const node = e.target.closest("[data-film]");
-    if (node) playFilm(node);
+    const node = e.target.closest("[data-project]");
+    if (node) openSheet(node);
   });
   accRoot.addEventListener("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
-    const node = e.target.closest("[data-film]");
+    const node = e.target.closest("[data-project], [data-film]");
     if (!node) return;
     e.preventDefault();
-    playFilm(node);
+    if (node.dataset.project) return openSheet(node);
+    lightbox.open(node);
   });
 }
 
@@ -1998,26 +2230,19 @@ const reelShow = (() => {
   return { remeasure: mark };
 })();
 
-/* ══════════ gallery wall: tap to lift ══════════
-   The lift itself is CSS `:hover`, gated behind `(hover: hover)`. Touch never
-   fires that, and a `:hover` left ungated on a phone is worse than nothing —
-   it latches on tap and stays until you touch something else. So touch gets an
-   explicit toggle, and only one tile is ever raised: a wall where every tile
-   you passed is still standing off it reads as a bug.
+/* The gallery wall's tap-to-lift is gone (2026-08-15). It existed to give
+   touch some equivalent of the hover lift, and the lightbox is a better one:
+   a tap now opens the picture full size instead of nudging it 10px. The lift
+   is a pointer affordance only, and CSS already gates it behind
+   `(hover: hover)`. */
 
-   Delegated on the wall rather than bound per tile, so it costs one listener
-   and survives any future re-tiling. */
-(() => {
-  const wall = document.querySelector(".gwall");
-  if (!wall || window.matchMedia("(hover: hover)").matches) return;
-
-  wall.addEventListener("click", (e) => {
-    const tile = e.target.closest(".gw-tile");
-    const up = wall.querySelector(".gw-tile.is-lifted");
-    if (up && up !== tile) up.classList.remove("is-lifted");
-    if (tile) tile.classList.toggle("is-lifted");
-  });
-})();
+/* Whole-site paper texture, off unless asked for: `?paper=1` on any page.
+   A switch rather than a decision — the agency wants to see the site wearing
+   it before choosing whether it belongs everywhere. Same query-string
+   convention as the chat widget's `?chat=up`. */
+if (new URLSearchParams(location.search).get("paper") === "1") {
+  document.body.classList.add("paper");
+}
 
 /* ══════════ boot ══════════ */
 applyI18n();

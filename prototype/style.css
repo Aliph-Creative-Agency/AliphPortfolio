@@ -77,6 +77,26 @@ body::before {
   pointer-events: none;
   z-index: 5;
 }
+/* ── whole-site paper, behind a switch ──
+   Load any page with `?paper=1` to see the crumple over EVERYTHING, so the
+   agency can decide whether it belongs on the whole site or only where it is
+   placed deliberately. Off by default; the same query-string convention the
+   chat widget already uses (`?chat=up`).
+
+   It sits above the linen and below the lightbox. Deliberately weaker than the
+   hero panel's copy — at full strength across a whole page it stops being a
+   material and becomes a filter. */
+body.paper::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("assets/img/paper-page.webp") repeat;
+  background-size: 1100px;
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 6;
+}
 
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
@@ -202,7 +222,16 @@ body.nav-open .menu-btn .bars span:nth-child(2) { top: 6px; transform: rotate(-4
   pointer-events: none;
 }
 body.nav-open { overflow: hidden; }
-body.nav-open .nav-overlay { visibility: visible; }
+/* ⚠️ `.nav-closing` is what makes the exit animation exist at all. Visibility
+   is keyed to a class on the BODY, and .nav-open is removed the instant the
+   burger is clicked — so without this the overlay disappears on that frame and
+   the close tween animates something already invisible. main.js adds this,
+   runs the tween, and removes it in onComplete.
+   Scroll is released immediately; only the paint is held. */
+body.nav-open .nav-overlay,
+body.nav-closing .nav-overlay { visibility: visible; }
+/* the fixed pill would otherwise pop back in over the still-sliding panel */
+body.nav-closing .masthead .lang-switch { opacity: 0; pointer-events: none; }
 
 .nav-brand { height: 60px; position: relative; z-index: 1; }
 .nav-brand img { height: 100%; }
@@ -405,6 +434,35 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   padding: 0.22em 0.2em 0.14em;
   white-space: nowrap;
 }
+/* ── the paper INSIDE the letters ──
+   The texture is clipped to the glyphs, so the ink field around them stays
+   flat and only the cream type carries the fold. `background-clip: text` is
+   what does it: the element paints cream multiplied by the texture, and then
+   shows that paint only where the letterforms are.
+
+   ⚠️ Guarded by @supports, and this one really matters. The technique needs
+   `color: transparent` to let the background through — so anywhere the clip is
+   not supported, an unguarded rule gives you invisible headlines rather than
+   untextured ones. Failing back to plain cream type is the whole point of the
+   guard. */
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .banner h2 {
+    background-color: var(--cream);
+    background-image: url("assets/img/paper-title.webp");
+    /* Deliberately small — far smaller than the tile is "meant" to be shown
+       at. The clip throws away everything outside the glyphs, so the only
+       creases that survive are the ones that happen to fall inside a stroke.
+       At 600px a whole letter sits on one flat facet and the texture reads as
+       nothing; at this size each stroke crosses several folds. */
+    background-size: 240px;
+    background-position: center;
+    /* cream is the paper, the texture is the shadow on it */
+    background-blend-mode: multiply;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
 
 /* ── hero: film strip on a linen field + cream side panel ── */
 .hero {
@@ -458,6 +516,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
    device px and sizing to the CSS width would look soft. */
 @media (max-width: 900px) {
   .film-scroll { background-image: url("assets/img/film-m.webp"); }
+  .film-frame::before { background-image: url("assets/img/film-grain-m.webp"); }
 }
 
 .film-group {
@@ -499,8 +558,35 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   filter: contrast(1.08) brightness(0.92);
   transition: filter 0.55s, opacity 0.55s;
 }
-/* vignette only — the woven grain read as fabric over the photos rather than
-   emulsion, so linen is kept off the strip entirely */
+/* The emulsion filter: the photo is exposed ONTO the stock, so the stock's
+   grain, dust and hairline scratches ride over the image rather than stopping
+   at its edge. film-grain.webp is a high-pass of the film scan itself — the
+   same grain as the surrounding frame, not a generic overlay (linen read as
+   fabric here, which is why it was pulled).
+
+   Sized to var(--pitch) x var(--fh), i.e. exactly the scale the film tile is
+   drawn at, and shifted by the frame's own slot so the grain runs continuously
+   across the group instead of restarting in every frame. Regenerate from the
+   current tile whenever the film is re-cut. */
+.film-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: url("assets/img/film-grain.webp");
+  background-size: var(--pitch) var(--fh);
+  background-position: calc(var(--fh) * -0.826630 * var(--gi, 0)) center;
+  mix-blend-mode: overlay;
+  opacity: 0.55;
+}
+.film-group .film-frame:nth-child(1) { --gi: 0; }
+.film-group .film-frame:nth-child(2) { --gi: 1; }
+.film-group .film-frame:nth-child(3) { --gi: 2; }
+.film-group .film-frame:nth-child(4) { --gi: 3; }
+
+/* vignette — kept separate from the grain so the blend mode above doesn't
+   also act on this shadow */
 .film-frame::after {
   content: "";
   position: absolute;
@@ -550,6 +636,27 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   color: var(--ink);
   border-inline-end: 3px solid var(--ink);
   box-shadow: 24px 0 60px -24px rgba(5, 9, 13, 0.55);
+}
+/* ── crumpled paper ──────────────────────────────────────────────────
+   Cut from the agency's own scan. THREE different tiles are in play across the
+   site — `paper-panel`, `paper-title`, `paper-page` — taken from three
+   non-overlapping regions of the same sheet, because the same creases showing
+   up in the hero, in the headlines and behind the page would read as one
+   repeated stamp rather than as paper.
+
+   Multiply, the way ink meets paper, and the way the linen already works. The
+   tiles are lifted toward white when they are cut, so the flats barely touch
+   the cream and the folds do the work. */
+.hero-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: url("assets/img/paper-panel.webp") repeat;
+  background-size: 900px;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
 }
 /* linen over the panel so it doesn't read as a flat cream block */
 .hero-panel::after {
@@ -729,15 +836,33 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
 /* Both faces used to be absolutely positioned, leaving .oval-swap with zero
    intrinsic width — so the button never grew to fit its label, sat at
    min-width, and `overflow: hidden` sliced the text at both ends. The label
-   is in flow now and is what sizes the swap; only the arrow stays absolute. */
+   is in flow now and is what sizes the swap; only the arrow stays absolute.
+
+   ⚠️ The swap travels SIDEWAYS, and the height is no longer fixed. It used to
+   be `height: 1.5em` with the faces sliding on Y — which meant the mask was
+   only as tall as the travel needed, and Arabic paid for it: تعرّف على ألِف
+   has a hamza above and a descender below, and both were sliced off flat by
+   the very overflow that makes the swap work. A vertical mask cannot clip the
+   travel without also clipping the letters.
+
+   Moving horizontally decouples the two. The padding gives the ascenders and
+   descenders room, the negative margin gives that room back so the button's
+   height is unchanged, and `overflow: hidden` now only ever cuts left/right —
+   where there is nothing but the face waiting off stage. */
 .oval-swap {
   position: relative;
   display: block;
   width: max-content;
   max-width: 100%;
-  height: 1.5em;
+  padding: 0.34em 0;
+  margin: -0.34em 0;
   overflow: hidden;
+  /* which way the label leaves and the arrow arrives. Physical, because
+     translateX is physical: in RTL reading order the label should exit to the
+     right, in LTR to the left. */
+  --swap: -1;
 }
+html[dir="rtl"] .oval-swap { --swap: 1; }
 .ob-face {
   position: absolute;
   inset: 0;
@@ -747,18 +872,18 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(0.95rem, 1.5vw, 1.2rem);
-  line-height: 1;
+  line-height: 1.3;
   white-space: nowrap;
   transition: transform 0.55s cubic-bezier(0.65,0,0.35,1);
 }
 /* Must sit AFTER .ob-face — same specificity, so source order decides.
    Above it, the label stays absolute and the swap goes back to 0px. */
-.ob-label { position: relative; inset: auto; height: 100%; }
-.ob-arrow { transform: translateY(115%); }
+.ob-label { position: relative; inset: auto; }
+.ob-arrow { transform: translateX(calc(var(--swap) * -110%)); }
 .ob-arrow svg { width: 3.2rem; height: auto; }
 html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
-.oval-btn:hover .ob-label { transform: translateY(-115%); }
-.oval-btn:hover .ob-arrow { transform: translateY(0); }
+.oval-btn:hover .ob-label { transform: translateX(calc(var(--swap) * 110%)); }
+.oval-btn:hover .ob-arrow { transform: translateX(0); }
 
 /* ── a11y utility ── */
 .sr-only {
@@ -1141,14 +1266,10 @@ html[dir="rtl"] .sw-arrow svg { transform: scaleX(-1); }
     z-index: 3;
   }
 }
-/* Touch has no hover, and a :hover left ungated there latches on tap and
-   stays. main.js toggles this instead, one tile at a time. */
-.gw-tile.is-lifted {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 26px 46px -14px rgba(5, 9, 13, 0.66),
-              0 6px 14px rgba(5, 9, 13, 0.34);
-  z-index: 3;
-}
+/* Touch gets no lift and does not need one: a tap opens the picture in the
+   lightbox, which is the thing the lift was gesturing at. The `(hover: hover)`
+   gate above is what keeps a phone from latching the lift on tap and holding
+   it until you touch something else. */
 
 /* ── the agency's own marks, hung among the photographs ──
    Same ink plate as everything else now, so they sit in the wall rather than
@@ -1343,6 +1464,133 @@ html[dir="rtl"] .sw-arrow svg { transform: scaleX(-1); }
   margin-top: 0.4rem;
 }
 
+/* ═══════════════════════════════════════════
+   LIGHTBOX
+   Any picture or film, full size over a dimmed page. Built by main.js, so
+   there is no markup for it in any of the three documents.
+
+   Ink at 0.93 rather than the usual scrim: this is the one place on the site
+   where the work is meant to be the only thing in the room, and cream chrome
+   floating over a half-lit page competes with it.
+   ═══════════════════════════════════════════ */
+.lb {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+}
+.lb[hidden] { display: none; }
+body.lb-open { overflow: hidden; }
+
+.lb-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 24, 32, 0.93);
+  cursor: pointer;
+}
+/* the page-wide linen reads over this too, or the overlay is the one flat
+   surface on the site */
+.lb-scrim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("assets/img/fabric.webp") repeat;
+  background-size: 900px;
+  mix-blend-mode: overlay;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.lb-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: 100%;
+  max-height: 100%;
+}
+/* ⚠️ The cap on the MEDIA is what keeps the caption on screen. Sizing the
+   stage instead lets a 9:16 reel take the full height and push the line off
+   the bottom — min() against both axes, with room left for the caption. */
+.lb-stage { display: flex; min-height: 0; }
+.lb-stage img,
+.lb-stage video {
+  display: block;
+  max-width: min(100%, 1500px);
+  max-height: calc(100vh - 9rem);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  background: var(--ink);
+  box-shadow: 0 30px 80px rgba(5, 9, 13, 0.6);
+}
+.lb-cap {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(217, 217, 206, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+.lb-cap:empty { display: none; }
+
+.lb-close {
+  position: absolute;
+  top: clamp(0.6rem, 2vw, 1.4rem);
+  inset-inline-end: clamp(0.6rem, 2vw, 1.4rem);
+  z-index: 2;
+  width: 2.6rem;
+  height: 2.6rem;
+  display: grid;
+  place-items: center;
+  color: var(--cream);
+  opacity: 0.65;
+  transition: opacity 0.25s;
+}
+.lb-close:hover { opacity: 1; }
+.lb-close svg { width: 1.1rem; height: 1.1rem; }
+
+/* The steppers only exist when there is more than one thing to step through —
+   a lone picture with dead arrows either side reads as a broken gallery. */
+.lb-step {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: none;
+  place-items: center;
+  padding: 1rem 0.7rem;
+  color: var(--cream);
+  opacity: 0.5;
+  transition: opacity 0.25s;
+}
+.lb.has-steps .lb-step { display: grid; }
+.lb-step:hover { opacity: 1; }
+.lb-step svg { width: 0.95rem; height: auto; }
+.lb-prev { inset-inline-start: clamp(0.2rem, 1.5vw, 1rem); }
+.lb-next { inset-inline-end: clamp(0.2rem, 1.5vw, 1rem); }
+/* drawn for LTR, mirrored as a pair — same rule as every other chevron here */
+html[dir="rtl"] .lb-step svg { transform: scaleX(-1); }
+
+/* anything that opens the overlay says so */
+.why .holder,
+.gw-tile,
+.lib-grid .tile,
+.clip-photo { cursor: zoom-in; }
+
+@media (max-width: 640px) {
+  .lb-stage img,
+  .lb-stage video { max-height: calc(100vh - 7rem); }
+  /* at this width the arrows sit on the picture; swipe is not available here,
+     so they stay — but tucked to the very edge */
+  .lb-step { padding: 1rem 0.25rem; }
+}
+
 /* ═══════════ LIBRARY: category accordion ═══════════ */
 .lib-bar {
   display: flex;
@@ -1471,17 +1719,16 @@ html[dir="rtl"] .sw-arrow svg { transform: scaleX(-1); }
   background: var(--ink);
   overflow: hidden;
 }
-.tile img,
-.tile video {
+/* No `video` here any more: film used to play inside its own tile, and now
+   opens in the lightbox like everything else. A tile only ever holds the
+   poster frame. */
+.tile img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   filter: contrast(1.05);
 }
-/* the film, once it has been asked for, is shown whole rather than cropped —
-   it is the work now, not a thumbnail of it */
-.tile video { object-fit: contain; background: var(--ink); }
 
 /* ── film tiles ── */
 .tile.is-film { cursor: pointer; }
@@ -1518,8 +1765,6 @@ html[dir="rtl"] .tile-play::after { transform: translateX(0.08rem); }
 }
 .tile.is-film:hover img { filter: contrast(1.05) saturate(1.12); }
 .tile.is-film:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-/* once it is playing the tile is a player, not a button */
-.tile.is-playing { cursor: default; }
 .tile figcaption {
   display: flex;
   justify-content: space-between;
