@@ -66,16 +66,43 @@ body {
   line-height: 1.85;
   overflow-x: clip;
 }
+/* ⚠️ Overscanned on purpose — do not "tidy" this back to `inset: 0`.
+   A fixed element at inset:0 is sized to the LAYOUT viewport, and on Android
+   that does not grow when the URL bar retracts. Scrolling with a finger down
+   therefore exposes a band at the bottom that the linen never covers, and
+   because the texture stops dead at a horizontal line it reads as a seam in
+   the paper rather than as a missing overlay. Bleeding past both edges and
+   sizing to the LARGE viewport means no browser-chrome state can uncover an
+   edge. The tile is `repeat` and the element is fixed, so the extra area
+   costs nothing and the texture does not appear to move. */
 body::before {
   content: "";
   position: fixed;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: -8vh;
+  height: 116vh;                    /* fallback where lvh is unsupported */
+  height: calc(100lvh + 16vh);
   background: url("assets/img/fabric.webp") repeat;
-  background-size: 900px;
+  /* Two knobs and they are not interchangeable: opacity is how deep the weave
+     sits into the cream, tile size is how close it is. A tighter tile reads
+     stronger at the same opacity because more thread edges land per
+     centimetre — which is why the old 0.16/900 was almost invisible on a
+     phone and lifting opacity alone would have muddied the ink instead of
+     showing the weave. 0.28/620 is both stronger and closer. */
+  background-size: 620px;
   mix-blend-mode: multiply;
-  opacity: 0.16;
+  opacity: 0.28;
   pointer-events: none;
   z-index: 5;
+}
+/* ?flat=1 — see main.js. Same weave, no blend, so the compositor treats it as
+   an ordinary layer. Opacity is dropped to match how much darker `multiply`
+   renders the same tile, so the two look comparable and only the COST differs;
+   otherwise the A/B compares two different-looking pages and proves nothing. */
+body.flat-linen::before {
+  mix-blend-mode: normal;
+  opacity: 0.12;
 }
 /* ── whole-site paper, behind a switch ──
    Load any page with `?paper=1` to see the crumple over EVERYTHING, so the
@@ -499,7 +526,75 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   background-repeat: repeat-x;
   background-size: var(--pitch, 100%) 100%;
   will-change: transform;
+  /* contains the wash below: without it the soft-light blend would also act
+     on the cream page showing through the sprocket holes */
+  isolation: isolate;
 }
+/* ── the emulsion wash (2026-08-16) ──
+   ONE layer over the whole strip — the base and the photographs sitting on it
+   — so a frame reads as exposed ONTO this stock rather than pasted on top of
+   it. That is the whole point: it is a top layer for the media, not a tint on
+   the film.
+
+   ⚠️ Masked by the film tile's OWN alpha, at the same size and phase as the
+   background above. That is what keeps it inside the strip: it stops dead at
+   every sprocket hole and at both long edges, instead of laying a rectangle of
+   colour over the cream. Any change to `background-size` here has to be made
+   twice or the wash drifts out of register with the film under it.
+
+   Deliberately light. `soft-light` at this strength warms the base and pulls
+   the frames toward it without darkening either — a heavier hand turns the
+   photographs muddy, which is the opposite of showing the work. */
+.film-scroll::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg,
+      rgba(30, 22, 12, 0.34) 0%,
+      rgba(30, 22, 12, 0) 20%,
+      rgba(30, 22, 12, 0) 80%,
+      rgba(30, 22, 12, 0.34) 100%),
+    linear-gradient(92deg,
+      rgba(150, 104, 46, 0.20) 0%,
+      rgba(96, 88, 70, 0.10) 46%,
+      rgba(52, 72, 98, 0.20) 100%);
+  mix-blend-mode: soft-light;
+  opacity: 0.92;
+  -webkit-mask-image: url("assets/img/film.webp");
+  mask-image: url("assets/img/film.webp");
+  -webkit-mask-size: var(--pitch, 100%) 100%;
+  mask-size: var(--pitch, 100%) 100%;
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+}
+/* A frame opened in the lightbox is shown as the work, not as film — the
+   wash lives on the strip and never follows the picture out of it. */
+
+/* ── inline previews ──
+   The preview lies exactly over the still it replaces, so the handover is a
+   crossfade in place rather than a jump: same box, same crop, same corner.
+   The poster underneath is what shows while the first frames arrive, and what
+   comes back when the preview is torn down. */
+.gw-tile, .reel-slide .holder, .wb1-media { position: relative; }
+video.preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* matches the still it covers — see the media grade note */
+  filter: contrast(1.05);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;            /* the tile keeps its own click */
+}
+.is-previewing video.preview { opacity: 1; }
+/* the gallery wall crops to its cells by design; a preview must crop the same
+   way or the tile changes shape when the film starts */
+.gw-tile video.preview { border-radius: inherit; }
 /* The cast shadow is off (2026-08-08). It used to paint film-shadow.webp
    under the film and above the cream, so it read only through the sprocket
    holes — but it also darkened the whole base, and without it the strip
@@ -534,7 +629,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
 .film-frame {
   position: relative;
   flex: 0 0 auto;
-  width: calc(var(--fh) * 0.826630 - var(--fgap) * 2);
+  width: calc(var(--fh) * 0.611967 - var(--fgap) * 2);
   height: 62%;
   margin-inline: var(--fgap);
   margin-top: calc(var(--fh) * 0.021);   /* nudge onto the window band's centre */
@@ -576,7 +671,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   pointer-events: none;
   background-image: url("assets/img/film-grain.webp");
   background-size: var(--pitch) var(--fh);
-  background-position: calc(var(--fh) * -0.826630 * var(--gi, 0)) center;
+  background-position: calc(var(--fh) * -0.611967 * var(--gi, 0)) center;
   mix-blend-mode: overlay;
   opacity: 0.55;
 }
@@ -622,7 +717,14 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   height: 100%;
   display: flex;
   align-items: stretch;
+  /* ⚠️ The overlay spans the WHOLE hero at z-index 4, so the empty half beside
+     the panel sat on top of the film and swallowed every click meant for a
+     frame — `elementFromPoint` over a frame returned .hero-overlay, not the
+     picture. It is a positioning wrapper, not a surface; the panel inside it
+     takes its clicks back. */
+  pointer-events: none;
 }
+.hero-overlay > * { pointer-events: auto; }
 /* cream panel pinned to the start side, film visible beside it */
 .hero-panel {
   position: relative;
@@ -638,26 +740,21 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   box-shadow: 24px 0 60px -24px rgba(5, 9, 13, 0.55);
 }
 /* ── crumpled paper ──────────────────────────────────────────────────
-   Cut from the agency's own scan. THREE different tiles are in play across the
-   site — `paper-panel`, `paper-title`, `paper-page` — taken from three
-   non-overlapping regions of the same sheet, because the same creases showing
-   up in the hero, in the headlines and behind the page would read as one
-   repeated stamp rather than as paper.
+   Cut from the agency's own scan. Two tiles are still in play — `paper-title`
+   in the banner headlines and `paper-page` behind the whole site at ?paper=1 —
+   taken from non-overlapping regions of the same sheet, because the same
+   creases showing up in two places would read as one repeated stamp rather
+   than as paper.
 
    Multiply, the way ink meets paper, and the way the linen already works. The
    tiles are lifted toward white when they are cut, so the flats barely touch
-   the cream and the folds do the work. */
-.hero-panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: url("assets/img/paper-panel.webp") repeat;
-  background-size: 900px;
-  mix-blend-mode: multiply;
-  opacity: 0.55;
-}
+   the cream and the folds do the work.
+
+   ⚠️ The HERO's crumple is gone (2026-08-16, the agency's call). `paper-panel`
+   is still on disk and still cut by resources/cut_paper.py if it comes back —
+   it was `.hero-panel::before`, multiply at 0.55, 900px tile. The ::after
+   linen below is what the panel carries now, and it is the only thing
+   stopping the panel reading as flat cream, so do not remove it too. */
 /* linen over the panel so it doesn't read as a flat cream block */
 .hero-panel::after {
   content: "";
@@ -847,15 +944,28 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
 
    Moving horizontally decouples the two. The padding gives the ascenders and
    descenders room, the negative margin gives that room back so the button's
-   height is unchanged, and `overflow: hidden` now only ever cuts left/right —
-   where there is nothing but the face waiting off stage. */
+   height is unchanged, and `overflow: hidden` now only ever cuts left/right.
+
+   ⚠️ But "cuts left/right where there is nothing but the face waiting off
+   stage" was only true if the mask reaches the oval's edge, and it did not.
+   `width: max-content` sized the mask to the LABEL — 113.7px centred in a
+   404.7px ellipse — so the cut line stood 145.5px inside the rim with empty
+   oval either side, and the label was sliced in mid-air halfway through the
+   travel. That is the clipping that survived the vertical→horizontal fix:
+   the axis changed, the too-small mask did not.
+
+   The mask is the whole oval now, bled out over the button's own padding so
+   the cut lands exactly on the rim, where the border explains it. The faces
+   also fade as they travel, which means the exact travel distance stops
+   being load-bearing — a longer label in either language cannot reintroduce
+   a visible slice. */
 .oval-swap {
   position: relative;
   display: block;
-  width: max-content;
-  max-width: 100%;
-  padding: 0.34em 0;
-  margin: -0.34em 0;
+  width: calc(100% + 2 * 1.8rem);   /* 1.8rem = .oval-btn's inline padding */
+  margin-inline: -1.8rem;
+  padding-block: 0.34em;
+  margin-block: -0.34em;
   overflow: hidden;
   /* which way the label leaves and the arrow arrives. Physical, because
      translateX is physical: in RTL reading order the label should exit to the
@@ -874,16 +984,17 @@ html[dir="rtl"] .oval-swap { --swap: 1; }
   font-size: clamp(0.95rem, 1.5vw, 1.2rem);
   line-height: 1.3;
   white-space: nowrap;
-  transition: transform 0.55s cubic-bezier(0.65,0,0.35,1);
+  transition: transform 0.55s cubic-bezier(0.65,0,0.35,1),
+              opacity 0.34s ease;
 }
 /* Must sit AFTER .ob-face — same specificity, so source order decides.
    Above it, the label stays absolute and the swap goes back to 0px. */
 .ob-label { position: relative; inset: auto; }
-.ob-arrow { transform: translateX(calc(var(--swap) * -110%)); }
+.ob-arrow { transform: translateX(calc(var(--swap) * -110%)); opacity: 0; }
 .ob-arrow svg { width: 3.2rem; height: auto; }
 html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
-.oval-btn:hover .ob-label { transform: translateX(calc(var(--swap) * 110%)); }
-.oval-btn:hover .ob-arrow { transform: translateX(0); }
+.oval-btn:hover .ob-label { transform: translateX(calc(var(--swap) * 110%)); opacity: 0; }
+.oval-btn:hover .ob-arrow { transform: translateX(0); opacity: 1; }
 
 /* ── a11y utility ── */
 .sr-only {
@@ -980,7 +1091,9 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
      0.85, not 1/1.37. */
   --why-type: 1;
 }
-html[lang="en"] .why { --why-type: 0.85; }
+/* Both solved by resources/fit_columns.py against the 2026-08-16 copy:
+   Arabic lands at 26.4px / 99% full, English at 20.7px / 95% full. */
+html[lang="en"] .why { --why-type: 0.784; --why-title-type: 0.62; }
 
 .why-block { padding: var(--why-gap) 0; }
 
@@ -1019,7 +1132,7 @@ html[lang="en"] .why { --why-type: 0.85; }
    and a gallery wall on 2026-08-11 and carry no body copy at all, so their
    solved sizes went with them — `fit_columns.py ar` now has one column to
    fit, not four. */
-.wb1-side  .why-para { font-size: calc(clamp(0.95rem, 2.20vw, 1.50rem) * var(--why-type)); }   /* 28.2px */
+.wb1-side  .why-para { font-size: calc(clamp(0.95rem, 2.06vw, 1.50rem) * var(--why-type)); }   /* 26.4px */
 .why-para {
   font-size: clamp(0.86rem, 1.8vw, 1.16rem);
   line-height: 1.52;
@@ -1063,7 +1176,14 @@ html[lang="en"] .why { --why-type: 0.85; }
 /* a 30%-wide column can't take the full-width display size — it would set
    four characters to a line */
 /* from the wireframe's header box: two lines at ~90px, not a subhead */
-.wb1 .why-title { font-size: clamp(1.7rem, 6.25vw, 5.8rem); }
+/* ⚠️ The TITLE needs its own language lever, not --why-type's.
+   Block 1's column is exactly as tall as the picture beside it, and the title
+   and the body share that height — so a title that sets longer steals the
+   body's room rather than overflowing on its own. «نبدأ بالسؤال، لا بالإجابة»
+   sets in two lines; "We begin with the question, not the answer." sets in
+   five and left the body solving at 10px, which is unreadable. The body ratio
+   between the languages is mild (0.85); the title ratio is not. */
+.wb1 .why-title { font-size: calc(clamp(1.7rem, 6.25vw, 5.8rem) * var(--why-title-type, 1)); }
 /* aspect comes from data-kind — see the holder block */
 
 /* ── block 2: the reel carousel ──
@@ -2180,6 +2300,27 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   letter-spacing: 0.1em;
   opacity: 0.6;
 }
+/* The wordmark fills the 562px of empty ink the spinning stamp left between
+   the clock and the socials. As the THIRD child of a space-between column it
+   needs no positioning of its own.
+
+   ⚠️ Capped with max-*, never `width/height: 100%` + object-fit. A percentage
+   height does not resolve against an auto-sized flex line, so the browser
+   falls back to the intrinsic ratio and sizes from the width — the same trap
+   that made the gallery wall's أ 654px tall in a 447px tile. */
+.contact-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  opacity: 0.92;
+}
+.contact-mark img {
+  width: auto;
+  height: auto;
+  max-width: min(272px, 60%);
+  max-height: 190px;
+}
 .contact-socials {
   display: flex;
   flex-wrap: wrap;
@@ -2698,6 +2839,31 @@ body.sheet-open { overflow: hidden; }
   .why-outro-line,
   .sw-name,
   .sw-desc { text-align: center; }
+
+  /* ── squeeze the services section on a phone (2026-08-16) ──
+     Of its 631px, 154 were padding and margin around ~477px of content, and
+     on a screen this size that reads as a section you scroll through rather
+     than one you look at. Roughly a third of the slack comes back without
+     the rows touching each other.
+
+     ⚠️ The stage is still ~220px of GREY PLACEHOLDER — `HOLDER`, the inline
+     data URI — because the switcher has no real media wired yet. That, not
+     the spacing, is the bulk of what reads as empty here, and no amount of
+     tightening fixes it. Landing real media is the actual answer. */
+  /* Same wordmark, footer volume. ⚠️ Not `Aliph-Icon-cream.svg`, which looks
+     like the obvious "short" mark and is a 68x244 letterform — a 3.6:1 spike.
+     Capped to 54px wide it came out 194px TALL and grew the phone footer by
+     more than it saved. `HalfAliph-Stamp` is squarish and would fit, but the
+     stamp was removed from this footer on 2026-08-11 at the agency's request,
+     so bringing it back here would undo that. */
+  .contact-mark { margin: 0.35rem 0; }
+  .contact-mark img { max-width: 148px; max-height: 100px; }
+
+  .svc-picks { padding: 0.5rem 0 0.7rem; }
+  .sw-name   { margin-bottom: 0.34rem; }
+  .sw-desc   { margin-bottom: 0.75rem; }
+  .sw-foot   { margin-top: 0.25rem; }
+  .services  { padding-bottom: 0.7rem; }
 
   /* Blocks 2 and 3 hang a hairline off their titles, and a centred title
      needs one on BOTH sides or `flex: 1 1 auto` eats the slack and the words

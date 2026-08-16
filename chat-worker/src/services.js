@@ -76,8 +76,8 @@ export const SERVICES = [
   },
   {
     id: "tech",
-    ar: "تطوير برمجيات",
-    en: "Software Development",
+    ar: "حلول تقنية وبرمجية",
+    en: "Tech & Software Solutions",
     examples: {
       ar: "موقع بورتفوليو، صفحة هبوط لحملة، متجر إلكتروني، نظام تسجيل، تطبيق",
       en: "a portfolio site, a campaign landing page, an online store, a registration system, an app",

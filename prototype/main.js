@@ -75,14 +75,21 @@ const I18N = {
   hero1: { ar: "نبدأ من حيث", en: "We start where" },
   hero2: { ar: "تبدأ الأشياء.", en: "things begin." },
   /* the boxed letter completes the first word: أ + لِف / A + liph */
+  /* ✅ The agency's own words, from the boss's copy doc (2026-08-16). What was
+     here before was written for the prototype and read as fact. ⚠️ The ENGLISH
+     of every string that came out of that doc is still mine — the doc is
+     Arabic only — so it needs the same sign-off the Arabic has already had. */
   heroPara: {
-    ar: "لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة، من الألِف إلى الياء.",
-    en: "liph is an agency that begins at the first letter. Every brand has an origin point it is built from and returns to; our work is finding that point, then drawing the whole system from it: the name, the identity, the voice, and the way the brand shows up in the world. We design, we shoot, and we build the sites and systems that run it all. From A to Z.",
+    ar: "لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.",
+    en: "liph is an agency that begins at the first letter. Every brand has an origin point it is built from and returns to, and our work is to find that point and help you get from A to Z.",
   },
   /* the dropcap letter is baked into the sprite; this is what screen
      readers get */
   dropLetter: { ar: "أ", en: "A" },
-  heroMeta1: { ar: "منذ ٢٠٢٤", en: "Since 2024" },
+  /* ⚠️ ٢٠٢٦, not ٢٠٢٤. The agency kept 2024 deliberately on 2026-08-10 while
+     deleting the founding year from the about copy; the boss's 2026-08-16 doc
+     writes 2026 and was taken as the newer instruction. */
+  heroMeta1: { ar: "منذ ٢٠٢٦", en: "Since 2026" },
   heroMeta2: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
   /* heroMeta3 is assigned below, derived from CATS — the literal that used to
      sit here was dead (overwritten at boot) and still carried the pre-rename
@@ -94,7 +101,7 @@ const I18N = {
   svcBanner: { ar: "ماذا نقدم؟", en: "What we do?" },
   svc1: { ar: "تصميم جرافيكي", en: "Graphic Design" },
   svc2: { ar: "صناعة محتوى", en: "Media Production" },
-  svc3: { ar: "تطوير برمجيات", en: "Software Development" },
+  svc3: { ar: "حلول تقنية وبرمجية", en: "Tech & Software Solutions" },
 
   /* the example switcher under "what we do" */
   swPrev: { ar: "المثال السابق", en: "Previous example" },
@@ -105,12 +112,25 @@ const I18N = {
   /* why aliph — three editorial blocks, each carrying work in its holders */
   storyBanner: { ar: "لماذا ألِف؟", en: "Why Aliph?" },
 
-  w1Title: { ar: "صوت واحد، حرفان، ولغتان.", en: "One sound, two letters, two languages." },
-  w1Para: {
-    ar: "ألِف أوّل الحروف، والنقطة التي يبدأ منها كل شيء. اسمٌ من حرفين، وصوتٌ واحد في لغتين: نكتب بالعربيّة أوّلًا، ثم باللاتينيّة — لا ترجمةً حرفيّة، بل نصّين يقولان الشيء نفسه بالطريقة التي تليق بكلٍّ منهما. ما يصلح في اتّجاهٍ واحد لا يصلح تلقائيًّا في الآخر، والفرق بينهما هو نصف العمل.",
-    en: "Alif is the first letter, and the point everything starts from. A name of two letters and one voice in two languages: we write Arabic first, then Latin — not a literal translation but two texts saying the same thing the way each one should. What works in one direction does not automatically work in the other, and that difference is half the work.",
+  w1Title: { ar: "نبدأ بالسؤال، لا بالإجابة", en: "We begin with the question, not the answer." },
+  /* Three paragraphs in the doc, kept as three keys rather than one joined
+     string: the boss wrote the break between "why the point matters", "how we
+     reach it" and "what that rules out", and running them together loses the
+     argument's shape. Three sibling .why-para elements is what the CSS already
+     expects — hence the `:last-child { margin-bottom: 0 }` rule. */
+  w1ParaA: {
+    ar: "لأنّ كل علامةٍ تبدأ من نقطة، ولأنّ هذه النقطة هي الأصعب في الإيجاد والأهم في البناء.",
+    en: "Because every brand begins at a point, and that point is the hardest thing to find and the most important thing to build on.",
   },
-  w2Title: { ar: "نبحث عن النقطة، ثم نرسم.", en: "We find the point, then draw the system." },
+  w1ParaB: {
+    ar: "نحن لا نبدأ بالتصميم، بل نبدأ بالسؤال: من أنت؟ وماذا تريد أن تقول؟ من هذه الإجابة، تُبنى الهوية البصرية، وتُصاغ الصورة، ويُكتب النص، ويُصمَّم الموقع، كلٌّ في مكانه، وكلٌّ بخدمة الفكرة الواحدة.",
+    en: "We don't begin with the design. We begin with the question: who are you, and what do you want to say? From that answer the identity is built, the image is shaped, the words are written and the site is designed — each in its place, and each in service of one idea.",
+  },
+  w1ParaC: {
+    ar: "لا نقدّم حلولاً جاهزة، لأنّ لا علامتين تتشابهان في نقطة بدايتهما. نصغي أولاً، ثم نبني.",
+    en: "We don't hand over ready-made solutions, because no two brands share a starting point. We listen first, then we build.",
+  },
+  w2Title: { ar: "نقاطٌ بحثنا عنها، وأعمالٌ بنيناها منها.", en: "Points we searched for, and work we built from them." },
 
   /* ⚠️ Blocks 2 and 3 lost their body copy on 2026-08-11 when they became a
      carousel and a gallery wall, and the twenty orphaned entries went with
@@ -237,7 +257,7 @@ const SERVICES = [
     },
   },
   {
-    id: "tech", tag: "SOFTWARE DEVELOPMENT", seed: "aliph-svc3",
+    id: "tech", tag: "TECH & SOFTWARE SOLUTIONS", seed: "aliph-svc3",
     what: {
       ar: "نبني المواقع والأنظمة والتطبيقات التي تحتاجها العلامة لتشتغل فعلًا: بورتفوليو أو موقع تعريفي، صفحة هبوط لحملة، متجر، نظام تسجيل أو حجز، لوحة إدارة يفهمها صاحبها، أو تطبيق هاتف.",
       en: "We build the sites, systems and apps a brand needs to actually run: a portfolio or presence site, a campaign landing page, a store, a registration or booking system, an admin panel its owner can understand, or a mobile app.",
@@ -257,7 +277,7 @@ const CATS = [
   { id: "all", ar: "الكل", en: "All" },
   { id: "design", ar: "تصميم جرافيكي", en: "Graphic Design" },
   { id: "photo", ar: "صناعة محتوى", en: "Media Production" },
-  { id: "tech", ar: "تطوير برمجيات", en: "Software Development" },
+  { id: "tech", ar: "حلول تقنية وبرمجية", en: "Tech & Software Solutions" },
 ];
 
 /* The hero's third meta slot lists what the agency does, and a typed copy of
@@ -277,22 +297,26 @@ const SUBCATS = {
     {
       id: "logos", ar: "شعارات", en: "Logos", seed: "aliph-d1",
       desc: {
-        ar: "الشعار هو النقطة التي يُبنى منها كل ما بعده: نرسمه بمشتقّاته وأحجامه وحالاته، ونسلّمه بقواعد استعماله لا كملفٍّ وحيد. ونختبره حيث سيعيش فعلًا: على لافتة، وعلى فنجان، وفي صورة شخصيّة مربّعة بحجم ظفر الإبهام. الشعار الذي ينجو من هذه الثلاثة ينجو من كل شيء بعدها.",
-        en: "The mark is the point everything after it is built from: we draw it with its lockups, sizes and states, and hand it over with the rules for using it — not as a single file. And we test it where it will actually live: on a sign, on a cup, and in a square avatar the size of a thumbnail. A mark that survives those three survives everything after them."
+        ar: "الشعار نقطة البداية. نرسمه، نسلّمه بقواعد استعماله، ونختبره حيث سيعيش فعلاً: على لافتة، وعلى فنجان، وفي صورة بحجم ظفر الإبهام.",
+        en: "The mark is the starting point. We draw it, hand it over with the rules for using it, and test it where it will actually live: on a sign, on a cup, and in a picture the size of a thumbnail."
       }
     },
     {
       id: "print", ar: "مطبوعات", en: "Printables", seed: "aliph-d2",
       desc: {
-        ar: "قرطاسيّة، وقوائم، ودعوات، وكتيّبات — مصمّمة للورق أوّلًا: المقاسات، والهوامش، والحبر، وما يحدث للحرف العربي حين يُطبع صغيرًا. ونحسب الكلفة قبل الجمال: عدد الألوان، ونوع الورق، وما إذا كان التصميم يحتمل الطباعة الرقميّة أم يحتاج أوفست. المطبوع الذي لا يستطيع صاحبه إعادة طباعته هو تصميم استُعمل مرّة واحدة.",
-        en: "Stationery, menus, invitations and booklets — designed for paper first: trim sizes, margins, ink, and what happens to an Arabic letter when it prints small. And we cost it before we prettify it: how many inks, which stock, and whether it survives digital printing or needs offset. Printed matter its owner can't reprint is a design that got used once."
+        ar: "نصنع المطبوع من أوله لآخره، تصميماً وطباعة.",
+        en: "We make printed matter end to end — the design and the printing both."
       }
     },
     {
-      id: "posters", ar: "ملصقات", en: "Posters", seed: "aliph-d3",
+      /* ⚠️ Renamed from ملصقات / Posters on 2026-08-16 at the boss's
+         instruction ("تبديل ملصقات ب إعلانات رقمية"). The id stays `posters`
+         — it is the join key across CATS, PROJECTS[].cat and the markup, and
+         renaming it breaks classification silently. Labels only. */
+      id: "posters", ar: "إعلانات رقمية", en: "Digital Ads", seed: "aliph-d3",
       desc: {
-        ar: "الملصق يُقرأ من عشرة أمتار ثم من نصف متر. نصمّمه ليقول شيئًا واحدًا من بعيد، ويكافئ من اقترب بتفصيلٍ لم يره أوّل مرّة. ونصمّمه ليُصوَّر أيضًا: نصف من سيرونه لن يمرّوا بجانبه، بل سيرونه في صورة على الهاتف. ما يعمل على الجدار ولا يعمل في المربّع الصغير نصف عمل.",
-        en: "A poster is read from ten metres, then from half a metre. We design it to say one thing from far away and reward whoever steps closer with a detail they missed. And we design it to be photographed too: half the people who see it will never walk past it — they will see it in a picture on a phone. What works on a wall and dies in a small square is half a job."
+        ar: "بين إعلانٍ يُرى وآخر يُتجاوَز، ثانية واحدة فقط. نصمّم لتلك الثانية: فالإعلان الذي لا يوقفك، لم يُصمَّم أصلاً.",
+        en: "Between an ad that gets seen and one that gets scrolled past there is exactly one second. We design for that second: an ad that doesn't stop you was never designed at all."
       }
     },
   ],
@@ -300,22 +324,30 @@ const SUBCATS = {
     {
       id: "reels", ar: "ريلز", en: "Reels", seed: "aliph-p1",
       desc: {
-        ar: "فيديو عمودي قصير للمنصّات: يُصوَّر ويُركَّب ليعمل بلا صوت في أوّل ثانيتين، ثم يكافئ من رفع الصوت. ونكتب الريل قبل تصويره: لقطة تفتح، وفكرة واحدة، ونهاية تُغري بالإعادة. أمّا التصوير أوّلًا ثم البحث عن قصّة في المونتاج فهو أطول طريق إلى أضعف نتيجة.",
-        en: "Short vertical video for the feed: shot and cut to work muted in the first two seconds, then to reward whoever turns the sound on. And we write the reel before shooting it: an opening frame, one idea, and an ending that earns a replay. Shooting first and hunting for a story in the edit is the longest route to the weakest result."
+        ar: "نعرف أن انتباه المشاهد ثمين ولا يُمنح بسهولة. لهذا نبدأ كل ريلز بلحظة تستحق التوقّف، ثم نبنيه بإيقاعٍ لا يترك فراغاً يُغري بالتمرير، وتعليقات متحرّكة تصل حتى لمن يشاهد بلا صوت.",
+        en: "We know a viewer's attention is expensive and is not given away. So every reel opens on a moment worth stopping for, then runs at a pace that leaves no gap tempting enough to scroll through, with motion captions that reach whoever is watching without sound."
       }
     },
     {
       id: "video", ar: "فيديو أفقي", en: "Video", seed: "aliph-p2",
       desc: {
-        ar: "فيديو تعريفي وحملات: مقابلات، ومشاهد مكان، ومنتج في يد صاحبه — مونتاج وتلوين ضمن نظام العلامة اللوني. ونصوّر ليُقتطع: من كل جلسة يخرج الفيلم الطويل، ونسخة قصيرة للمنصّات، ولقطات صامتة تصلح للموقع. الميزانيّة نفسها، وثلاثة استعمالات بدل واحد.",
-        en: "Profile films and campaigns: interviews, place, and the product in its owner's hands — edited and graded inside the brand's own colour system. And we shoot for reuse: every session yields the long film, a short cut for social, and silent clips the website can use. Same budget, three uses instead of one."
+        /* ⚠️ "بما يخدم", not the doc's "بالية يخدم" — a typo in the source
+           doc, corrected here and flagged to the agency. */
+        ar: "من الفيديو المؤسسي والتعريفي، إلى توثيق الفعاليات، إلى الإعلانات التجارية والمحتوى الوثائقي. نصوّر بعدسات سينمائية وإضاءة تُبنى لكل مشهد، ونمنتج ونصحّح الألوان بما يخدم الاستخدام النهائي: عرض تقديمي، إعلان، أو أرشيف مؤسسي.",
+        en: "From corporate and profile film to event coverage, commercials and documentary work. We shoot on cinema glass with lighting built for each scene, then edit and grade for the end use: a presentation, an advert, or a corporate archive."
       }
     },
     {
       id: "stills", ar: "صور ثابتة", en: "Stills", seed: "aliph-p3",
       desc: {
-        ar: "جلسات للمنتج والمكان والوجوه، وتوثيق الفعاليّات. نسلّم مكتبة صور تكفي سنةً من النشر، لا عشر لقطات تنفد في شهر. ونسلّمها مرتّبة ومسمّاة ومقصوصة بالمقاسات التي ستُستعمل بها فعلًا، لا مجلّدًا فيه ثمانمئة ملفّ. المكتبة التي لا يستطيع صاحبها أن يجد فيها صورة هي مكتبة لم تُسلَّم.",
-        en: "Sessions for product, place and faces, and event coverage. We deliver an image library that carries a year of publishing, not ten frames that run out in a month. And we hand them over ordered, named and cropped to the sizes they will actually be used at — not a folder of eight hundred files. A library its owner can't find a picture in is a library that was never delivered."
+        /* ⚠️ The doc heads this paragraph «صناعة المحتوى», which is the SERVICE
+           name, not a subcategory — but its three items map one-to-one onto
+           the three photo subcategories and this one is entirely about stills
+           ("تصوير المنتجات", "كل صورة"). Read as the stills copy; worth
+           confirming with the agency. The doc's "للصورة،،" double comma is
+           normalised to a colon. */
+        ar: "من تصوير المنتجات، إلى التوثيق المؤسسي والفعاليات، إلى التصوير التجاري بمعايير الحملات الإعلانية. نضبط الإضاءة، والزاوية، بما يخدم الاستخدام النهائي للصورة: كتالوج، تقرير سنوي، أو حملة سوشيال ميديا. كل صورة تُصوَّر لغاية محدّدة، لا لتُضاف إلى الأرشيف فقط.",
+        en: "From product photography to corporate and event documentation to commercial work shot to campaign standards. We set the light and the angle for what the picture is finally for: a catalogue, an annual report, or a social campaign. Every frame is shot for a specific purpose, not just to be added to the archive."
       }
     },
   ],
@@ -362,7 +394,7 @@ const SUBCATS = {
    archive has one address. `r` is width/height, used to give each tile the
    shape of the thing inside it — the design work is 4:5 and does NOT crop,
    which is why this page sizes from the ratio instead of forcing a grid. */
-const R2 = "https://pub-0b1a78477e8542a28db190d86f861426.r2.dev";
+const R2 = "https://media.aliphcreative.com";
 const MEDIA = [
   { f: "design-grillit-1.webp", c: "design", r: 0.8, d: null },
   { f: "design-grillit-2.webp", c: "design", r: 0.8, d: null },
@@ -1534,8 +1566,13 @@ function initDropCap() {
 const lightbox = (() => {
   /* Every media surface that should open, and the container that decides what
      counts as "the same set" for the arrow keys. */
-  const OPENS = ".why .holder, .gw-tile, .lib-grid .tile, .sheet-shot, .clip-photo, .asvc-media";
-  const GROUPS = ".gwall, .lib-grid, .reelshow-track, .clippings, .wb1, main";
+  /* ⚠️ `.film-frame` is here so a frame in the hero strip opens like every
+     other piece of media (2026-08-16). It matters more here than elsewhere:
+     the strip lays an emulsion wash over its frames so they read as exposed
+     onto the stock, and the lightbox is where that comes off and the work is
+     seen in its own colours. */
+  const OPENS = ".why .holder, .gw-tile, .lib-grid .tile, .sheet-shot, .clip-photo, .film-frame";
+  const GROUPS = ".gwall, .lib-grid, .reelshow-track, .clippings, .wb1, .film-group, main";
 
   let root, stage, capEl, countEl, group = [], at = 0, lastFocus = null;
 
@@ -1585,7 +1622,19 @@ const lightbox = (() => {
                date: date && date.textContent };
     }
     const vid = node.querySelector("video");
-    if (vid) return { video: vid.currentSrc || vid.src, poster: vid.poster };
+    /* A live preview hands over where it had got to, so opening the overlay
+       carries on from the frame that was on screen rather than restarting —
+       the same continuity a YouTube thumbnail gives when you click it. */
+    if (vid) {
+      return { video: vid.currentSrc || vid.src, poster: vid.poster,
+               at: vid.currentTime || 0 };
+    }
+    /* the preview has been torn down (off screen, or never started), but the
+       node still knows its film and how far it got */
+    if (node.dataset && node.dataset.preview) {
+      return { video: node.dataset.preview, poster: img && img.src,
+               at: parseFloat(node.dataset.at || "0") || 0 };
+    }
     if (!img) return null;
     /* a placeholder holder has nothing worth enlarging */
     if (img.src.startsWith("data:")) return null;
@@ -1605,6 +1654,14 @@ const lightbox = (() => {
       v.playsInline = true;
       v.autoplay = !prefersReduced;
       v.preload = "auto";
+      /* Resume where the preview had reached. Set on loadedmetadata, not
+         immediately: seeking before the duration is known is dropped
+         silently, and the video would start from zero with no error. */
+      if (it.at > 0.2) {
+        v.addEventListener("loadedmetadata", () => {
+          if (it.at < v.duration - 0.3) v.currentTime = it.at;
+        }, { once: true });
+      }
       stage.appendChild(v);
     } else {
       const i = document.createElement("img");
@@ -1672,6 +1729,164 @@ const lightbox = (() => {
   });
 
   return { open, close };
+})();
+
+/* ══════════ inline previews ══════════
+   A short, muted, looping piece of a film played inside its own tile, so the
+   work moves on the page without anyone opening a player. Clicking still opens
+   the lightbox, and it carries on from the frame the preview was showing.
+
+   Declarative on purpose — wiring a real film to a tile is one attribute:
+
+       <figure class="gw-tile gw-b" data-preview="https://…/clip.mp4">
+         <img src="…poster.webp" alt="">
+       </figure>
+
+   ⚠️ THE FILMS ARE NOT CHOSEN YET. Nothing carries data-preview at the moment,
+   so this whole module is inert; adding the attribute is the only step left.
+
+   Three placements, three different rules, all asked for:
+
+     * gallery wall — desktop plays ONE tile per band, and the wall is banded
+       by grid row so a band lights up as it is scrolled past. On a phone the
+       whole wall is a single band, i.e. strictly one at a time.
+     * carousel — the centred slide plays and nothing else. The carousel's own
+       dwell already moves it along, so there is no second timer here.
+     * why-block 1 — plays whenever it is on screen and NEVER hands on. It is
+       one picture in a column, not a sequence.
+
+   ⚠️ A stopped preview is DESTROYED, not paused. A paused <video> that still
+   has a src keeps its buffer and on some browsers keeps filling it — the same
+   reason the lightbox tears its element down on close. The position survives
+   on the node instead (`data-at`), which is what the overlay reads. */
+const previews = (() => {
+  const HOLD = 5200;               // how long one preview keeps the band
+  /* ⚠️ Re-queried on every refresh(), never captured once at boot. Tiles on
+     the work page are rendered from JS after this module runs, and an earlier
+     shape that snapshotted the DOM here would have silently ignored every one
+     of them — and gone permanently inert on any page that had no previews at
+     load. */
+  let nodes = [];
+  if (prefersReduced) return { refresh() { } };
+
+  const phone = () => window.matchMedia("(max-width: 640px)").matches;
+
+  /* Which band does a node belong to? The wall is split by grid row so that
+     "scrolled past this part of the wall" is a real, measurable thing rather
+     than a guess about where the eye is. */
+  function bandOf(node) {
+    if (node.closest(".reelshow-track")) return "reel";
+    if (node.closest(".wb1")) return "wb1";
+    const wall = node.closest(".gwall");
+    if (wall) {
+      if (phone()) return "wall";
+      const wr = wall.getBoundingClientRect(), nr = node.getBoundingClientRect();
+      const third = Math.min(2, Math.floor(((nr.top + nr.height / 2) - wr.top)
+                                           / (wr.height / 3)));
+      return "wall-" + third;
+    }
+    return "loose";
+  }
+
+  const bands = new Map();          // band -> { members, at, timer, visible }
+  function band(name) {
+    if (!bands.has(name)) bands.set(name, { members: [], at: 0, timer: null });
+    return bands.get(name);
+  }
+
+  function stop(node) {
+    const v = node.querySelector("video.preview");
+    if (!v) return;
+    node.dataset.at = String(v.currentTime || 0);
+    v.pause();
+    v.removeAttribute("src");
+    v.load();                       // drops the buffer; pause() alone does not
+    v.remove();
+    node.classList.remove("is-previewing");
+  }
+
+  function play(node) {
+    if (node.querySelector("video.preview")) return;
+    const img = node.querySelector("img");
+    const v = document.createElement("video");
+    v.className = "preview";
+    v.muted = true;                 // set BEFORE src, or autoplay is refused
+    v.defaultMuted = true;
+    v.playsInline = true;
+    v.loop = true;
+    v.preload = "auto";
+    if (img) v.poster = img.currentSrc || img.src;
+    v.src = node.dataset.preview;
+    const at = parseFloat(node.dataset.at || "0") || 0;
+    if (at > 0.2) {
+      v.addEventListener("loadedmetadata", () => {
+        if (at < v.duration - 0.3) v.currentTime = at;
+      }, { once: true });
+    }
+    node.appendChild(v);
+    node.classList.add("is-previewing");
+    v.play().catch(() => stop(node));   // a refused autoplay must not strand it
+  }
+
+  function advance(name) {
+    const b = band(name);
+    const live = b.members.filter((n) => n.dataset.visible === "1");
+    clearTimeout(b.timer);
+    b.timer = null;
+    b.members.forEach(stop);
+    if (!live.length) return;
+    b.at = b.at % live.length;
+    const node = live[b.at];
+    play(node);
+    /* wb1 is the exception the agency asked for: it holds, it does not cycle */
+    if (name === "wb1" || name === "reel") return;
+    b.timer = setTimeout(() => { b.at += 1; advance(name); }, HOLD);
+  }
+
+  /* the carousel drives itself: whatever is centred plays, nothing else */
+  function syncReel() {
+    const b = band("reel");
+    b.members.forEach((n) => {
+      const on = n.closest(".reel-slide")?.classList.contains("is-current")
+        && n.dataset.visible === "1";
+      on ? play(n) : stop(n);
+    });
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    const touched = new Set();
+    entries.forEach((e) => {
+      e.target.dataset.visible = e.isIntersecting ? "1" : "0";
+      if (!e.isIntersecting) stop(e.target);
+      touched.add(e.target.dataset.band);
+    });
+    touched.forEach((n) => (n === "reel" ? syncReel() : advance(n)));
+  }, { threshold: 0.35 });
+
+  function refresh() {
+    bands.forEach((b) => clearTimeout(b.timer));
+    bands.clear();
+    nodes = Array.from(document.querySelectorAll("[data-preview]"));
+    nodes.forEach((n) => {
+      const name = bandOf(n);
+      n.dataset.band = name;
+      band(name).members.push(n);
+      io.observe(n);
+    });
+  }
+  refresh();
+
+  /* the centred slide changes without any intersection change */
+  document.getElementById("reelTrack")
+    ?.addEventListener("scroll", () => syncReel(), { passive: true });
+  /* re-band on resize: the phone collapses the wall's three bands into one */
+  let rt = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { nodes.forEach(stop); io.disconnect(); refresh(); }, 220);
+  });
+
+  return { refresh };
 })();
 
 /* ══════════ index page motion ══════════ */
@@ -1982,7 +2197,14 @@ const projectSheet = (() => {
   };
 })();
 
-/* ══════════ about: one section per service ══════════ */
+/* ══════════ about: one section per service ══════════
+   ⚠️ UNUSED since 2026-08-16 — `#svcAbout` was removed from about.html at the
+   boss's instruction ("About Us shouldn't repeat our services"). The early
+   return below is what makes it a no-op rather than an error.
+
+   Kept, with SERVICES[].what/why/does, only because a different treatment of
+   the same material may be wanted later. ⚠️ That copy is PROTOTYPE-INVENTED
+   and was never approved — do not wire this back up without replacing it. */
 const svcAboutRoot = document.getElementById("svcAbout");
 function renderServiceSections() {
   if (!svcAboutRoot) return;
@@ -2103,13 +2325,27 @@ const reelShow = (() => {
   let idx = -1, timer = null, raf = 0, settle = 0;
   let onScreen = true, held = false, dragging = false;
 
-  function mark() {
+  /* ⚠️ Measure slides by their CENTRE, never by an edge.
+     A flanking slide sits at `transform: scale(0.94)` and the centred one at
+     scale(1), and getBoundingClientRect reports the VISUAL box — so a flank's
+     `left` is inset by 3% of its width against its layout position, and the
+     0.5s transition means that inset is a moving number besides. A uniform
+     scale about the default 50% 50% origin leaves the centre exactly where it
+     was, so the centre is the one measurement the transform cannot move. */
+  const mid = (i) => {
+    const r = slides[i].getBoundingClientRect();
+    return r.left + r.width / 2;
+  };
+  const trackMid = () => {
     const t = track.getBoundingClientRect();
-    const mid = t.left + t.width / 2;
+    return t.left + t.width / 2;
+  };
+
+  function mark() {
+    const m = trackMid();
     let best = 0, bestD = Infinity;
     slides.forEach((s, i) => {
-      const r = s.getBoundingClientRect();
-      const d = Math.abs(r.left + r.width / 2 - mid);
+      const d = Math.abs(mid(i) - m);
       if (d < bestD) { bestD = d; best = i; }
     });
     if (best === idx) return;
@@ -2118,12 +2354,9 @@ const reelShow = (() => {
   }
 
   function centerOn(i, instant) {
-    const s = slides[i];
-    if (!s) return;
-    const t = track.getBoundingClientRect();
-    const r = s.getBoundingClientRect();
+    if (!slides[i]) return;
     track.scrollBy({
-      left: (r.left + r.width / 2) - (t.left + t.width / 2),
+      left: mid(i) - trackMid(),
       /* "instant", not "auto". `auto` means "defer to CSS scroll-behavior",
          which this track sets to smooth — so the reduced-motion branch would
          animate exactly like the other one and the setting would do nothing.
@@ -2147,9 +2380,7 @@ const reelShow = (() => {
     mark();
     if (idx >= n && idx < 2 * n) return;
     const target = n + ((idx % n) + n) % n;
-    const from = slides[idx].getBoundingClientRect().left;
-    const to = slides[target].getBoundingClientRect().left;
-    track.scrollBy({ left: to - from, behavior: "instant" });
+    track.scrollBy({ left: mid(target) - mid(idx), behavior: "instant" });
     mark();
   }
 
@@ -2240,8 +2471,25 @@ const reelShow = (() => {
    A switch rather than a decision — the agency wants to see the site wearing
    it before choosing whether it belongs everywhere. Same query-string
    convention as the chat widget's `?chat=up`. */
-if (new URLSearchParams(location.search).get("paper") === "1") {
+const QS = new URLSearchParams(location.search);
+if (QS.get("paper") === "1") {
   document.body.classList.add("paper");
+}
+
+/* `?flat=1` — a DIAGNOSTIC, not a design option.
+   The linen is a viewport-sized fixed layer with mix-blend-mode: multiply
+   sitting above everything. A blend mode cannot be composited as a plain
+   layer — the GPU has to read the backdrop back for every affected pixel —
+   so on a mid-range phone it can cost a re-composite of the whole viewport on
+   every scroll frame, which surfaces as stutter in anything moving underneath
+   it (reported on the carousel, on a Galaxy A54 in Brave).
+
+   Loading any page with ?flat=1 drops the blend to a plain overlay. If the
+   stutter goes with it, the cost is the blend and the fix is to stop blending
+   a full-viewport fixed layer. If the stutter stays, the linen is innocent and
+   this switch has ruled it out — which is the point. */
+if (QS.get("flat") === "1") {
+  document.body.classList.add("flat-linen");
 }
 
 /* ══════════ boot ══════════ */

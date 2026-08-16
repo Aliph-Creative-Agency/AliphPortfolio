@@ -121,10 +121,16 @@
   </dl>
 </section>
 
-<!-- one section per service — rendered by main.js from SERVICES -->
-<div class="banner"><h2 data-i18n="svcAboutBanner">ماذا نقدّم؟</h2></div>
+<!-- ⚠️ The per-service sections are GONE (2026-08-16), at the boss's
+     instruction in the copy doc: «في من نحن؟ بلزمش نرجع نكرر خدماتنا خليها بس
+     من فوق لحد هون» — About Us keeps the intro and stops repeating the
+     services, which the home page already lists.
 
-<section class="svc-about" id="svcAbout"></section>
+     They were three .asvc articles rendered by main.js from SERVICES, each
+     ~1300px tall on a phone: 3,934px of a 9,187px page, all of it placeholder
+     media and prototype copy the agency never wrote. renderServiceSections()
+     and the SERVICES[].what/why/does copy it read are still in main.js,
+     unused, if a different treatment is ever wanted. -->
 
 <div class="ab-cta">
   <a class="oval-btn" href="library.html">
@@ -190,6 +196,13 @@
         <span id="clockTime">—</span>
         <small data-i18n="cClock">بتوقيت القدس</small>
       </p>
+      <!-- The mark the spinning stamp left behind (2026-08-16). Three children
+           under `justify-content: space-between` put it in the middle of the
+           column with no extra rule. Decorative: the agency's name is already
+           in the legal line below, so a screen reader gets it once, not twice. -->
+      <div class="contact-mark" aria-hidden="true">
+        <img src="assets/img/Aliph-Logo-Main-cream.svg" alt="">
+      </div>
       <nav class="contact-socials latin" lang="en" aria-label="Social">
         <a href="https://www.instagram.com/aliph.creative" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>
         <a href="https://www.facebook.com/share/19F5j4XM6g/" target="_blank" rel="noopener noreferrer">FACEBOOK</a>

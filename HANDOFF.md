@@ -2,19 +2,31 @@
 
 _Updated 2026-08-16. Read this first._
 
-> ## 🟡 State on 2026-08-16: committed, NOT pushed, NOT deployed
+> ## 🟡 State on 2026-08-16: uncommitted work in the tree, NOT pushed, NOT deployed
 >
 > `5a5a0d3` — lightbox, the tech section back, six recovered films, horizontal
-> button swap, the nav close animation, and the paper texture. **It is committed
-> and nothing else. Not pushed, not deployed.**
+> button swap, the nav close animation, and the paper texture — is committed.
+> On top of it sits a large body of **uncommitted work**: the custom-domain
+> switch, the oval button fix, the boss's real copy, the service rename, the
+> new DaVinci film strip and its emulsion wash, the linen and scroll-gap fixes,
+> the footer wordmark, the about page's service repetition removed, and the
+> inline-preview system. See _Session 2026-08-16 (second round)_.
+>
+> **The agency asked to hold the deploy until the current batch of work is
+> finished.** That decision is why the live media outage below is still open.
 >
 > The previous round (`042a402` — phone centring, the dark wall, the media
 > archive) **is** pushed and live. Deploy is not automatic: `npx.cmd wrangler
 > deploy` from the repo root, and pushing to GitHub does nothing.
 >
-> ✅ **R2 carries the media.** Bucket `aliph-media` on the agency's account,
-> public access ON, base URL
-> `https://pub-0b1a78477e8542a28db190d86f861426.r2.dev`. Four prefixes:
+> 🔴 **`film-grain.webp` and `film-grain-m.webp` are referenced by COMMITTED
+> CSS three times and are not tracked by git.** They sit untracked in the
+> working copy, so `5a5a0d3` on its own ships an emulsion overlay pointing at
+> nothing. Commit them with the film-strip work.
+>
+> ✅ **R2 carries the media, on `media.aliphcreative.com` since 2026-08-16.**
+> Bucket `aliph-media` on the agency's account, base URL
+> `https://media.aliphcreative.com`. Four prefixes:
 > `img/` 63 WebP · `video/` 13 web-ready MP4 · `poster/` 13 frames ·
 > `master/` 5 full-quality originals. Every object verified readable at the
 > right length and content-type.
@@ -24,10 +36,13 @@ _Updated 2026-08-16. Read this first._
 > *web* version is up and playing — only the master needs a drag-and-drop into
 > the R2 dashboard, which has no such cap. Nothing on the site is broken by it.
 >
-> ⚠️ **r2.dev is not a production CDN.** Cloudflare rate-limits it, documents it
-> as development-only, and gives it no edge caching — which now matters, because
-> the archive serves 224 MB of video. `media.aliphcreative.com` is the answer;
-> the steps are in _Moving media to a custom domain_ below.
+> 🔴 **`r2.dev` is switched OFF and now answers 401.** The custom domain
+> replaced it, and the two changes are not independent: the moment public
+> access came off the `r2.dev` URL, **the deployed site's work page went to 401
+> on every image, poster and film**, because `main.js` still named the old
+> host. The constant is flipped in the repo — but that fix is **not deployed**,
+> so the live site is broken for R2 media until it is. See _Moving media to a
+> custom domain_.
 >
 > **Still fabricated, still not shippable:** block 1's paragraph, the three
 > block titles, and — newly back on the page — the four **tech projects and
@@ -686,6 +701,305 @@ reads.
 rejected.** Recorded because the instinct to generate a texture will come back:
 don't. It is in `resources/` now.
 
+## Session 2026-08-16 (second round)
+
+### The boss's copy doc — the site's text is real now
+
+Source: a Google Doc titled «نص موقع الف». ⚠️ **It exports without auth** —
+`https://docs.google.com/document/d/<ID>/export?format=txt` returns the whole
+thing as UTF-8. `WebFetch` on the `/edit` URL returns the SPA shell and reads
+as an empty document; don't conclude the doc is unreadable from that.
+
+What moved: the hero paragraph, `w1Title` + a three-paragraph `w1ParaA/B/C`,
+`w2Title` («نقاطٌ بحثنا عنها، وأعمالٌ بنيناها منها.»), and the `desc` of all six
+subcategories. All of it replaced invented prototype copy.
+
+⚠️ **Three doc typos were corrected, not transcribed** — flag them if the doc
+is ever re-imported: `مساعتدكم` → `مساعدتكم` (hero), `بالية يخدم` → `بما يخدم`
+(فيديو أفقي), and a doubled comma in the stills paragraph.
+
+⚠️ **The doc heads the stills paragraph «صناعة المحتوى»**, which is the SERVICE
+name, not a subcategory. Its three items map one-to-one onto the three photo
+subcategories and that paragraph is entirely about stills, so it was read as
+the stills copy. Worth confirming.
+
+**Still outstanding from the doc:** the about page instruction — «بلزمش نرجع
+نكرر خدماتنا» — i.e. من نحن؟ should keep only the intro paragraph and stop
+repeating the services. That is a structural change to `about.html` and has
+not been made. The برمجيات block was skipped at the agency's request.
+
+### The third service was renamed — and this time the id did NOT move
+
+`تطوير برمجيات` → **`حلول تقنية وبرمجية`** / `Software Development` →
+**`Tech & Software Solutions`**. Third rename, third time only labels moved.
+All six live copies plus the `SERVICES[].tag` were updated together, and
+`chat-worker`'s 67 tests still pass — because both the count and the name list
+are DERIVED from `SERVICES` rather than typed.
+
+### The oval button's clipping was the mask, not the axis
+
+The 2026-08-16 vertical→horizontal fix changed which edge cut the label; it did
+not stop the cutting. `.oval-swap` was `width: max-content`, so the mask was
+sized to the LABEL — 113.7px centred in a 404.7px ellipse — putting a hard cut
+line **145.5px inside the rim** with empty oval either side. The mask spans the
+whole button now (bled out over its padding so the cut lands on the rim), and
+both faces fade as they travel, which stops label length in either language
+from ever reintroducing a slice.
+
+⚠️ **The rest-state measurement said nothing.** Mask and label measured exactly
+equal at rest; the defect only exists mid-transition. A complaint about an
+animation cannot be checked in a static state.
+
+### Block 1 needed a SECOND language lever
+
+`--why-type` scales the body. It does not scale the title, and block 1's column
+is exactly as tall as the picture beside it — so title and body share one
+height budget and a longer title steals the body's room rather than overflowing
+on its own. «نبدأ بالسؤال، لا بالإجابة» sets in two lines; "We begin with the
+question, not the answer." sets in **five**, and the body solved at **10px**.
+`--why-title-type` (1 for Arabic, 0.62 for English) is the fix.
+
+⚠️ **`fit_columns.py` was stale and would have thrown before solving anything**
+— `AREAS` still listed `.wb2-flow`, `.wb2-rail` and both `.wb3` columns, which
+stopped existing on 2026-08-11. It fits the one remaining column now and takes
+`PORT` from the environment.
+
+### The carousel jitter is NOT the wrap — and the first probe fabricated a bug
+
+🔴 **Read this before chasing it again.** Measured on the current code: the
+wrap moves the picture **0.25px**, steps are monotone with **zero overshoot**,
+there is **no drift at rest**, and there are **no long frames even at 6× CPU
+throttle**. The geometry is not the problem.
+
+⚠️ **A first probe reported a 7.5px visible jump and was wrong.** It compared
+the `left` edge of the centred slide before and after the wrap — but across a
+wrap that is two DIFFERENT elements, mid-way through opposite `scale(0.94)`
+transitions, so their edges differ by ~3% of a slide width even when perfectly
+co-located. The tell was that the number came out **identical on the broken and
+the fixed code**. Measuring centres instead — invariant under a uniform scale
+about its own origin — gives 0.25px either way. A fix had already been written
+for a defect that never existed.
+
+`recentre()` does now measure centres rather than edges. That is a genuine
+latent-correctness fix — the old delta was ~4.6px wrong and only survived
+because mandatory scroll-snap absorbed it inside the same frame — but **it is
+not the jitter fix and must not be described as one.**
+
+**The open lead is texture memory.** The track holds **41 megapixels of decoded
+image**: eight 1600px photographs shown at ~304px wide, tripled by the loop
+clones. Reported on a Galaxy A54 (Mali-G68) in Brave. This is the same failure
+the film strip already hit once — "a browser decodes an image at its intrinsic
+size however small it is drawn" — and the answer there was a phone-sized
+derivative. Not yet done.
+
+### The film strip is the agency's DaVinci scan now
+
+`resources/cut_film_scan.py` turns the scan into the tile. It is a different
+job from `recut_film.py` (which re-cuts an existing tile) and the difference
+that matters is that the scan's sprocket holes are **white pixels**, where the
+page needs transparency so the cream shows through.
+
+**Tile: 5400×2391 → 5400×2206 RGBA, 18 pitches, 6.8% transparent.**
+⚠️ **The frame-slot constant moved 0.826630 → 0.611967** and lives in two
+places in `style.css`. The new scan is proportionally taller than the old one,
+so the frames come out squarer than the old landscape 3:2. That is what the
+asset gives; `FILM_FRAMES` is fixed at four entries and `SERVICE_FRAMES`
+indexes into it, so frames-per-tile cannot be changed to compensate.
+
+⚠️ **`film.webp` is ~150 KB now and the alpha is FINE.** The old "near 145 KB
+means the alpha is gone" rule was calibrated on the previous 795 KB tile; this
+one is a flat synthetic base with the edge text removed, so it compresses far
+harder. Check `mode == RGBA` and the transparent fraction, not the file size.
+
+Three things the script does that are not obvious:
+
+- ⚠️ **It paints out "KODAK T-MAX 400".** Not tidiness — the edge printing does
+  **not** repeat on a regular period (measured gaps of 2479 and 2590 px), so no
+  cut width can ever make it join and the seam lands mid-word whatever the
+  perforations do. It is also a third-party trademark across a commercial
+  hero. The bands are rebuilt from the longest text-free stretch of the same
+  band, so the replacement is the scan's own base and grain.
+- ⚠️ **The base box is found strictly, then inset 90px.** The scan's edges are
+  soft and carry a dark rim ~50px inside the ramp. A loose threshold left that
+  rim in the tile and the repeat showed a **10% tonal step** — which looks
+  exactly like a lighting gradient across the scan. It is not: the interior
+  profile is flat to within 5%. Two rounds of gradient-fitting were spent on a
+  gradient that did not exist before the edge was measured.
+- ⚠️ **It regenerates `film-grain.webp` too, and that is not optional.** The
+  grain is a high-pass of the film scan itself — the same grain as the
+  surrounding base, not a generic overlay — and it is positioned by the
+  frame-slot constant. Left over from the previous scan it is grain from a
+  different piece of film placed by the new constant, and the two disagree.
+  Both `-m` variants are regenerated with it. ✅ Done for this cut.
+- The residual tilt is levelled with a **polynomial fit, not a wrapped blur**.
+  Wrapping treats the tile's two ends as neighbours and averages them, so the
+  fitted profile is already continuous across the join and dividing by it
+  removes nothing — the step came back 10.1% → 10.7%. Now −1.8%, asserted.
+
+### The emulsion wash — one layer over the strip AND its frames
+
+`.film-scroll::after`, `soft-light` at 0.92, **masked by `film.webp`'s own
+alpha at the same size and phase as the background**. That mask is the whole
+trick: the wash stops dead at every sprocket hole and at both long edges
+instead of laying a rectangle of colour over the cream.
+
+⚠️ **`background-size` is now declared twice** — once for the film, once for
+the mask. Change one without the other and the wash drifts out of register.
+`.film-scroll` also sets `isolation: isolate`, or the blend would act on the
+cream page seen through the holes.
+
+⚠️ **`.hero-overlay` had to give up its clicks.** It spans the whole hero at
+z-index 4, so the empty half beside the panel sat on top of the film and
+swallowed every click meant for a frame — `elementFromPoint` over a frame
+returned `.hero-overlay`. It is `pointer-events: none` with
+`.hero-overlay > * { pointer-events: auto }`, so the panel keeps its own.
+
+`.film-frame` is in the lightbox's `OPENS` list now, and `.film-group` in
+`GROUPS`: a frame opens like any other media, and the wash does not follow it
+out — which is the point, the work is seen in its own colours.
+
+### The hero's crumple is gone
+
+`.hero-panel::before` removed at the agency's request. `paper-panel.webp` is
+still on disk and still cut by `cut_paper.py`. ⚠️ **`.hero-panel::after` is the
+linen and must stay** — it is the only thing stopping the panel reading as a
+flat cream block.
+
+### The linen, the scroll gap, and the footer mark
+
+**The linen is 0.28 / 620px** (was 0.16 / 900px). Two knobs and they are not
+interchangeable: opacity is how deep the weave sits into the cream, tile size
+is how close it is, and a tighter tile reads stronger at the same opacity
+because more thread edges land per centimetre. Lifting opacity alone would
+have muddied the ink instead of showing the weave. Five alternatives were
+rendered side by side at 3× on plain cream; the agency has the sheet.
+
+🔴 **The scroll "gap in the texture" was `position: fixed; inset: 0`.** A fixed
+element is sized to the LAYOUT viewport, and on Android that does not grow when
+the URL bar retracts — so scrolling with a finger down exposes a band at the
+bottom the linen never covers, and because the texture stops at a horizontal
+line it reads as a seam in the paper. It is overscanned now (`top: -8vh`,
+`height: calc(100lvh + 16vh)`). ⚠️ Do not tidy it back to `inset: 0`.
+
+**`?flat=1` is a diagnostic**, not a design option. The linen is a
+viewport-sized fixed layer with `mix-blend-mode: multiply` above everything,
+and a blend cannot be composited as a plain layer — the GPU reads the backdrop
+back for every affected pixel. On a mid-range phone that can cost a
+re-composite of the whole viewport per scroll frame, which would surface as
+stutter in anything moving underneath, including the carousel. `?flat=1` drops
+the blend at matched apparent strength so only the COST differs. If the
+reported jitter goes with it, the blend is the cause; if it stays, the linen is
+ruled out.
+
+**The footer mark is back** — the wordmark, in the 562px of empty ink the
+spinning stamp left between the clock and the socials, as the third child of a
+`space-between` column. ⚠️ Not `Aliph-Icon-cream.svg`, which looks like the
+obvious "short" mark and is a 68×244 letterform: capped to 54px wide it came
+out **194px tall** and grew the phone footer by more than it saved. Both axes
+are capped now. `HalfAliph-Stamp` would fit but is the mark the agency asked to
+remove from this footer on 2026-08-11.
+
+### The about page stopped repeating the services
+
+At the boss's instruction. Three `.asvc` articles, ~1300px each on a phone —
+**3,934px of a 9,187px page**, all placeholder media and prototype copy.
+The page is **5,051px now, 10.9 phone screens → 6.0**.
+`renderServiceSections()` and `SERVICES[].what/why/does` are still in `main.js`,
+unused and marked; ⚠️ that copy was never approved, so do not wire it back up
+without replacing it first.
+
+### Inline previews — built, tested, and deliberately unwired
+
+A short, muted, looping piece of a film plays inside its own tile; clicking
+opens the lightbox and **carries on from the frame the preview was showing**.
+`previews` in `main.js`, with `.preview` styling in `style.css`.
+
+🔴 **THE FILMS ARE NOT CHOSEN YET, so nothing carries `data-preview` and the
+module is inert.** Wiring one up is a single attribute — that is the whole
+design:
+
+```html
+<figure class="gw-tile gw-b" data-preview="https://media.aliphcreative.com/video/clip.mp4">
+  <img src="…poster.webp" alt="">
+</figure>
+```
+
+Three placements, three different rules, all measured on desktop and phone:
+
+| where | rule | verified |
+|---|---|---|
+| gallery wall | one tile at a time per band; the wall is banded by grid row so a band lights as it is scrolled past. A phone collapses it to **one band**, i.e. one tile on the whole wall | ✅ |
+| carousel | only the centred slide. No second timer — the carousel's own dwell does the advancing | ✅ |
+| why-block 1 | plays and **never** hands on. One picture in a column, not a sequence | ✅ |
+
+⚠️ **A stopped preview is DESTROYED, not paused** — `pause()` alone leaves the
+buffer, and some browsers keep filling it. The position survives on the node as
+`data-at`, which is what the overlay reads to resume.
+
+⚠️ **`muted` is set BEFORE `src`.** The other order gets autoplay refused, and
+the failure is a rejected promise rather than an error — it looks like the
+preview simply never starts.
+
+⚠️ **`refresh()` re-queries the DOM; it does not capture a node list at boot.**
+The work page renders its tiles from JS after this module runs, so a snapshot
+taken at boot would silently ignore every one of them.
+
+### "new materials" — downloaded, derived, uploaded
+
+Drive folder `1-aCuYK_SoM4slQEh2ZACBcrmoxj2XNzY`. **28 media files, 761.8 MB,
+0 failures** fetched into the session scratchpad, then derived to **166.7 MB**.
+
+⚠️ **18 of the 19 clips are HEVC**, which Chrome on Android and Firefox will
+not play — so unlike the Drive films, `-c copy` was not an option and these had
+to be **re-encoded to H.264**. Do not assume a remux is enough because it was
+last time; check `codec_name` first.
+
+⚠️ **Everything was 3840×2160** and is capped to 1920 on the long edge. A 4K
+master behind a slot a few hundred px wide is the exact mistake the film strip
+already paid for.
+
+⚠️ **Rotation is BAKED IN, not left in metadata.** Most clips carried
+`rot=-90`; browsers honour that inconsistently, so what ships is already the
+right way up and the tag is cleared. Portrait clips are 1080×1920, landscape
+1920×1080 — check that, not the source dimensions.
+
+Naming: `bts-NN` for the behind-the-scenes set, `bts-montage` for the 65s cut,
+`design-newmat-NN` for the two 4:5 posters. Arabic filenames strip to nothing,
+which is how the first import produced `copy-of-1` / `copy-of-2`.
+
+✅ **All 47 objects are on R2 and verified** — 28 assets plus 19 poster frames,
+every one 200 over `media.aliphcreative.com` with the right content-type and
+`immutable`. They are **not referenced by any page yet**: `MEDIA` in `main.js`
+is generated and was not regenerated, so the work page does not know about
+them. That is the next step, and it needs the agency to say which of them
+belong on the site.
+
+⚠️ **The masters are NOT uploaded** — only the web derivatives. That is open
+question 11 and still unanswered; the 762 MB of originals sit in the session
+scratchpad, which Windows can clear, with the Drive as the only other copy.
+
+⚠️ **The Al-Baidar landing page is deliberately excluded.** It is a full git
+working copy (116 files, ~98 of them `.git` internals), i.e. source, not media.
+Serve it from its own domain and put a screenshot in R2; a copy in a media
+bucket goes stale the moment they touch the site. The boss's doc also names it
+as the landing page to feature (with سيدات ايلياء as the alternative) — that
+line sits inside the برمجيات block the agency asked to defer.
+
+⚠️ **`embeddedfolderview` beats driving the browser for this.**
+`https://drive.google.com/embeddedfolderview?id=<ID>#list` returns a plain,
+non-virtualised list — no scrolling, no browser, and it recurses. Folder vs
+file comes from the `href` (`/drive/folders/` vs `/file/d/`), **not** from the
+icon image, whose filename matches nothing.
+
+⚠️ **The folder also contains a full git working copy of the landing page** —
+116 files, ~98 of them `.git` internals. That is source, not media. It is
+excluded from the fetch and **must not go in the bucket**: a landing page is a
+live site with its own analytics and links, and a copy in R2 goes stale the
+moment they touch it. Serve it from its own domain; put a screenshot in R2.
+
+Still to do: HEIC → WebP, MOV → faststart MP4, then upload and wire up. The
+`.MOV` files are iPhone HEVC and will not play in most browsers untouched.
+
 ## The work page (2026-08-12, tech restored 2026-08-16)
 
 One continuous run of **the media itself** — no titles, no captions. The
@@ -811,11 +1125,13 @@ This login reaches two accounts and stops to ask otherwise — which is a hard
 failure non-interactively, and publishes into the personal account if answered
 wrong. Same reasoning as the pin in `wrangler.toml`.
 
-⚠️ **r2.dev 403s a request carrying a scripting library's default user-agent.**
-It is Cloudflare bot protection, and it looks exactly like "public access is
-disabled" — all 70 objects reported 403 while being perfectly readable. Send a
-browser UA from any verification script. A check that fails for *every* item is
-more likely broken than the thing it checks.
+⚠️ **Send a browser user-agent from any verification script.** `r2.dev` used to
+403 a scripting library's default UA — Cloudflare bot protection, which looks
+exactly like "public access is disabled": all 70 objects reported 403 while
+being perfectly readable. The host is gone but the habit stays, and so does the
+rule behind it: a check that fails for *every* item is more likely broken than
+the thing it checks. ⚠️ **`401` from `pub-0b1a7847….r2.dev` is a different
+thing and is now correct** — that URL is switched off on purpose.
 
 ## Crumpled paper (2026-08-16)
 
@@ -893,36 +1209,49 @@ height unchanged, and the overflow now only ever cuts left/right where there is
 nothing but the face waiting off stage. `--swap` flips the direction with the
 language.
 
-## Moving media to a custom domain
+## Moving media to a custom domain — DONE 2026-08-16, except the deploy
 
-`r2.dev` is rate-limited by design, documented as development-only, and gets no
-edge caching — which matters now that the archive serves 224 MB of video.
+The agency did the dashboard half: `media.aliphcreative.com` is connected to
+`aliph-media`, the certificate is live, and **the `r2.dev` URL is switched
+off** — it answers `401 Unauthorized` now, for every object.
 
-Dashboard/registrar work (needs an account holder):
+Verified this session:
 
-1. Confirm `aliphcreative.com` is on Cloudflare **in the same account as the
-   bucket** (`6c60bd77…`). If not, add the site and repoint nameservers.
-2. R2 → `aliph-media` → Settings → Public access → **Connect Custom Domain** →
-   `media.aliphcreative.com`. Same-account zones get the DNS record written
-   automatically.
-3. Wait for the certificate.
-4. **Then disable the `r2.dev` URL.** Leaving it on keeps a second, slower,
-   uncached door to the same objects.
+- **All 89 objects the page actually asks for** — 63 `img/`, 13 `poster/`,
+  13 `video/` — return 200 over the new host at real lengths with
+  `cache-control: public, max-age=31536000, immutable` intact. The checker
+  reads the keys out of `MEDIA` in `main.js` rather than listing the bucket,
+  because what matters is the set the page requests.
+- **Edge caching works with no Cache Rule needed** — `cf-cache-status: HIT` on
+  a repeat GET, 0.20s → 0.07s. ⚠️ Do not conclude otherwise from a `HEAD`:
+  HEADs report `DYNAMIC` on an object that is in fact cached, which reads
+  exactly like "the cache rule is missing" and sent one round of diagnosis at
+  a non-problem.
+- A film still streams: `horizontal-maqasid.mp4` reports 1920×1080 / 207.1s
+  from `loadedmetadata` alone, so the faststart remux and byte-range serving
+  both survived the move.
+- The work page renders end to end from the new host — 152 tiles, 0 broken,
+  **0 failed requests**.
 
-Then, in the repo:
+🔴 **The deploy is the only step left, and it is urgent:** `npx.cmd wrangler
+deploy` from the repo root. Until it runs, the deployed site still names the
+dead `r2.dev` host and every piece of media on the work page 401s.
 
-5. Verify every object over the new host — 200s, lengths, content-types.
-6. Change **one constant**: `R2` in `main.js`. That is the only reference.
-7. Add a Cache Rule so media is edge-cached. The objects already carry
-   `max-age=31536000, immutable`; a custom domain is what lets Cloudflare
-   honour it.
-8. Redeploy and re-verify live.
+⚠️ **The bucket has no CORS policy, and that is fine — don't "fix" it.** A
+cross-origin `fetch()` for a media object fails; `<img>` and `<video>` with a
+plain `src` do not need CORS and are unaffected. Nothing in `main.js` fetches
+media — the lightbox builds a `<video>` element. Only add a CORS policy if
+something starts reading media bytes from script.
 
 ## Open questions for the agency
 
-1. **The لماذا ألِف؟ copy is mine, not the studio's.** It is deliberately about
-   method, but an earlier pass invented studio history and that reads as true.
-   **Do not ship it.** Real copy will not be the same length — re-run `fit_columns.py`.
+1. ~~The لماذا ألِف؟ copy is mine, not the studio's.~~ ✅ **Resolved
+   2026-08-16** — the boss's copy doc replaced the hero paragraph, block 1's
+   title and body, block 2's title, and all six subcategory descriptions.
+   `fit_columns.py` was re-run: Arabic 26.4px, English 20.7px.
+   ⚠️ **The ENGLISH of everything that came out of that doc is still mine** —
+   the doc is Arabic only — so the English needs the sign-off the Arabic has
+   now had. That is the remaining half of this question, not the whole of it.
 2. **Channel management has no home** in the three-service taxonomy. The old
    `creative` service was the only one that covered *running* an account. Social
    keywords are parked on `photo` with a comment.
@@ -958,11 +1287,15 @@ Then, in the repo:
     derivatives the site serves. Say if the masters should be archived there
     too. ⚠️ They live in a **temp folder** that Windows can clear; the Drive is
     the only other copy.
-12. **A custom domain for the media.** `r2.dev` is rate-limited by design and
-    Cloudflare says not to ship production on it. Steps are written up above.
+12. ~~A custom domain for the media.~~ **Resolved 2026-08-16** —
+    `media.aliphcreative.com` is live, all 89 objects verified over it, edge
+    caching confirmed, and `r2.dev` is switched off. Only the deploy is
+    outstanding.
 13. **The home page still serves its own images from the repo**, not R2 — they
     were already committed and working, and churning them buys nothing. The
     work page is the only R2 consumer. Worth unifying if one address is wanted.
+    ⚠️ This is now also what kept the home page working while `r2.dev` went
+    dark: only the work page broke.
 14. **Do the tech projects get real content?** Four entries and their
     screenshots are invented, and they are now on the work page behind a
     profile sheet that presents them as real. Needs titles, dates, write-ups
@@ -1110,11 +1443,10 @@ Three size limits, all real, all different:
 - **GitHub: 50 MB warning per file.** Which is why `resources/*.mp4` is now
   gitignored.
 
-~~⚠️ The R2 URL already in the repo was the bucket root —
-`https://pub-90bac6014abe49c594f8ac9c1f1899cb.r2.dev`~~ **Dead — that was a
-different bucket.** ✅ **Resolved 2026-08-12:** the live base is
-`https://pub-0b1a78477e8542a28db190d86f861426.r2.dev` on bucket `aliph-media`.
-See the banner at the top.
+✅ **The base URL is `https://media.aliphcreative.com`** (bucket `aliph-media`),
+since 2026-08-16. Both `r2.dev` hosts this file used to name are dead now: the
+first (`pub-90bac601…`) was always a different bucket, and the second
+(`pub-0b1a7847…`) was switched off with the domain move. See the banner.
 
 ✅ **The faststart remux is DONE — for all seven videos (2026-08-12).** `moov`
 was the last 12 KB of each file, so nothing played until the whole 28–84 MB had

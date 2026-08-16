@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8321", "-d", "prototype"],
       "port": 8321
+    },
+    {
+      "name": "aliph-prototype-alt",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8322", "-d", "prototype"],
+      "port": 8322
     }
   ]
 }

@@ -8,19 +8,20 @@ This binary-searches the size that lands the inked extent on the target.
 ⚠️ Fill is the INKED extent (createRange), never the element box — a stretched
 <p> is always exactly as tall as its row.
 """
-import sys, json
+import os, sys, json
 from playwright.sync_api import sync_playwright
 
 LANG = sys.argv[1] if len(sys.argv) > 1 else "ar"
+PORT = os.environ.get("PORT", "8321")
 W, H = 1280, 900
 TARGET = 99.0          # aim just under full so nothing spills
 
+# ⚠️ ONE column, not four. Blocks 2 and 3 became a carousel and a gallery wall
+# on 2026-08-11 and lost their copy; .wb2-flow, .wb2-rail and both .wb3 columns
+# no longer exist, so asking for them threw before any size was solved.
+# Block 1 is the only why-column still carrying text.
 AREAS = {
   "wb1-side":  ".wb1-side .why-para",
-  "wb2-flow":  ".wb2-flow .why-para",
-  "wb2-rail":  ".wb2-rail .why-para",
-  "wb3-col-a": ".wb3-body > .wb-col:first-child .why-para",
-  "wb3-col-b": ".wb3-body > .wb-col:last-child .why-para",
 }
 
 FILL = """(sel) => {
@@ -54,7 +55,7 @@ SETSIZE = """([sel, px]) => {
 with sync_playwright() as pw:
     b = pw.chromium.launch()
     pg = b.new_page(viewport={"width": W, "height": H}, device_scale_factor=2)
-    pg.goto("http://localhost:8321/index.html", wait_until="domcontentloaded")
+    pg.goto("http://localhost:%s/index.html" % PORT, wait_until="domcontentloaded")
     pg.wait_for_timeout(600)
     pg.evaluate("l=>localStorage.setItem('aliph-lang',l)", LANG)
     pg.reload(wait_until="domcontentloaded"); pg.wait_for_timeout(1500)
