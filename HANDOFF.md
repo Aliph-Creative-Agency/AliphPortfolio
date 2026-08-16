@@ -30,27 +30,28 @@ _Updated 2026-08-16. Read this first._
 > ✅ **R2 carries the media, on `media.aliphcreative.com` since 2026-08-16.**
 > Bucket `aliph-media` on the agency's account, base URL
 > `https://media.aliphcreative.com`. Four prefixes:
-> `img/` 63 WebP · `video/` 13 web-ready MP4 · `poster/` 13 frames ·
+> `img/` 72 WebP · `video/` 32 web-ready MP4 · `poster/` 32 frames ·
 > `master/` 5 full-quality originals. Every object verified readable at the
 > right length and content-type.
+> ⚠️ **47 of those are the "new materials" and are referenced by nothing yet** —
+> see open question 18.
 >
 > 🔴 **One object is still missing: `master/horizontal-maqasid.mp4`.** It is
 > 384 MiB and `wrangler r2 object put` refuses anything over **300 MiB**. Its
 > *web* version is up and playing — only the master needs a drag-and-drop into
 > the R2 dashboard, which has no such cap. Nothing on the site is broken by it.
 >
-> 🔴 **`r2.dev` is switched OFF and now answers 401.** The custom domain
-> replaced it, and the two changes are not independent: the moment public
-> access came off the `r2.dev` URL, **the deployed site's work page went to 401
-> on every image, poster and film**, because `main.js` still named the old
-> host. The constant is flipped in the repo — but that fix is **not deployed**,
-> so the live site is broken for R2 media until it is. See _Moving media to a
-> custom domain_.
+> ⚠️ **`r2.dev` is switched OFF and answers 401.** The custom domain replaced
+> it. Keep the lesson if the media host ever moves again: switching off the old
+> host and shipping the new constant are **one change, not two** — doing the
+> first without the second put every image, poster and film on the deployed
+> work page into a 401 until the deploy caught up.
 >
-> **Still fabricated, still not shippable:** block 1's paragraph, the three
-> block titles, and — newly back on the page — the four **tech projects and
-> their screenshots**. The sheet that displays them is real; its contents are
-> invented. See open question 1.
+> 🔴 **One piece of invented content is left, and it is public:** the four
+> **tech projects and their grey screenshots** on the work page. The profile
+> sheet that displays them is real; its contents are not. Everything else —
+> the hero, block 1, block 2's title, all six subcategory descriptions — is the
+> agency's own words as of 2026-08-16. See open question 14.
 
 **Standing rule: update this file at the end of every session.**
 
@@ -305,9 +306,15 @@ every number moves until it does.
 **Every scripted edit must assert its anchor.** `str.replace` on a miss is a no-op
 that looks like success. This has silently lost real edits.
 
-**`film.webp` is RGBA and the alpha is load-bearing** — 8% of it is transparent, the
-sprocket holes the page shows through. Flattening it to RGB drops the file from
-~810 KB to ~145 KB, which is the tell. It must say `RGBA`.
+**`film.webp` is RGBA and the alpha is load-bearing** — ~7% of it is transparent,
+the sprocket holes the page shows through. It must say `RGBA`.
+⚠️ **Check the MODE, never the file size.** The old rule of thumb — "near 145 KB
+means the alpha is gone" — was calibrated on a 795 KB scan and is now simply
+wrong: the current tile is a flat synthetic base with its edge printing removed,
+so it compresses to ~150 KB with its alpha perfectly intact. A size heuristic
+that outlives the file it was measured on turns into a false alarm.
+`cut_film_scan.py` asserts `mode == "RGBA"` and a plausible transparent
+fraction instead, which is what actually matters.
 
 **🔴 The Browser pane reports `document.visibilityState === "hidden"`, so it never
 runs a frame.** `requestAnimationFrame` never fires, CSS transitions sit frozen at
@@ -352,29 +359,26 @@ took keyboard focus and has been mistaken for a stray border.
 **Hero** — a film strip loops behind a cream panel. `filmLoop` in `main.js` travels
 exactly one period at 34 px/s and repeats, so the restart is pixel-identical. The
 film tile's aspect divided by 4 is the frame-slot constant in `style.css`
-(**`0.826630`** since the 2026-08-11 re-cut); re-cut the tile and that number must
-change with it. The strip pauses off screen. **It has been blamed for four bugs and
-caused none of them** — check the callers first.
+(**`0.611967`** since the 2026-08-16 DaVinci cut); re-cut the tile and that number
+must change with it — `cut_film_scan.py` prints the value. The strip pauses off
+screen. **It has been blamed for four bugs and caused none of them** — check the
+callers first.
 
-🔴 **`recut_film.py` was scoring the wrong feature until 2026-08-11, and it is the
-reason the loop looked broken for weeks.** Its perforation detector read
-*luminance* through `im.convert("RGB")`, which drops alpha and leaves the bright
-rim around each hole scoring as its own run: it counted **43 holes where the tile
-has 21**, so the mean pitch came out at half the truth (128.5 against 258.4) and
-the seam was graded against a rhythm that does not exist. It pronounced the tile
-already optimal at −9.7% while the real seam was **+33%** — a third of a pitch of
-extra film between two perforations, once per repeat.
+🔴 **Measure the thing itself, not a proxy that happens to correlate.** This has
+now cost time twice on this one file, in opposite directions:
 
-A hole *is* the transparency (8.1% of the tile), so **alpha is the only ground
-truth**; the detector reads it now. Re-cut to 5426px (86px off the right), the
-seam is **−0.4% top / +0.0% bottom**, and the constant moved 0.839732 → 0.826630.
-`film-shadow.webp` and both `-m` variants were regenerated with it; all four are
-still RGBA and `film.webp` is 795 KB, nowhere near the ~145 KB that means the
-alpha is gone.
-
-The lesson generalises past this file: **measure the thing itself, not a proxy
-that happens to correlate.** Two scripts had been tuned against that phantom
-rhythm, and both looked like they were working.
+- `recut_film.py` scored perforations on *luminance*, which drops alpha and lets
+  the bright rim around each hole count as its own run. It found **43 holes where
+  the tile had 21**, halved the pitch, and graded the seam against a rhythm that
+  did not exist — two scripts were tuned against that phantom and both looked
+  like they were working. A hole *is* the transparency, so **alpha is the only
+  ground truth**, and both cutters read it now.
+- The 2026-08-16 cut then spent two rounds "levelling a lighting gradient" that
+  was never there. The interior profile is flat to within 5%; the 10% step at the
+  seam was **scan margin bleeding into the tile edges**, because the base-box
+  threshold was loose enough to include a soft ~30px ramp. No amount of
+  gradient-fitting can fix an edge artefact. Inspect the profile before fitting a
+  correction to it.
 
 The headline's أ (and Latin A) are photographed paper scraps that re-cut themselves
 every second or so. `splitSafe()` refuses to split a word where Arabic shaping would
@@ -440,23 +444,19 @@ rather than re-centring the target. They are the same thing only at rest, and it
 now fires mid-flight: re-centring would snap a running animation to a stop, where
 a translation preserves the exact visual offset and stays invisible.
 
-Three things about it that are easy to get wrong, all of them measured:
+Three things about it are easy to get wrong, all measured, and all three are
+written up once in _Things that will bite you_ rather than twice here — the
+percentage-base trap, `scrollLeft` under RTL, and `behavior: "auto"` not
+meaning "instant". How this carousel settles them:
 
-- ⚠️ **The two percentages resolve against different bases.** `padding-inline` on
-  the track resolves against the parent's width; a slide's `flex-basis` resolves
-  against the *content* box that padding just shrank. Writing `flex: 0 0
-  var(--reel-w)` looks right and gives you **a third of a third** — 125px in a
-  1188px track. The slide is `flex: 0 0 100%`, because the padding has already
-  made the content box exactly one slide wide.
-- ⚠️ **`scrollLeft` is negative under RTL** and its origin differs between
-  engines. Everything is measured with `getBoundingClientRect` centre-to-centre
-  and moved with `scrollBy`, which takes a visual delta — neither needs
-  `dirSign()`. Verified: after "next", the centred slide is 0.1px off centre and
-  `scrollLeft` is −468.
-- ⚠️ **`behavior: "auto"` is not "instant".** It means "defer to CSS
-  `scroll-behavior`", which this track sets to `smooth` — so the reduced-motion
-  branch animated exactly like the other one and the setting did nothing. It is
-  `"instant"` now.
+- the slide is `flex: 0 0 100%`, because the track's `padding-inline` has
+  already made the content box exactly one slide wide
+- everything is measured **centre-to-centre** with `getBoundingClientRect` and
+  moved with `scrollBy`, so nothing needs a direction flip. ⚠️ Centres, not
+  edges: a flank sits at `scale(0.94)` and the centred slide at `scale(1)`, so
+  their edges differ by 3% of a slide width even when perfectly co-located,
+  while a uniform scale leaves the centre exactly where it was
+- the reduced-motion branch passes `"instant"`
 
 Autoplay is a self-resetting timeout, not an interval, so every scroll re-arms it
 and it cannot yank itself forward out of a swipe someone is mid-way through. It
@@ -1233,7 +1233,7 @@ height unchanged, and the overflow now only ever cuts left/right where there is
 nothing but the face waiting off stage. `--swap` flips the direction with the
 language.
 
-## Moving media to a custom domain — DONE 2026-08-16, except the deploy
+## Moving media to a custom domain — DONE 2026-08-16
 
 The agency did the dashboard half: `media.aliphcreative.com` is connected to
 `aliph-media`, the certificate is live, and **the `r2.dev` URL is switched
@@ -1257,9 +1257,11 @@ Verified this session:
 - The work page renders end to end from the new host — 152 tiles, 0 broken,
   **0 failed requests**.
 
-🔴 **The deploy is the only step left, and it is urgent:** `npx.cmd wrangler
-deploy` from the repo root. Until it runs, the deployed site still names the
-dead `r2.dev` host and every piece of media on the work page 401s.
+✅ **Deployed 2026-08-16.** ⚠️ The lesson worth keeping: switching off `r2.dev`
+and shipping the constant are **one change, not two**. The moment public access
+came off the old host, every image, poster and film on the deployed work page
+401'd — and it stayed broken for as long as the deploy was held. If the media
+host is ever moved again, land the repo change first.
 
 ⚠️ **The bucket has no CORS policy, and that is fine — don't "fix" it.** A
 cross-origin `fetch()` for a media object fails; `<img>` and `<video>` with a
@@ -1269,13 +1271,13 @@ something starts reading media bytes from script.
 
 ## Open questions for the agency
 
-1. ~~The لماذا ألِف؟ copy is mine, not the studio's.~~ ✅ **Resolved
-   2026-08-16** — the boss's copy doc replaced the hero paragraph, block 1's
-   title and body, block 2's title, and all six subcategory descriptions.
-   `fit_columns.py` was re-run: Arabic 26.4px, English 20.7px.
-   ⚠️ **The ENGLISH of everything that came out of that doc is still mine** —
-   the doc is Arabic only — so the English needs the sign-off the Arabic has
-   now had. That is the remaining half of this question, not the whole of it.
+> Numbers are stable — the banner and other sections refer to them. Closed ones
+> stay in place as one-liners rather than being renumbered away.
+
+1. **The English copy is unapproved.** The Arabic came from the boss's doc and
+   is signed off; every English string derived from it is mine, because the doc
+   is Arabic only. (The Arabic half of this — invented لماذا ألِف؟ copy — was
+   closed 2026-08-16.)
 2. **Channel management has no home** in the three-service taxonomy. The old
    `creative` service was the only one that covered *running* an account. Social
    keywords are parked on `photo` with a comment.
@@ -1287,8 +1289,7 @@ something starts reading media bytes from script.
    Blocked on the 29LT licence: converting desktop OTFs can breach a foundry
    licence, and the kit may already exist. This is the last big lever on phone
    performance.
-6. ~~`wb2-rail-media` points three ways at once.~~ **Resolved 2026-08-11** — the
-   element and all three of its contradictory labels went with the rebuild.
+6. ~~`wb2-rail-media` points three ways at once.~~ ✅ Closed 2026-08-11.
 7. **The carousel is showing photographs, not reels** — and as of 2026-08-16
    nothing is blocking this any more. The reels are on R2 and the preview
    system exists, so a slide becomes a playing reel by adding **one
@@ -1306,19 +1307,16 @@ something starts reading media bytes from script.
 9. **The nine design pieces have no date**, and the archive shows them undated
    at the end of the run. Their PNGs carry no EXIF at all — this is checked,
    not missing. Either the agency supplies dates, or they stay as they are.
-10. ~~Five Drive videos never downloaded.~~ **Resolved 2026-08-16** — all six
-    are in. Five were recovered past the scan interstitial; `الف للتوكتوك` was
-    a dead Drive file and the agency supplied it by hand.
+10. ~~Five Drive videos never downloaded.~~ ✅ Closed 2026-08-16 — all six are
+    in; see _The six recovered films_.
 11. **~1.7 GB of originals are not on R2** — only the web derivatives the site
     serves. Two sets now: the 938 MB of camera originals from the first import,
     and the **762 MB of "new materials"** pulled on 2026-08-16. Say if the
     masters should be archived there too. ⚠️ Both live in **temp folders**
     Windows can clear, and the Drive is the only other copy. This is the
     outstanding item with an actual clock on it.
-12. ~~A custom domain for the media.~~ ✅ **Closed 2026-08-16** —
-    `media.aliphcreative.com` is live, all 89 objects verified over it, edge
-    caching confirmed, `r2.dev` switched off, and the repo change is deployed.
-    Nothing outstanding.
+12. ~~A custom domain for the media.~~ ✅ Closed 2026-08-16 —
+    `media.aliphcreative.com` is live and deployed; `r2.dev` is off.
 13. **The home page still serves its own images from the repo**, not R2 — they
     were already committed and working, and churning them buys nothing. The
     work page is the only R2 consumer. Worth unifying if one address is wanted.
@@ -1359,7 +1357,7 @@ something starts reading media bytes from script.
 
 ---
 
-## Real media — first trial done, and it did not fit
+## The Drive, and how media gets off it
 
 The Drive folder (`aliph website/`) holds `graphic designs`, `horizintal videos`,
 `pics` (~54 JPEGs, in 11 subject subfolders), `reels`. It resolves without signing
@@ -1401,11 +1399,9 @@ and Google has broken the hotlink patterns before. The pipeline is
 library for less than twice the weight of the fonts. Committed to
 `prototype/assets/media/`.
 
-⚠️ One Drive filename carried a **broken UTF-16 surrogate** and one console print
-killed the whole run. Sanitise names before printing: this box's console is
-cp1252 and cannot render Arabic at all — `.encode("ascii","replace")` any name
-before logging it, or the script dies with a `UnicodeEncodeError` that looks
-like a download failure and is not.
+⚠️ One Drive filename carried a **broken UTF-16 surrogate** and one console
+print killed the whole run — the first of the console-encoding failures written
+up in _Things that will bite you_.
 
 ⚠️ The design filenames came out as `copy-of-1`, `copy-of-2` because the slug
 function strips Arabic to nothing. They are renamed after their clients —
@@ -1435,40 +1431,33 @@ https://drive.google.com/thumbnail?id=<FILE_ID>&sz=w1600
 Load it in an `Image()` and read `naturalWidth`/`naturalHeight`. `sz=w1600` caps the
 long edge, so the *pixels* are a lower bound but the *ratio* is exact.
 
-Four files were pulled and trialled in the holders. **The design work does not
-crop.** Those assets are finished layouts with type baked in at 4:5 — every holder
-crops them (keeping 53–80%) and the crop cuts the words. (The second half of that
-finding has since expired: the site no longer grayscales, so Grillit's orange stays
-orange. **The crop is still fatal**, and it was always the bigger of the two.)
+⚠️ **The design work does not crop, and that is permanent.** Those assets are
+finished layouts with type baked in at 4:5; every fixed-aspect holder crops them
+(keeping 53–80%) and the crop cuts the words. It is the reason the archive is a
+column layout rather than a grid, and the reason no design work is on the film
+strip or in the carousel.
 
-So: the holders in لماذا ألِف؟ want **photographs**, and the design work needs its own
-slot at its own ratio. The Drive is organised by *subject*; the site needs *projects*
-with a title, date, service and cover. That mapping cannot be derived from the folder
-names — the studio has to supply it.
+The Drive is organised by *subject*; the site needs *projects* with a title,
+date, service and cover. That mapping cannot be derived from the folder names —
+the agency has to supply it.
 
-⚠️ **That paragraph is now half-expired.** The home page carries real photographs
-throughout — block 1's still, the carousel's eight slides and the gallery wall's
-nine tiles. `HOLDER` (an inline SVG data URI) is still what `setHolder()` paints
-when an item has no `src`, which is everything the **library and about pages**
-show. The `seed` fields on `PROJECTS` are dead data kept on purpose — they are the
-shopping list.
+The home page carries real photographs throughout. `HOLDER` (an inline SVG data
+URI) is what `setHolder()` paints when an item has no `src`, which is what the
+**ماذا نفعل؟ switcher and the about page** still show. The `seed` fields on
+`PROJECTS` are dead data kept on purpose — they are the shopping list.
 
-### The reel trial — it works, and it is deliberately not in the repo
+### Reels in the carousel — the treatment is proven
 
-A real reel was put in `wb2-rail-media` on 2026-08-10 and **the treatment holds**:
-1080×1920 H.264, 30.7s, autoplays muted and loops. `.holder > video` was already
-styled alongside `.holder > img`, so no CSS was needed. (It was trialled under the
-old grayscale grade and read correctly there too, for whatever that is now worth.)
+A real reel was trialled in a holder on 2026-08-10 and it read correctly:
+`.holder > video` is styled alongside `.holder > img`, so no CSS is needed. Every
+carousel slide is a true 9:16 now, so a reel plays uncropped.
 
-It was **never committed** — 51.8 MB, past GitHub's 50 MB warning and into every
-clone forever, for something that should be served by URL. `prototype/media/` is
-gitignored and is now **empty**; that reel lives on R2 as
-`video/reels-finallllllllllll.mp4` like the rest.
+⚠️ **No video belongs in the repo.** That trial reel was 51.8 MB — past GitHub's
+50 MB warning and into every clone forever, for something that should be served
+by URL. `prototype/media/` is gitignored and empty; video lives on R2.
 
-⚠️ **The 9/13 crop is fixed** — the holder that caused it is gone and every
-carousel slide is a true 9:16, so a reel now plays uncropped. **The burnt-in
-titles are still there**, and with the figcaption gone they no longer collide with
-anything, but they will still read as part of the page rather than part of the film.
+⚠️ **The reels have burnt-in titles.** They no longer collide with anything, but
+they will read as part of the page rather than part of the film.
 
 ### Decided 2026-08-10: video lives on R2 — refined 2026-08-16
 
@@ -1524,12 +1513,6 @@ in the session scratchpad and on R2; the directory stays gitignored.
 `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-9.0-full_build\bin\ffmpeg.exe`
 — call it by full path rather than concluding it is missing.
 
-⚠️ Two harmless differences that will show up if you diff the files and should not
-be mistaken for quality loss: the `.mp4` is **8 KB larger** (the relocated index
-needs 32-bit offsets), and **3 of 1477 audio packets** differ where ffmpeg
-re-split the last ~0.07s into uniform 1024-sample packets. Total sample count is
-identical and the reel plays muted anyway.
-
 ⚠️ **A rail loop and a showcase piece are different assets.** The rail box is
 474×685 CSS px; a 1080×1920 master is downscaled by the browser to fill it, so the
 extra pixels cost bandwidth and are never seen *in that slot*. That is an argument
@@ -1541,11 +1524,11 @@ opened full-screen, the master has to be there too.
 Before blaming markup for a video that will not play, check the container:
 
 ```bash
-python -c "import struct;d=open('prototype/media/wb2-rail-reel.mov','rb').read();i=0
+python -c "import struct,sys;d=open(sys.argv[1],'rb').read();i=0
 while i+8<=len(d):
     s,t=struct.unpack('>I',d[i:i+4])[0],d[i+4:i+8].decode('latin1');print(t,s)
     i+=s if s>=8 else len(d)
-print('bytes',len(d),'moov at',d.find(b'moov'))"
+print('bytes',len(d),'moov at',d.find(b'moov'))" <file>
 ```
 
 That is how a **truncated** copy was caught here: an interrupted copy left 9,354,776
@@ -1573,8 +1556,9 @@ output.
 | `extract.py` | Pulls the wireframe's colour-coded boxes out as percentages of the page column. |
 
 ⚠️ Several of these **overwrite their output in place**. Back the file up before
-rerunning, and check the result's mode and size — a film file near 145 KB has lost
-its alpha.
+rerunning, and check the result's **mode** — a film tile that is not `RGBA` has
+lost its sprocket holes. Do not judge that by file size; see _Things that will
+bite you_.
 
 The list above is the whole of `resources/*.py`. Two superseded scripts were deleted
 on 2026-08-09 — `fit.py` (targeted grids block 2 no longer has; `fit_columns.py`
