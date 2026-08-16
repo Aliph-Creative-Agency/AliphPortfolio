@@ -107,6 +107,17 @@ npx.cmd wrangler deploy
 - Wrangler often says *"No updated asset files to upload"* even when files changed.
   It dedupes by content hash and the deploy is still correct — verify by fetching
   the live file and diffing, not by trusting the message.
+- ⚠️ **Verify with a cache-buster, and compare BYTES.** Straight after a deploy
+  the custom domain can still serve the previous copy of an asset for a minute
+  or two while `workers.dev` already has the new one — measured on 2026-08-16,
+  `film-m.webp` came back 264,986 bytes on `aliphcreative.com` and 42,086 on
+  `workers.dev`, which looks exactly like a half-finished deploy. Appending
+  `?v=<timestamp>` shows the true origin. Assets are `max-age=0,
+  must-revalidate`, so it clears itself; there is nothing to purge.
+- ⚠️ **Do not grep live Arabic through Git Bash.** The shell mangles the
+  pattern and every match comes back empty, which reads as "the copy did not
+  deploy". Fetch in Python and test with `in`. This box's cp1252 console has
+  now produced three different false failures — see _Things that will bite you_.
 
 ---
 
@@ -206,6 +217,16 @@ User-Agent. It looks exactly like "public access is disabled", and it sent a
 round of diagnosis into settings that were already correct. Real failures are
 usually partial; send the same headers the real consumer sends, and keep a
 known-good probe object to test the checker itself.
+
+**This box's console is cp1252 and it has produced three different false
+failures.** It cannot render Arabic at all, and each time the symptom looked
+like something else entirely: a `print()` of a Drive filename killed a download
+run with a `UnicodeEncodeError` that read as a failed fetch; a folder listing
+died mid-parse on a directional-isolate character; and grepping the live site
+for Arabic through Git Bash returned empty for every string, which read as "the
+copy never deployed" when it had. **Sanitise before printing**
+(`.encode("ascii","replace")`), and when checking text that contains Arabic,
+read it in Python and test with `in` rather than piping it through the shell.
 
 **Model-generated data is plausible in every local detail and still wrong.** A
 70-row table read out of file metadata was retyped from a truncated terminal
@@ -1268,14 +1289,16 @@ something starts reading media bytes from script.
    performance.
 6. ~~`wb2-rail-media` points three ways at once.~~ **Resolved 2026-08-11** — the
    element and all three of its contradictory labels went with the rebuild.
-7. **The carousel is showing photographs, not reels.** It is built for 9:16 video
-   and the agency has reels; they are on R2's side of the line, so the eight
-   slides are portrait photographs at 2:3 cropped ~16% on the width. Landing the
-   real reels is a `src` change per slide, nothing more — edit the **eight slides
-   in `index.html`**, never the clones, which are built from them at runtime.
+7. **The carousel is showing photographs, not reels** — and as of 2026-08-16
+   nothing is blocking this any more. The reels are on R2 and the preview
+   system exists, so a slide becomes a playing reel by adding **one
+   `data-preview` attribute**; it plays only while centred, and clicking opens
+   the lightbox at the frame it had reached. Edit the **eight slides in
+   `index.html`**, never the clones, which are built from them at runtime.
    ⚠️ Three of the eight (`portraits-46/47/48`) are frames from one session and
-   read as near-duplicates, which is most visible at the wrap where 6 and 0 flank
-   7 together. Worth swapping when the reels land.
+   read as near-duplicates, most visible at the wrap where 6 and 0 flank 7
+   together. Worth swapping at the same time.
+   **This is the highest-value thing that can be done without asking anyone.**
 8. **Which work goes on the gallery wall?** The twelve tiles are a curated
    composition, not a feed — the shapes are fixed and the pictures were chosen to
    fill them. Swapping a photograph is one `src`; changing how many there are
@@ -1286,29 +1309,53 @@ something starts reading media bytes from script.
 10. ~~Five Drive videos never downloaded.~~ **Resolved 2026-08-16** — all six
     are in. Five were recovered past the scan interstitial; `الف للتوكتوك` was
     a dead Drive file and the agency supplied it by hand.
-11. **The 938 MB of camera originals are not on R2** — only the web
-    derivatives the site serves. Say if the masters should be archived there
-    too. ⚠️ They live in a **temp folder** that Windows can clear; the Drive is
-    the only other copy.
-12. ~~A custom domain for the media.~~ **Resolved 2026-08-16** —
+11. **~1.7 GB of originals are not on R2** — only the web derivatives the site
+    serves. Two sets now: the 938 MB of camera originals from the first import,
+    and the **762 MB of "new materials"** pulled on 2026-08-16. Say if the
+    masters should be archived there too. ⚠️ Both live in **temp folders**
+    Windows can clear, and the Drive is the only other copy. This is the
+    outstanding item with an actual clock on it.
+12. ~~A custom domain for the media.~~ ✅ **Closed 2026-08-16** —
     `media.aliphcreative.com` is live, all 89 objects verified over it, edge
-    caching confirmed, and `r2.dev` is switched off. Only the deploy is
-    outstanding.
+    caching confirmed, `r2.dev` switched off, and the repo change is deployed.
+    Nothing outstanding.
 13. **The home page still serves its own images from the repo**, not R2 — they
     were already committed and working, and churning them buys nothing. The
     work page is the only R2 consumer. Worth unifying if one address is wanted.
     ⚠️ This is now also what kept the home page working while `r2.dev` went
     dark: only the work page broke.
-14. **Do the tech projects get real content?** Four entries and their
-    screenshots are invented, and they are now on the work page behind a
-    profile sheet that presents them as real. Needs titles, dates, write-ups
-    and actual screenshots — or the section comes back off.
+14. 🔴 **Do the tech projects get real content?** Four entries and their grey
+    screenshots are invented, and since 2026-08-16 they are **live and public**
+    on the work page, behind a profile sheet that presents them as real. The
+    agency was told twice before the deploy and chose to ship. Needs titles,
+    dates, write-ups and actual screenshots — or the section comes back off.
+    ⚠️ Nothing else on the site is fabricated any more, which makes this the
+    single remaining piece of invented content, and it is the loudest one.
 15. **Does the whole-site paper texture ship?** Built and switchable at
     `?paper=1`, deliberately not enabled. The hero panel and the two banner
     headlines carry it either way.
 16. **`master/horizontal-maqasid.mp4` is not in the bucket.** 384 MiB against
     wrangler's 300 MiB single-upload cap; needs a dashboard drag-and-drop. The
     web version is up and playing, so nothing is broken meanwhile.
+17. 🔴 **The carousel stutters on a Galaxy A54 in Brave, and nothing measurable
+    reproduces it.** Everything checkable is clean — the wrap moves the picture
+    0.25px, steps are monotone with zero overshoot, no drift at rest, no long
+    frames even at 6× CPU throttle, and the decoded-texture figure is a
+    reasonable 13.6 MP. **The one untested suspect is the linen**: a
+    viewport-sized fixed layer with `mix-blend-mode: multiply` above
+    everything, which a phone GPU cannot composite as a plain layer.
+    ⚠️ **The next step is one page load, not more code.** Open any page with
+    **`?flat=1`** on the affected phone and scroll the carousel: it drops the
+    blend at matched apparent strength, so only the cost differs. Stutter goes
+    → the blend is the cause. Stutter stays → the linen is ruled out and the
+    hunt moves on. Do not start rewriting the carousel before this is answered;
+    a previous round already built a fix for a defect that did not exist.
+18. **Which of the 47 "new materials" objects belong on the site?** They are
+    uploaded and verified but referenced by nothing: 19 BTS clips, 6 stills,
+    2 posters at 4:5, and a 65s montage. `MEDIA` in `main.js` is generated and
+    was not regenerated, so the work page does not know about them. The three
+    preview slots (gallery wall 2/10/12) are also still waiting on a choice of
+    clip.
 
 ---
 
