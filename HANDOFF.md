@@ -2,27 +2,30 @@
 
 _Updated 2026-08-16. Read this first._
 
-> ## 🟡 State on 2026-08-16: uncommitted work in the tree, NOT pushed, NOT deployed
+> ## 🟢 State on 2026-08-16: committed, pushed, and DEPLOYED
 >
-> `5a5a0d3` — lightbox, the tech section back, six recovered films, horizontal
-> button swap, the nav close animation, and the paper texture — is committed.
-> On top of it sits a large body of **uncommitted work**: the custom-domain
-> switch, the oval button fix, the boss's real copy, the service rename, the
-> new DaVinci film strip and its emulsion wash, the linen and scroll-gap fixes,
-> the footer wordmark, the about page's service repetition removed, and the
-> inline-preview system. See _Session 2026-08-16 (second round)_.
+> `5d53d5c` — the boss's copy, the service rename, the new DaVinci film strip
+> and its emulsion wash, the linen and scroll-gap fixes, the footer wordmark,
+> the about page's service repetition removed, and the inline-preview system —
+> is on `main`, pushed, and live. See _Session 2026-08-16 (second round)_.
 >
-> **The agency asked to hold the deploy until the current batch of work is
-> finished.** That decision is why the live media outage below is still open.
+> **Verified live, not assumed**: every changed asset compared byte-for-byte
+> against the local copy on both hosts, and three pages loaded in a real
+> browser with **0 console errors, 0 4xx and 0 broken images**. The work page
+> pulls from `media.aliphcreative.com` again — ⚠️ that outage is over.
 >
-> The previous round (`042a402` — phone centring, the dark wall, the media
-> archive) **is** pushed and live. Deploy is not automatic: `npx.cmd wrangler
-> deploy` from the repo root, and pushing to GitHub does nothing.
+> ⚠️ **Right after a deploy the custom domain can serve stale assets for a
+> minute or two** — `film-m.webp` and `film-grain.webp` came back at their old
+> lengths on `aliphcreative.com` while `workers.dev` already had the new ones.
+> It resolves itself (assets are `max-age=0, must-revalidate`); a cache-buster
+> query shows the true origin if you need to check during that window.
 >
-> 🔴 **`film-grain.webp` and `film-grain-m.webp` are referenced by COMMITTED
-> CSS three times and are not tracked by git.** They sit untracked in the
-> working copy, so `5a5a0d3` on its own ships an emulsion overlay pointing at
-> nothing. Commit them with the film-strip work.
+> Deploy is not automatic: `npx.cmd wrangler deploy` from the repo root, and
+> pushing to GitHub does nothing.
+>
+> 🔴 **The four tech projects and their grey screenshots are now PUBLIC.** The
+> agency was told twice and chose to ship. They remain the most visible piece
+> of invented content on the site — see open question 14.
 >
 > ✅ **R2 carries the media, on `media.aliphcreative.com` since 2026-08-16.**
 > Bucket `aliph-media` on the agency's account, base URL
