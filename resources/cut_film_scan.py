@@ -46,6 +46,27 @@ def runs(mask):
     return list(zip(np.where(d == 1)[0], np.where(d == -1)[0]))
 
 
+def grow(prof, s, e, floor=0.01, pad=2):
+    """Widen a band outward to where the signal actually dies.
+
+    ⚠️ A coverage threshold high enough to IDENTIFY a perforation band is far
+    too high to DELIMIT one. A sprocket hole has rounded corners, so its first
+    and last rows are only a few percent bright — measured, the top band reads
+    37..216 at the 0.25 that finds it and 31..221 where it truly ends. Those
+    ten rows are the whole bug this function exists to stop: left outside the
+    band they stay opaque AND bright, and because the edge-print rebuild below
+    takes everything above the band as "margin", it tiled those bright
+    hole-tops across the full width at the patch's period instead of the
+    hole's — a row of pale crescents in the GAPS between the holes, along both
+    long edges. Identify at 0.25, delimit here.
+    """
+    while s > 0 and prof[s - 1] > floor:
+        s -= 1
+    while e < len(prof) and prof[e] > floor:
+        e += 1
+    return max(0, s - pad), min(len(prof), e + pad)
+
+
 def main():
     im = Image.open(SRC).convert("RGB")
     a = np.asarray(im).astype(np.float32)
@@ -81,9 +102,11 @@ def main():
     # A hole is bright AND inside one of the two perforation bands. Keying on
     # brightness alone would also punch the white edge-print highlights.
     bright = cl > HOLE_THRESH
-    bands = [(s, e) for s, e in runs(bright.mean(1) > 0.25) if e - s > 50]
+    rowprof = bright.mean(1)
+    bands = [(s, e) for s, e in runs(rowprof > 0.25) if e - s > 50]
     assert len(bands) == 2, "expected 2 perforation bands, found %d" % len(bands)
-    print("perf bands      rows %s" % (bands,))
+    bands = [grow(rowprof, s, e) for s, e in bands]
+    print("perf bands      rows %s (grown to the holes' true extent)" % (bands,))
 
     alpha = np.full((ch, cw), 255, np.uint8)
     for s, e in bands:
@@ -107,6 +130,13 @@ def main():
         if bot - top < 8:
             continue
         seg = cl[top:bot, :]
+        # ⚠️ Nothing bright may reach this point. A margin band is plain film
+        # base; anything above HOLE_THRESH in it is a hole corner that the band
+        # above failed to claim, and the tile below is about to smear it across
+        # the full width at the wrong period. Fail here rather than ship it.
+        assert (seg > HOLE_THRESH).mean() < 0.001, \
+            "edge band %d..%d still holds %.2f%% hole pixels — grow() under-reached" \
+            % (top, bot, 100 * (seg > HOLE_THRESH).mean())
         ink = (seg < 40).mean(0) > 0.04
         clean = [(s, e) for s, e in runs(~ink) if e - s > 200]
         assert clean, "no text-free stretch found in edge band %d..%d" % (top, bot)
