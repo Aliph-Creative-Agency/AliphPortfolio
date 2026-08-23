@@ -37,6 +37,22 @@
     <a href="library.html" class="nav-item" data-i18n="navWork">الأعمال</a>
     <a href="about.html" class="nav-item" data-i18n="navAbout">من نحن</a>
   </nav>
+  <!-- The one action the menu was missing. It lives between the pages and the
+       socials because it is neither: a destination on whatever page you are
+       already on, which is why it is a bare #contact and works from all three.
+       main.js closes the overlay behind it — a same-page anchor does not
+       navigate, so without that the panel would stay over the footer it just
+       scrolled to. -->
+  <a class="oval-btn nav-cta" id="navContact" href="#contact">
+    <span class="oval-swap">
+      <span class="ob-face ob-label" data-i18n="ctaContact">تواصل معنا</span>
+      <span class="ob-face ob-arrow" aria-hidden="true">
+        <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+        </svg>
+      </span>
+    </span>
+  </a>
   <div class="nav-foot">
     <!-- Real accounts as of 2026-08-10. BEHANCE was a placeholder; the agency
          does not have one. rel="noopener" on every external target=_blank. -->
@@ -83,20 +99,36 @@
         </span>
         <p data-i18n="heroPara">لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.</p>
       </div>
-      <!-- Two rows so the phone can break the line between the place and the
-           services. `.hm-row` is display:contents above 640px, so the desktop
-           flex line is exactly what it was; on a phone each row takes a full
-           basis and the seam dot between them is dropped. -->
-      <div class="hero-meta">
-        <span class="hm-row">
-          <span data-i18n="heroMeta1">منذ ٢٠٢٦</span>
-          <span class="dot" aria-hidden="true">·</span>
-          <span data-i18n="heroMeta2">القدس — جبل الزيتون</span>
-        </span>
-        <span class="dot hm-seam" aria-hidden="true">·</span>
-        <span class="hm-row">
-          <span data-i18n="heroMeta3">تصميم جرافيكي · صناعة محتوى · حلول تقنية وبرمجية</span>
-        </span>
+      <!-- Two ways out of the hero: on down through the page, or straight to
+           the people. This replaced the meta line — منذ ٢٠٢٦ · القدس — جبل
+           الزيتون · the three services — and nothing went with it that was
+           said only there: the place is in the footer's contact table and the
+           three services are the section below.
+
+           ⚠️ Both are plain anchors. `scroll-behavior: smooth` is already on
+           html and is already dropped under prefers-reduced-motion, so a
+           scripted scroll here would only be a second, worse copy of that. -->
+      <div class="hero-cta">
+        <a class="oval-btn is-solid" href="#why">
+          <span class="oval-swap">
+            <span class="ob-face ob-label" data-i18n="ctaStart">ابدأ من هنا</span>
+            <span class="ob-face ob-arrow" aria-hidden="true">
+              <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+              </svg>
+            </span>
+          </span>
+        </a>
+        <a class="oval-btn" href="#contact">
+          <span class="oval-swap">
+            <span class="ob-face ob-label" data-i18n="ctaContact">تواصل معنا</span>
+            <span class="ob-face ob-arrow" aria-hidden="true">
+              <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+              </svg>
+            </span>
+          </span>
+        </a>
       </div>
     </div>
   </div>
@@ -123,8 +155,8 @@
          Drive — photography is 3:2 either way up — and the caption calls it a
          shoot, so it is a still. -->
     <figure class="holder wb1-media" data-kind="still">
-          <img src="assets/media/pics-Interactive-36-dsc02566.webp" alt="" loading="lazy" decoding="async">
-        </figure>
+      <img src="assets/media/pics-Queen-retreat-55-copy-of-0c2a0240.webp" alt="" loading="lazy" decoding="async">
+    </figure>
   </article>
 
   <hr class="splitter">
@@ -149,45 +181,54 @@
     <div class="reelshow" id="reelShow">
       <div class="reelshow-track" id="reelTrack">
         <div class="reel-slide">
-          <figure class="holder" data-kind="reel">
-            <img src="assets/media/pics-portraits-46-2j6a5679.webp" alt="" loading="lazy" decoding="async">
+          <figure class="holder" data-kind="reel"
+                  data-preview="https://media.aliphcreative.com/video/reels-alif-tuktuk.mp4">
+            <img src="assets/media/reels-alif-tuktuk.webp" alt="" loading="lazy" decoding="async">
           </figure>
         </div>
         <div class="reel-slide">
-          <figure class="holder" data-kind="reel">
-            <img src="assets/media/pics-food-14-dsc00666.webp" alt="" loading="lazy" decoding="async">
+          <figure class="holder" data-kind="reel"
+                  data-preview="https://media.aliphcreative.com/video/reels-connect-edited.mp4">
+            <img src="assets/media/reels-connect-edited.webp" alt="" loading="lazy" decoding="async">
           </figure>
         </div>
         <div class="reel-slide">
-          <figure class="holder" data-kind="reel">
-            <img src="assets/media/pics-Queen-retreat-52-copy-of-0c2a0144.webp" alt="" loading="lazy" decoding="async">
+          <figure class="holder" data-kind="reel"
+                  data-preview="https://media.aliphcreative.com/video/reels-child-section-final.mp4">
+            <img src="assets/media/reels-child-section-final.webp" alt="" loading="lazy" decoding="async">
           </figure>
         </div>
         <div class="reel-slide">
-          <figure class="holder" data-kind="reel">
-            <img src="assets/media/pics-portraits-47-2j6a5684.webp" alt="" loading="lazy" decoding="async">
+          <figure class="holder" data-kind="reel"
+                  data-preview="https://media.aliphcreative.com/video/reels-einar-edited.mp4">
+            <img src="assets/media/reels-einar-edited.webp" alt="" loading="lazy" decoding="async">
           </figure>
         </div>
         <div class="reel-slide">
-          <figure class="holder" data-kind="reel">
-            <img src="assets/media/pics-food-17-dsc00763.webp" alt="" loading="lazy" decoding="async">
+          <figure class="holder" data-kind="reel"
+                  data-preview="https://media.aliphcreative.com/video/reels-dardashat.mp4">
+            <img src="assets/media/reels-dardashat.webp" alt="" loading="lazy" decoding="async">
           </figure>
         </div>
         <div class="reel-slide">
-          <figure class="holder" data-kind="reel">
-            <img src="assets/media/pics-Queen-retreat-58-copy-of-0c2a9810.webp" alt="" loading="lazy" decoding="async">
+          <figure class="holder" data-kind="reel"
+                  data-preview="https://media.aliphcreative.com/video/reels-copy-of-bader-4.mp4">
+            <img src="assets/media/reels-copy-of-bader-4.webp" alt="" loading="lazy" decoding="async">
           </figure>
         </div>
         <div class="reel-slide">
-          <figure class="holder" data-kind="reel">
-            <img src="assets/media/pics-portraits-48-2j6a5694.webp" alt="" loading="lazy" decoding="async">
+          <figure class="holder" data-kind="reel"
+                  data-preview="https://media.aliphcreative.com/video/reels-finallllllllllll.mp4">
+            <img src="assets/media/reels-finallllllllllll.webp" alt="" loading="lazy" decoding="async">
           </figure>
         </div>
         <div class="reel-slide">
-          <figure class="holder" data-kind="reel">
-            <img src="assets/media/pics-food-24-dsc03667.webp" alt="" loading="lazy" decoding="async">
+          <figure class="holder" data-kind="reel"
+                  data-preview="https://media.aliphcreative.com/video/reels-draft2-show.mp4">
+            <img src="assets/media/reels-draft2-show.webp" alt="" loading="lazy" decoding="async">
           </figure>
         </div>
+      
       </div>
 
       <!-- Bare chevrons, drawn pointing the way they point in LTR. The pair is
@@ -300,68 +341,67 @@
 
 </section>
 
-<!-- ══════════ WHAT WE DO — service picker + example switcher ══════════
-     Three services as one dot-separated line; the arrows step through the
-     selected service's subcategories, and the column beside the stage speaks
-     about the category and the subcategory together. -->
+<!-- ══════════ WHAT WE DO — the service rings ══════════
+     One service at a time; its work orbits a mark that stands for the service.
+     The item facing you grows and its line appears under the ring. Clicking it
+     brings it round to the front; clicking the one already at the front opens
+     that piece on the work page.
+
+     The three rings are stacked vertically inside one window and the stack
+     slides — picking a service scrolls to its ring rather than repainting one
+     stage, so the services read as three rooms rather than one changing wall.
+
+     ⚠️ TWO controls for one state, and neither is a spare. On a phone the
+     service is named between two arrows above the ring (2026-08-23: the agency
+     asked for that layout to stay); on a desktop the three are a stacked list
+     beside it with the current one underlined. CSS shows one at a time and
+     both call the same go(), so there is one implementation, not two.
+
+     ⚠️ The stages are BUILT IN main.js, not written here. Each ring's items,
+     their ratios and their angles are computed from the media, and an item's
+     size comes from its own aspect — see serviceRings. -->
 <div class="banner"><h2 data-i18n="svcBanner">ماذا نفعل؟</h2></div>
 
 <section class="services" id="services">
-  <div class="svc-picks" role="tablist" aria-label="الخدمات">
-    <button class="svc-pick is-active" role="tab" aria-selected="true" data-service="design">
-      <span data-i18n="svc1">تصميم جرافيكي</span>
+  <div class="svc-head">
+    <button class="svc-arrow svc-prev" id="svcPrev" type="button">
+      <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 1 2 11l7 10"/>
+      </svg>
+      <span class="sr-only" data-i18n="svcPrev">الخدمة السابقة</span>
     </button>
-    <span class="svc-dot" aria-hidden="true">·</span>
-    <button class="svc-pick" role="tab" aria-selected="false" data-service="photo">
-      <span data-i18n="svc2">صناعة محتوى</span>
-    </button>
-    <span class="svc-dot" aria-hidden="true">·</span>
-    <button class="svc-pick" role="tab" aria-selected="false" data-service="tech">
-      <span data-i18n="svc3">حلول تقنية وبرمجية</span>
+    <h3 class="svc-name" id="svcName">تصميم جرافيكي</h3>
+    <button class="svc-arrow svc-next" id="svcNext" type="button">
+      <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 1l7 10-7 10"/>
+      </svg>
+      <span class="sr-only" data-i18n="svcNext">الخدمة التالية</span>
     </button>
   </div>
 
-  <div class="svc-demo">
-    <div class="sw-text">
-      <h3 class="sw-name" id="swName">شعارات</h3>
-      <p class="sw-desc" id="swDesc"></p>
-      <div class="sw-foot">
-        <span class="sw-index sr-only">
-          <b id="swIndex">٠١</b><i>/</i><span id="swTotal">٠٣</span>
+  <div class="ring-window" id="ringWindow">
+    <div class="ring-reel" id="ringReel"><!-- three .ring-stage, built in main.js --></div>
+  </div>
+
+  <!-- built in main.js from SERVICES: anything that names or counts the
+       services has to derive it, or it goes stale at the next rename -->
+  <nav class="svc-list" id="svcList" aria-label="الخدمات"></nav>
+
+  <p class="ring-desc" id="ringDesc"></p>
+
+  <div class="ring-foot">
+    <a class="oval-btn" href="library.html">
+      <span class="oval-swap">
+        <span class="ob-face ob-label" data-i18n="btnWork">كل الأعمال</span>
+        <span class="ob-face ob-arrow" aria-hidden="true">
+          <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+          </svg>
         </span>
-        <a class="oval-btn" href="library.html">
-          <span class="oval-swap">
-            <span class="ob-face ob-label" data-i18n="btnWork">كل الأعمال</span>
-            <span class="ob-face ob-arrow" aria-hidden="true">
-              <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
-              </svg>
-            </span>
-          </span>
-        </a>
-      </div>
-    </div>
-    <figure class="sw-stage" id="swStage">
-      <div class="sw-media" id="swMedia"></div>
-
-      <button class="sw-arrow sw-prev" id="swPrev" type="button">
-        <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9 1 2 11l7 10"/>
-        </svg>
-        <span class="sr-only" data-i18n="swPrev">المثال السابق</span>
-      </button>
-      <button class="sw-arrow sw-next" id="swNext" type="button">
-        <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 1l7 10-7 10"/>
-        </svg>
-        <span class="sr-only" data-i18n="swNext">المثال التالي</span>
-      </button>
-
-      <span class="sw-bar" aria-hidden="true"></span>
-    </figure>
-
+      </span>
+    </a>
   </div>
 </section>
 

@@ -21,50 +21,6 @@ const HOLDER =
 /* Paint one holder. The sections carry work in four formats — film, reel,
    poster, still — so a holder can become a <video> as well as an <img>.
 
-   Video never preloads and only plays on screen: the Drive's horizontal
-   videos are 55–384 MB and four autoplaying would undo every phone fix. */
-function setHolder(box, item) {
-  if (!box) return;
-  const poster = (item && item.src) || HOLDER;
-
-  if (item && item.video) {
-    let v = box.querySelector("video");
-    if (!v) {
-      box.textContent = "";
-      v = document.createElement("video");
-      v.muted = true;
-      v.loop = true;
-      v.playsInline = true;
-      v.preload = "none";
-      box.appendChild(v);
-      playWhenVisible(v);
-    }
-    if (v.dataset.src !== item.video) {
-      v.dataset.src = item.video;
-      v.poster = poster;
-      v.src = item.video;
-    }
-    return;
-  }
-
-  let img = box.querySelector("img");
-  if (!img) {
-    box.textContent = "";
-    img = document.createElement("img");
-    img.alt = "";
-    box.appendChild(img);
-  }
-  if (img.getAttribute("src") !== poster) img.src = poster;
-}
-
-function playWhenVisible(v) {
-  if (!window.IntersectionObserver) return;
-  new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !prefersReduced) v.play().catch(() => { });
-    else v.pause();
-  }, { rootMargin: "100px" }).observe(v);
-}
-
 /* ══════════ i18n ══════════ */
 const I18N = {
   navHome: { ar: "الرئيسيّة", en: "Home" },
@@ -86,14 +42,16 @@ const I18N = {
   /* the dropcap letter is baked into the sprite; this is what screen
      readers get */
   dropLetter: { ar: "أ", en: "A" },
-  /* ⚠️ ٢٠٢٦, not ٢٠٢٤. The agency kept 2024 deliberately on 2026-08-10 while
-     deleting the founding year from the about copy; the boss's 2026-08-16 doc
-     writes 2026 and was taken as the newer instruction. */
-  heroMeta1: { ar: "منذ ٢٠٢٦", en: "Since 2026" },
-  heroMeta2: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
-  /* heroMeta3 is assigned below, derived from CATS — the literal that used to
-     sit here was dead (overwritten at boot) and still carried the pre-rename
-     short labels. A second copy of this list has gone stale twice already. */
+  /* The hero's two buttons. `ctaStart` is a scroll down the page, not a
+     link off it, and it echoes the headline above it deliberately —
+     نبدأ من حيث تبدأ الأشياء, so the way in is ابدأ من هنا.
+
+     They replaced heroMeta1/2/3 (منذ ٢٠٢٦ · the place · the three services).
+     ⚠️ The founding year is now stated NOWHERE on the site — about.html
+     says ٢٠٢٤ in its own facts table, which contradicted this line for
+     two weeks. Worth settling before it goes back anywhere. */
+  ctaStart: { ar: "ابدأ من هنا", en: "Start here" },
+  ctaContact: { ar: "تواصل معنا", en: "Get in touch" },
   btnWork: { ar: "كل الأعمال", en: "ALL WORK" },
   btnAbout: { ar: "تعرّف على ألِف", en: "Get to know Aliph" },
 
@@ -104,8 +62,9 @@ const I18N = {
   svc3: { ar: "حلول تقنية وبرمجية", en: "Tech & Software Solutions" },
 
   /* the example switcher under "what we do" */
-  swPrev: { ar: "المثال السابق", en: "Previous example" },
-  swNext: { ar: "المثال التالي", en: "Next example" },
+  svcPrev: { ar: "الخدمة السابقة", en: "Previous service" },
+  svcNext: { ar: "الخدمة التالية", en: "Next service" },
+  svcList: { ar: "الخدمات", en: "Services" },
   reelPrev: { ar: "الوسيط السابق", en: "Previous item" },
   reelNext: { ar: "الوسيط التالي", en: "Next item" },
 
@@ -164,20 +123,17 @@ const I18N = {
 
   /* project profile sheet */
   pfOpen: { ar: "افتح الملف", en: "Open profile" },
-  pfDetails: { ar: "التفاصيل", en: "Details" },
   pfShots: { ar: "لقطات", en: "Screenshots" },
   pfAbout: { ar: "عن المشروع", en: "About this project" },
   pfClose: { ar: "إغلاق", en: "Close" },
-  pfPreview: { ar: "معاينة الموقع", en: "Open live preview" },
-  pfPreviewNote: {
-    ar: "نسخة معاينة — لا تُجمع أيّ بيانات ولا تُرسل أيّ استمارة.",
-    en: "Preview build — no data is collected and no form is submitted.",
-  },
-  pfService: { ar: "الخدمة", en: "Service" },
-  pfDate: { ar: "التاريخ", en: "Date" },
-  cap1: { ar: "من جلسة تصوير — البلدة القديمة", en: "From a shoot — the Old City" },
-  cap2: { ar: "وراء الكواليس — تجهيز فعاليّة", en: "Behind the scenes — event setup" },
-  cap3: { ar: "نقاش تصميم — الوكالة", en: "Design discussion — the agency" },
+  /* Was pfPreview/pfPreviewNote — "preview build, no data is collected", which
+     described a sandboxed iframe around a mock. The projects are real and live
+     now, so the button leaves for the actual site and the note under it is the
+     address it leaves for. */
+  pfVisit: { ar: "زيارة الموقع", en: "Visit the site" },
+  cap1: { ar: "من موقع التصوير", en: "On location" },
+  cap2: { ar: "خلف الكاميرا", en: "Behind the camera" },
+  cap3: { ar: "تجهيز اللقطة", en: "Setting up the shot" },
   quote: {
     ar: "«النتيجة يجب أن تبدو حتميّة: راسخة، مدروسة، وذات شخصيّة لا تُخطئها العين.»",
     en: "“The result should feel inevitable: rooted, considered, with a personality the eye can't miss.”",
@@ -209,14 +165,6 @@ const I18N = {
     ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف.",
     en: "We don't hand over a logo and walk away. We hand over a system that knows how to behave.",
   },
-  abFact1k: { ar: "التأسيس", en: "Founded" },
-  abFact1v: { ar: "٢٠٢٤", en: "2024" },
-  abFact2k: { ar: "المقرّ", en: "Based in" },
-  abFact2v: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
-  abFact3k: { ar: "اللغات", en: "Languages" },
-  abFact3v: { ar: "عربي / إنجليزي", en: "Arabic / English" },
-  abFact4k: { ar: "الخدمات", en: "Services" },
-  abFact4v: { ar: "ثلاث", en: "Three" },
 
   svcAboutBanner: { ar: "ماذا نقدّم؟", en: "What we offer" },
   abWhat: { ar: "ما نفعله", en: "What we do" },
@@ -279,16 +227,6 @@ const CATS = [
   { id: "photo", ar: "صناعة محتوى", en: "Media Production" },
   { id: "tech", ar: "حلول تقنية وبرمجية", en: "Tech & Software Solutions" },
 ];
-
-/* The hero's third meta slot lists what the agency does, and a typed copy of
-   that list has now gone stale twice: it still read "هويّات · تسويق ·
-   فعاليّات · تقنيّة" — the FOUR services retired on 2026-08-08 — and the JS
-   fallback beside it still had the pre-rename short labels. Derived, so the
-   taxonomy is the only place this can be changed. */
-I18N.heroMeta3 = {
-  ar: CATS.filter((c) => c.id !== "all").map((c) => c.ar).join(" · "),
-  en: CATS.filter((c) => c.id !== "all").map((c) => c.en).join(" · "),
-};
 
 /* The example switcher steps through these subcategories, not through
    projects. `desc` speaks about the category and subcategory together. */
@@ -396,6 +334,14 @@ const SUBCATS = {
    which is why this page sizes from the ratio instead of forcing a grid. */
 const R2 = "https://media.aliphcreative.com";
 const MEDIA = [
+  /* «حقك تعرف حقك» for مكاتب خدمات الرفاه الاجتماعي — القدس, imported
+     2026-08-23 from 4500x5625 masters (resources/import_bts.py).
+     ⚠️ img/design-newmat-27 and -28 on the bucket are two of these three at
+     1280px, from the 2026-08-16 import; these supersede them and the old keys
+     are referenced by nothing. */
+  { f: "design-haqqak-1.webp", c: "design", r: 0.8, d: null },
+  { f: "design-haqqak-2.webp", c: "design", r: 0.8, d: null },
+  { f: "design-haqqak-3.webp", c: "design", r: 0.8, d: null },
   { f: "design-grillit-1.webp", c: "design", r: 0.8, d: null },
   { f: "design-grillit-2.webp", c: "design", r: 0.8, d: null },
   { f: "design-grillit-3.webp", c: "design", r: 0.8, d: null },
@@ -491,235 +437,73 @@ const MEDIA = [
   { f: "horizontal-tone-colored.mp4", c: "photo", r: 1.7778, d: "2026-02-08", v: 1, p: "horizontal-tone-colored.webp" },
 ];
 
-/* `date` is "YYYY-MM"; the archive is one continuous run, newest first,
-   with no year sections and no piece counts. A `profile` is what opens the
-   preview sheet — any project given one gets the sheet. */
+/* ══════════ the software work ══════════
+   Three real projects, all three live, all three built by the agency. This
+   array replaced twelve invented ones on 2026-08-22 — the last fabricated
+   content on the site (open question 14).
+
+   ⚠️ Only `tech` entries carrying a `profile` are rendered, by renderLibrary.
+   A design or photography project added here will not appear: that work comes
+   from MEDIA and is shown as itself. This array exists because there is no
+   photograph of a booking system.
+
+   ⚠️ `url` is the live deployment and opens in a new tab. `shots` are real
+   screenshots in assets/shots/, captured from those deployments — not seeds,
+   not placeholders. Re-capture with resources/shoot.py if a site changes: a
+   portfolio showing a screenshot of a page that no longer looks like that is
+   worse than showing no screenshot at all. */
 const PROJECTS = [
   {
-    ar: "مؤسّسة بنيان", en: "Bunyan Foundation", date: "2026-05", cat: "design", seed: "aliph01",
+    ar: "رتريت عودة الملكة", en: "Queen's Retreat", date: "2026-07", cat: "tech",
     desc: {
-      ar: "حضورٌ أوضح وأكثر حداثة، مع الحفاظ على روح العلامة المألوفة: شعار، ألوان، تغليف، وظهور يومي.",
-      en: "A clearer, more modern presence that keeps the brand's familiar spirit: mark, colors, packaging, and daily touchpoints."
-    }
-  },
-  {
-    ar: "بوّابة عودة الملكة", en: "Queen's Retreat Portal", date: "2026-05", cat: "tech", seed: "aliphT1",
-    desc: {
-      ar: "موقع ونظام تسجيل لخلوة عودة الملكة: صفحة هبوط، استمارة، ولوحة متابعة للمشرفين.",
-      en: "A site and registration system for the Queen's Retreat: landing page, form, and an organiser dashboard."
+      ar: "موقع الرتريت ونظام التسجيل الذي يقف خلفه: استمارة، وتوزيع على المحطّات، وسقف لكل جلسة.",
+      en: "The retreat's site and the registration system behind it: a form, station allocation, and a ceiling on every session."
     },
     profile: {
       kind: "site",
-      tagline: { ar: "موقع · نظام تسجيل · لوحة إدارة", en: "Website · Registration · Admin dashboard" },
+      url: "https://queensretreat.ceo-6c6.workers.dev",
+      tagline: { ar: "موقع · نظام تسجيل · جدولة محطّات", en: "Website · Registration · Station scheduling" },
       body: {
-        ar: "بُني الموقع ليقوم بعملين في آنٍ واحد: أن يقول حكاية الخلوة بهدوء، وأن يدير تسجيل المشاركات من أوّل ضغطة إلى آخر تأكيد. الاستمارة تكتب مباشرةً إلى جدول المنظّمات، والتأكيد يصل بالبريد خلال ثوانٍ، ولوحة المتابعة تُظهر الأعداد والحالات لحظةً بلحظة دون أن يفتح أحد ملفًّا.",
-        en: "The site does two jobs at once: tell the retreat's story quietly, and run registration end to end. The form writes straight to the organisers' sheet, confirmation lands by email within seconds, and the dashboard shows counts and statuses live without anyone opening a file.",
+        ar: "رتريت قيادي ليوم واحد بستّ محطّات، كل واحدة باسم مدرّبتها، وكل مشتركة تدور على ثلاث منها في أوقات محدّدة. الصفحة تحكي الرتريت، والاستمارة تفعل الباقي: تتحقّق من المدخلات، وتحسب ما تبقّى من المقاعد في كل محطّة وكل جولة، ثم تكتب الصفّ في جدول المنظّمات مباشرة. والمقاعد المتبقّية معروضة على الصفحة نفسها، لأنّ رتريتًا محدود العدد يجب أن يقول ذلك قبل التسجيل لا بعده.",
+        en: "A one-day leadership retreat with six stations, each named for the woman running it, and every participant rotating through three of them at set times. The page tells the retreat's story; the form does the rest — it validates, works out how many seats are left in each station in each round, then writes the row straight into the organisers' sheet. The remaining seats are shown on the page itself, because a retreat with a hard limit should say so before you register, not after.",
       },
-      meta: [
-        { k: { ar: "العميل", en: "Client" }, v: { ar: "عودة الملكة", en: "Queen's Retreat" } },
-        { k: { ar: "النوع", en: "Type" }, v: { ar: "موقع + نظام تسجيل", en: "Website + registration system" } },
-        { k: { ar: "المنصّة", en: "Platform" }, v: { ar: "الويب — حاسوب وهاتف", en: "Web — desktop & mobile" } },
-        { k: { ar: "التقنيّات", en: "Stack" }, v: { ar: "Cloudflare Workers · Google Sheets · JS", en: "Cloudflare Workers · Google Sheets · JS" }, latin: true },
-        { k: { ar: "اللغات", en: "Languages" }, v: { ar: "عربي / إنجليزي", en: "Arabic / English" } },
-      ],
-      shots: ["aliphT1a", "aliphT1b", "aliphT1c", "aliphT1d", "aliphT1e"],
-      preview: "preview/site-demo.html",
+      shots: ["queens-retreat-1", "queens-retreat-2", "queens-retreat-3",
+              "queens-retreat-4", "queens-retreat-5"],
     }
   },
   {
-    ar: "مواسم الزيتون", en: "Olive Seasons", date: "2026-04", cat: "photo", seed: "aliph02",
+    ar: "دعوة افتتاح البيدر", en: "Al Baydar Opening", date: "2026-08", cat: "tech",
     desc: {
-      ar: "توثيق بصري لموسم القطف من الحقل إلى المعصرة، بهويّة لونيّة واحدة وقصص يوميّة.",
-      en: "A visual record of the harvest from field to press — one tonal identity and daily stories."
-    }
-  },
-  {
-    ar: "ورشة الخط", en: "Calligraphy Workshop", date: "2026-03", cat: "design", seed: "aliph03",
-    desc: {
-      ar: "ورشة مفتوحة في الوكالة: برنامج، مطبوعات، وتغطية كاملة لليومين.",
-      en: "An open workshop at the agency: program, printed matter, and full two-day coverage."
-    }
-  },
-  {
-    ar: "حارة النصارى", en: "Christian Quarter", date: "2026-03", cat: "photo", seed: "aliph04",
-    desc: {
-      ar: "سلسلة مصوّرة عن تفاصيل الحارة ووجوهها، بالأبيض والأسود.",
-      en: "A photographed series on the quarter's details and faces, in black and white."
-    }
-  },
-  {
-    ar: "دفتر الحضور", en: "Attendance Book", date: "2026-02", cat: "tech", seed: "aliphT2",
-    desc: {
-      ar: "تطبيق حضور للفعاليّات يعمل من الهاتف: مسح رمز، تسجيل فوري، وتقرير في نهاية اليوم.",
-      en: "A phone-first event check-in app: scan a code, log instantly, and get a report at day's end."
-    },
-    profile: {
-      kind: "app",
-      tagline: { ar: "تطبيق · أندرويد و iOS · يعمل دون اتصال", en: "App · Android & iOS · Works offline" },
-      body: {
-        ar: "وُلد التطبيق من مشكلة عمليّة: طوابير على باب الفعاليّة وقوائم ورقيّة تضيع. الآن يمسح المنظّم رمز الدعوة فيُسجَّل الحضور في أقل من ثانية، ويظلّ كل شيء يعمل إذا انقطعت الشبكة ثم يزامن نفسه حين تعود. في نهاية اليوم يخرج تقرير جاهز: كم حضر، ومتى، ومن لم يأتِ.",
-        en: "It came out of a practical problem: queues at the door and paper lists that go missing. An organiser scans the invitation code and attendance is logged in under a second; everything keeps working if the network drops and syncs itself when it returns. At day's end a report comes out ready: who came, when, and who didn't.",
-      },
-      meta: [
-        { k: { ar: "العميل", en: "Client" }, v: { ar: "داخلي — أدوات ألِف", en: "Internal — Aliph tooling" } },
-        { k: { ar: "النوع", en: "Type" }, v: { ar: "تطبيق هاتف", en: "Mobile application" } },
-        { k: { ar: "المنصّة", en: "Platform" }, v: { ar: "أندرويد · iOS", en: "Android · iOS" } },
-        { k: { ar: "التقنيّات", en: "Stack" }, v: { ar: "React Native · SQLite · Workers", en: "React Native · SQLite · Workers" }, latin: true },
-        { k: { ar: "اللغات", en: "Languages" }, v: { ar: "عربي / إنجليزي", en: "Arabic / English" } },
-      ],
-      shots: ["aliphT2a", "aliphT2b", "aliphT2c", "aliphT2d"],
-    }
-  },
-  {
-    ar: "مقهى الجبل", en: "Mountain Café", date: "2026-02", cat: "design", seed: "aliph05",
-    desc: {
-      ar: "هويّة كاملة لمقهى صغير: اسم، شعار، قائمة، ولوحة واجهة.",
-      en: "A complete identity for a small café: name, mark, menu, and shopfront."
-    }
-  },
-  {
-    ar: "معرض التراث", en: "Heritage Fair", date: "2026-02", cat: "design", seed: "aliph06",
-    desc: {
-      ar: "تنظيم معرض ثلاثة أيام: توزيع المساحة، لافتات، وتوثيق مصوّر.",
-      en: "A three-day fair: spatial layout, signage, and photographic documentation."
-    }
-  },
-  {
-    ar: "سوق البلدة", en: "Old Town Market", date: "2026-01", cat: "photo", seed: "aliph07",
-    desc: {
-      ar: "حملة إعلانيّة كاملة لإحياء السوق القديم: مفهوم، تصوير، وإدارة منصّات لثلاثة أشهر.",
-      en: "A full campaign to revive the old market: concept, photography, and three months of channel management."
-    }
-  },
-  {
-    ar: "جبل الزيتون", en: "Mount of Olives", date: "2026-01", cat: "photo", seed: "aliph08",
-    desc: {
-      ar: "لقطات من الجبل عند الفجر — مادّة أساس لمكتبة الصور.",
-      en: "Shots from the mount at first light — base material for the image library."
-    }
-  },
-  {
-    ar: "متجر بنيان", en: "Bunyan Shop", date: "2025-11", cat: "tech", seed: "aliphT3",
-    desc: {
-      ar: "متجر إلكتروني بسيط لمنتجات المؤسّسة: كتالوج، سلّة، ودفع محلّي.",
-      en: "A simple storefront for the foundation's products: catalogue, cart, and local payment."
+      ar: "بطاقة دعوة تعمل: عدٌّ تنازليّ للموعد، ورشتان تُختار إحداهما، واستمارة تحجز المقعد باسمٍ واحد.",
+      en: "An invitation that works: a countdown to the evening, two workshops to pick between, and a form that holds a seat on one name."
     },
     profile: {
       kind: "site",
-      tagline: { ar: "موقع · متجر إلكتروني · لوحة تحكّم", en: "Website · Online store · Control panel" },
+      url: "https://albaydaropening.aliphcreative.com",
+      tagline: { ar: "دعوة · اختيار ورشة · تأكيد حضور", en: "Invitation · Workshop choice · RSVP" },
       body: {
-        ar: "متجر مبنيّ على قاعدة أن من يديره ليس تقنيًّا. الكتالوج يُحدَّث من لوحة واحدة بالعربيّة، والصفحة تُحمَّل سريعًا على شبكة الهاتف، والدفع يمرّ عبر مزوّد محلّي. الهويّة البصريّة للمؤسّسة انتقلت إلى الشاشة كما هي: الحبر، والكريمي، وسطر الأساس نفسه.",
-        en: "A store built on the premise that whoever runs it isn't technical. The catalogue updates from one Arabic panel, pages load fast on mobile data, and payment goes through a local provider. The foundation's identity carried onto the screen intact: the ink, the cream, the same baseline rule.",
+        ar: "مساء واحد، وصفحة واحدة تحمله. المكان يُعرَّف قبل أن يُدعى إليه أحد، ثمّ العدّ التنازليّ يجعل الموعد شيئًا يقترب لا سطرًا مكتوبًا. الورشتان — تعبئة العطر مع Méjana، وزراعة الصبّار في الفخّار — معروضتان جنبًا إلى جنب لأنّ الاختيار بينهما هو القرار الوحيد المطلوب من الضيف، والاستمارة تحته لا تسأل إلّا عن الاسم؛ الهاتف وعدد المرافقين اختياريّان. وما إن يُسجَّل الاسم حتى تعرض الصفحة الموعد جاهزًا للإضافة إلى التقويم والمكان جاهزًا على الخريطة، لأنّ الدعوة التي لا تُوصِل إلى الباب لم تكتمل.",
+        en: "One evening, and one page carrying it. The place introduces itself before anyone is invited into it, and the countdown turns the date into something approaching rather than a line of text. The two workshops — perfume-filling with Méjana, and planting a cactus in pottery — sit side by side because choosing between them is the only decision the guest is asked to make, and the form beneath asks for nothing but a name; phone and companions are optional. The moment the name is in, the page hands back the date ready for a calendar and the address ready for a map, because an invitation that does not get you to the door is unfinished.",
       },
-      meta: [
-        { k: { ar: "العميل", en: "Client" }, v: { ar: "مؤسّسة بنيان", en: "Bunyan Foundation" } },
-        { k: { ar: "النوع", en: "Type" }, v: { ar: "متجر إلكتروني", en: "E-commerce" } },
-        { k: { ar: "المنصّة", en: "Platform" }, v: { ar: "الويب — حاسوب وهاتف", en: "Web — desktop & mobile" } },
-        { k: { ar: "التقنيّات", en: "Stack" }, v: { ar: "Astro · Stripe · Workers KV", en: "Astro · Stripe · Workers KV" }, latin: true },
-        { k: { ar: "اللغات", en: "Languages" }, v: { ar: "عربي / إنجليزي", en: "Arabic / English" } },
-      ],
-      shots: ["aliphT3a", "aliphT3b", "aliphT3c", "aliphT3d"],
-      preview: "preview/site-demo.html",
+      shots: ["al-baydar-1", "al-baydar-2", "al-baydar-3",
+              "al-baydar-4", "al-baydar-5"],
     }
   },
   {
-    ar: "ليالي رمضان", en: "Ramadan Nights", date: "2025-10", cat: "photo", seed: "aliph09",
+    ar: "سيكو سيكو — ليلة سينما", en: "Seeko Seeko — Movie Night", date: "2026-05", cat: "tech",
     desc: {
-      ar: "فعاليّة مجتمعيّة على مدار الشهر: برنامج، هويّة للفعاليّة، وتغطية يوميّة.",
-      en: "A month-long community event: program, event identity, and daily coverage."
-    }
-  },
-  {
-    ar: "البلدة القديمة", en: "The Old City", date: "2025-09", cat: "photo", seed: "aliph10",
-    desc: {
-      ar: "أرشيف مصوّر للأزقّة والأبواب، صُوّر على مدار فصلين.",
-      en: "A photographic archive of alleys and doorways, shot across two seasons."
-    }
-  },
-  {
-    ar: "مهرجان الصيف", en: "Summer Festival", date: "2025-08", cat: "design", seed: "aliph11",
-    desc: {
-      ar: "مهرجان مفتوح: هويّة بصريّة، لافتات موقع، وتوثيق مباشر.",
-      en: "An open-air festival: visual identity, site signage, and live documentation."
-    }
-  },
-  {
-    ar: "دار الأيتام", en: "Orphanage Campaign", date: "2025-06", cat: "photo", seed: "aliph12",
-    desc: {
-      ar: "حملة تبرّعات هادئة تعتمد على الحكاية لا على الصخب.",
-      en: "A quiet fundraising campaign built on story rather than volume."
-    }
-  },
-  {
-    ar: "مطعم الديوان", en: "Al-Diwan Restaurant", date: "2025-05", cat: "design", seed: "aliph13",
-    desc: {
-      ar: "هويّة مطعم: شعار، قوائم، قرطاسيّة، ونظام لافتات.",
-      en: "A restaurant identity: mark, menus, stationery, and a signage system."
-    }
-  },
-  {
-    ar: "لوحة المواسم", en: "Seasons Dashboard", date: "2025-04", cat: "tech", seed: "aliphT4",
-    desc: {
-      ar: "لوحة داخليّة تجمع أرقام الحملات من كل المنصّات في شاشة واحدة.",
-      en: "An internal dashboard pulling campaign numbers from every channel onto one screen."
+      ar: "صفحة واحدة لليلة سينمائيّة واحدة، مبنيّة حول فعلٍ واحد: احجز مقعدك.",
+      en: "One page for one film night, built around a single action: book your seat."
     },
     profile: {
-      kind: "app",
-      tagline: { ar: "أداة داخليّة · لوحة قياس · تقارير آليّة", en: "Internal tool · Analytics · Automated reports" },
+      kind: "site",
+      url: "https://seekoseeko.ceo-6c6.workers.dev",
+      tagline: { ar: "صفحة هبوط · حجز مقاعد · ملف واحد", en: "Landing page · Seat booking · One file" },
       body: {
-        ar: "قبلها كان تقرير الحملة يُجمَّع يدويًّا من خمس منصّات كل شهر. الآن تُسحب الأرقام آليًّا وتُعرض على شاشة واحدة بلغة العميل: ماذا نُشر، وكم وصل، وأين تحرّك الاهتمام. التقرير الشهري يخرج ملفًّا مصمَّمًا بهويّة ألِف دون أن يلمسه أحد.",
-        en: "Before it, a campaign report was assembled by hand from five platforms every month. Now the numbers pull automatically onto one screen in the client's language: what went out, how far it reached, where interest moved. The monthly report exports as a designed file in Aliph's identity without anyone touching it.",
+        ar: "ليلة واحدة، ومكان واحد، وسعر واحد — فالصفحة كلّها فعل واحد. التاريخ والمكان والوقت والتذكرة في صفٍّ واحد أعلى الطيّة، والاستمارة تحتها مباشرةً بأربعة حقول لا أكثر. صُمِّمت للهاتف أوّلًا، لأنّ الرابط يصل عبر واتساب ويُفتح في الشارع.",
+        en: "One night, one venue, one price — so the whole page is one action. Date, venue, time and ticket sit in a single row above the fold, with the form directly beneath it and four fields in it, no more. Built phone-first, because the link arrives over WhatsApp and gets opened in the street.",
       },
-      meta: [
-        { k: { ar: "العميل", en: "Client" }, v: { ar: "داخلي — أدوات ألِف", en: "Internal — Aliph tooling" } },
-        { k: { ar: "النوع", en: "Type" }, v: { ar: "لوحة قياس", en: "Analytics dashboard" } },
-        { k: { ar: "المنصّة", en: "Platform" }, v: { ar: "الويب — سطح المكتب", en: "Web — desktop" } },
-        { k: { ar: "التقنيّات", en: "Stack" }, v: { ar: "Node · Meta & TikTok APIs · Charts", en: "Node · Meta & TikTok APIs · Charts" }, latin: true },
-        { k: { ar: "اللغات", en: "Languages" }, v: { ar: "عربي / إنجليزي", en: "Arabic / English" } },
-      ],
-      shots: ["aliphT4a", "aliphT4b", "aliphT4c"],
-    }
-  },
-  {
-    ar: "أسبوع التصميم", en: "Design Week", date: "2025-03", cat: "design", seed: "aliph14",
-    desc: {
-      ar: "برنامج أسبوع كامل: جدول، مطبوعات، وتغطية للجلسات.",
-      en: "A week-long program: schedule, printed matter, and session coverage."
-    }
-  },
-  {
-    ar: "افتتاح المكتبة", en: "Library Opening", date: "2024-11", cat: "design", seed: "aliph15",
-    desc: {
-      ar: "افتتاح مكتبة الحيّ: دعوات، لافتات، وتوثيق الليلة.",
-      en: "A neighbourhood library opening: invitations, signage, and coverage of the night."
-    }
-  },
-  {
-    ar: "حملة التخرّج", en: "Graduation Campaign", date: "2024-09", cat: "photo", seed: "aliph16",
-    desc: {
-      ar: "حملة موسميّة للجامعات: مفهوم، تصوير، ونشر على المنصّات.",
-      en: "A seasonal campaign for universities: concept, photography, and channel rollout."
-    }
-  },
-  {
-    ar: "بيت الشباب", en: "Youth House", date: "2024-07", cat: "design", seed: "aliph17",
-    desc: {
-      ar: "هويّة مرنة لمركز شبابي، تتحمّل أيدي كثيرة وتظلّ متماسكة.",
-      en: "A flexible identity for a youth centre — it survives many hands and stays coherent."
-    }
-  },
-  {
-    ar: "نادي القراءة", en: "Reading Club", date: "2024-05", cat: "design", seed: "aliph18",
-    desc: {
-      ar: "محتوى شهري لنادي قراءة: أغلفة، اقتباسات، ومنشورات.",
-      en: "Monthly content for a reading club: covers, pull quotes, and posts."
-    }
-  },
-  {
-    ar: "عرس فلسطيني", en: "Palestinian Wedding", date: "2024-03", cat: "photo", seed: "aliph19",
-    desc: {
-      ar: "توثيق عرس كامل من التحضير إلى آخر رقصة.",
-      en: "A full wedding documented from preparation to the last dance."
+      shots: ["seeko-seeko-1", "seeko-seeko-2", "seeko-seeko-3", "seeko-seeko-4"],
     }
   },
 ];
@@ -795,16 +579,23 @@ const BAND_SPEED = 40;
 let bandTween = null;
 
 /* Four frames, matched to the film tile: the tile is one group wide and its
-   sprocket run repeats in lockstep. Re-cutting it to three is a separate job
-   (resources/recut_film.py), so photography takes two of the four slots. */
-/* The frame slot is landscape, so these are the 3:2 photographs; a 4:5 design
-   would lose a third of itself to the crop. ⚠️ The captions are still invented
-   project names — real ones are pending from the agency. */
+   sprocket run repeats in lockstep, so the count here and FRAMES_PER_TILE in
+   resources/cut_film_scan.py are the same number in two places.
+
+   The frame slot is 0.87 wide for 1 tall, so these are the 3:2 photographs; a
+   4:5 design would lose a third of itself to the crop, and a 9:16 reel would
+   lose more. ⚠️ Making the slot hold a vertical item is a measured change to
+   two CSS numbers, not a guess — the recipe is in HANDOFF.
+
+   The `cap` field is gone. It held four invented project names, kept as "the
+   shopping list for the real titles"; the real titles exist now and none of
+   them belongs to these photographs, so an unused field of fiction was the
+   only thing left to delete. Captions have not rendered since 2026-08-10. */
 const FILM_FRAMES = [
-  { src: "assets/media/pics-idk-category-28-dsc00020.webp", svc: "design", cap: { ar: "مؤسّسة بنيان — هويّة", en: "Bunyan — identity" } },
-  { src: "assets/media/pics-Interactive-37-dsc03223.webp", svc: "photo", cap: { ar: "سوق البلدة — حملة", en: "Old Town Market — campaign" } },
-  { src: "assets/media/pics-food-21-dsc03454.webp", svc: "photo", cap: { ar: "ليالي رمضان — تغطية", en: "Ramadan Nights — coverage" } },
-  { src: "assets/media/pics-public-services-49-img.webp", svc: "tech", cap: { ar: "عودة الملكة — منصّة", en: "Queen's Retreat — platform" } },
+  { src: "assets/media/pics-idk-category-28-dsc00020.webp", svc: "design" },
+  { src: "assets/media/pics-Interactive-37-dsc03223.webp", svc: "photo" },
+  { src: "assets/media/pics-food-21-dsc03454.webp", svc: "photo" },
+  { src: "assets/media/pics-public-services-49-img.webp", svc: "tech" },
 ];
 const SERVICE_FRAMES = { design: 0, photo: 1, tech: 3 };
 const filmScroll = document.getElementById("filmScroll");
@@ -1211,53 +1002,21 @@ function applyI18n() {
      textContent and destroys the chips */
   initRansom();
 
-  svcPicker.render();
+  serviceRings.build();
   renderLibrary();
   renderServiceSections();
   projectSheet.refresh();
+  /* ⚠️ The preview module ran its own refresh() once, when it was DEFINED —
+     which is before the carousel triples its slides and before renderLibrary
+     paints a single tile. So it only ever held the eight originals, and the
+     centred slide is almost always a clone: nothing could play, and adding
+     data-preview to a slide did nothing at all. It has to be re-scanned after
+     whatever built the DOM, and this is that place — it also runs on every
+     language switch, which re-renders the library from scratch. */
+  previews.refresh();
   rebuildLoops();
   filmLoop.rebuild();
-  fitPicks();
   tickClock();
-}
-
-/* ══════════ service names, set to fill their line ══════════
-   They are the section's headline, so they should run the width of the
-   column rather than sit in the middle of it.
-
-   This cannot be a fixed vw: "Film & Photography" against تصوير means any
-   single value either wraps in English or leaves Arabic floating. Text width
-   is proportional to font-size, so one probe measurement is enough —
-   everything horizontal in the row is in em, including the gap, for that to
-   hold. */
-function fitPicks() {
-  const row = document.querySelector(".svc-picks");
-  if (!row) return;
-  const MIN = 15;                     // below this it stops being a headline
-  const PROBE = 40;
-
-  const avail = row.clientWidth;
-  row.style.fontSize = PROBE + "px";
-
-  /* `white-space: nowrap` does NOT work here — it governs line breaking inside
-     a text run, not flex wrapping, so the row still wrapped and scrollWidth
-     came back equal to clientWidth. `width: max-content` + `flex-wrap: nowrap`
-     is what asks for the one-line intrinsic width. Both restored before
-     anything can paint. */
-  const wrap = row.style.flexWrap, wide = row.style.width;
-  row.style.flexWrap = "nowrap";
-  row.style.width = "max-content";
-  const natural = row.getBoundingClientRect().width;
-  row.style.flexWrap = wrap;
-  row.style.width = wide;
-  if (!natural || !avail) { row.style.fontSize = ""; return; }
-
-  /* Sized to land exactly on the container, sub-pixel rounding tips the row
-     into a second line at some widths. Half a percent of headroom is
-     invisible and keeps it on one line everywhere. */
-  const size = ((PROBE * avail) / natural) * 0.996;
-  const MAX = 58;                     // cap so service titles don't over-expand
-  row.style.fontSize = Math.min(MAX, Math.max(MIN, size)) + "px";
 }
 
 /* language switch (pill) — click or keyboard */
@@ -1315,6 +1074,17 @@ const overlay = document.getElementById("navOverlay");
 if (menuBtn && overlay) {
   const items = overlay.querySelectorAll(".nav-item");
   let open = false;
+
+  /* ⚠️ The contact button is a SAME-PAGE anchor, so unlike the three nav links
+     it does not navigate — nothing tears the overlay down behind it, and the
+     panel would sit over the footer it had just scrolled to. Re-clicking the
+     burger is the one path that runs the whole close (the exit tween, the
+     .nav-closing hand-off, the bar re-sync), so it is re-used rather than
+     re-implemented. */
+  overlay.querySelector(".nav-cta")?.addEventListener("click", () => {
+    if (open) menuBtn.click();
+  });
+
   menuBtn.addEventListener("click", () => {
     open = !open;
     document.body.classList.toggle("nav-open", open);
@@ -1424,76 +1194,471 @@ function queueMenuSync() {
 window.addEventListener("scroll", queueMenuSync, { passive: true });
 window.addEventListener("resize", queueMenuSync);
 
-/* ══════════ what we do — picker + example switcher ══════════
-   The arrows step through the selected service's subcategories, not its
-   projects. Deliberately not animated: the swap is a straight repaint. */
+/* ══════════ what we do — the service rings ══════════
+   Three rings, one per service, stacked in a window that slides. Each ring
+   turns continuously; the item facing the viewer grows and its line appears
+   under the ring; clicking it opens that piece on the work page.
+
+   ⚠️ THE PICTURES ARE LOCAL, and that is a rule, not an accident. Everything
+   the home page paints comes out of assets/, never R2 (open question 13) —
+   which is the only reason this page stayed up when r2.dev went dark and took
+   the work page with it. The reels' POSTERS are here for the same reason; only
+   a reel that actually plays is fetched from R2.
+
+   ⚠️ Ratios come from MEDIA, not from the file. `r` is read off each original
+   by the generator, so a ring item is cut to the shape of the thing inside it
+   without this module ever loading an image to measure it — which it could not
+   do anyway before laying the ring out. */
+const RINGS = {
+  /* All nine design pieces; the agency filed every one as a digital ad
+     (2026-08-22), so they all take the `posters` line. */
+  design: [
+    { f: "design-grillit-1.webp", sub: "posters" },
+    { f: "design-shawarma-veal-1.webp", sub: "posters" },
+    { f: "design-grillit-2.webp", sub: "posters" },
+    { f: "design-shawarma-mix-1.webp", sub: "posters" },
+    { f: "design-grillit-3.webp", sub: "posters" },
+    { f: "design-shawarma-habash-1.webp", sub: "posters" },
+    { f: "design-shawarma-veal-2.webp", sub: "posters" },
+    { f: "design-shawarma-mix-2.webp", sub: "posters" },
+    { f: "design-shawarma-habash-2.webp", sub: "posters" },
+  ],
+  /* Reels and stills alternate on purpose: a 9:16 next to a 3:2 is what makes
+     the ring read as work of different shapes rather than a row of cards. */
+  photo: [
+    { f: "reels-alif-tuktuk.webp", sub: "reels", open: "reels-alif-tuktuk.mp4" },
+    { f: "pics-food-17-dsc00763.webp", sub: "stills" },
+    { f: "reels-einar-edited.webp", sub: "reels", open: "reels-einar-edited.mp4" },
+    { f: "pics-Interactive-37-dsc03223.webp", sub: "stills" },
+    { f: "reels-connect-edited.webp", sub: "reels", open: "reels-connect-edited.mp4" },
+    { f: "pics-Queen-retreat-52-copy-of-0c2a0144.webp", sub: "stills" },
+    { f: "reels-child-section-final.webp", sub: "reels", open: "reels-child-section-final.mp4" },
+    { f: "pics-official-visits-43-dsc08794.webp", sub: "stills" },
+  ],
+  /* The software work has no photograph of itself, so the ring holds the same
+     screenshots the profile sheet does, and a click opens that sheet. */
+  tech: [
+    { shot: "queens-retreat-1", project: 0, r: 1.6 },
+    { shot: "al-baydar-1", project: 1, r: 1.6 },
+    { shot: "seeko-seeko-1", project: 2, r: 1.6 },
+  ],
+};
+
+/* The mark each ring turns around.
+
+   ⚠️ PHOTOGRAPHS, not pictograms, where there is a real one to use. The agency
+   asked on 2026-08-23 for cutouts of their own people instead of drawn icons,
+   and supplied one: their cameraman, cut from their own footage
+   (resources/cut_mark.py turns it into `assets/marks/mark-photo.webp`).
+
+   🔴 There is no photograph for the other two, and the two files that came
+   with the request are AI stock — the whiteboard lettering and the on-screen
+   code in them are gibberish, which is the giveaway at any size, and neither
+   is a cutout. They are also the wrong material for a section built entirely
+   out of the agency's own work. The 19 BTS clips on R2 are one desert shoot:
+   cameras, tripods and a boom, and nobody at a screen. So design and tech keep
+   the drawn mark until the agency sends a photograph of their designer and
+   their developer at work — a phone frame is enough, the cameraman is one —
+   and each is then one file and one line here. */
+const RING_MARKS = {
+  design: {
+    svg:
+      '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"' +
+      ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M31 6 42 17 20 39l-13 3 3-13z"/><path d="M28 9l11 11"/>' +
+      '<path d="M20 39 12.5 31.5"/><path d="M24.5 26.5 21 30"/></svg>',
+  },
+  photo: { img: "assets/marks/mark-photo.webp" },
+  tech: {
+    svg:
+      '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"' +
+      ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<rect x="5" y="9" width="38" height="30" rx="2"/><path d="M5 17h38"/>' +
+      '<path d="M17 24l-5 5 5 5"/><path d="M27 24l5 5-5 5"/></svg>',
+  },
+};
+
+/* Which ring is showing. Read by nothing else today, but it is the one
+   name for "the service being looked at" and the chat widget asked for it
+   once already. */
 let currentService = "design";
 
-const svcPicker = (() => {
-  const stage = document.getElementById("swStage");
-  if (!stage) return { setService() { }, render() { }, next() { }, prev() { } };
+const serviceRings = (() => {
+  const reel = document.getElementById("ringReel");
+  if (!reel) return { build() { }, paint() { }, resize() { } };
 
-  const media = document.getElementById("swMedia");
-  const elName = document.getElementById("swName");
-  const elDesc = document.getElementById("swDesc");
-  const elIndex = document.getElementById("swIndex");
-  const elTotal = document.getElementById("swTotal");
+  const win = document.getElementById("ringWindow");
+  const nameEl = document.getElementById("svcName");
+  const descEl = document.getElementById("ringDesc");
+  const listEl = document.getElementById("svcList");
 
-  let items = [], idx = 0;
+  const ORDER = SERVICES.map((s) => s.id);
+  const TURN = 26000;               // ms for one full revolution
+  const GLIDE = 620;                // ms to bring a clicked item to the front
+  let at = 0;                       // which service
+  let spin = 0;                     // degrees
+  let turned = 0;                   // degrees since the last service change
+  let held = false;                 // a click stops the service auto-advance
+  let hover = false;
+  let glide = null;                 // { from, to, t0 } while an item travels
+  let raf = 0, last = 0;
+  let stages = [];
 
-  function paint() {
-    const s = items[idx];
-    if (!s) return;
-    elName.textContent = s[lang];
-    elDesc.textContent = s.desc ? s.desc[lang] : "";
-    elIndex.textContent = num(String(idx + 1).padStart(2, "0"));
-    elTotal.textContent = num(String(items.length).padStart(2, "0"));
-    setHolder(media, s);
+  /* ⚠️ Hover-to-pause is gated on a real pointer. On touch `pointerenter`
+     fires once and `pointerleave` never does, so an ungated version stops the
+     ring for the rest of the visit on the first tap. The carousel is gated the
+     same way for the same reason. */
+  const canHover = window.matchMedia("(hover: hover)").matches;
+
+  /* An item's ratio: MEDIA is the record for anything out of the archive, and
+     a ring entry may carry its own for a screenshot that is not in it. */
+  const ratioOf = (item) => {
+    if (item.r) return item.r;
+    const m = MEDIA.find((x) => x.f === item.f || x.p === item.f);
+    return (m && m.r) || 1;
+  };
+
+  const srcOf = (item) =>
+    item.shot ? "assets/shots/" + item.shot + ".webp"
+              : "assets/media/" + item.f;
+
+  /* Items are sized to a constant AREA, not a constant width or height. A 9:16
+     reel beside a 3:2 photograph looks like two different sizes either way —
+     equal area is the one that makes neither of them dominate, which is what
+     "they don't have to be the same size" has to mean if the ring is to read
+     as one composition. */
+  function sizes(items, h) {
+    const area = Math.pow(h * 0.34, 2);
+    return items.map((it) => {
+      const r = ratioOf(it);
+      const ih = Math.sqrt(area / r);
+      return { w: ih * r, h: ih, r };
+    });
   }
 
-  function go(next) {
-    if (!items.length) return;
-    idx = ((next % items.length) + items.length) % items.length;
+  /* Wide enough that neighbours never touch.
+     ⚠️ Derived, not a fudge factor. Two neighbours are 360/n apart, so the
+     chord between their centres is 2r*sin(pi/n); asking that to be at least
+     1.18 widths gives the radius directly, and it stays right for a ring of
+     three as well as one of nine. The old constant was tuned for a ring seen
+     nearly edge-on at the sides — since the items are billboarded (2026-08-23)
+     they are full width everywhere, so the honest bound is the one to use. */
+  function radius(dims, n) {
+    const widest = dims.reduce((a, d) => Math.max(a, d.w), 0);
+    return Math.max(150, (widest * 1.18) / (2 * Math.sin(Math.PI / Math.max(2, n))));
+  }
+
+  function build() {
+    reel.innerHTML = "";
+    stages = ORDER.map((id) => {
+      const items = RINGS[id] || [];
+      const stage = document.createElement("div");
+      stage.className = "ring-stage";
+      stage.dataset.service = id;
+
+      const ring = document.createElement("div");
+      ring.className = "ring";
+
+      /* ⚠️ INSIDE the ring, so the 3D context depth-sorts it against the work.
+         Outside it, near and far halves both painted over it. */
+      const m = RING_MARKS[id] || {};
+      const mark = document.createElement("div");
+      mark.className = "ring-mark" + (m.img ? " is-photo" : "");
+      mark.innerHTML = m.img
+        ? '<img src="' + m.img + '" alt="" loading="lazy" decoding="async">'
+        : (m.svg || "");
+      ring.appendChild(mark);
+
+      items.forEach((it, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "ring-item";
+        b.style.setProperty("--a", (i * (360 / items.length)) + "deg");
+        b.dataset.i = String(i);
+        b.dataset.service = id;
+        /* Where this piece lives on the work page. A media item is found by
+           its own filename; a software project by its index, because the sheet
+           is what shows it. */
+        if (it.project !== undefined) b.dataset.project = String(it.project);
+        else b.dataset.open = it.open || it.f;
+        b.innerHTML = '<span class="ring-face"><img src="' + srcOf(it) +
+          '" alt="" loading="lazy" decoding="async"></span>';
+        if (canHover) {
+          b.addEventListener("pointerenter", () => { hover = true; });
+          b.addEventListener("pointerleave", () => { hover = false; });
+        }
+        ring.appendChild(b);
+      });
+      stage.appendChild(ring);
+      reel.appendChild(stage);
+      return { id, stage, ring, items, front: -1, picked: -1,
+               nodes: Array.from(ring.querySelectorAll(".ring-item")) };
+    });
+    buildList();
+    layout();
     paint();
   }
 
-  return {
-    setService(id) { items = SUBCATS[id] || []; idx = 0; paint(); },
-    render() {
-      items = SUBCATS[currentService] || [];
-      idx = Math.min(idx, Math.max(items.length - 1, 0));
+  /* The desktop control. Derived from SERVICES like every other list of them:
+     typed copies of these names have gone stale at two renames already. */
+  function buildList() {
+    if (!listEl) return;
+    listEl.setAttribute("aria-label", I18N.svcList[lang]);
+    listEl.innerHTML = "";
+    ORDER.forEach((id, n) => {
+      const cat = CATS.find((c) => c.id === id);
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "svc-opt";
+      b.dataset.service = id;
+      b.innerHTML = "<span></span>";
+      b.firstChild.textContent = cat ? cat[lang] : id;
+      b.addEventListener("click", () => go(n, true));
+      listEl.appendChild(b);
+    });
+  }
+
+  function layout() {
+    const box = win.getBoundingClientRect();
+    const h = box.height || 380;
+    stages.forEach((s) => {
+      const dims = sizes(s.items, h);
+      let rad = radius(dims, s.items.length);
+      /* ⚠️ Fit the ring to the WINDOW as well as to its own items. Since
+         2026-08-23 the ring lives in half the section on a desktop, and an
+         item at a quarter turn sits a full radius off the axis with nothing
+         foreshortening it — so a ring sized only from its height silently runs
+         out under `overflow: hidden`. Everything scales together, or the items
+         stop matching the orbit they sit on. */
+      const widest = dims.reduce((a, d) => Math.max(a, d.w), 0);
+      const need = 2 * rad + widest;
+      /* A little over 1: a ring that stops dead inside its frame reads as a
+         diagram. Letting the two items at the extremes run just under the
+         window's edge is what makes it read as an orbit that carries on. Much
+         more than this and the slice through a poster reads as a bug. */
+      const room = (box.width || need) * 1.05;
+      const fit = need > room ? room / need : 1;
+      rad *= fit;
+      s.nodes.forEach((n, i) => {
+        n.style.setProperty("--w", (dims[i].w * fit).toFixed(1) + "px");
+        n.style.setProperty("--h", (dims[i].h * fit).toFixed(1) + "px");
+        n.style.setProperty("--rad", rad.toFixed(1) + "px");
+      });
+    });
+  }
+
+  /* Which item faces the viewer, and how the rest fall away from it. Both come
+     out of one number — the item's angle from the front — so they cannot drift
+     apart. */
+  /* ⚠️ This runs only when the FRONT ITEM CHANGES, never per frame, and the
+     difference is not academic. Writing --o and --s on every item every frame
+     is ~60 style writes a frame for a nine-item ring, all of them setting the
+     value the element already had. It also fought the 0.45s transition these
+     properties carry — a per-frame write restarts the interpolation before it
+     can run, so paying that cost bought a WORSE-looking ring than not paying
+     it. One item enters the front zone at a time, so recomputing on that
+     boundary gives the transition the two keyframes it needs. */
+  function front(s) {
+    const step = 360 / s.items.length;
+    let best = 0, bestD = 1e9;
+    const away = s.nodes.map((n, i) => {
+      let d = (i * step + spin) % 360;
+      if (d > 180) d -= 360;
+      if (d < -180) d += 360;
+      const a = Math.abs(d);
+      if (a < bestD) { bestD = a; best = i; }
+      return a;
+    });
+    if (best === s.front) return best;
+    s.front = best;
+    /* ⚠️ /600, not /240. At /240 the far side of the ring reached 0.25 and the
+       work there was barely on the page; the agency asked on 2026-08-23 for it
+       to stay visible all the way round, so the floor is 0.70 at half a turn.
+       Depth is carried by perspective and by the front item's scale, which do
+       not need the fade to do their job. */
+    s.nodes.forEach((n, i) => {
+      const face = n.firstElementChild;
+      face.style.setProperty("--o", (1 - Math.min(away[i], 180) / 600).toFixed(3));
+      face.style.setProperty("--s", i === best ? (i === s.picked ? "1.3" : "1.14") : "1");
+      n.classList.toggle("is-front", i === best);
+    });
+    return best;
+  }
+
+  function line(s, i) {
+    const it = s.items[i];
+    if (!it) return "";
+    if (it.project !== undefined) {
+      const p = PROJECTS[it.project];
+      return p ? p.desc[lang] : "";
+    }
+    const sub = (SUBCATS[s.id] || []).find((x) => x.id === it.sub);
+    return sub ? sub.desc[lang] : "";
+  }
+
+  function paint() {
+    const s = stages[at];
+    if (!s) return;
+    reel.style.setProperty("--stage", String(at));
+    const svc = SERVICES.find((x) => x.id === s.id);
+    const cat = CATS.find((c) => c.id === s.id);
+    if (nameEl && cat) nameEl.textContent = cat[lang];
+    if (svc) nameEl.dataset.service = svc.id;
+    if (listEl) {
+      listEl.querySelectorAll(".svc-opt").forEach((b) => {
+        const on = b.dataset.service === s.id;
+        b.classList.toggle("is-on", on);
+        /* the underline is the only thing that says "this one" — say it to a
+           screen reader as well, since the heading it replaces is hidden here */
+        b.setAttribute("aria-current", on ? "true" : "false");
+      });
+    }
+    s.ring.style.setProperty("--spin", spin.toFixed(2) + "deg");
+    /* front() returns early unless the facing item actually changed, so
+       the line under the ring is only rewritten when it has something
+       different to say. */
+    const was = s.front;
+    const i = front(s);
+    if (descEl && i !== was) descEl.textContent = line(s, i);
+    /* Only the ring on screen is worth turning. */
+    stages.forEach((x, n) => x.stage.setAttribute("aria-hidden", String(n !== at)));
+  }
+
+  function go(next, byHand) {
+    at = ((next % stages.length) + stages.length) % stages.length;
+    currentService = stages[at].id;
+    turned = 0;
+    glide = null;
+    if (byHand) held = true;
+    clearPick();
+    paint();
+  }
+
+  function clearPick() {
+    stages.forEach((s) => {
+      if (s.picked < 0) return;
+      s.nodes[s.picked].classList.remove("is-picked");
+      s.picked = -1;
+      s.front = -1;             /* force front() to rewrite the scales */
+    });
+  }
+
+  /* ══════════ the two-step ══════════
+     ⚠️ ONE click used to leave the page, on a desktop and on a phone alike.
+     The agency's rule of 2026-08-23 is that the first click brings the piece
+     round to the front and grows it, and only a second click on the piece
+     already at the front opens it on the work page — so a ring you can look at
+     properly is not also a minefield of links. The same rule on touch, where
+     there is no hover to preview with and a stray tap used to navigate.
+
+     Bringing it round is an eased change to `spin`, driven by the same rAF
+     that turns the ring, NOT a CSS transition: the transform depends on
+     --spin and is rewritten every frame, so a transition on it would smear. */
+  function pickAngle(s, i) {
+    const step = 360 / s.items.length;
+    let d = -(i * step) - spin;
+    d = ((d % 360) + 540) % 360 - 180;   /* the short way round */
+    return spin + d;
+  }
+
+  reel.addEventListener("click", (e) => {
+    const b = e.target.closest(".ring-item");
+    const s = stages[at];
+    if (!s) return;
+    if (!b) { clearPick(); paint(); return; }   /* a click off the work releases it */
+    held = true;
+    const i = +b.dataset.i;
+    if (s.picked === i && s.front === i) {
+      const q = b.dataset.project !== undefined
+        ? "?project=" + encodeURIComponent(b.dataset.project)
+        : "?open=" + encodeURIComponent(b.dataset.open);
+      location.href = "library.html" + q;
+      return;
+    }
+    clearPick();
+    s.picked = i;
+    b.classList.add("is-picked");
+    s.front = -1;
+    const to = pickAngle(s, i);
+    /* ⚠️ Under prefers-reduced-motion nothing drives a frame — start() returns
+       without arming the rAF — so a glide would never arrive and the second
+       click could never find an item at the front. It jumps instead. */
+    if (prefersReduced) {
+      spin = ((to % 360) + 360) % 360;
+      glide = null;
+    } else {
+      glide = { from: spin, to: to, t0: 0 };
+      start();
+    }
+    paint();
+  });
+
+  /* One rAF for all three rings, and only the visible one advances. */
+  function tick(t) {
+    raf = requestAnimationFrame(tick);
+    const dt = last ? Math.min(t - last, 60) : 0;
+    last = t;
+    if (glide) {
+      if (!glide.t0) glide.t0 = t;
+      const k = Math.min(1, (t - glide.t0) / GLIDE);
+      const e = 1 - Math.pow(1 - k, 3);          /* ease out */
+      spin = glide.from + (glide.to - glide.from) * e;
+      if (k >= 1) { glide = null; spin = ((spin % 360) + 360) % 360; }
       paint();
+      return;
+    }
+    /* A picked item waits where it was put: the second click has to land on
+       the same piece, and a ring that carried it away would make that a game
+       of timing. */
+    if (hover || document.hidden || stages[at].picked >= 0) return;
+    const d = (dt / TURN) * 360;
+    spin += d;
+    turned += d;
+    if (spin >= 360) spin -= 360;
+    /* "services should auto circle every full rotation of the ring unless
+       something is clicked" — so a full turn hands on to the next service, and
+       the first click anywhere in the section ends that for the visit. */
+    if (!held && turned >= 360) { go(at + 1, false); return; }
+    paint();
+  }
+
+  function start() {
+    if (prefersReduced || raf) return;
+    last = 0;
+    raf = requestAnimationFrame(tick);
+  }
+  function stop() {
+    cancelAnimationFrame(raf);
+    raf = 0;
+  }
+
+  document.getElementById("svcNext")
+    ?.addEventListener("click", () => go(at + 1, true));
+  document.getElementById("svcPrev")
+    ?.addEventListener("click", () => go(at - 1, true));
+
+  /* Off screen it does not turn: this is three rings of decoded image and a
+     compositing cost, several screens below the fold. */
+  if (window.IntersectionObserver) {
+    new IntersectionObserver((es) => (es[0].isIntersecting ? start() : stop()),
+      { rootMargin: "120px" }).observe(win);
+  } else {
+    start();
+  }
+
+  return {
+    build,
+    paint,
+    /* Sizes are pixels off the window's measured box, so they are wrong the
+       moment it changes. */
+    resize() { layout(); paint(); },
+    /* Language switch: the name, the list and the line are the text in here. */
+    setService(id) {
+      const n = ORDER.indexOf(id);
+      if (n >= 0) go(n, true);
     },
-    next() { go(idx + 1); },
-    prev() { go(idx - 1); },
   };
 })();
-
-function activateService(id, scroll) {
-  const cells = document.querySelectorAll(".svc-pick");
-  if (!cells.length) return;
-  cells.forEach((b) => {
-    const on = b.dataset.service === id;
-    b.classList.toggle("is-active", on);
-    b.setAttribute("aria-selected", String(on));
-  });
-  currentService = id;
-  svcPicker.setService(id);
-  if (scroll) {
-    document.getElementById("services").scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
-  }
-}
-
-document.getElementById("swNext")?.addEventListener("click", () => svcPicker.next());
-document.getElementById("swPrev")?.addEventListener("click", () => svcPicker.prev());
-
-document.querySelectorAll(".svc-pick").forEach((btn) => {
-  btn.addEventListener("click", () => activateService(btn.dataset.service, false));
-  /* No filmLoop.focus()/blur() here: the strip is three screens up, so the
-     glide drove nothing visible while pointing the loop at a frame off
-     screen — which is how the strip ended up stopped. focus() still exists
-     for anything near the hero that wants it. */
-});
 
 const band = document.querySelector(".contact-band");
 if (band) {
@@ -1571,8 +1736,25 @@ const lightbox = (() => {
      the strip lays an emulsion wash over its frames so they read as exposed
      onto the stock, and the lightbox is where that comes off and the work is
      seen in its own colours. */
-  const OPENS = ".why .holder, .gw-tile, .lib-grid .tile, .sheet-shot, .clip-photo, .film-frame";
-  const GROUPS = ".gwall, .lib-grid, .reelshow-track, .clippings, .wb1, .film-group, main";
+  const OPENS = ".why .holder, .gw-tile, .lib-grid .tile, .sheet-shot, .clip-photo," +
+    " .film-frame, .ab-media";
+  const GROUPS = ".gwall, .lib-grid, .reelshow-track, .clippings, .wb1, .film-group," +
+    " .ab-read, main";
+  /* ⚠️ The carousel triples its slide set so the loop has no rewind, so the
+     track holds 24 nodes showing 8 pictures. Counting the DOM gave "3 / 24"
+     and made the arrows walk the same eight three times over — and a click
+     that landed on a clone was not in the set at all, so `indexOf` returned
+     -1 and the overlay silently opened slide 1 instead. The set is the
+     originals; a clone is resolved back to the one it was copied from. */
+  const CLONE = ".is-clone";
+
+  const origin = (node) => {
+    const c = node.closest(CLONE + "[data-slide]");
+    if (!c) return node;
+    const twin = c.parentElement.querySelector(
+      '[data-slide="' + c.dataset.slide + '"]:not(' + CLONE + ")");
+    return (twin && twin.querySelector(OPENS)) || node;
+  };
 
   let root, stage, capEl, countEl, group = [], at = 0, lastFocus = null;
 
@@ -1617,8 +1799,12 @@ const lightbox = (() => {
     const film = node.dataset && node.dataset.film;
     const img = node.querySelector("img");
     const date = node.querySelector(".t-date");
+    /* `data-full` is the archive file behind a thumbnail. Without it the
+       overlay would enlarge the 600px tile derivative — which looks exactly
+       like a broken image pipeline and is not one. */
+    const full = img && (img.dataset.full || img.currentSrc || img.src);
     if (film) {
-      return { video: `${R2}/video/${film}`, poster: img && img.src,
+      return { video: `${R2}/video/${film}`, poster: full,
                date: date && date.textContent };
     }
     const vid = node.querySelector("video");
@@ -1638,8 +1824,7 @@ const lightbox = (() => {
     if (!img) return null;
     /* a placeholder holder has nothing worth enlarging */
     if (img.src.startsWith("data:")) return null;
-    return { img: img.currentSrc || img.src, alt: img.alt,
-             date: date && date.textContent };
+    return { img: full, alt: img.alt, date: date && date.textContent };
   }
 
   function paint() {
@@ -1683,8 +1868,10 @@ const lightbox = (() => {
 
   function open(node) {
     if (!root) build();
+    node = origin(node);
     const host = node.closest(GROUPS) || document.body;
-    group = [...host.querySelectorAll(OPENS)].filter(itemOf);
+    group = [...host.querySelectorAll(OPENS)]
+      .filter((el) => itemOf(el) && !el.closest(CLONE));
     at = Math.max(0, group.indexOf(node));
     if (!group.length) return;
     lastFocus = document.activeElement;
@@ -1724,6 +1911,16 @@ const lightbox = (() => {
     if (e.target.closest(".sw-stage, .sheet-thumbs, .lb-open")) return;
     const node = e.target.closest(OPENS);
     if (!node || !itemOf(node)) return;
+    e.preventDefault();
+    open(node);
+  });
+
+  /* Anything with a role of button has to answer the keyboard too. The archive
+     binds its own because its tiles are re-rendered; these are in the page. */
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const node = e.target.closest && e.target.closest('[role="button"]' + "");
+    if (!node || !node.matches(OPENS) || !itemOf(node)) return;
     e.preventDefault();
     open(node);
   });
@@ -1768,6 +1965,23 @@ const previews = (() => {
      load. */
   let nodes = [];
   if (prefersReduced) return { refresh() { } };
+
+  /* ⚠️ A preview is a REEL, and the reels run 17–83 MB each. Autoplaying one
+     the moment a slide centres is fine on a desk and expensive in the street,
+     which is where this site is mostly opened — the carousel advances on its
+     own, so a visitor who never touches it can still pull several of them.
+
+     So: if the browser says the connection is slow or the visitor has asked
+     their phone to save data, the carousel stays a run of poster frames. That
+     is not a degraded page — it is what this section looked like until today,
+     and the posters are the reels' own first frames.
+
+     Feature-detected, because Network Information is Chromium-only; where it
+     does not exist nothing is assumed and the previews play. */
+  const conn = navigator.connection || navigator.mozConnection;
+  const thin = !!conn && (conn.saveData === true
+    || /^(slow-)?2g$/.test(conn.effectiveType || ""));
+  if (thin) return { refresh() { } };
 
   const phone = () => window.matchMedia("(max-width: 640px)").matches;
 
@@ -1923,9 +2137,21 @@ let openCat = "all";
    the words — the one thing this archive must not do (see HANDOFF). Mixed
    ratios are why the run is a column layout rather than a grid of equal
    cells. */
+/* The tile for a software project: the client's own mark on a field of their
+   site's dominant colour, cut to the tile's 1.6 by derive_shots.py.
+
+   ⚠️ It was a 160px square crop of screenshot 1, drawn into a tile ~270px wide
+   at a different aspect — upscaled AND showing a fragment of a page rather
+   than whose page it is. That is the "low quality covers" the agency raised on
+   2026-08-23. Both files are derived, not stored per project: the name is the
+   first shot's, so there is nothing extra to keep in step. */
+const coverOf = (p) =>
+  "assets/shots/" + p.profile.shots[0].replace(/-\d+$/, "-card") + ".webp";
+
 function renderLibrary() {
   if (!accRoot) return;
   accRoot.innerHTML = "";
+  pending.clear();
 
   /* Undated sorts LAST, not to 1970. The nine design pieces carry no date at
      all, and an empty string compares below every real one — which would file
@@ -1944,8 +2170,48 @@ function renderLibrary() {
      way to actually show that work — what it is, what it runs on, what it was
      for. Same tile, different payload.
 
-     ⚠️ The tech entries and their screenshots are still PLACEHOLDER content
-     (see HANDOFF). The sheet is real; what it currently displays is not. */
+     All three are real and live as of 2026-08-22. */
+  /* ══════════ the subsection runs ══════════
+     A service panel is filed into named runs; `all` deliberately is not — it
+     is the whole archive newest-first, and a row's run is a property of its
+     service, so grouping the mixed view would just re-sort it by category
+     under another name.
+
+     ⚠️ NOT the SUBCATS taxonomy the services switcher steps through. That one
+     is what the agency SELLS (reels / video / stills, three of them); this is
+     how the archive is FILED (one videos run, one photos run). They overlap
+     without matching, and forcing one to serve both would file a horizontal
+     film and a vertical reel apart on the page whose whole job is to show the
+     work together.
+
+     `of` claims a row for a run, first run wins. A run that claims nothing is
+     not rendered — the agency's rule. Which is why `logos`, `print` and `apps`
+     are declared with predicates that cannot currently match: they are the
+     shape the archive grows into, not dead code, and the day a logo is filed
+     they appear on their own.
+
+     ⚠️ Every design piece is a digital ad because the agency said so
+     (2026-08-22), not because anything in the file says which is which. MEDIA
+     carries no subsection field. When they classify the nine, this becomes a
+     lookup and `of` stops being a constant. */
+  const LIBSUBS = {
+    design: [
+      { id: "ads", ar: "إعلانات رقمية", en: "Digital Ads", of: () => true },
+      { id: "logos", ar: "شعارات", en: "Logos", of: () => false },
+      { id: "print", ar: "مطبوعات", en: "Printables", of: () => false },
+    ],
+    photo: [
+      { id: "videos", ar: "فيديوهات", en: "Videos", of: (r) => !!(r.m && r.m.v) },
+      { id: "photos", ar: "صور", en: "Photos", of: (r) => !!(r.m && !r.m.v) },
+    ],
+    tech: [
+      { id: "sites", ar: "مواقع", en: "Websites",
+        of: (r) => !!(r.p && r.p.profile.kind === "site") },
+      { id: "apps", ar: "تطبيقات", en: "Apps",
+        of: (r) => !!(r.p && r.p.profile.kind === "app") },
+    ],
+  };
+
   const rows = (catId) => {
     const media = (catId === "all" ? MEDIA : MEDIA.filter((m) => m.c === catId))
       .map((m) => ({ kind: "media", d: m.d, key: m.f, m }));
@@ -1966,7 +2232,7 @@ function renderLibrary() {
     panel.className = "acc-panel" + (cat.id === openCat ? " open" : "");
     panel.dataset.cat = cat.id;
 
-    const tiles = items.map((row) => {
+    const tileHTML = (row) => {
       /* A software project has no photograph of itself — it gets a named tile
          that opens the profile sheet, which is where that work can actually
          be shown. It is the one kind of tile here that carries a title. */
@@ -1975,7 +2241,7 @@ function renderLibrary() {
         return `
       <figure class="tile has-profile" data-project="${row.at}" role="button" tabindex="0">
         <div class="tile-img" style="aspect-ratio:1.6">
-          <img src="${HOLDER}" alt="${p[lang]}" loading="lazy">
+          <img src="${coverOf(p)}" alt="${p[lang]}" loading="lazy" decoding="async">
           <span class="tile-open" aria-hidden="true">${I18N.pfOpen[lang]}</span>
         </div>
         <figcaption><span>${p[lang]}</span><span class="t-date">${fmtDate(p.date)}</span></figcaption>
@@ -1986,17 +2252,58 @@ function renderLibrary() {
          muted loops is the exact load the phone pass spent a week removing,
          and these run 28-209 MB. */
       const m = row.m;
-      const src = m.v ? `${R2}/poster/${m.p}` : `${R2}/img/${m.f}`;
+      /* ⚠️ The TILE takes the 600px derivative, not the archive file. A browser
+         decodes an image at its intrinsic size however small it is drawn, so
+         serving the 1600px master into a tile ~180 CSS px wide on a phone put
+         22.9 megapixels of decoded texture on the page for 24 visible tiles.
+         The lightbox still opens the full file — that is the one place the
+         work is meant to be seen at size. resources/thumb_media.py derives
+         them; every key under thumb/ is the same name as its source. */
+      const src = `${R2}/thumb/${m.v ? m.p : m.f}`;
+      /* The full file the lightbox opens. Carried on the node because the
+         overlay reads the picture that is on screen, and the picture on screen
+         is now the thumbnail. */
+      const full = m.v ? `${R2}/poster/${m.p}` : `${R2}/img/${m.f}`;
       const date = m.d ? `<figcaption><span class="t-date">${fmtDate(m.d)}</span></figcaption>` : "";
       return `
       <figure class="tile${m.v ? " is-film" : ""}"${m.v ? ` data-film="${m.f}" role="button" tabindex="0" aria-label="${I18N.mPlay[lang]}"` : ""}>
         <div class="tile-img" style="aspect-ratio:${m.r}">
-          <img src="${src}" alt="" loading="lazy" decoding="async">
+          <img src="${src}" data-full="${full}" alt="" loading="lazy" decoding="async">
           ${m.v ? '<span class="tile-play" aria-hidden="true"></span>' : ""}
         </div>
         ${date}
       </figure>`;
-    }).join("");
+    };
+
+    /* First run to claim a row keeps it. Anything no run claims still gets a
+       grid of its own — a piece of work must never fall out of the archive
+       because the taxonomy grew a hole. */
+    const claimed = new Set();
+    const runs = [];
+    (cat.id === "all" ? [] : LIBSUBS[cat.id] || []).forEach((sub) => {
+      const list = items.filter((r) => !claimed.has(r) && sub.of(r));
+      list.forEach((r) => claimed.add(r));
+      if (list.length) runs.push({ sub, list });
+    });
+    const rest = items.filter((r) => !claimed.has(r));
+    if (rest.length) runs.push({ sub: null, list: rest });
+
+    /* ⚠️ The panel ships EMPTY and is filled the first time it opens.
+       Three of the four panels are shut at any moment, and a shut panel is
+       still 64-104px wide with `overflow: hidden` — not `display: none` — so
+       every tile in it was being laid out, in a four-column layout, inside a
+       box narrower than one column. Most items exist twice (once in `all`,
+       once in their service), which put 158 tiles and 164 images in the
+       document to show 79. `loading="lazy"` does not help with this: it defers
+       the BYTES, not the boxes.
+
+       Measured on a phone profile at 4x CPU throttle before this change:
+       1,189 DOM nodes, 164 images, and 151ms for one forced full layout. */
+    const fill = () => `${runs.map((run) => `
+        <section class="lib-sub">
+          ${run.sub ? `<div class="sub-head"><span class="sub-name">${run.sub[lang]}</span></div>` : ""}
+          <div class="lib-grid">${run.list.map(tileHTML).join("")}</div>
+        </section>`).join("")}`;
 
     panel.innerHTML = `
       <button class="spine" aria-expanded="${cat.id === openCat}">
@@ -2007,14 +2314,18 @@ function renderLibrary() {
           <h2>${cat[lang]}</h2>
           <span class="panel-count">${num(items.length)}</span>
         </div>
-        <div class="lib-run">
-          <div class="lib-grid">${tiles}</div>
-        </div>
+        <div class="lib-run"></div>
       </div>`;
+    pending.set(cat.id, () => {
+      panel.querySelector(".lib-run").innerHTML = fill();
+    });
 
     panel.querySelector(".spine").addEventListener("click", () => {
       if (openCat === cat.id) return;
       openCat = cat.id;
+      /* Built before the class flips, so the panel opens onto its work rather
+         than onto cream that fills in a frame later. */
+      ensurePanel(cat.id);
       accRoot.querySelectorAll(".acc-panel").forEach((p) => {
         const isOpen = p.dataset.cat === openCat;
         p.classList.toggle("open", isOpen);
@@ -2025,6 +2336,34 @@ function renderLibrary() {
 
     accRoot.appendChild(panel);
   });
+
+  ensurePanel(openCat);
+  syncSubOffset();
+}
+
+/* Panels not yet built, by category id. A builder is dropped as it runs, so
+   `ensurePanel` is safe to call from anywhere and costs nothing after the
+   first time. Cleared by renderLibrary, which re-registers all four — the
+   language switch re-renders the whole archive. */
+const pending = new Map();
+function ensurePanel(catId) {
+  const build = pending.get(catId);
+  if (!build) return false;
+  pending.delete(catId);
+  build();
+  return true;
+}
+
+/* A subsection head pins directly under the panel head, which is itself sticky
+   at the top of the same scroller. That offset is measured rather than typed:
+   the panel head is set in the display face at a clamp, in two languages, and
+   a guessed constant either leaves a cream gap above the heading or tucks it
+   behind — and it is wrong at a different width for a different reason each
+   time. Re-run after the fonts land; the fallback face is a different height. */
+function syncSubOffset() {
+  if (!accRoot) return;
+  const head = accRoot.querySelector(".panel-head");
+  if (head) accRoot.style.setProperty("--phead", head.offsetHeight + "px");
 }
 
 /* Delegated once on the root, which survives every re-render.
@@ -2063,17 +2402,26 @@ const projectSheet = (() => {
   const sheet = root.querySelector(".sheet");
   const shot = el("sheetShot");
   const thumbs = el("sheetThumbs");
-  const webview = el("webview");
-  const wvFrame = el("wvFrame");
 
   let current = null, shotIdx = 0, lastFocus = null;
 
-  const shotSrc = () => HOLDER;
+  /* Real screenshots, captured from the live deployments. This returned the
+     grey placeholder for as long as the projects were invented; it is the one
+     line that decides whether this sheet shows work or a swatch.
+
+     `-t` is the 400x250 thumb beside the 1600x1000 plate. Both are cut to the
+     sheet's own aspect ratios by resources/derive_shots.py, so nothing here
+     needs a width or a height — the CSS already states them. */
+  const shotSrc = (id, thumb) =>
+    "assets/shots/" + id + (thumb ? "-t" : "") + ".webp";
+
+  /* The square version of the same logo card the tile shows. */
+  const coverSrc = (shots) => shotSrc(shots[0].replace(/-\d+$/, "-cover"));
 
   function paintShot(i) {
     const shots = current.profile.shots;
     shotIdx = ((i % shots.length) + shots.length) % shots.length;
-    shot.src = shotSrc(shots[shotIdx], 1600, 1000);
+    shot.src = shotSrc(shots[shotIdx]);
     thumbs.querySelectorAll("button").forEach((b, n) =>
       b.classList.toggle("on", n === shotIdx));
     if (!prefersReduced) {
@@ -2084,45 +2432,36 @@ const projectSheet = (() => {
 
   function paint() {
     const p = current, pr = p.profile;
-    el("sheetCover").src = shotSrc(p.seed, 300, 300);
+    el("sheetCover").src = coverSrc(pr.shots);
     el("sheetTitle").textContent = p[lang];
     el("sheetTagline").textContent = pr.tagline[lang];
-    el("sheetDetailsK").textContent = I18N.pfDetails[lang];
     el("sheetAboutK").textContent = I18N.pfAbout[lang];
     el("sheetShotsK").textContent = I18N.pfShots[lang];
     el("sheetBody").textContent = pr.body[lang];
     el("sheetClose").setAttribute("aria-label", I18N.pfClose[lang]);
 
-    el("sheetMeta").innerHTML = pr.meta.map((m) => `
-      <div class="sm-row">
-        <dt>${m.k[lang]}</dt>
-        <dd${m.latin ? ' class="latin" lang="en" dir="ltr"' : ""}>${m.v[lang]}</dd>
-      </div>`).join("") + `
-      <div class="sm-row">
-        <dt>${I18N.pfService[lang]}</dt>
-        <dd>${CATS.find((c) => c.id === p.cat)[lang]}</dd>
-      </div>
-      <div class="sm-row">
-        <dt>${I18N.pfDate[lang]}</dt>
-        <dd>${fmtDate(p.date)}</dd>
-      </div>`;
-
     thumbs.innerHTML = pr.shots.map((s, i) => `
       <button type="button" data-shot="${i}" aria-label="${I18N.pfShots[lang]} ${num(i + 1)}">
-        <img src="${shotSrc(s, 320, 200)}" alt="" loading="lazy">
+        <img src="${shotSrc(s, true)}" alt="" loading="lazy">
       </button>`).join("");
 
-    /* only sites get a live preview; apps just show their screenshots */
+    /* The work is live, so the button leaves the site rather than framing it.
+       It used to open a sandboxed iframe around a preview BUILD, which existed
+       because the projects were invented and there was nothing real to point
+       at. There is now — and a real site in a real tab is the honest version
+       of that button, as well as the one a visitor expects. */
     const cta = el("sheetPreview");
     const note = el("sheetNote");
-    const hasPreview = pr.kind === "site" && pr.preview;
-    cta.hidden = !hasPreview;
-    note.hidden = !hasPreview;
-    if (hasPreview) {
-      cta.querySelector(".ob-label").textContent = I18N.pfPreview[lang];
-      note.textContent = I18N.pfPreviewNote[lang];
+    const hasSite = !!pr.url;
+    cta.hidden = !hasSite;
+    note.hidden = !hasSite;
+    if (hasSite) {
+      cta.href = pr.url;
+      cta.querySelector(".ob-label").textContent = I18N.pfVisit[lang];
+      /* The address itself, not a description of it: it says where the button
+         goes, and it is the one line on this sheet a visitor might type out. */
+      note.textContent = pr.url.replace(/^https?:\/\//, "");
     }
-    el("wvNote").textContent = I18N.pfPreviewNote[lang];
 
     paintShot(0);
   }
@@ -2130,28 +2469,6 @@ const projectSheet = (() => {
   thumbs.addEventListener("click", (e) => {
     const b = e.target.closest("[data-shot]");
     if (b) paintShot(+b.dataset.shot);
-  });
-
-  /* ── the browser-chrome preview ── */
-  function openWebview() {
-    const pr = current.profile;
-    const slug = current.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    el("wvUrl").textContent = `preview.aliphcreative.com/${slug}`;
-    wvFrame.src = pr.preview;
-    webview.hidden = false;
-    if (!prefersReduced) {
-      gsap.fromTo(webview, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" });
-      gsap.fromTo(webview.querySelector(".wv-window"),
-        { y: 30, scale: 0.97 }, { y: 0, scale: 1, duration: 0.5, ease: "power3.out" });
-    }
-  }
-  function closeWebview() {
-    webview.hidden = true;
-    wvFrame.src = "about:blank";   // stop the preview build the moment it closes
-  }
-  el("sheetPreview").addEventListener("click", openWebview);
-  webview.addEventListener("click", (e) => {
-    if (e.target.closest("[data-wv-close]")) closeWebview();
   });
 
   function open(i) {
@@ -2172,7 +2489,6 @@ const projectSheet = (() => {
   }
 
   function close() {
-    closeWebview();
     root.hidden = true;
     root.setAttribute("aria-hidden", "true");
     document.body.classList.remove("sheet-open");
@@ -2185,8 +2501,7 @@ const projectSheet = (() => {
   });
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape" || root.hidden) return;
-    if (!webview.hidden) closeWebview();
-    else close();
+    close();
   });
 
   return {
@@ -2260,7 +2575,11 @@ if (page === "about" && !prefersReduced) {
       scrollTrigger: { trigger: el, start: "top 88%" },
     });
   });
-  gsap.utils.toArray(".clip, .ab-p, .ab-fact").forEach((el) => {
+  /* The card is the unit now, not the paragraph inside it — and `.ab-fact` is
+     gone with the facts table (2026-08-23). A stale selector here costs
+     nothing at run time and is exactly how a reveal quietly stops covering
+     something that was renamed. */
+  gsap.utils.toArray(".clip, .ab-media, .ab-card").forEach((el) => {
     gsap.from(el, {
       opacity: 0, y: 26, duration: 0.7, ease: "power2.out",
       scrollTrigger: { trigger: el, start: "top 92%" },
@@ -2311,8 +2630,16 @@ const reelShow = (() => {
      pixel on screen does. It only ever happens once scrolling has settled,
      never mid-scroll and never under a live finger. */
   if (n > 1) {
+    /* ⚠️ Tag the originals and mark the copies. The clones are a scrolling
+       trick, not content: anything that counts, indexes or lists the slides
+       has to be able to tell the eight real pictures from the 24 nodes in the
+       DOM, and `aria-hidden` alone only told assistive tech. `data-slide` is
+       what maps a clone back to the original it was copied from — cloneNode
+       carries it across, so the two always agree. */
+    real.forEach((s, i) => { s.dataset.slide = String(i); });
     const copy = () => real.map((s) => {
       const c = s.cloneNode(true);
+      c.classList.add("is-clone");
       c.setAttribute("aria-hidden", "true");   // the same eight pictures, thrice
       return c;
     });
@@ -2476,6 +2803,65 @@ if (QS.get("paper") === "1") {
   document.body.classList.add("paper");
 }
 
+/* ══════════ arriving from a ring ══════════
+   The home page's rings link here on a piece, not on a page: `?open=<file>`
+   for something out of the archive, `?project=<n>` for a software project.
+   This opens the panel that holds it, brings the tile into view, and opens it
+   the way clicking it would.
+
+   ⚠️ Runs after boot, not with it. renderLibrary paints from applyI18n, so at
+   the time this file is read the tile being looked for does not exist yet.
+
+   ⚠️ The key is the MEDIA filename — a film is filed under its own `.mp4`
+   even though the tile shows a poster, which is why the ring sends `open` and
+   not the picture's src. */
+function openFromQuery() {
+  if (document.body.dataset.page !== "library") return;
+  const wantProject = QS.get("project");
+  const wantOpen = QS.get("open");
+  if (wantProject === null && !wantOpen) return;
+
+  /* ⚠️ Panels are built on first open, so the tile being looked for may not
+     be in the document at all yet. Build the one that holds it — its service
+     for a media file, `tech` for a project — and `all` as the fallback the
+     search below falls through to. */
+  const home = wantProject !== null
+    ? "tech"
+    : (MEDIA.find((m) => m.f === wantOpen || m.p === wantOpen) || {}).c;
+  if (home) ensurePanel(home);
+  ensurePanel("all");
+
+  const sel = wantProject !== null
+    ? '.tile[data-project="' + CSS.escape(wantProject) + '"]'
+    : '.tile[data-film="' + CSS.escape(wantOpen) + '"]';
+  let all = Array.from(document.querySelectorAll(sel));
+  if (!all.length && wantOpen) {
+    all = Array.from(document.querySelectorAll('.tile img[src$="/' + wantOpen + '"]'))
+      .map((i) => i.closest(".tile"));
+  }
+  /* ⚠️ Every piece appears TWICE — once in its category panel and once in the
+     mixed `all` run — and `all` comes first in the DOM. Prefer the category:
+     arriving from a ring should land in the service that ring belongs to, with
+     the neighbouring work being the rest of that service rather than the whole
+     archive. It also decides what the overlay's arrows walk through. */
+  const tile = all.find((t) => t.closest(".acc-panel")?.dataset.cat !== "all") || all[0];
+  if (!tile) return;
+
+  const panel = tile.closest(".acc-panel");
+  if (panel && !panel.classList.contains("open")) panel.querySelector(".spine").click();
+
+  /* ⚠️ NOT requestAnimationFrame. A link opened into a background tab does not
+     paint, and rAF there does not run at all — the piece would stay unopened
+     until the tab was looked at, which is exactly when the arrival is over. A
+     timer runs either way, and it also outlasts the panel's open transition,
+     so the tile has its real position before anything scrolls to it. */
+  setTimeout(() => {
+    tile.scrollIntoView({ block: "center", behavior: prefersReduced ? "auto" : "smooth" });
+    if (wantProject !== null) projectSheet.open(+wantProject);
+    else lightbox.open(tile);
+  }, 460);
+}
+
 /* `?flat=1` — a DIAGNOSTIC, not a design option.
    The linen is a viewport-sized fixed layer with mix-blend-mode: multiply
    sitting above everything. A blend mode cannot be composited as a plain
@@ -2496,6 +2882,7 @@ if (QS.get("flat") === "1") {
 applyI18n();
 initDropCap();
 syncMenuBtn();
+openFromQuery();
 setInterval(tickClock, 20000);
 
 /* widths measured before Idris lands are wrong and leave a gap in the
@@ -2504,10 +2891,8 @@ if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
     rebuildLoops();
     filmLoop.rebuild();
-    /* fitPicks measures text, so it is wrong until Idris has landed — the
-       fallback face is a different width entirely */
-    fitPicks();
     queueMenuSync();
+    syncSubOffset();
   });
 }
 
@@ -2547,6 +2932,9 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(() => {
     rebuildLoops();
     filmLoop.rebuild();
-    fitPicks();
+    /* The ring's item sizes and radius are pixels off the window's measured
+       height, so they are stale the moment the window changes. */
+    serviceRings.resize();
+    syncSubOffset();
   }, 250);
 });

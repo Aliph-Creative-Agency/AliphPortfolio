@@ -42,3 +42,9 @@ Thumbs.db
 desktop.ini
 .DS_Store
 .gstack/
+resources/shots/
+resources/edge-cdp*/
+
+# Derivative cache for thumb_media.py — pulled from R2 and re-derived on
+# demand, so nothing here is a source.
+resources/thumb-cache/

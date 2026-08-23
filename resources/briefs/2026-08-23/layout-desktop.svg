@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 720" width="1040" height="720">
+  <!-- Redrawn from the user's hand sketch of 2026-08-23. The colours are the
+       sketch's own annotation colours, not the site's palette.
+
+       This is the DESKTOP layout for ماذا نفعل؟. The phone keeps the layout
+       that is on the site today (ring under a centred service name), with the
+       "all work" button CENTRED. -->
+  <rect width="1040" height="720" fill="#fff"/>
+
+  <!-- the section banner, full width -->
+  <rect x="8" y="12" width="1016" height="140" fill="none" stroke="#8e44ad" stroke-width="4"/>
+  <text x="516" y="88" font-family="Arial,sans-serif" font-size="26" font-weight="700"
+        letter-spacing="2" text-anchor="middle" fill="#000">WHAT WE DO</text>
+
+  <!-- the ring, left, large and square-ish -->
+  <rect x="6" y="174" width="504" height="390" fill="none" stroke="#2244cc" stroke-width="4"/>
+  <text x="258" y="390" font-family="Arial,sans-serif" font-size="34" font-weight="700"
+        text-anchor="middle" fill="#000">media ring here</text>
+  <!-- the little square the sketch puts at the ring box's top-left corner -->
+  <rect x="72" y="158" width="22" height="22" fill="#fff" stroke="#000" stroke-width="2"/>
+
+  <!-- the three services stacked at the right; the active one is underlined -->
+  <text x="536" y="252" font-family="Arial,sans-serif" font-size="46" font-weight="700"
+        fill="#000">media production</text>
+  <line x1="536" y1="272" x2="1006" y2="272" stroke="#000" stroke-width="7"/>
+  <text x="536" y="396" font-family="Arial,sans-serif" font-size="46" font-weight="700"
+        fill="#000">graphic</text>
+  <text x="536" y="536" font-family="Arial,sans-serif" font-size="46" font-weight="700"
+        fill="#000">tech</text>
+
+  <!-- the description of the item facing the viewer, under the ring -->
+  <rect x="6" y="566" width="510" height="146" fill="none" stroke="#dd2222" stroke-width="4"/>
+  <text x="261" y="608" font-family="Arial,sans-serif" font-size="21" font-weight="700"
+        text-anchor="middle" fill="#000">media item description</text>
+
+  <!-- all work, at the right, under the service list -->
+  <ellipse cx="775" cy="644" rx="137" ry="44" fill="none" stroke="#dd2222" stroke-width="5"/>
+  <text x="775" y="656" font-family="Arial,sans-serif" font-size="30" font-weight="700"
+        text-anchor="middle" fill="#000">all work</text>
+</svg>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 300" width="380" height="300">
+  <!-- Redrawn from the user's hand sketch of 2026-08-23: "when i said tilted i
+       meant like this".
+
+       ⚠️ THE CORRECTION THIS SKETCH MAKES. The ring's PLANE is tilted — it is
+       drawn as an ellipse with visible thickness, a band seen from slightly
+       above, like Saturn's. But the media item (red) stands UPRIGHT through
+       that band: it is vertical to the viewer, not lying in the tilted plane.
+
+       The implementation on the site tilts the whole ring with a single
+       rotateX on the container, which tilts every item with it. To match this,
+       the tilt has to be undone per item — rotateX(-tilt) on the item after it
+       is placed — so the orbit is elliptical while the pictures stay square to
+       the eye. -->
+  <g fill="none" stroke="#000" stroke-width="2.4" stroke-linecap="round">
+    <!-- the band: two concentric ellipse arcs with the near edge closing it -->
+    <ellipse cx="190" cy="170" rx="168" ry="62"/>
+    <path d="M22 170 a168 62 0 0 0 336 0"/>
+    <path d="M22 170 v22 a168 62 0 0 0 336 0 v-22"/>
+
+    <!-- segment marks across the near face of the band -->
+    <path d="M104 224 v26"/>
+    <path d="M258 222 v-26"/>
+    <path d="M320 196 l14 22"/>
+    <path d="M150 246 l58 -10"/>
+    <path d="M232 208 l10 26"/>
+  </g>
+
+  <!-- the media item: upright, straddling the front of the band -->
+  <path d="M108 28 h132 v152 h-132 z" fill="none" stroke="#e01b1b" stroke-width="5"/>
+
+  <!-- the arrow marks in the sketch, showing the direction of travel -->
+  <g fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round">
+    <path d="M74 126 l14 6 -13 7"/>
+    <path d="M244 196 l-3 15 -11 -6"/>
+  </g>
+</svg>

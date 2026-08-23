@@ -56,13 +56,34 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-/* 150% across all pages; rem-based sizes inherit it */
-html { scroll-behavior: smooth; overflow-x: clip; font-size: 150%; }
+/* 150% across all pages; rem-based sizes inherit it.
+   ⚠️ The cream lives HERE, not on body. The texture layers below are body
+   pseudo-elements at negative z-index, and a negative-z child of body still
+   paints ABOVE body's own background — so a cream body background would bury
+   them. The root paints the field; body stays transparent over it. */
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  font-size: 150%;
+  background: var(--cream);
+}
 
 body {
   font-family: var(--font-body);
-  background: var(--cream);
+  background: transparent;
   color: var(--ink);
+  /* Body copy sets BOLD, inherited so every paragraph picks it up. Idris Flat
+     ships a real 700 (29LTIdris-FlatBold.otf, declared above), so this resolves
+     to the drawn face rather than a synthesised smear — which is the failure
+     mode to watch for here: a missing weight does not error, the browser just
+     fakes one, and faked bold on an Arabic face reads as the wrong font.
+     Check `document.fonts.check('700 16px "Idris Flat"')` after any font change.
+
+     ⚠️ Bold sets WIDER, so block 1's solved body size is not transferable
+     across this change — --why-type was re-solved with fit_columns.py against
+     the bold face. Explicit weights below (500 meta, 800 display) are their own
+     tiers and stay where they are. */
+  font-weight: 700;
   line-height: 1.85;
   overflow-x: clip;
 }
@@ -83,7 +104,22 @@ body::before {
   top: -8vh;
   height: 116vh;                    /* fallback where lvh is unsupported */
   height: calc(100lvh + 16vh);
-  background: url("assets/img/fabric.webp") repeat;
+  /* ⚠️ The weave multiplies against its OWN cream, not against the page.
+     It used to sit at z-index 5 with `mix-blend-mode: multiply`, i.e. on top
+     of every photograph and every line of type on the site — the weave was
+     printed over the work rather than under it. Texture is the paper the page
+     is on, so it belongs behind the content.
+
+     Moving it down is what forces the blend to change too: `mix-blend-mode`
+     composites against whatever is painted BELOW it, and below a background
+     layer there is nothing but the cream. `background-blend-mode` blends the
+     tile into this element's own cream instead, which is self-contained —
+     same arithmetic, same result over the cream field, no backdrop to read.
+     That also drops the per-frame backdrop re-composite that made this layer
+     the prime suspect for the phone stutter (open question 17). */
+  background-color: var(--cream);
+  background-image: url("assets/img/fabric.webp");
+  background-repeat: repeat;
   /* Two knobs and they are not interchangeable: opacity is how deep the weave
      sits into the cream, tile size is how close it is. A tighter tile reads
      stronger at the same opacity because more thread edges land per
@@ -91,17 +127,16 @@ body::before {
      phone and lifting opacity alone would have muddied the ink instead of
      showing the weave. 0.28/620 is both stronger and closer. */
   background-size: 620px;
-  mix-blend-mode: multiply;
+  background-blend-mode: multiply;
   opacity: 0.28;
   pointer-events: none;
-  z-index: 5;
+  z-index: -2;
 }
-/* ?flat=1 — see main.js. Same weave, no blend, so the compositor treats it as
-   an ordinary layer. Opacity is dropped to match how much darker `multiply`
-   renders the same tile, so the two look comparable and only the COST differs;
-   otherwise the A/B compares two different-looking pages and proves nothing. */
+/* ?flat=1 — see main.js. Kept as a switch, but it no longer proves much: the
+   layer stopped reading the backdrop when it moved behind the content, so
+   there is no blend cost left for it to remove. */
 body.flat-linen::before {
-  mix-blend-mode: normal;
+  background-blend-mode: normal;
   opacity: 0.12;
 }
 /* ── whole-site paper, behind a switch ──
@@ -110,19 +145,22 @@ body.flat-linen::before {
    placed deliberately. Off by default; the same query-string convention the
    chat widget already uses (`?chat=up`).
 
-   It sits above the linen and below the lightbox. Deliberately weaker than the
-   hero panel's copy — at full strength across a whole page it stops being a
-   material and becomes a filter. */
+   It sits above the linen and, like the linen, BEHIND the content — the paper
+   is what the page is printed on, not a filter laid over the printing.
+   Deliberately weaker than the hero panel's copy: at full strength across a
+   whole page it stops being a material and becomes a filter. */
 body.paper::after {
   content: "";
   position: fixed;
   inset: 0;
-  background: url("assets/img/paper-page.webp") repeat;
+  background-color: var(--cream);
+  background-image: url("assets/img/paper-page.webp");
+  background-repeat: repeat;
   background-size: 1100px;
-  mix-blend-mode: multiply;
+  background-blend-mode: multiply;
   opacity: 0.5;
   pointer-events: none;
-  z-index: 6;
+  z-index: -1;
 }
 
 img { max-width: 100%; display: block; }
@@ -159,9 +197,7 @@ svg,
 .dropcap,
 .ransom,
 .reel-arrow,
-.sw-arrow,
-.hero-meta .dot,
-.svc-dot {
+.svc-arrow {
   -webkit-user-select: none;
   user-select: none;
 }
@@ -297,6 +333,18 @@ body.nav-closing .masthead .lang-switch { opacity: 0; pointer-events: none; }
   transform: scaleX(1);
 }
 
+/* The menu's one action. `.oval-btn` takes its border from currentColor and
+   its colour from the parent, so on the ink overlay it comes out cream with no
+   second rule — the same ellipse as everywhere else, in the other ink.
+
+   ⚠️ z-index 1 like its siblings: .nav-overlay::after lays a fabric wash over
+   the whole panel, and anything without it sits under that wash. */
+.nav-cta {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.4rem;
+}
+
 .nav-foot {
   display: flex;
   align-items: center;
@@ -321,10 +369,14 @@ body.nav-closing .masthead .lang-switch { opacity: 0; pointer-events: none; }
 .nav-socials a:hover { color: var(--cream); }
 
 /* ── masthead ───────────────────────────── */
+/* ⚠️ No background. Now that the weave is a layer BEHIND the page rather than
+   a wash over it, anything that repaints the page's own cream punches a flat
+   hole in the texture. A section that only ever wanted "the page colour"
+   should let the page provide it. Cards and chrome that are deliberately a
+   different tone (--cream-warm) still paint their own. */
 .masthead {
   position: relative;
   z-index: 20;
-  background: var(--cream);
 }
 .masthead-top {
   position: relative;
@@ -496,7 +548,9 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   --hero-h: clamp(560px, 88vh, 940px);
   position: relative;
   height: var(--hero-h);
-  background: var(--cream);          /* shows through the sprocket holes */
+  /* no background — the page's own textured cream is what shows through the
+     sprocket holes, so the weave runs behind the film rather than stopping at
+     the hero's top edge */
   overflow: hidden;
   border-bottom: 3px solid var(--ink);
 }
@@ -882,32 +936,35 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   white-space: nowrap;
 }
 
-.hero-meta {
+.hero-cta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 1rem;
+  gap: 0.7rem 0.9rem;
   margin-top: 1.1rem;
-  padding-top: 0.85rem;
+  padding-top: 0.95rem;
   border-top: 1px solid rgba(15, 24, 32, 0.3);
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: rgba(15, 24, 32, 0.68);
 }
-/* The rows are a phone device. Dissolving them here leaves .hero-meta's five
-   children exactly as they were, so the desktop line keeps its single flex
-   run and its one gap. */
-.hm-row { display: contents; }
-/* The separators stay at body weight while the words go bold — the file's
-   rule is that punctuation sits a tier below the text it divides, and
-   bolding it with everything else inverts that. */
-.hero-meta .dot { font-weight: 400; }
+/* The pair sits on the panel's own cream, so the outlined oval that works
+   everywhere else gives two equal buttons and no lead. One is filled instead:
+   same ellipse, same swap, ink where the others have air. */
+.oval-btn.is-solid { color: var(--cream); }
+.oval-btn.is-solid::before {
+  background: var(--ink);
+  border-color: var(--ink);
+  opacity: 1;
+}
+/* ⚠️ The oval is a ::before UNDER the label, so a filled one needs the label
+   lifted out of its own stacking order or the ink paints straight over the
+   words. The outlined version never needed this — there was nothing to hide
+   behind. */
+.oval-btn.is-solid .oval-swap { position: relative; z-index: 1; }
+.oval-btn.is-solid:hover::before { opacity: 1; }
+
 /* ── decorative separators ──────────────────────────────────────────
    The · and / marks are punctuation, not content, and are aria-hidden. They
    sit a tier below body text on purpose: raising them to AA would make the
    punctuation louder than the words it divides. The file's one deliberate
    contrast exception, and it applies to nothing that carries meaning. */
-.hero-meta .dot,
-.svc-dot,
 .lib-toggle .sep { color: var(--ink-faint); opacity: 1; }
 
 /* ── oval slide buttons (label → arrow) ── */
@@ -1043,9 +1100,7 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
 .holder[data-kind="still"]    { aspect-ratio: 3 / 2; }
 .holder[data-kind="portrait"] { aspect-ratio: 2 / 3; }
 .holder > img,
-.holder > video,
-.holder .sw-media > img,
-.holder .sw-media > video {
+.holder > video {
   display: block;
   width: 100%;
   height: 100%;
@@ -1091,9 +1146,13 @@ html[dir="rtl"] .ob-arrow svg { transform: scaleX(-1); }
      0.85, not 1/1.37. */
   --why-type: 1;
 }
-/* Both solved by resources/fit_columns.py against the 2026-08-16 copy:
-   Arabic lands at 26.4px / 99% full, English at 20.7px / 95% full. */
-html[lang="en"] .why { --why-type: 0.784; --why-title-type: 0.62; }
+/* Both solved by resources/fit_columns.py, re-run after body copy went bold:
+   Arabic lands at 26.4px / 99% full, English at 20.1px / 99% full.
+   ⚠️ Arabic did NOT move (26.4px before and after) and English did (20.7 →
+   20.1). A weight change alters where lines break, not the size directly, so
+   whether a column re-solves depends on whether any line actually re-wrapped —
+   "the Arabic is unchanged" is not evidence the solver failed to run. */
+html[lang="en"] .why { --why-type: 0.761; --why-title-type: 0.62; }
 
 .why-block { padding: var(--why-gap) 0; }
 
@@ -1105,8 +1164,7 @@ html[lang="en"] .why { --why-type: 0.784; --why-title-type: 0.62; }
    1140px wide in a 936px column. Media never stretches; text columns do. */
 .wb1-media { align-self: start; }
 
-.wb1 > *,
-.svc-demo > * { min-width: 0; }
+.wb1 > * { min-width: 0; }
 
 .splitter {
   border: 0;
@@ -1155,6 +1213,19 @@ html[lang="en"] .why { --why-type: 0.784; --why-title-type: 0.62; }
   align-items: center;
   gap: 0.45em;
 }
+/* Block 2's title is CENTRED, and it takes BOTH of these to be true.
+   The second hairline centres the text BLOCK: the rules flex to fill, so a
+   leading one balances the trailing one and pushes the words to the middle.
+   `text-align` alone could not do that — it would leave the single rule
+   running out to one side with the type off-centre inside it.
+   But the block being centred says nothing about its LINES. Arabic sets this
+   title in one line and looked finished; English wraps to two, and the second
+   line ragged to the start edge under a centred first line — measured, line 1
+   at 124..1151 and line 2 at 124..613. So the rules centre the block and this
+   centres the lines within it. The title is a bare text node (see above), so
+   it is the anonymous flex item between the two rules. */
+.wb2 .why-title { text-align: center; }
+.wb2 .why-title::before,
 .wb2 .why-title::after,
 .wb3-head::before,
 .wb3-head::after {
@@ -1284,7 +1355,7 @@ html[lang="en"] .why { --why-type: 0.784; --why-title-type: 0.62; }
    It has to be on the svg, not the button: the button's own transform is the
    translateY that centres it. */
 html[dir="rtl"] .reel-arrow svg,
-html[dir="rtl"] .sw-arrow svg { transform: scaleX(-1); }
+html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
 
 /* ── block 3: the gallery wall ── */
 /* the full-width headline — the biggest type after the section banners */
@@ -1438,13 +1509,13 @@ html[dir="rtl"] .sw-arrow svg { transform: scaleX(-1); }
 /* Not full-width any more: filling the text column made this a 482x219px
    ellipse, louder than the headline above it. It is the way out of the
    section, not its headline. */
-.sw-foot .oval-btn {
+.ring-foot .oval-btn {
   width: auto;
   min-width: clamp(11rem, 21vw, 15rem);
   aspect-ratio: 2.6;
 }
 .why-outro .ob-face,
-.sw-foot .ob-face { font-size: 1.12rem; }
+.ring-foot .ob-face { font-size: 1.12rem; }
 
 /* ── the way out ── */
 .why-outro {
@@ -1464,124 +1535,302 @@ html[dir="rtl"] .sw-arrow svg { transform: scaleX(-1); }
 }
 
 /* ═══════════════════════════════════════════
-   WHAT WE DO — service picker + example switcher
-   Three names on one line, one example at a time from the selected service's
-   subcategories. Not animated: the swap is a straight repaint.
+   WHAT WE DO — the service rings
+   Three rings stacked in one window; the stack slides to the chosen service.
+   Geometry (radius, item sizes, angles) is computed in main.js and arrives as
+   custom properties, because it depends on how many items a ring holds and on
+   each item's own aspect. Everything here is the part that does NOT depend on
+   the media.
+
+   The DESKTOP arrangement (2026-08-23, from the agency's sketch, redrawn at
+   resources/briefs/2026-08-23/layout-desktop.svg) is two columns: the ring
+   large in one with its line underneath, the three services stacked as a list
+   in the other with the current one underlined, and the way out below the
+   list. Below 900px the whole thing stacks back into the single column the
+   agency asked to keep.
+
+   ⚠️ LOGICAL, and read as the AGENCY reads. The sketch is drawn with English
+   placeholder words, so it looks LTR — but this file has been caught by that
+   once already (the footer wordmark, 2026-08-17): the agency draws in Arabic,
+   where "left" is the logical END. So the list takes the inline START, which
+   in Arabic is the right, and the ring lands physically on the left exactly
+   where the sketch drew it. It also matches the phone, which names the service
+   above the ring rather than after it. Swapping the two words in
+   grid-template-areas flips it if they meant the drawing literally.
    ═══════════════════════════════════════════ */
 .services { padding: 0 var(--pad) clamp(1.2rem, 2.4vw, 2rem); }
 
-/* Centred as one line, not space-between: pushed to the column edges the
-   three names read as three separate headings and the separators end up
-   marooned in the middle of ~300px of cream. */
-.svc-picks {
+/* ── phone: the service named between two arrows ──
+   The ring is a moving object and a control on top of it reads as part of the
+   motion, so the arrows flank the name instead. */
+.svc-head {
   display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.34em;
-  flex-wrap: wrap;
-  padding: 0.8rem 0 1.2rem;
-  font-size: clamp(1.4rem, 3.4vw, 2.8rem);
-}
-.svc-pick {
-  appearance: none;
-  background: none;
-  border: 0;
-  padding: 0.12em 0 0.2rem;
-  cursor: pointer;
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 1em;
-  font-weight: 800;
-  line-height: 1.24;
-  opacity: 0.42;
-  border-bottom: 2px solid transparent;
-  transition: opacity 0.28s ease, border-color 0.28s ease;
-}
-.svc-pick:hover { opacity: 0.75; }
-.svc-pick.is-active { opacity: 1; border-bottom-color: var(--ink); }
-.svc-dot {
-  font-family: var(--font-display);
-  font-size: 0.52em;
-  color: var(--ink-faint);
-  line-height: 1;
-  transform: translateY(-0.12em);
-}
-
-.svc-demo {
-  display: grid;
-  grid-template-columns: 1fr 1.35fr;
-  gap: 3%;
   align-items: center;
+  justify-content: center;
+  gap: clamp(0.8rem, 2.4vw, 2rem);
+  padding: 0.8rem 0 0.9rem;
 }
-
-.sw-stage { position: relative; margin: 0; }
-.sw-media {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  background: var(--cream-warm);
-  border: var(--media-line);
-  overflow: hidden;
+.svc-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3.6vw, 3rem);
+  line-height: 1.24;
+  padding-top: 0.12em;          /* Arabic ascenders clip without this */
+  text-align: center;
+  min-width: 0;
 }
-.sw-media > img,
-.sw-media > video {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: contrast(1.06);
-}
-.sw-bar { display: block; height: 6px; background: var(--ink); }
-
-/* Same treatment as the carousel's — bare chevron, no box. The two pairs are
-   the one control repeated, so they change together. */
-.sw-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
+/* The one control repeated — same bare chevron as the carousel's, drawn
+   pointing the way it points in LTR and mirrored under RTL by the shared rule,
+   so each always points away from the centre. */
+.svc-arrow {
   appearance: none;
   border: 0;
   background: none;
-  /* ⚠️ Cream, not ink: unlike the carousel's, these two sit ON the picture,
-     and the box that used to guarantee their contrast is gone. A cream mark
-     with a dark cast under it is the one combination that survives both a
-     bright frame and a dark one. */
-  color: var(--cream);
+  color: var(--ink);
   cursor: pointer;
   padding: 0.5rem 0.35rem;
   display: grid;
   place-items: center;
-  opacity: 0.75;
+  flex: 0 0 auto;
+  opacity: 0.55;
   transition: opacity 0.25s ease;
 }
-.sw-arrow svg {
-  width: 0.85rem;
-  height: auto;
-  filter: drop-shadow(0 1px 3px rgba(5, 9, 13, 0.8));
-}
-.sw-arrow:hover { opacity: 1; }
-.sw-prev { inset-inline-start: 0.7rem; }
-.sw-next { inset-inline-end: 0.7rem; }
+.svc-arrow svg { width: 0.8rem; height: auto; }
+.svc-arrow:hover { opacity: 1; }
+.svc-arrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.sw-text { display: flex; flex-direction: column; justify-content: center; }
-.sw-name {
+/* ── desktop: the three services as a list ──
+   The current one is underlined by a rule that runs the width of the column,
+   which is what the sketch draws. It is the same 3px ink rule the about page's
+   pull-quote and the sheet's tables use — the site has one heavy rule, not a
+   new one per component. */
+.svc-list {
+  display: none;
+  flex-direction: column;
+  gap: clamp(1.1rem, 2.6vw, 2.2rem);
+  padding-top: clamp(1.4rem, 3.4vw, 3.2rem);
+}
+@media (min-width: 901px) { .svc-list { display: flex; } }
+.svc-opt {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0 0 0.5rem;
+  width: 100%;
+  text-align: start;
+  cursor: pointer;
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3.2vw, 2.8rem);
-  line-height: 1.12;
-  padding-top: 0.12em;
-  margin-bottom: 0.6rem;
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3.1vw, 2.7rem);
+  line-height: 1.2;
+  color: var(--ink-mute);
+  /* The rule is a border that is transparent until the service is current, so
+     nothing moves when it appears — a rule added on selection would shift the
+     two names below it by 3px every time. */
+  border-bottom: 3px solid transparent;
+  transition: color 0.3s ease, border-color 0.3s ease;
 }
-.sw-desc {
-  font-size: clamp(1.02rem, 1.5vw, 1.32rem);
-  line-height: 1.65;
+.svc-opt > span { display: inline-block; padding-top: 0.12em; }
+.svc-opt:hover { color: var(--ink-soft); }
+.svc-opt.is-on {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+.svc-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ⚠️ The window CLIPS and the stages hold the PERSPECTIVE, never the other way
+   round. `overflow: hidden` forces transform-style back to flat on the same
+   element, so a window that both clipped and carried the perspective would
+   collapse every ring into a flat row of overlapping pictures — with no error
+   and no obvious cause. */
+.ring-window {
+  position: relative;
+  overflow: hidden;
+  height: clamp(310px, 43vw, 540px);
+}
+.ring-reel {
+  height: 100%;
+  transform: translateY(calc(var(--stage, 0) * -100%));
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ring-stage {
+  position: relative;
+  height: 100%;
+  perspective: 1500px;
+  /* Below centre, so the ring is read slightly from above — the same angle the
+     tilt below is built for. */
+  perspective-origin: 50% 42%;
+}
+
+/* The Saturn tilt. rotateX leans the PLANE of the ring toward the viewer;
+   rotateY is the spin, driven from JS. Both are undone again on each item —
+   see .ring-item. */
+.ring {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt, -22deg)) rotateY(var(--spin, 0deg));
+  /* 🔴 Or the two items at the BACK cannot be clicked at all. This box is a
+     plane at z = 0 in its own 3D context and it hit-tests across the whole
+     stage, so anything behind it — which is exactly the far half of the ring —
+     loses every click to it. Measured: items 4 and 5 of 9 resolved to `.ring`
+     and nothing else. It never showed while the far side was faded to almost
+     nothing; keeping it visible (2026-08-23) made it a dead zone. */
+  pointer-events: none;
+}
+
+/* 🔴 THE TILT IS UNDONE PER ITEM, and that is the whole correction of
+   2026-08-23. `.ring` alone leans the plane AND every picture standing on it,
+   so the work came out lying back like cards on a table. The agency's sketch
+   (resources/briefs/2026-08-23/ring-tilt.svg) is Saturn: the BAND is seen from
+   above and elliptical, the thing riding it stands upright through it.
+
+   So each item cancels both of the parent's rotations after it has been
+   placed: the composite orientation is R_x(tilt) · R_y(spin+a) · R_y(-(spin+a))
+   · R_x(-tilt) = identity, while the translateZ that puts it on the ring still
+   happens inside the tilted, spinning frame. The orbit is an ellipse; the
+   pictures are square to the eye all the way round.
+
+   ⚠️ Undoing the SPIN as well is not decoration. Without it the far half of
+   the ring is turned 180° away, which leaves it either invisible
+   (backface-visibility: hidden, which is what this rule used to carry) or
+   mirrored — and half this ring is design work with Arabic type baked into it.
+   The agency asked for the back half to stay visible; mirrored is not visible.
+
+   ⚠️ `--spin` changes every frame, so this transform is recomputed every frame
+   and MUST NOT be transitioned — a transition here restarts a 0.45s
+   interpolation sixty times a second and the ring smears. The grow and the
+   fade live on .ring-face, which changes only when the front item does. */
+.ring-item {
+  position: absolute;
+  /* `inset: 0; margin: auto` with an explicit width and height centres the box
+     on the stage, which puts its transform-origin exactly on the ring's axis.
+     So every item — whatever its size — orbits on the same centre line, and
+     items of different shapes line up through their middles rather than their
+     edges. */
+  inset: 0;
+  margin: auto;
+  width: var(--w);
+  height: var(--h);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;         /* .ring gives its clicks up — see above */
+  transform:
+    rotateY(var(--a))
+    translateZ(var(--rad))
+    rotateY(calc(-1 * (var(--a) + var(--spin, 0deg))))
+    rotateX(calc(-1 * var(--tilt, -22deg)));
+}
+.ring-face {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scale(var(--s, 1));
+  opacity: var(--o, 1);
+  transition: transform 0.45s ease-out, opacity 0.45s ease-out;
+}
+.ring-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* `contain`, not `cover`: the whole point is that a 4:5 poster and a 9:16
+     reel keep their own shape. The box is already cut to the item's ratio, so
+     there is nothing to letterbox. */
+  object-fit: contain;
+  border: var(--media-line);
+  border-radius: clamp(6px, 0.9vw, 14px);
+  background: var(--cream-warm);
+}
+.ring-item.is-front img { box-shadow: 0 18px 40px -18px rgba(5, 9, 13, 0.55); }
+/* Picked: brought to the front by a click and waiting for the second one that
+   opens it. It has to look different from merely facing you, or the two-step
+   is invisible and the first click reads as a dead click. */
+.ring-item.is-picked img {
+  box-shadow: 0 22px 54px -18px rgba(5, 9, 13, 0.7);
+  border-color: var(--ink);
+}
+.ring-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* The mark at the centre of the ring — one per service, the still thing the
+   work orbits.
+
+   ⚠️ It sits INSIDE .ring at z = 0 and undoes the spin and the tilt the same
+   way an item does. That is what depth-sorts it: items on the near half have a
+   positive z and pass in front of it, items on the far half have a negative z
+   and pass behind. As a sibling outside .ring it painted in flat DOM order, so
+   near and far halves both crossed over it — which was invisible only for as
+   long as the far half was faded almost to nothing. */
+.ring-mark {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: clamp(58px, 9vw, 116px);
+  height: clamp(58px, 9vw, 116px);
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  opacity: 0.5;
+  pointer-events: none;
+  transform:
+    rotateY(calc(-1 * var(--spin, 0deg)))
+    rotateX(calc(-1 * var(--tilt, -22deg)));
+}
+.ring-mark svg { width: 100%; height: 100%; }
+/* A photographic cutout is a person, not a pictogram: it needs room to read
+   and it is not drawn in the chrome's line weight, so it takes neither the
+   square box nor the half opacity. ⚠️ max-width/max-height rather than
+   width/height + object-fit — see the gallery wall's marks for what a
+   percentage height costs in a box that does not resolve one. */
+.ring-mark.is-photo {
+  width: clamp(88px, 12vw, 170px);
+  height: clamp(130px, 18vw, 250px);
+  opacity: 1;
+}
+.ring-mark img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.ring-desc {
+  font-size: clamp(1rem, 1.45vw, 1.28rem);
+  line-height: 1.7;
   color: var(--ink-soft);
-  margin-bottom: 1.2rem;
+  text-align: center;
+  max-width: 54rem;
+  margin-inline: auto;
+  padding-top: clamp(0.6rem, 1.6vw, 1.1rem);
+  min-height: 3.4em;            /* the line changes as the ring turns — hold the height */
 }
-.sw-foot {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: 0.4rem;
+.ring-foot {
+  display: grid;
+  justify-items: center;        /* centred, phone and desktop alike (2026-08-23) */
+  padding-top: clamp(0.6rem, 1.6vw, 1.1rem);
+}
+
+@media (min-width: 901px) {
+  /* The ring spans the first two rows so the list can sit above the way out
+     in the other column — the sketch puts «all work» directly under the three
+     services, not level with the bottom of the ring. */
+  .services {
+    display: grid;
+    grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.02fr);
+    grid-template-areas:
+      "list ring"
+      "foot ring"
+      "foot desc";
+    column-gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: start;
+    padding-top: clamp(0.6rem, 1.6vw, 1.4rem);
+  }
+  .svc-head { display: none; }          /* the list is the control up here */
+  .ring-window { grid-area: ring; }
+  .svc-list { grid-area: list; }
+  .ring-desc { grid-area: desc; }
+  .ring-foot { grid-area: foot; align-self: start; }
 }
 
 /* ═══════════════════════════════════════════
@@ -1813,8 +2062,59 @@ html[dir="rtl"] .lb-step svg { transform: scaleX(-1); }
   font-variant-numeric: tabular-nums;
 }
 
-/* one continuous run — no year headings, newest first */
+/* one continuous run — newest first, filed into named subsections */
 .lib-run { padding-bottom: 0.8rem; }
+
+/* ── subsection heads (2026-08-22) ──
+   The heading HANGS OVER its grid instead of pushing it down: `height: 0` so
+   it occupies no flow, and the grid below carries the top padding that clears
+   it. That is the archive's original year head, and it is why a run reads as a
+   named field of work rather than a labelled list — the type sits in the same
+   air as the pictures.
+
+   ⚠️ `--phead` comes from JS (syncSubOffset), because the panel head above it
+   is sticky in the SAME scroller: pin the heading any higher and it slides
+   behind that head and is never seen again. The fallback only covers the gap
+   before the first measurement.
+
+   `pointer-events: none` matters more than it looks — a zero-height box with
+   4rem of type overflowing it would otherwise sit across the top row of tiles
+   and swallow their clicks. */
+.lib-sub { position: relative; }
+.lib-sub { --sub-type: clamp(2.4rem, 5.5vw, 5rem); }
+.sub-head {
+  position: sticky;
+  /* The extra 0.4rem is air between the panel head's hairline and the type.
+     Pinned flush the heading touches that rule, and the rule reads as a line
+     drawn through the words. */
+  top: calc(var(--phead, 3.4rem) + 0.4rem);
+  z-index: 4;
+  height: 0;
+  display: flex;
+  /* ⚠️ flex-start, not the default stretch. A flex item in a zero-height
+     container stretches to zero, and the heading then measures 0 tall while
+     its glyphs spill out of it — which reads fine and is impossible to
+     position against. This gives the box its real height. */
+  align-items: flex-start;
+  padding-inline: 1.4rem;
+  pointer-events: none;
+}
+.sub-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--sub-type);
+  line-height: 1.15;
+  /* ⚠️ Idris Sharp's INK runs above its declared ascent, and the panel head is
+     an opaque cream box at a higher z-index — so with no padding the top of
+     the heading is not merely tight, it is painted over. Measured at 57.6px:
+     the font box ascent is 37px while «إعلانات رقمية» inks to 49.3px, i.e.
+     0.133em above the line box. 0.16em covers it with a little to spare. */
+  padding-top: 0.16em;
+}
+/* The clearance IS the heading — its line box, its ascender padding and the
+   offset above it — rather than a second clamp that has to be re-tuned by hand
+   every time the type moves. */
+.lib-sub .lib-grid { padding-top: calc(var(--sub-type) * 1.31 + 1.1rem); }
 
 /* ⚠️ COLUMNS, not a grid of equal cells, and that is the whole point.
    The archive holds four different shapes at once — 4:5 design work, 3:2 and
@@ -1959,7 +2259,17 @@ body.lib-index .lib-list { display: block; }
   color: var(--ink-mute);
   padding-top: 0.45rem;
 }
-.clip-img { aspect-ratio: 4 / 3; overflow: hidden; }
+/* ⚠️ The ratio comes from the PICTURE, not the box — `--r` per clipping. A
+   fixed 4/3 cropped the two portrait frames to a band across the middle.
+   The width is capped through the height so a 9:16 clipping does not come out
+   twice as tall as the collage it is pinned to: min() takes the column when
+   the picture is wide and the height cap when it is tall. */
+.clip-img {
+  aspect-ratio: var(--r, 1.3333);
+  width: min(100%, calc(38vh * var(--r, 1.3333)));
+  margin-inline: auto;
+  overflow: hidden;
+}
 .clip-img img {
   width: 100%;
   height: 100%;
@@ -1997,25 +2307,86 @@ body.lib-index .lib-list { display: block; }
 }
 .clip-text p { margin-bottom: 1rem; color: rgba(15, 24, 32, 0.78); font-size: 0.95rem; }
 
-/* ── the long read: text column + a facts rail ── */
+/* ── the long read: behind-the-scenes down one side, the copy in cards ──
+   The agency's ask of 2026-08-23: fill the left and right of the page with
+   media the BTS can live in, set the text in cards like the quote clipping
+   above, and on a phone alternate one holder then one card.
+
+   Every row is written media-first and the EVEN rows are flipped in CSS, so
+   the media walks left-right-left down the page while the source order stays
+   media, card, media, card — which is exactly what a phone gets when the two
+   columns collapse. Flipping in the markup instead would put two cards side by
+   side at that moment.
+
+   The facts rail that used to sit here (التأسيس / المقرّ / اللغات / الخدمات)
+   is gone with the agency's ask; so is `.ab-col`, which held the single text
+   column it stood beside. */
 .ab-read {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 15rem;
-  gap: clamp(1.6rem, 4vw, 3.4rem);
-  align-items: start;
+  gap: clamp(2rem, 5vw, 3.6rem);
   padding: clamp(1.5rem, 4vh, 2.6rem) var(--pad) clamp(2.4rem, 6vh, 4rem);
   border-bottom: var(--hair);
 }
-/* 37.5rem holds the long read at ~72ch. The grid cell alone is wider and
-   pushed it to 78ch, past where Arabic body copy stays comfortable to track
-   line to line. */
-.ab-col { max-width: 37.5rem; }
+.ab-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  gap: clamp(1.4rem, 4vw, 3.2rem);
+  align-items: center;
+}
+/* Placed by column, not by `order` — the picture and its card keep their
+   document order (which is what the phone reads) and only the track they sit
+   in changes. The tracks swap with them so the card always gets the wider of
+   the two, whichever side it is on. */
+.ab-row > .ab-media { grid-column: 1; }
+.ab-row > .ab-card { grid-column: 2; }
+.ab-row:nth-child(even) {
+  grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr);
+}
+.ab-row:nth-child(even) > .ab-media { grid-column: 2; }
+.ab-row:nth-child(even) > .ab-card { grid-column: 1; }
+
+.ab-media { cursor: zoom-in; }
+/* Same rule as the clippings: the medium states its ratio and the holder is
+   capped by height, because a 9:16 across half a 1280px page is 880px tall —
+   taller than the window it is being read in. */
+.ab-holder {
+  position: relative;
+  aspect-ratio: var(--r, 1.3333);
+  width: min(100%, calc(56vh * var(--r, 1.3333)));
+  margin-inline: auto;
+  overflow: hidden;
+  border: var(--media-line);
+  background: var(--ink);
+}
+.ab-holder img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.06);
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (hover: hover) {
+  .ab-media:hover .ab-holder img { transform: scale(1.03); }
+}
+.ab-media:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* The card treatment is the quote clipping's, which is what the agency
+   pointed at: cream-warm stock, a hairline, and a soft cast shadow. It is NOT
+   rotated — a clipping is pinned to a board, a card in a reading column is
+   set on the page. */
+.ab-card {
+  background: var(--cream-warm);
+  border: var(--hair);
+  box-shadow: 0 8px 24px rgba(15, 24, 32, 0.12);
+  padding: clamp(1.2rem, 2.6vw, 2rem);
+}
 .ab-p {
   font-size: 1rem;
   line-height: 1.95;
   color: rgba(15, 24, 32, 0.82);
-  margin-bottom: 1.15rem;
 }
+.ab-p + .ab-p { margin-top: 1.15rem; }
 /* the opening paragraph carries the weight — first line set larger */
 .ab-lead {
   font-size: clamp(1.08rem, 1.6vw, 1.3rem);
@@ -2028,42 +2399,12 @@ body.lib-index .lib-list { display: block; }
    logo's extending baseline, a horizontal stroke. Turned vertical beside a
    blockquote it stops being the brand's mark and becomes the generic
    quote-callout tab. */
-.ab-pull {
-  margin: 2.2rem 0 1.9rem;
-  padding-top: 1.1rem;
+.ab-card-quote {
   border-top: 3px solid var(--ink);
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(1.15rem, 2.1vw, 1.65rem);
   line-height: 1.75;
-}
-
-.ab-facts {
-  border-top: 3px solid var(--ink);
-  padding-top: 0.9rem;
-  position: sticky;
-  top: 1.5rem;
-}
-.ab-fact {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.8rem;
-  padding: 0.62rem 0;
-  border-bottom: var(--hair);
-}
-.ab-fact dt {
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-  white-space: nowrap;
-}
-.ab-fact dd {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 0.95rem;
-  text-align: end;
 }
 
 /* ── one section per service ──
@@ -2205,7 +2546,6 @@ body[data-page="index"] .footer { margin-top: 0; }
 .contact-band {
   position: relative;
   display: block;
-  background: var(--cream);
   color: var(--ink);
   overflow: hidden;
   padding: 0.7rem 0;
@@ -2308,10 +2648,21 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
    height does not resolve against an auto-sized flex line, so the browser
    falls back to the intrinsic ratio and sizes from the width — the same trap
    that made the gallery wall's أ 654px tall in a 447px tile. */
+/* Pushed to the same edge as the clock above it and the socials below it,
+   instead of centring itself in the column — it was the one thing in the
+   footer that lined up with nothing. `flex-end` and not a physical `left`
+   because the whole footer mirrors with the language.
+
+   ⚠️ `width: 100%` stays, and it is load-bearing twice over. The logo is an
+   SVG with a viewBox and NO width/height attributes, so it has a ratio but no
+   intrinsic size: let this box shrink-wrap and `width: auto` resolves to zero
+   and the mark vanishes — measured, a 0x0 box. It is also what the img's 60%
+   cap resolves against, and a percentage against a shrink-wrapped parent is
+   the circular case the rest of this file keeps warning about. */
 .contact-mark {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   width: 100%;
   opacity: 0.92;
 }
@@ -2380,7 +2731,7 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .wb3-head { justify-content: flex-start; text-align: start; }
   .wb3-head::before { display: none; }
   .why-outro .oval-btn,
-  .sw-foot .oval-btn { width: auto; aspect-ratio: auto; min-width: 11rem; }
+  .ring-foot .oval-btn { width: auto; aspect-ratio: auto; min-width: 11rem; }
 
   /* Block 1's holder keeps its own aspect on a phone. It used to be forced to
      4/3 once alone in a row, which is wrong for what goes in it — `data-kind`
@@ -2412,17 +2763,25 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
      steeper one made the names bigger at 900px than at 1000px. English still
      takes two lines below 900px, which is honest — "Film & Photography"
      cannot set beside two more names at headline scale. */
-  .svc-picks { justify-content: center; }
-  /* stacked, the button reads as the section's way out rather than something
-     pinned to a column edge — and it clears the corner launcher */
-  .sw-foot { justify-content: center; }
-  .svc-demo { grid-template-columns: 1fr; }
-  .sw-stage { order: -1; }
   .banner h2 { white-space: normal; }
 
   /* about */
-  .ab-read { grid-template-columns: 1fr; }
-  .ab-facts { position: static; }
+  /* one holder, then one card, all the way down — the agency's phone rule of
+     2026-08-23. Source order is already media-then-card in every row, so the
+     collapse needs nothing but the column reset; without resetting the even
+     rows' explicit placement they would stack on top of each other, which is
+     the `order`-is-ignored-for-placed-items trap written up in HANDOFF. */
+  .ab-row,
+  .ab-row:nth-child(even) { grid-template-columns: 1fr; }
+  .ab-row > .ab-media,
+  .ab-row > .ab-card,
+  .ab-row:nth-child(even) > .ab-media,
+  .ab-row:nth-child(even) > .ab-card { grid-column: 1; }
+  /* ⚠️ No height cap on a phone. A cap and an aspect-ratio cannot both be
+     honoured and the cap wins silently — which is what was re-cropping 9:16
+     media on the smallest screens before 2026-08-10. */
+  .ab-holder,
+  .clip-img { width: 100%; }
   .asvc { grid-template-columns: 1fr; }
   .asvc:nth-child(even) .asvc-media { order: 0; }
   .asvc-media img { aspect-ratio: 3 / 2; }
@@ -2581,17 +2940,17 @@ body.sheet-open { overflow: hidden; }
 .sheet-close:hover { background: var(--ink); color: var(--cream); }
 .sheet-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ── body: gallery + copy one side, details rail the other ── */
+/* ── body: the gallery, then the write-up ──
+   One column since the details rail came out (2026-08-23). The screenshots
+   take the full width of the sheet rather than 74% of it, which is the point
+   of showing them at all. */
 .sheet-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(15rem, 26%, 20rem);
-  gap: 0 clamp(1rem, 2.2vw, 1.8rem);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   padding: clamp(0.9rem, 2vw, 1.4rem);
   align-items: start;
 }
-.sheet-gallery { grid-column: 1; }
-.sheet-side { grid-column: 2; grid-row: 1 / span 2; }
-.sheet-copy { grid-column: 1; }
 
 .sheet-shot {
   border: var(--hair);
@@ -2655,36 +3014,6 @@ body.sheet-open { overflow: hidden; }
   max-width: 22rem;
 }
 
-/* ── the details rail ── */
-.sheet-side .sheet-k { margin-bottom: 0.5rem; }
-.sheet-meta { border-top: 3px solid var(--ink); }
-.sm-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.8rem;
-  padding: 0.6rem 0.1rem;
-  border-bottom: var(--hair);
-}
-.sm-row dt {
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  color: var(--ink-mute);
-  white-space: nowrap;
-}
-.sm-row dd {
-  font-size: 0.82rem;
-  font-weight: 500;
-  text-align: end;
-}
-/* .latin carries 0.18em tracking for all-caps display strings; a stack list
-   is running text and needs it back to normal or it wraps onto three lines */
-.sm-row dd.latin {
-  letter-spacing: 0.01em;
-  font-size: 0.78rem;
-  line-height: 1.5;
-}
-
 .sheet-copy { margin-top: 1.6rem; }
 .sheet-copy p {
   font-size: 0.97rem;
@@ -2693,99 +3022,7 @@ body.sheet-open { overflow: hidden; }
   max-width: 42rem;
 }
 
-/* ── the live preview: browser chrome around the preview build ── */
-.webview {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(0.6rem, 3vh, 2rem);
-}
-.webview[hidden] { display: none; }
-.wv-scrim {
-  position: absolute;
-  inset: 0;
-  background: rgba(15, 24, 32, 0.92);
-  cursor: pointer;
-}
-.wv-window {
-  position: relative;
-  width: min(78rem, 100%);
-  height: min(46rem, 100%);
-  display: flex;
-  flex-direction: column;
-  background: var(--cream);
-  border: 3px solid var(--ink);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-}
-.wv-chrome {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 0.45rem 0.7rem;
-  background: var(--ink);
-  color: var(--cream);
-  flex: 0 0 auto;
-}
-.wv-dots { display: flex; gap: 5px; flex: 0 0 auto; }
-.wv-dots i {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: rgba(217, 217, 206, 0.34);
-}
-.wv-url {
-  flex: 1;
-  text-align: center;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  color: rgba(217, 217, 206, 0.7);
-  background: rgba(217, 217, 206, 0.1);
-  padding: 0.22rem 0.7rem;
-  border-radius: 999px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.wv-close {
-  flex: 0 0 auto;
-  width: 1.7rem;
-  height: 1.7rem;
-  display: grid;
-  place-items: center;
-  background: transparent;
-  border: none;
-  color: var(--cream);
-  cursor: pointer;
-  opacity: 0.75;
-}
-.wv-close svg { width: 0.95rem; height: 0.95rem; }
-.wv-close:hover { opacity: 1; }
-.wv-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-.wv-frame {
-  flex: 1;
-  width: 100%;
-  border: none;
-  background: var(--cream);
-}
-.wv-note {
-  flex: 0 0 auto;
-  padding: 0.45rem 0.8rem;
-  background: var(--ink);
-  color: rgba(217, 217, 206, 0.72);
-  font-size: 0.72rem;
-  text-align: center;
-}
-
 @media (max-width: 900px) {
-  .sheet-body { grid-template-columns: 1fr; }
-  .sheet-gallery, .sheet-side, .sheet-copy { grid-column: 1; }
-  .sheet-side { grid-row: auto; margin-top: 1.6rem; }
-  .sheet-copy { margin-top: 1.6rem; }
   .sheet-thumbs {
     grid-auto-flow: column;
     grid-auto-columns: 32%;
@@ -2793,7 +3030,6 @@ body.sheet-open { overflow: hidden; }
     scrollbar-width: none;
   }
   .sheet-thumbs::-webkit-scrollbar { display: none; }
-  .wv-window { height: 100%; }
 }
 
 /* ═══════════ PHONE ONLY (≤640px) — the short edit of لماذا ألِف؟ ═══════════
@@ -2837,32 +3073,65 @@ body.sheet-open { overflow: hidden; }
   .why-title,
   .why-para,
   .why-outro-line,
-  .sw-name,
-  .sw-desc { text-align: center; }
+  .svc-name,
+  .ring-desc { text-align: center; }
 
-  /* ── squeeze the services section on a phone (2026-08-16) ──
-     Of its 631px, 154 were padding and margin around ~477px of content, and
-     on a screen this size that reads as a section you scroll through rather
-     than one you look at. Roughly a third of the slack comes back without
-     the rows touching each other.
-
-     ⚠️ The stage is still ~220px of GREY PLACEHOLDER — `HOLDER`, the inline
-     data URI — because the switcher has no real media wired yet. That, not
-     the spacing, is the bulk of what reads as empty here, and no amount of
-     tightening fixes it. Landing real media is the actual answer. */
   /* Same wordmark, footer volume. ⚠️ Not `Aliph-Icon-cream.svg`, which looks
      like the obvious "short" mark and is a 68x244 letterform — a 3.6:1 spike.
      Capped to 54px wide it came out 194px TALL and grew the phone footer by
      more than it saved. `HalfAliph-Stamp` is squarish and would fit, but the
      stamp was removed from this footer on 2026-08-11 at the agency's request,
      so bringing it back here would undo that. */
-  .contact-mark { margin: 0.35rem 0; }
-  .contact-mark img { max-width: 148px; max-height: 100px; }
+  /* ⚠️ Grid, not the column flex above, because the mark shares the clock's
+     LINE on a phone — the clock at the start edge and the mark at the far end
+     of the same row, with the socials on their own row underneath. A column
+     flex cannot put two children side by side, and stacking clock/mark/socials
+     was three shallow bands of mostly-empty ink.
+     `justify-self: end` rather than a physical left: the whole footer mirrors
+     with the language, and in Arabic — the primary — end IS the left. */
+  .contact-side {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    justify-content: space-between;
+    row-gap: 0.9rem;
+    column-gap: 1rem;
+  }
+  .contact-clock   { grid-area: 1 / 1; justify-self: start; }
+  .contact-mark    { grid-area: 1 / 2; justify-self: end; width: auto; margin: 0; }
+  .contact-socials { grid-area: 2 / 1 / 3 / -1; }
+  /* Same wordmark, footer volume. ⚠️ Not `Aliph-Icon-cream.svg`, which looks
+     like the obvious "short" mark and is a 68x244 letterform — a 3.6:1 spike.
+     Capped to 54px wide it came out 194px TALL and grew the phone footer by
+     more than it saved. `HalfAliph-Stamp` is squarish and would fit, but the
+     stamp was removed from this footer on 2026-08-11 at the agency's request,
+     so bringing it back here would undo that. */
+  /* ⚠️ A definite width, not a cap, and not `width: auto`. The logo SVG has a
+     viewBox and no width/height, so with the grid sizing this track to its
+     content there is no percentage left to resolve and `auto` collapses it to
+     nothing. Sharing a line with the clock is also what pays for the smaller
+     mark: it no longer has a band to fill. */
+  .contact-mark img { width: 112px; max-width: 112px; max-height: 76px; }
 
-  .svc-picks { padding: 0.5rem 0 0.7rem; }
-  .sw-name   { margin-bottom: 0.34rem; }
-  .sw-desc   { margin-bottom: 0.75rem; }
-  .sw-foot   { margin-top: 0.25rem; }
+  /* ⚠️ Stacked, because side by side does not fit and never did quite fit:
+     measured at 375px the two halves need 310px of a 327px line, so each one
+     wrapped INSIDE itself — the Latin wordmark broke across two lines that
+     ragged back toward the Arabic instead of toward its own edge, which is the
+     ragged block that reads as "not aligned". Trimming type cannot buy 60px
+     without shrinking the line to nothing, so they get a line each.
+
+     `align-items: stretch` and then a `text-align` per child, rather than two
+     flex alignments: each span is full width, so the legal keeps the start
+     edge the contact rows use and the wordmark takes the end edge — the same
+     edge the mark above it now sits on, which is the left in Arabic. */
+  .footer-legal {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+  .footer-legal > :first-child { text-align: start; }
+  .footer-legal .latin { text-align: end; }
+
   .services  { padding-bottom: 0.7rem; }
 
   /* Blocks 2 and 3 hang a hairline off their titles, and a centred title
@@ -2873,6 +3142,7 @@ body.sheet-open { overflow: hidden; }
      centring is the alignment; it does not need the furniture. */
   .wb2 .why-title,
   .wb3-head { justify-content: center; text-align: center; }
+  .wb2 .why-title::before,
   .wb2 .why-title::after,
   .wb3-head::before,
   .wb3-head::after { display: none; }
@@ -2887,23 +3157,12 @@ body.sheet-open { overflow: hidden; }
      sitting under the pair. The air belongs between the two. */
   .why-outro .oval-btn { margin-top: 1.6rem; }
 
-  .sw-text { align-items: center; }
-  .sw-foot { justify-content: center; }
 
-  /* ── the hero's meta line ──
-     The one part of the hero that centres. It also breaks in two: the date
-     and the place on one line, the three services on the next. `.hm-row`
-     stops being display:contents so each row takes a full basis, and the dot
-     that used to join them has nothing left to separate. */
-  .hero-meta { justify-content: center; text-align: center; }
-  .hm-row {
-    display: flex;
-    flex: 0 0 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.4rem 1rem;
-  }
-  .hm-seam { display: none; }
+  /* The two hero buttons centre with the rest of the panel on a phone.
+     They also stretch: two ovals of different widths under a centred
+     column read as a mistake, and there is room for exactly one each. */
+  .hero-cta { justify-content: center; }
+  .hero-cta .oval-btn { flex: 1 1 100%; }
 
   /* The pill is chrome pinned over the page at the one width where the page
      has no room to spare. Only the type inside it shrinks — the 3px frame and

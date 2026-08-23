@@ -34,6 +34,22 @@
     <a href="library.html" class="nav-item" data-i18n="navWork">الأعمال</a>
     <a href="about.html" class="nav-item is-current" data-i18n="navAbout">من نحن</a>
   </nav>
+  <!-- The one action the menu was missing. It lives between the pages and the
+       socials because it is neither: a destination on whatever page you are
+       already on, which is why it is a bare #contact and works from all three.
+       main.js closes the overlay behind it — a same-page anchor does not
+       navigate, so without that the panel would stay over the footer it just
+       scrolled to. -->
+  <a class="oval-btn nav-cta" id="navContact" href="#contact">
+    <span class="oval-swap">
+      <span class="ob-face ob-label" data-i18n="ctaContact">تواصل معنا</span>
+      <span class="ob-face ob-arrow" aria-hidden="true">
+        <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+        </svg>
+      </span>
+    </span>
+  </a>
   <div class="nav-foot">
     <div class="nav-socials latin" lang="en">
       <a href="https://www.instagram.com/aliph.creative" target="_blank" rel="noopener noreferrer">INSTAGRAM</a><span>·</span>
@@ -61,64 +77,125 @@
 
 <div class="banner"><h2 data-i18n="aboutBanner">من نحن؟</h2></div>
 
-<!-- scattered clippings -->
+<!-- ══════════ scattered clippings ══════════
+     Real behind-the-scenes now (2026-08-23) — the three grey rectangles here
+     were the last placeholder media on the site. `aspect-ratio` is stated per
+     clipping because the pictures are not all one shape and a fixed 4:3 box
+     cropped two of them: ratio belongs to the medium, and if a layout wants a
+     different box the layout changes. -->
 <section class="about-clips">
   <div class="clippings">
     <figure class="clip clip-photo c1">
-      <div class="clip-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt=""></div>
-      <figcaption data-i18n="cap1">من جلسة تصوير — البلدة القديمة</figcaption>
+      <div class="clip-img" style="--r:1.3333">
+        <img src="assets/media/bts-01.webp" alt="" loading="lazy" decoding="async">
+      </div>
+      <figcaption data-i18n="cap1">من موقع التصوير</figcaption>
     </figure>
     <blockquote class="clip clip-quote c2">
       <p data-i18n="quote">«النتيجة يجب أن تبدو حتميّة: راسخة، مدروسة، وذات شخصيّة لا تُخطئها العين.»</p>
       <cite data-i18n="quoteCite">— دفتر ألِف</cite>
     </blockquote>
     <figure class="clip clip-photo c3">
-      <div class="clip-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt=""></div>
-      <figcaption data-i18n="cap2">وراء الكواليس — تجهيز فعاليّة</figcaption>
+      <div class="clip-img" style="--r:0.562">
+        <img src="assets/media/bts-26.webp" alt="" loading="lazy" decoding="async">
+      </div>
+      <figcaption data-i18n="cap2">خلف الكاميرا</figcaption>
     </figure>
     <div class="clip clip-text c4">
       <h3 data-i18n="aboutH">صوت واحد، حرفان، ولغتان.</h3>
       <p data-i18n="aboutP">نحن فريق صغير من القدس يصنع الهويّات والمحتوى من حرفها الأوّل. نبدأ من النقطة التي تُبنى منها الأشياء، ونرسم منها نظامًا كاملًا: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم.</p>
     </div>
     <figure class="clip clip-photo c5">
-      <div class="clip-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt=""></div>
-      <figcaption data-i18n="cap3">نقاش تصميم — الوكالة</figcaption>
+      <div class="clip-img" style="--r:0.562">
+        <img src="assets/media/bts-27.webp" alt="" loading="lazy" decoding="async">
+      </div>
+      <figcaption data-i18n="cap3">تجهيز اللقطة</figcaption>
     </figure>
   </div>
 </section>
 
-<!-- the long read: who Aliph is -->
+<!-- ══════════ the long read ══════════
+     Five paragraphs, five pieces of behind-the-scenes, alternating sides —
+     the agency's ask of 2026-08-23: media down the left and right of the page
+     with the text set in cards, and on a phone one holder then one card.
+
+     ⚠️ SOURCE ORDER IS MEDIA THEN CARD IN EVERY ROW, and the alternation is
+     done by CSS on the even rows. Writing the even rows card-first would put
+     two cards next to each other the moment the grid collapses, which is
+     exactly what the phone rule is there to avoid.
+
+     ⚠️ The POSTER frames are local, the CLIPS stream from R2 — open question
+     13. Everything but the work archive paints out of assets/, which is why
+     the home page stayed up the day r2.dev went dark. A clip has no choice.
+     `data-film` is the same contract the archive's film tiles use, so the
+     lightbox resolves it against the media host and nothing here repeats it.
+
+     ⚠️ The facts table that used to sit beside this copy (التأسيس / المقرّ /
+     اللغات / الخدمات) came out at the agency's request. Its founding year
+     also contradicted the hero's for two weeks — see open question 20 before
+     a year goes back anywhere on this site. -->
 <section class="ab-read">
-  <div class="ab-col">
-    <p class="ab-p ab-lead" data-i18n="abLead">ألِف وكالة إبداعية من القدس — من جبل الزيتون تحديدًا. بدأت بفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم، بل نظام يُبنى من نقطة أصله. واسمنا نفسه هو أوّل الحروف: النقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف.</p>
-    <p class="ab-p" data-i18n="abP2">نعمل بالعربيّة أوّلًا.</p>
 
-    <blockquote class="ab-pull">
-      <p data-i18n="abPull">لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف.</p>
-    </blockquote>
-
-    <p class="ab-p" data-i18n="abP3">نحن فريق صغير عن قصد.</p>
-    <p class="ab-p" data-i18n="abP4">من الحرف الأوّل إلى آخر تفصيل.</p>
+  <div class="ab-row">
+    <figure class="ab-media" data-film="bts-montage.mp4" role="button" tabindex="0">
+      <div class="ab-holder" style="--r:1.7794">
+        <img src="assets/media/bts-montage.webp" alt="" loading="lazy" decoding="async">
+        <span class="tile-play" aria-hidden="true"></span>
+      </div>
+    </figure>
+    <div class="ab-card">
+      <p class="ab-p ab-lead" data-i18n="abLead">ألِف وكالة إبداعية من القدس — من جبل الزيتون تحديدًا. بدأت بفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم، بل نظام يُبنى من نقطة أصله. واسمنا نفسه هو أوّل الحروف: النقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف.</p>
+    </div>
   </div>
 
-  <dl class="ab-facts">
-    <div class="ab-fact">
-      <dt data-i18n="abFact1k">التأسيس</dt>
-      <dd data-i18n="abFact1v">٢٠٢٤</dd>
+  <div class="ab-row">
+    <figure class="ab-media" data-film="bts-28.mp4" role="button" tabindex="0">
+      <div class="ab-holder" style="--r:0.562">
+        <img src="assets/media/bts-28.webp" alt="" loading="lazy" decoding="async">
+        <span class="tile-play" aria-hidden="true"></span>
+      </div>
+    </figure>
+    <blockquote class="ab-card ab-card-quote">
+      <p data-i18n="abPull">لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف.</p>
+    </blockquote>
+  </div>
+
+  <div class="ab-row">
+    <figure class="ab-media" data-film="bts-29.mp4" role="button" tabindex="0">
+      <div class="ab-holder" style="--r:0.562">
+        <img src="assets/media/bts-29.webp" alt="" loading="lazy" decoding="async">
+        <span class="tile-play" aria-hidden="true"></span>
+      </div>
+    </figure>
+    <div class="ab-card">
+      <p class="ab-p" data-i18n="abP2">نعمل بالعربيّة أوّلًا.</p>
     </div>
-    <div class="ab-fact">
-      <dt data-i18n="abFact2k">المقرّ</dt>
-      <dd data-i18n="abFact2v">القدس — جبل الزيتون</dd>
+  </div>
+
+  <div class="ab-row">
+    <figure class="ab-media" data-film="bts-30.mp4" role="button" tabindex="0">
+      <div class="ab-holder" style="--r:0.562">
+        <img src="assets/media/bts-30.webp" alt="" loading="lazy" decoding="async">
+        <span class="tile-play" aria-hidden="true"></span>
+      </div>
+    </figure>
+    <div class="ab-card">
+      <p class="ab-p" data-i18n="abP3">نحن فريق صغير عن قصد.</p>
     </div>
-    <div class="ab-fact">
-      <dt data-i18n="abFact3k">اللغات</dt>
-      <dd data-i18n="abFact3v">عربي / إنجليزي</dd>
+  </div>
+
+  <div class="ab-row">
+    <figure class="ab-media" data-film="bts-31.mp4" role="button" tabindex="0">
+      <div class="ab-holder" style="--r:0.562">
+        <img src="assets/media/bts-31.webp" alt="" loading="lazy" decoding="async">
+        <span class="tile-play" aria-hidden="true"></span>
+      </div>
+    </figure>
+    <div class="ab-card">
+      <p class="ab-p" data-i18n="abP4">من الحرف الأوّل إلى آخر تفصيل.</p>
     </div>
-    <div class="ab-fact">
-      <dt data-i18n="abFact4k">الخدمات</dt>
-      <dd data-i18n="abFact4v">ثلاث</dd>
-    </div>
-  </dl>
+  </div>
+
 </section>
 
 <!-- ⚠️ The per-service sections are GONE (2026-08-16), at the boss's

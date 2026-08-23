@@ -34,6 +34,22 @@
     <a href="library.html" class="nav-item is-current" data-i18n="navWork">الأعمال</a>
     <a href="about.html" class="nav-item" data-i18n="navAbout">من نحن</a>
   </nav>
+  <!-- The one action the menu was missing. It lives between the pages and the
+       socials because it is neither: a destination on whatever page you are
+       already on, which is why it is a bare #contact and works from all three.
+       main.js closes the overlay behind it — a same-page anchor does not
+       navigate, so without that the panel would stay over the footer it just
+       scrolled to. -->
+  <a class="oval-btn nav-cta" id="navContact" href="#contact">
+    <span class="oval-swap">
+      <span class="ob-face ob-label" data-i18n="ctaContact">تواصل معنا</span>
+      <span class="ob-face ob-arrow" aria-hidden="true">
+        <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+        </svg>
+      </span>
+    </span>
+  </a>
   <div class="nav-foot">
     <div class="nav-socials latin" lang="en">
       <a href="https://www.instagram.com/aliph.creative" target="_blank" rel="noopener noreferrer">INSTAGRAM</a><span>·</span>
@@ -105,24 +121,29 @@
         <div class="sheet-thumbs" id="sheetThumbs" role="group" aria-label="لقطات"></div>
 
         <div class="sheet-actions">
-          <button class="oval-btn sheet-cta" id="sheetPreview" type="button" hidden>
+          <!-- An anchor, not a button: the work is live and this leaves for it.
+               `rel` is not optional with target=_blank — without noopener the
+               opened tab gets a handle on this one through window.opener. -->
+          <a class="oval-btn sheet-cta" id="sheetPreview" href="#"
+             target="_blank" rel="noopener noreferrer" hidden>
             <span class="oval-swap">
-              <span class="ob-face ob-label">معاينة الموقع</span>
+              <span class="ob-face ob-label">زيارة الموقع</span>
               <span class="ob-face ob-arrow" aria-hidden="true">
                 <svg viewBox="0 0 90 24" fill="none" stroke="currentColor" stroke-width="1.6">
                   <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
                 </svg>
               </span>
             </span>
-          </button>
-          <p class="sheet-note" id="sheetNote" hidden></p>
+          </a>
+          <p class="sheet-note latin" id="sheetNote" lang="en" dir="ltr" hidden></p>
         </div>
       </div>
 
-      <aside class="sheet-side">
-        <span class="sheet-k" id="sheetDetailsK">التفاصيل</span>
-        <dl class="sheet-meta" id="sheetMeta"></dl>
-      </aside>
+      <!-- The التفاصيل / Details rail was removed on 2026-08-23 at the
+           agency's request. What it listed — client, type, platform, stack,
+           language, service, date — is either in the write-up beside it or is
+           trade detail a visitor did not ask for. PROJECTS[].profile.meta is
+           still carried; nothing reads it. -->
 
       <section class="sheet-copy">
         <span class="sheet-k" id="sheetAboutK">عن المشروع</span>
@@ -131,28 +152,10 @@
     </div>
   </div>
 
-  <!-- the live preview: browser chrome around a real preview build -->
-  <div class="webview" id="webview" hidden>
-    <div class="wv-scrim" data-wv-close></div>
-    <div class="wv-window">
-      <div class="wv-chrome">
-        <span class="wv-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="wv-url latin" id="wvUrl" lang="en" dir="ltr"></span>
-        <button class="wv-close" data-wv-close aria-label="إغلاق المعاينة">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="M4 4l12 12M16 4L4 16"/>
-          </svg>
-        </button>
-      </div>
-      <!-- no allow-same-origin: the frame gets an opaque origin, so the
-           preview build cannot touch cookies or storage even if it tried.
-           allow-forms only lets the submit event fire — the preview's own
-           handler preventDefaults it and nothing is ever sent. -->
-      <iframe class="wv-frame" id="wvFrame" title="معاينة الموقع"
-              sandbox="allow-scripts allow-forms" src="about:blank"></iframe>
-      <p class="wv-note" id="wvNote"></p>
-    </div>
-  </div>
+  <!-- The sandboxed iframe that used to live here is gone (2026-08-22). It
+       framed a mock preview build, which is what you do when the projects are
+       invented; the three real ones are live, so the sheet's button opens the
+       actual site in a new tab. Its CSS (.webview / .wv-*) is gone with it. -->
 </div>
 
 <!-- ══════════ CONTACT FOOTER (shared) ══════════ -->

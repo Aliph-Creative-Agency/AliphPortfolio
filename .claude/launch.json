@@ -4,14 +4,38 @@
     {
       "name": "aliph-prototype",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8321", "-d", "prototype"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8321",
+        "-d",
+        "prototype"
+      ],
       "port": 8321
     },
     {
       "name": "aliph-prototype-alt",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8322", "-d", "prototype"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8322",
+        "-d",
+        "prototype"
+      ],
       "port": 8322
+    },
+    {
+      "name": "report-deck",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8331",
+        "-d",
+        "D:/Personal/Projects/Internship-Report-Deck"
+      ],
+      "port": 8331
     }
   ]
 }
