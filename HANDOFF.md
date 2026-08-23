@@ -92,6 +92,18 @@ _Updated 2026-08-23. Read this first._
    the 197 MB AliphxBader 4K master on the Desktop is not archived anywhere but
    the Desktop. It is *under* the 300 MiB `wrangler r2 object put` cap, unlike
    `master/horizontal-maqasid.mp4`, so it can go up with one command if wanted.
+6. **The ring's two-step click has never been SEEN, only read.** Its glide is
+   driven by rAF, which does not fire in a browser pane that is not
+   displayed, so no session has watched a picked item travel to the front.
+   The logic is right and every static property measures right. What is
+   unverified is the feel: the glide's timing, and whether the picked item's
+   `1.3` is too large a jump against an unpicked front item's `1.14`.
+7. **Two things blocked on the user, neither breaking anything.** The
+   `SeekoSeeko-MovieNight` repo cannot be created until `gh` is
+   authenticated (banner), and `master/horizontal-maqasid.mp4` cannot be
+   uploaded until an R2 API token exists (open question 16). Both have been
+   carried for more than one session — neither is forgotten, both are
+   waiting on a credential only a person can create.
 
 ---
 
@@ -349,6 +361,63 @@ was queried instead. And a `Range` rect over display type reports the font box,
 not the ink.
 
 ---
+### The audit after the deploy — a second pair of eyes
+
+The session that built this round wrote its own write-up and then died before
+deploying (see the banner). Everything above was therefore re-checked from the
+outside, against the live site rather than against the description of it. All
+six edits hold. The numbers below are measured on `aliphcreative.com`, not
+locally.
+
+**The ring, against the sketch, one row per thing asked for:**
+
+| asked | measured on the deployed page |
+|---|---|
+| tilt like Saturn | item transform ends `rotateY(-(a + spin)) rotateX(-tilt)` — the orbital angle *and* the spin are undone, then the plane tilt. Orbit elliptical, pictures upright and facing front. `--tilt` is `-22deg`, was `-14deg`. |
+| smooth, curved edges | `border-radius: clamp(6px, 0.9vw, 14px)` |
+| back half stays visible | `--o` floor is now `1 - min(away,180)/600` → **0.70** at the back. It was `/240` → 0.25. |
+| hover only on the item | bound on each `.ring-item`, not `.ring-window` |
+| two-step click | first click sets `picked` and glides; navigation is gated on `picked === i && front === i` |
+| desktop two columns | ring 43→697, its line beneath it in the same column, the three services stacked at x=754, the way out at 917→1219 |
+| phone unchanged, button centred | `.svc-head` returns; the button sits 32px from each edge — measured equal |
+
+⚠️ **Two things that read as bugs and are not. Both cost a round here.**
+
+1. **The active service is marked `is-on`, not `is-active`.** Checking for
+   `is-active` reports all three options inactive and identically styled, which
+   looks exactly like the active state never landed. It did: the live one
+   carries an ink `border-bottom-color` and full-strength text while the other
+   two are transparent at 68%.
+2. **`.svc-opt`'s own computed `display` is `inline-block` at every width**, so
+   reading it on a phone looks like the desktop list is rendering on top of the
+   phone heading. It is not — the parent `.svc-list` is `display: none` there
+   and all three options measure 0×0. **Read the parent, not the child**, when
+   a container is what the breakpoint switches.
+
+**The work page's deferral, in numbers, on the live page:**
+
+| | at load |
+|---|---|
+| tiles in the DOM | **82** — the open panel only; the other three are empty until opened |
+| DOM nodes | 784 |
+| `<img>` elements | 88 |
+| images actually fetched | **4** (1 KB transferred) |
+| DOMContentLoaded / load | 224 ms / 224 ms |
+
+The eager build put every panel's rows in at load. The lazy one builds a
+panel's tiles when its spine is clicked — opening تصميم جرافيكي took it from
+`design:0` to `design:12` on the spot.
+
+⚠️ **One behaviour could NOT be tested and is still unverified: the two-step
+click in motion.** The glide that carries a picked item to the front is driven
+by `requestAnimationFrame`, and a browser pane that is not displayed does not
+composite, so rAF never fires — the second click can never find an item at the
+front there. The logic reads correctly and every static property measures
+right, but the *feel* of it — the glide's timing, whether `1.3` is too large a
+jump against the `1.14` of an unpicked front item — has never been seen by
+anyone. It needs a real pair of eyes on a real screen.
+---
+
 ## Session 2026-08-22 — five features, shipped and deployed
 
 Built and deployed in one pass: work-page subsections, the three real software
@@ -2434,6 +2503,27 @@ print('bytes',len(d),'moov at',d.find(b'moov'))" <file>
 That is how a **truncated** copy was caught here: an interrupted copy left 9,354,776
 bytes of a file whose own `mdat` declared 54,265,568, with no `moov` at all. It looked
 identical to a wrong `src` — `error.code === 4`, empty cream box.
+
+---
+
+## The briefs in `resources/briefs/`
+
+What the agency actually asked for, kept where the code can be read beside
+it. One dated folder per round, each with its own README.
+
+⚠️ **`briefs/2026-08-23/` holds the only surviving record of two sketches.**
+They were pasted into a chat, and a pasted image cannot be carried from one
+session to the next — `layout-desktop.svg` and `ring-tilt.svg` are redraws
+made from the originals while they were still on screen. If a question ever
+comes up about what the desktop arrangement or the Saturn tilt was supposed
+to be, those two files are the answer and there is no other copy.
+
+The same folder carries the three centre-mark candidates and a verdict on
+each: the cameraman is a real cutout of the agency's own crew and is the one
+in use; the other two are AI stock, and the giveaway is that the whiteboard
+lettering and the on-screen code in the programmer image are both gibberish.
+⚠️ **Anything generated does not belong in this section** — it is otherwise
+built entirely from the agency's own work, and that is the whole point of it.
 
 ---
 
