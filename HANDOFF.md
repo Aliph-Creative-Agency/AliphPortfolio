@@ -1,113 +1,341 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-23. Read this first._
+_Updated 2026-08-23 (evening). Read this first._
 
-> ## 🟢 State on 2026-08-23: the agency's six edits are built, COMMITTED and deployed
+> ## 🟢 State on 2026-08-23 evening: the agency's ten screenshot edits are built and committed
 >
-> `aliphcreative.com` and `aliphcreative.ceo-6c6.workers.dev` are serving the
-> rebuilt ماذا نفعل, the fixed subsection heading, the real Al Baydar project,
-> the profile sheet without its details rail, the deferred work page, and the
-> about page's BTS rails.
+> A second round landed the same day, sent as nine annotated screenshots and one
+> screen recording. The full brief — every arrow, every red line, written out in
+> words — is at **`resources/briefs/2026-08-23b/TASKS.md`**, so no future session
+> needs the images.
 >
-> ⚠️ **This banner was written BEFORE the deploy, not after.** The session that
-> built the six edits committed and pushed, then hit its limit at the words
-> "Now let me commit in three ordered commits" — the handoff already said
-> "deployed" while the live site was still the 2026-08-22 build. It was
-> deployed separately afterwards. **Do not write the deploy up until wrangler
-> has actually returned a version id.**
->
-> ✅ **Verified live, not assumed** (2026-08-23, version
-> `275c68e3-99b3-431a-8d2c-14c9a6ab1feb`): both hosts return the same index
-> hash `22b1901089da` (was `c0cd987d9d21`), `main.js` matches the local file
-> byte-for-byte, the new assets answer 200 at their exact lengths
-> (`marks/mark-photo.webp` 31,590 · `media/bts-01.webp` 62,442 ·
-> `shots/al-baydar-card.webp` 7,106), and the home page loaded on the custom
-> domain with **88 images, 0 broken, 0 console errors, 0 horizontal
-> overflow**, three ring stages, 20 ring items and a photographic centre
-> mark.
->
-> ✅ **The working tree is committed and pushed.** Three commits, in the order
-> the work actually happened — the 2026-08-17 film re-cut, the 2026-08-22 reels
-> and preview removal, and this round. ⚠️ The third one carries the *code* for
-> all three, because `main.js` and `style.css` were never committed in between
-> and there is no honest way to split a single blob back into three sessions.
+> ⚠️ **The deploy is written up in its own section below, and only after
+> wrangler returned a version id.** The morning round was written up as
+> "deployed" before it was; do not repeat that.
 >
 > ### What changed, in one line each
 >
 > | # | the agency asked | what landed |
 > |---|---|---|
-> | 1 | ماذا نفعل: keep the phone layout, centre the button, rebuild the desktop, fix the tilt | two-column desktop with a service list, Saturn tilt with the pictures upright, rounded corners, the far half visible, hover only on an item, two-step click, a photographic centre mark for صناعة محتوى |
-> | 2 | the clipped إعلانات رقمية heading | ink now clears the panel head by **12px**; it was **7.7px behind it** |
-> | 3 | the wrong Al Baydar site | the invitation site is the project now, re-shot, re-written, and every cover is the client's logo on the client's colour |
-> | 4 | drop the details table | `.sheet-side` / `#sheetMeta` / `.sm-row` and the three I18N keys are gone; the sheet is one column |
-> | 5 | the work page is slow | panels build on first open and tiles take a 600px derivative: **73.0 → 7.0 megapixels decoded**, 1,189 → 783 DOM nodes, 151 → 87ms per full layout |
-> | 6 | BTS and the new ads are missing | 22 new objects on R2, the about page rebuilt as media rails and text cards, the facts table gone, three new digital ads in the archive |
+> | 1 | the hero lede's last line is orphaned on a phone | the paper أ is shorter there: 5 lines with a 3-word widow → **4 lines, 7 words on the last** |
+> | 2 | the footer band shows an emoji and no text | it was **ink on ink** — the band never had a ground of its own; and U+2733 needed U+FE0E to stop iOS drawing it as a green sprite |
+> | 3 | the about page doesn't look like the section above it | the long read takes the collage's **matted clipping** treatment, and its even rows were **silently stacking** — see below |
+> | 4 | the ring doesn't feel like a ring | every item is **bent across ten slats** on the cylinder, the far half **turns away and shows its mirrored back**, and nothing clips at any angle |
+> | 5 | the footer clock is too small for the wordmark | sized from its own column, matched to within **0.1px**, with tabular figures so it stays matched all day |
+> | 6 | the hero lede is too small on a desktop | three lines that end **0.2px** from the bottom of the paper at 1920×1080 |
+> | 7 | the reels carousel is washed out on a phone | `is-current` was thrashing; hysteresis, an in-flight guard, and a debounce on the preview sync |
+> | 8 | a tech item opens a lightbox over its own profile | the lightbox no longer claims a tile that carries `data-project` |
+> | 9 | centre the clock and the wordmark on a phone | stacked and centred, both 176px wide |
 >
-> 🔴 **Two of the three ring marks are still drawn icons, and that is the one
-> thing this round could not finish.** The cameraman cutout the agency supplied
-> is real and is in (`assets/marks/mark-photo.webp`). The two files that came
-> with it for a designer and a programmer are **AI stock** — the whiteboard
-> lettering and the on-screen code in them are gibberish — and neither is a
-> cutout. The 19 BTS clips on R2 are all one desert shoot: cameras, tripods and
-> a boom, and **nobody at a screen**, so there is nothing of the agency's own to
-> cut them from either. **Send a photograph of your designer and your developer
-> at work** — a phone frame is enough, the cameraman is one — and each is then
-> one run of `resources/cut_mark.py` and one line in `RING_MARKS`.
+> 🔴 **Two faults found while building that the agency had not reported, and both
+> were bigger than what they had.**
 >
-> ⚠️ **The desktop ماذا نفعل layout mirrors the sketch rather than copying it.**
-> The sketch is drawn with English words left-to-right and puts the ring on the
-> left; it is read here as an Arabic layout, so the service list takes the
-> inline START (the right in Arabic) and the ring lands physically on the left —
-> where the sketch drew it, for the language the agency reads. This file has
-> been caught reading a hand-drawn "left" the wrong way once already (the footer
-> wordmark, 2026-08-17). **Two words in `grid-template-areas` flip it.**
+> 1. **The about page's even rows were laying out as TWO rows, not one.** The
+>    picture was placed in column 2 and the card in column 1, and CSS grid
+>    auto-placement cannot send the cursor backwards — so the card dropped to a
+>    row of its own. Measured before the fix: `grid-template-rows: 493.531px
+>    169.281px` on rows 2 and 4. That is where most of the "huuuuuuuge spaces"
+>    actually came from. `grid-row: 1` on both children fixes it.
+> 2. **The ring's slats resolved to a flat identity matrix on first paint.**
+>    `layout()` measures the window, which flushes style for the nodes it has
+>    just inserted — before it has written their geometry. Every `var()` in the
+>    transform was undefined on that pass, the property fell back to `none`,
+>    and the transition on it turned that into a half-second unfold on load and
+>    on every resize. Fallbacks on the vars, and no transition on anything
+>    layout writes.
 >
-> ⚠️ **The سيكو سيكو repo still does NOT exist.** `gh` is not authenticated
-> here. The project is committed locally at `D:\Personal\Projects\bader-movie-night`
-> with its remote already set to
-> `https://github.com/Aliph-Creative-Agency/SeekoSeeko-MovieNight.git`. Create
-> that repo and `git push -u origin main`. Nothing on the portfolio waits on it.
+> ⚠️ **The ring reverses the morning's correction, on the agency's instruction
+> and with the consequence stated.** The morning build billboarded each item so
+> the far half stayed square to the eye and readable. The agency asked for a
+> real ring instead — "its face should be to the absolute back of the website" —
+> and chose, when asked, the mirrored back over a blank card back. **So the
+> Arabic set into the design ads reads backwards on the far half. That is the
+> agency's decision of 2026-08-23b, not an oversight.** Un-reversing it means
+> putting the two inverse rotations back on `.ring-item`.
 >
-> ⚠️ **The custom domain serves ~359 bytes more HTML than workers.dev, and it is
-> not a stale asset.** It is Cloudflare Web Analytics injecting `beacon.min.js`
-> before `</body>` — account-level, on the domain only. Do not chase it.
+> ⚠️ **The two missing ring marks are IN, and they are the AI stock files.** The
+> agency was told on 2026-08-23 that the designer and developer photographs are
+> AI generated — gibberish hand-lettering on the whiteboard, code on the screens
+> that is not code — and asked for them anyway. `resources/cut_people_marks.py`
+> cuts them; the whiteboard leaves with the background, and the screens read as
+> texture at 60px. Replace them the day the agency photographs their own two
+> people: one script run, no other change.
+>
+> 🔴 **NOTHING ANIMATED WAS EVER SEEN.** The browser pane available to this
+> session does not composite frames — screenshots time out with "the page is not
+> compositing frames" — so `requestAnimationFrame`, `IntersectionObserver`,
+> `loading="lazy"`, `scroll-behavior: smooth` and writes to `scrollLeft` are all
+> inert in it, and **every CSS transition is frozen at its FROM value**. Every
+> static property in this round was measured, and the geometry was proved by
+> sweeping `--spin` through 360° by hand. What was NOT verified: the ring
+> turning, the two-step click's glide, the carousel actually advancing, and
+> therefore **whether the carousel fix works**. See the next round.
 
 ---
 
 ## ⏭ The next round — what is open
 
-1. **The two missing ring marks** — see the banner. One photograph each.
-2. **Open question 20 is still open and now blocks nothing:** the founding year
-   is stated nowhere on the site at all. The about page's facts table (which
-   said ٢٠٢٤) came out this round; the hero's meta line (٢٠٢٦) went last round.
-   Settle it before a year goes back anywhere.
-3. **The three new digital ads are undated**, like the other nine — their
-   masters carry no EXIF and the date printed inside them is the *event's*
-   (8-9-2026), not the artwork's. Open question 9.
-4. **The ring's design run still shows the nine Grillit/Shawarma pieces.** The
-   three new «حقك تعرف حقك» ads are in the archive but not on the ring, which is
-   a curated sample rather than a feed — and the ring paints from `assets/`,
-   so adding one means committing a local copy of it. Say if they should be in.
+1. **The carousel fix is REASONED, NOT REPRODUCED, and it is the one thing in
+   this round that could still be wrong.** The pane refuses programmatic
+   scrolling — `scrollLeft` was written four times and never moved off −2473 —
+   so the fault could not be recreated locally. What is known: 10 frames a
+   second out of the agency's recording show the centred reel flickering
+   between opaque, half-faded and gone, which is `is-current` being taken off
+   and put back many times a second while a 0.5s opacity transition restarts
+   from wherever it had got to. Three changes went in — hysteresis in `mark()`
+   (a challenger must be a quarter of a slide nearer to take the class), an
+   in-flight guard so `recentre()`'s instant scroll cannot cancel a running
+   smooth one, and a 120ms debounce on `syncReel()`, which was building and
+   tearing down a `<video>` element on every scroll event. **Watch it on a real
+   phone before believing it.**
+2. **The ring's motion has still never been SEEN** — now for a second round.
+   The turn, the glide, and the new lift (the front item stands proud of the
+   band rather than scaling) are all rAF-driven. Every static property
+   measures right; the feel is unknown.
+3. **Open question 20 is still open**: the founding year is stated nowhere on
+   the site. Settle it before a year goes back anywhere.
+4. **The three new digital ads are still undated**, like the other nine — open
+   question 9. They are on the ring now, so the gap is more visible.
 5. **`master/` still has nothing from the new imports** (open question 11), and
-   the 197 MB AliphxBader 4K master on the Desktop is not archived anywhere but
-   the Desktop. It is *under* the 300 MiB `wrangler r2 object put` cap, unlike
-   `master/horizontal-maqasid.mp4`, so it can go up with one command if wanted.
-6. **The ring's two-step click has never been SEEN, only read.** Its glide is
-   driven by rAF, which does not fire in a browser pane that is not
-   displayed, so no session has watched a picked item travel to the front.
-   The logic is right and every static property measures right. What is
-   unverified is the feel: the glide's timing, and whether the picked item's
-   `1.3` is too large a jump against an unpicked front item's `1.14`.
-7. **Two things blocked on the user, neither breaking anything.** The
-   `SeekoSeeko-MovieNight` repo cannot be created until `gh` is
-   authenticated (banner), and `master/horizontal-maqasid.mp4` cannot be
-   uploaded until an R2 API token exists (open question 16). Both have been
-   carried for more than one session — neither is forgotten, both are
-   waiting on a credential only a person can create.
+   the 197 MB AliphxBader 4K master on the Desktop is archived nowhere but the
+   Desktop.
+6. **Two things blocked on the user, both carried for several sessions.** The
+   `SeekoSeeko-MovieNight` repo cannot be created until `gh` is authenticated;
+   the project is committed locally at `D:\Personal\Projects\bader-movie-night`
+   with its remote already set. And `master/horizontal-maqasid.mp4` cannot be
+   uploaded until an R2 API token exists (open question 16). ✅ Note that
+   `wrangler r2 object put --remote` DOES work from this machine — it put the
+   three cropped bts-29 objects this round — so the token may only be needed
+   for the file that exceeds the 300 MiB cap.
+7. **The about page's phone height is 8,713px** and the media there is
+   deliberately uncapped, per the rule of 2026-08-10 that a height cap and an
+   `aspect-ratio` cannot both be honoured. If that page needs to be shorter, the
+   lever is `width: min(100%, calc(<H> * var(--r)))` — the desktop's approach —
+   not a `max-height`, which crops.
 
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-08-23 (evening) — the agency's ten screenshot edits
+
+**The brief is `resources/briefs/2026-08-23b/TASKS.md`.** It describes every
+screenshot in words, including which file each red line was drawn on, so this
+round can be re-read without the images. What follows is what was built.
+
+### 1. The ring is a real ring now — bent, and inverting at the back
+
+**Each item is cut into ten vertical SLATS**, each one flat, each placed a
+little further round the cylinder than the last. The picture is a background
+stepped across by the ordinary sprite formula, so ten slats cost ONE decode.
+Measured on item 0: the ten slat centres run from x = −72.4 to +72.4 with z
+rising from 256.7 at the ends to 266.6 in the middle — a 10.0px bulge, which is
+exactly `r − √(r² − 72.4²)` for r = 266.6. It is a cylinder, not an approximation
+of one.
+
+⚠️ **The APOTHEM, not the radius.** A slat is a flat chord across the arc it
+covers; putting its centre on the circle pushes both ends outside it, and ten
+of those make a cog. `rad·cos(dθ/2)` puts the slat's ENDS on the circle.
+
+⚠️ **`scaleX(1.012)` on every slat is a seam fix, not styling.** Two
+neighbouring strips meet along a shared edge at an angle and each is
+antialiased independently, which leaves a hairline of page showing between
+every pair — ten vertical rules across every picture. The overlap stretches the
+slice by a third of a pixel.
+
+**The far half turns away and shows its mirrored back.** Measured at spin 0:
+items 3–7 of 9 have a composed m33 < 0. This is the reversal of the morning's
+billboarding, at the agency's instruction — see the banner.
+
+🔴 **The clipping is fixed, and it needed a two-axis fit through the
+perspective.** The old `layout()` only checked width, which was enough for a
+billboarded ring where an item's vertical extent was its own height. A real
+ring is different twice over: `rotateX(tilt)` maps depth to `y = −z·sin(tilt)`,
+so the band rises and falls by `rad·sin(tilt)` — ±112px at 22° and a 300px
+radius; and the near half sits at `+rad·cos(tilt)` toward the camera and is
+drawn `P/(P−z)` larger, about 1.25×. The item that clipped was always the front
+one, which is exactly the one being magnified. The fit now solves for the
+largest scale whose worst-case magnified half-extents fit, by bisection.
+**Verified by sweeping `--spin` through a full turn in 5° steps and measuring
+every slat against its stage: 0px over the top, 0px over the bottom, 0 either
+side, on all three rings, at 1920 and at 390.**
+
+⚠️ **The width gets a 1.14 bleed and the height gets none**, and that
+asymmetry is deliberate. Nine items at 1.12 spacing need a diameter of 3.2
+widths before perspective, so on a 390px phone they cannot be both large and
+entirely inside. A poster running under the left or right edge says the orbit
+carries on; a poster sliced along the BOTTOM is the fault that was reported.
+
+⚠️ **The front item is LIFTED, not scaled.** A scale on a wrapper between
+`.ring` and a slat forces `transform-style` back to flat and collapses the
+bend — and so does an opacity below 1. So the front item's slats push out along
+the normal they already sit on, like a stone set proud of the band, and
+perspective makes it larger for free. Opacity is set on the ITEM and read by
+each slat.
+
+⚠️ **The radius floor is the MARK, not a constant.** It was a flat 150px,
+which never bound on the nine-item ring and always bound on the three-item one
+— forcing an orbit twice as wide as the chord rule wanted, which the window fit
+then shrank back down, taking the items with it. Measured: the tech ring's logo
+tiles came out 77px across while the mark they circled was 100px. The floor is
+now `markW/2 + widest·0.55`, and the item area grew from a flat 0.34 of the
+window to `0.30 + 0.36/n` — the same 0.34 at nine, 0.42 at three.
+
+**Every item is clickable at every angle.** Hit-tested at six spins × nine
+items: no dead zones. `.ring-item` gives its clicks up to its slats for the
+same reason `.ring` gives its up — it is a flat plane across the middle of the
+stage whose children have all been translated off it.
+
+### 2. The desktop columns, the button, and the invitation
+
+**35 / 65**, from the line the agency drew: measured 31.8% list, 59.1% ring.
+The way out is pushed to the inline END of its column — the edge that touches
+the ring — and a one-line invitation sits above it. Verified in English/LTR
+too: list at x=43, ring at x=540, button at 194→497 (the right end of the list
+column, nearest the ring).
+
+### 3. The centre marks are photographs, all three
+
+`resources/cut_people_marks.py`. ⚠️ **It is NOT `cut_mark.py`**, and the
+difference matters: that one finds a flat ground by reachability, because the
+cameraman arrived already cut out onto black. These two are whole scenes — a
+room, a desk, a lamp, a whiteboard — and there is no ground to find. They are
+segmented instead (rembg / isnet-general-use), with two corrections a segmenter
+cannot make:
+
+🔴 **The designer's MONITOR is put back by hand.** The segmenter is right that
+it is not part of the man and wrong about what the mark is for: a man
+photographed from behind in a desk chair is any office worker alive. The screen
+full of colour-blocked layout is the only thing in the frame that says GRAPHIC
+DESIGNER, exactly as the rig is what makes the cameraman legible at 90px.
+
+⚠️ **`.ring-mark img` is `position: absolute; inset: 0`, and it took three
+attempts.** `max-width/max-height: 100%` bound only on the width; `width/height:
+100%` computed the height as 318.172px in a 240px box. The parent is
+`display: grid; place-items: center`, so its single row is sized FROM its item —
+and an item asking for a percentage of a row whose height depends on that item
+is circular. Chrome breaks the circle with the intrinsic ratio, which is why
+the two marks shorter than the box looked fine and the one taller did not.
+
+⚠️ **The marks are NOT lazy.** A lazy image inside a `preserve-3d` subtree
+rotated on two axes, two thirds of which are translated a whole window off
+screen by `.ring-reel`, is a fragile thing to ask an intersection test about.
+
+### 4. The ring's media
+
+**Nine design pieces still, three of them new.** The «حقك تعرف حقك» ads
+REPLACED veal-2, mix-2 and habash-2 rather than joining them — nine is what the
+radius, the area and the spacing were derived for. ⚠️ They paint from
+`assets/`, not the bucket: `resources/ring_media.py` is what puts a piece there.
+
+**The tech ring shows the clients' marks**, not screenshots — the same 640×640
+logo-on-brand-colour tiles `derive_shots.py` already cuts. A 1.6:1 crop of a
+page at ring size is a grey rectangle. ⚠️ All three carry `sub: "landing"` and
+`line()` now reads the SUBSECTION BEFORE the project, which is the whole of
+"unify their descriptions since they're all landing pages". Reverse those two
+branches and the three sites get three different lines again.
+
+### 5. The about page
+
+🔴 **The even rows were laying out as two rows.** See the banner — this was the
+real cause of the reported gaps, and it was never a gap.
+
+**The long read takes the collage's treatment**: cream-warm mat, hairline, cast
+shadow, a caption under each picture, and a rotation stated PER ROW (five
+different angles, not one alternated — a single value flipped by `nth-child`
+reads as a zigzag). Even rows carry a small negative top margin so the board
+overlaps rather than lists.
+
+⚠️ **The height cap came down from 56vh to 38vh.** The cap decides how tall a
+row is, and at 56vh a 9:16 clip stood 605px beside a card holding one short
+sentence.
+
+**The clips autoplay.** ⚠️ Each holder is its OWN preview band — a band plays
+exactly one member, so one band for the section would have played one clip at a
+time. And every about band HOLDS rather than cycling: a band of one that
+re-advanced would stop and restart its only member every 5.2s. ⚠️ The video is
+appended to the picture's PARENT now, not to the node: `video.preview` is
+`position: absolute; inset: 0`, and on this page the figure also carries a mat
+and a caption, which a video pinned to the figure would cover.
+
+**`bts-29` is cropped above its watermark** — `resources/crop_bts29.py`. The
+handle's ink runs from 90.5% to 94.3% of the frame, so the crop is at 90%, not
+at the ~95% the line was drawn at. ⚠️ **Four objects, not one**: the local
+poster, and `video/`, `poster/` and `thumb/` on R2. The clip is re-encoded
+rather than remuxed — a crop rewrites the picture.
+
+### 6. The footer
+
+🔴 **The band was ink on ink.** `.footer` is `background: var(--ink)` and
+`.contact-band` set `color: var(--ink)` with no ground of its own, so
+«لنبدأ من الألِف» has been invisible on every page for as long as the footer has
+been ink. The only thing that showed was the asterisk between the words —
+because iOS was drawing U+2733 as a colour emoji. **Two faults, one strip, and
+the second one is what made the first visible.**
+
+🔴 **The clock has TABULAR FIGURES, and without them the agency's rule cannot
+be kept at all.** Idris Sharp's Arabic-Indic digits are proportional: measured
+at 163px, «١١:١١» sets 211px and «٨٨:٨٨» sets 322px. A clock sized to match the
+wordmark would have matched it for part of the day and jumped on the minute.
+The face ships a real `tnum`; with it every time sets the same width.
+
+⚠️ **It is sized from its COLUMN, in `cqw`, not from the viewport.** The
+wordmark is capped at `min(272px, 60%)` of the column, so the clock is that
+divided by the tabular ratio. A `vw` term matched it at 1920 and missed it by
+82px at 1024, where the 60% branch binds and the viewport one does not.
+Measured after: **271.9 vs 272.0 at 1920, 226.6 vs 226.7 at 1024, 176.1 vs
+176.0 at 390.**
+
+**Phone: stacked and centred**, reversing the two-up row — which was chosen to
+avoid "three shallow bands of mostly-empty ink" and produced a clock hugging
+one edge and a wordmark hugging the other. The type is large enough now that
+the band is not shallow.
+
+### 7. The hero
+
+**Phone**: the paper أ is `clamp(104px, 27vw, 132px)` there, down from
+`clamp(138px, 17.5vh, 205px)`. The float steals the width of the first lines,
+so the run has to make it up at the end; a shorter sheet clears the text one
+line earlier. **5 lines with a 3-word widow → 4 lines, 7 words on the last**, at
+375 and at 390.
+
+**Desktop**: the lede is sized against the paper, not against the body scale.
+⚠️ **Do not chase the last pixel by growing the type — the wrap is a
+knife-edge: 33.0px sets three lines and 33.024px sets four.** The sheet was
+moved instead. Measured at 1920×1080: three lines, **0.2px** between the text's
+bottom and the paper's. 1440×900: three lines, 14.5px short. 1280×720: four
+lines, 38.7px past — which is ordinary drop-cap behaviour and the opposite of
+the fault.
+
+### 8. The work page
+
+`OPENS` excludes `.lib-grid .tile[data-project]`. The comment at that site said
+project tiles "carry the placeholder data URI, so it falls through" — which
+stopped being true on 2026-08-23 morning, when `derive_shots.py` gave every
+project a real `-card.webp`. `itemOf()` resolved it, and a click opened the
+profile sheet AND floated the lightbox over it with two close buttons stacked.
+**Verified: clicking a tech tile leaves `.lb` absent from the DOM entirely and
+sets `body.sheet-open`.**
+
+### Verified, not assumed
+
+Three pages × two languages × desktop and phone, with every lazy image forced
+eager first so nothing below the fold could hide a 404:
+
+| | images | broken | page errors | h-overflow |
+|---|---|---|---|---|
+| index AR 1440 | 70 | **0** | **0** | **0** |
+| index EN 1440 | — | **0** | **0** | **0** |
+| index AR 390 | — | **0** | **0** | **0** |
+| about EN 1440 | — | **0** | **0** | **0** |
+| about AR 390 | — | **0** | **0** | **0** |
+| library AR 1440 | 96 | **0** | **0** | **0** |
+
+Plus: every `.ab-holder` and `.clip-img` renders its stated ratio to within
+0.002 on a phone (nothing re-cropped); rotations off at one column; the ring
+clips nowhere at any of 72 spin angles on any of three rings at two widths.
 
 ---
 

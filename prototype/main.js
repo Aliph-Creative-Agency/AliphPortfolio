@@ -36,7 +36,7 @@ const I18N = {
      of every string that came out of that doc is still mine — the doc is
      Arabic only — so it needs the same sign-off the Arabic has already had. */
   heroPara: {
-    ar: "لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.",
+    ar: "لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، \n\n  وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.",
     en: "liph is an agency that begins at the first letter. Every brand has an origin point it is built from and returns to, and our work is to find that point and help you get from A to Z.",
   },
   /* the dropcap letter is baked into the sprite; this is what screen
@@ -53,6 +53,13 @@ const I18N = {
   ctaStart: { ar: "ابدأ من هنا", en: "Start here" },
   ctaContact: { ar: "تواصل معنا", en: "Get in touch" },
   btnWork: { ar: "كل الأعمال", en: "ALL WORK" },
+  /* One line under the three services, inviting the way out (2026-08-23b).
+     The ring is nine or three pieces of a 82-item archive, and nothing said
+     so — «all work» named the destination without giving a reason to go. */
+  svcInvite: {
+    ar: "هذه نماذج فقط — الأرشيف كامل بانتظارك.",
+    en: "A handful of samples — the full archive is one click away."
+  },
   btnAbout: { ar: "تعرّف على ألِف", en: "Get to know Aliph" },
 
   /* services */
@@ -170,6 +177,15 @@ const I18N = {
   abWhat: { ar: "ما نفعله", en: "What we do" },
   abWhy: { ar: "لماذا نحن", en: "Why us" },
   abDoes: { ar: "يشمل", en: "Includes" },
+  /* Captions for the long read's five clippings (2026-08-23b). ⚠️ Each one
+     describes WHAT IS IN ITS FRAME and nothing more. The three in the collage
+     above had to be rewritten on 2026-08-23 because they described things that
+     were never in them, which is the failure mode a caption invites. */
+  abCap1: { ar: "من التصوير", en: "On the shoot" },
+  abCap2: { ar: "تجهيز الكاميرا", en: "Setting the camera" },
+  abCap3: { ar: "رفع اللقطة", en: "Rigging the shot" },
+  abCap4: { ar: "مراجعة اللقطة", en: "Reviewing the frame" },
+  abCap5: { ar: "في الموقع", en: "On location" },
 };
 
 /* one section per service on the about page */
@@ -632,7 +648,11 @@ function buildBandSource() {
   for (let i = 0; i < 4; i++) {
     const el = document.createElement("span");
     el.className = "cb-item";
-    el.innerHTML = `<span data-i18n="cBand"></span><i class="cb-star">✳</i>`;
+    /* ⚠️ U+FE0E after the asterisk is the TEXT presentation selector, and it
+       is load-bearing. U+2733 on its own is rendered as a colour emoji by iOS
+       and by several Androids — a green rounded sprite in a footer that is ink
+       and cream and nothing else. Do not drop it. */
+    el.innerHTML = `<span data-i18n="cBand"></span><i class="cb-star">✳︎</i>`;
     track.appendChild(el);
   }
 }
@@ -1212,16 +1232,25 @@ window.addEventListener("resize", queueMenuSync);
 const RINGS = {
   /* All nine design pieces; the agency filed every one as a digital ad
      (2026-08-22), so they all take the `posters` line. */
+  /* ⚠️ NINE, and the three «حقك تعرف حقك» ads REPLACED three of the
+     Grillit/Shawarma run rather than joining it (2026-08-23b). The ring is a
+     curated sample, not a feed: nine is what the radius, the item area and the
+     spacing were derived for, and a tenth item makes every one of them
+     smaller. The three that went are the second of each pair — veal-2, mix-2,
+     habash-2 — so one of every shawarma flavour is still on the ring and no
+     client lost their whole showing.
+     ⚠️ These paint from assets/, not from the bucket. resources/ring_media.py
+     is what puts a new piece there; a key on R2 alone will 404. */
   design: [
     { f: "design-grillit-1.webp", sub: "posters" },
-    { f: "design-shawarma-veal-1.webp", sub: "posters" },
+    { f: "design-haqqak-1.webp", sub: "posters" },
     { f: "design-grillit-2.webp", sub: "posters" },
     { f: "design-shawarma-mix-1.webp", sub: "posters" },
-    { f: "design-grillit-3.webp", sub: "posters" },
+    { f: "design-haqqak-2.webp", sub: "posters" },
     { f: "design-shawarma-habash-1.webp", sub: "posters" },
-    { f: "design-shawarma-veal-2.webp", sub: "posters" },
-    { f: "design-shawarma-mix-2.webp", sub: "posters" },
-    { f: "design-shawarma-habash-2.webp", sub: "posters" },
+    { f: "design-grillit-3.webp", sub: "posters" },
+    { f: "design-haqqak-3.webp", sub: "posters" },
+    { f: "design-shawarma-veal-1.webp", sub: "posters" },
   ],
   /* Reels and stills alternate on purpose: a 9:16 next to a 3:2 is what makes
      the ring read as work of different shapes rather than a row of cards. */
@@ -1235,47 +1264,47 @@ const RINGS = {
     { f: "reels-child-section-final.webp", sub: "reels", open: "reels-child-section-final.mp4" },
     { f: "pics-official-visits-43-dsc08794.webp", sub: "stills" },
   ],
-  /* The software work has no photograph of itself, so the ring holds the same
-     screenshots the profile sheet does, and a click opens that sheet. */
+  /* The software work has no photograph of itself. It used to borrow the
+     profile sheet's screenshots — a 1.6:1 crop of a page, which at ring size
+     is a grey rectangle with unreadable type on it and says nothing about
+     whose page it is. It takes the CLIENT'S MARK instead (2026-08-23b), the
+     same 640x640 logo-on-brand-colour tile derive_shots.py already cuts for
+     the profile sheet's cover. A click still opens the sheet, which is the
+     only place that work can actually be shown.
+     ⚠️ `sub: "landing"` on all three, and that is the agency's instruction
+     rather than a shortcut: they are all landing pages, so the line under the
+     ring says the same thing for each and stops pretending three one-page
+     sites are three different services. See line(). */
   tech: [
-    { shot: "queens-retreat-1", project: 0, r: 1.6 },
-    { shot: "al-baydar-1", project: 1, r: 1.6 },
-    { shot: "seeko-seeko-1", project: 2, r: 1.6 },
+    { shot: "queens-retreat-cover", project: 0, sub: "landing", r: 1 },
+    { shot: "al-baydar-cover", project: 1, sub: "landing", r: 1 },
+    { shot: "seeko-seeko-cover", project: 2, sub: "landing", r: 1 },
   ],
 };
 
-/* The mark each ring turns around.
+/* The mark each ring turns around — one per service, the still thing the work
+   orbits.
 
-   ⚠️ PHOTOGRAPHS, not pictograms, where there is a real one to use. The agency
-   asked on 2026-08-23 for cutouts of their own people instead of drawn icons,
-   and supplied one: their cameraman, cut from their own footage
-   (resources/cut_mark.py turns it into `assets/marks/mark-photo.webp`).
+   ⚠️ PHOTOGRAPHS, not pictograms, for all three since 2026-08-23b. The agency
+   asked for cut-outs of their own people instead of drawn icons and supplied
+   the cameraman first; the designer and the developer followed in the evening
+   round. Each is a person WITH THEIR TOOL, which is the whole reason the set
+   reads at 90px: a man in a chair from behind is any office worker alive, and
+   the monitor beside him is the only thing that says which one. See
+   resources/cut_people_marks.py, which puts the designer's monitor back after
+   segmentation for exactly that reason.
 
-   🔴 There is no photograph for the other two, and the two files that came
-   with the request are AI stock — the whiteboard lettering and the on-screen
-   code in them are gibberish, which is the giveaway at any size, and neither
-   is a cutout. They are also the wrong material for a section built entirely
-   out of the agency's own work. The 19 BTS clips on R2 are one desert shoot:
-   cameras, tripods and a boom, and nobody at a screen. So design and tech keep
-   the drawn mark until the agency sends a photograph of their designer and
-   their developer at work — a phone frame is enough, the cameraman is one —
-   and each is then one file and one line here. */
+   ⚠️ The designer's and the developer's source frames are AI STOCK, and the
+   agency was told so and asked for them anyway. The giveaway in both is
+   lettering: gibberish hand-writing on the developer's whiteboard, and code on
+   both screens that is not code. The whiteboard leaves with the background
+   because it is behind him; the screens survive at ~60px, where they read as
+   texture. Replace either the day the agency photographs their own two people
+   — it is one run of the script and no other change. */
 const RING_MARKS = {
-  design: {
-    svg:
-      '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"' +
-      ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-      '<path d="M31 6 42 17 20 39l-13 3 3-13z"/><path d="M28 9l11 11"/>' +
-      '<path d="M20 39 12.5 31.5"/><path d="M24.5 26.5 21 30"/></svg>',
-  },
+  design: { img: "assets/marks/mark-design.webp" },
   photo: { img: "assets/marks/mark-photo.webp" },
-  tech: {
-    svg:
-      '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"' +
-      ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-      '<rect x="5" y="9" width="38" height="30" rx="2"/><path d="M5 17h38"/>' +
-      '<path d="M17 24l-5 5 5 5"/><path d="M27 24l5 5-5 5"/></svg>',
-  },
+  tech: { img: "assets/marks/mark-tech.webp" },
 };
 
 /* Which ring is showing. Read by nothing else today, but it is the one
@@ -1322,13 +1351,41 @@ const serviceRings = (() => {
     item.shot ? "assets/shots/" + item.shot + ".webp"
               : "assets/media/" + item.f;
 
+  /* ══════ the band is BENT, and every number below exists for that ══════
+     Each piece of work is cut into SLATS — vertical strips, each one flat, each
+     one placed a little further round the cylinder than the last. Ten facets
+     across a piece is a curve at any size a browser can draw, and it is what
+     the agency asked for on 2026-08-23b: "imagine the outer face of a normal
+     ring with the media being literally bent on the outer face".
+
+     🔴 THIS REPLACES BILLBOARDING, and the reversal is deliberate. The build
+     of 2026-08-23 morning undid the ring's spin on every item so the far half
+     stayed square to the eye and readable. The agency looked at it and asked
+     for the opposite: a real ring, where the far half turns away and you are
+     looking at the BACK of the work. So an item is now mounted tangent to the
+     cylinder and nothing is undone — which means the far half shows through
+     the card, mirrored. That is the agency's choice of 2026-08-23b, made with
+     the consequence for Arabic type stated. Do not "fix" it back.
+
+     ⚠️ Ten is a build-time constant because it is DOM. The angle between two
+     slats is not — it falls out of the item's width and the radius, both of
+     which move with the window, so layout() writes it. */
+  const SLATS = 10;
+
   /* Items are sized to a constant AREA, not a constant width or height. A 9:16
      reel beside a 3:2 photograph looks like two different sizes either way —
      equal area is the one that makes neither of them dominate, which is what
      "they don't have to be the same size" has to mean if the ring is to read
      as one composition. */
+  /* ⚠️ The share of the window grows as the ring EMPTIES. A flat 0.34 was
+     tuned on the nine-piece design ring; the tech ring holds three, and three
+     items of the same area on the same orbit read as crumbs going round a
+     wheel — measured, its logo tiles came out 77px across while the mark they
+     circled was 100px, so the still thing at the centre was bigger than the
+     work. 0.30 + 0.36/n gives back the old 0.34 at nine and 0.42 at three. */
   function sizes(items, h) {
-    const area = Math.pow(h * 0.34, 2);
+    const n = Math.max(3, items.length);
+    const area = Math.pow(h * (0.30 + 0.36 / n), 2);
     return items.map((it) => {
       const r = ratioOf(it);
       const ih = Math.sqrt(area / r);
@@ -1339,13 +1396,23 @@ const serviceRings = (() => {
   /* Wide enough that neighbours never touch.
      ⚠️ Derived, not a fudge factor. Two neighbours are 360/n apart, so the
      chord between their centres is 2r*sin(pi/n); asking that to be at least
-     1.18 widths gives the radius directly, and it stays right for a ring of
-     three as well as one of nine. The old constant was tuned for a ring seen
-     nearly edge-on at the sides — since the items are billboarded (2026-08-23)
-     they are full width everywhere, so the honest bound is the one to use. */
-  function radius(dims, n) {
+     1.12 widths gives the radius directly, and it stays right for a ring of
+     three as well as one of nine. ⚠️ 1.12 rather than the 1.18 the flat
+     version used: a bent item follows the cylinder instead of cutting across
+     it, so it takes an ARC of 2*asin(w/2r) rather than a chord of w, and the
+     gap between two neighbours is wider on the surface than the flat maths
+     said. Winding them a little closer keeps the band reading as a band. */
+  /* ⚠️ The floor is the MARK, not a constant. It used to be a flat 150px,
+     which is meaningless in both directions: on a nine-item ring the chord
+     rule always asks for more, so it never bound; on a three-item ring it
+     always bound, and forced an orbit more than twice as wide as the chord
+     rule wanted — which the window fit then shrank back down, taking the items
+     with it. What the radius actually has to clear is the thing at the centre,
+     so that is what it is measured against. */
+  function radius(dims, n, markW) {
     const widest = dims.reduce((a, d) => Math.max(a, d.w), 0);
-    return Math.max(150, (widest * 1.18) / (2 * Math.sin(Math.PI / Math.max(2, n))));
+    const chord = (widest * 1.12) / (2 * Math.sin(Math.PI / Math.max(2, n)));
+    return Math.max(markW / 2 + widest * 0.55, chord);
   }
 
   function build() {
@@ -1364,8 +1431,16 @@ const serviceRings = (() => {
       const m = RING_MARKS[id] || {};
       const mark = document.createElement("div");
       mark.className = "ring-mark" + (m.img ? " is-photo" : "");
+      /* ⚠️ NOT lazy, and the three of them together are 96 KB. A lazy image
+         is loaded on intersection, and this one lives inside a preserve-3d
+         subtree that is rotated on two axes and, for two of the three rings,
+         translated a whole window off screen by .ring-reel. That is a fragile
+         thing to ask an intersection test about — measured in a pane that was
+         not compositing, all three marks sat at complete:false and currentSrc
+         "" forever, so the ring turned around a hole. The mark is the fixed
+         point the whole section is built on; it does not get deferred. */
       mark.innerHTML = m.img
-        ? '<img src="' + m.img + '" alt="" loading="lazy" decoding="async">'
+        ? '<img src="' + m.img + '" alt="" decoding="async">'
         : (m.svg || "");
       ring.appendChild(mark);
 
@@ -1374,6 +1449,10 @@ const serviceRings = (() => {
         b.type = "button";
         b.className = "ring-item";
         b.style.setProperty("--a", (i * (360 / items.length)) + "deg");
+        /* the centre slat's index, so a slat's angle is (k - kc) * dth */
+        b.style.setProperty("--kc", String((SLATS - 1) / 2));
+        /* the stylesheet's sprite maths reads this rather than repeating 10 */
+        b.style.setProperty("--n", String(SLATS));
         b.dataset.i = String(i);
         b.dataset.service = id;
         /* Where this piece lives on the work page. A media item is found by
@@ -1381,8 +1460,23 @@ const serviceRings = (() => {
            is what shows it. */
         if (it.project !== undefined) b.dataset.project = String(it.project);
         else b.dataset.open = it.open || it.f;
-        b.innerHTML = '<span class="ring-face"><img src="' + srcOf(it) +
-          '" alt="" loading="lazy" decoding="async"></span>';
+
+        /* 🔴 SLATS, not one <img>. Each is the same picture with its own
+           slice showing, by the ordinary sprite formula: the background is
+           laid out SLATS times as wide as one slat — which is exactly the
+           item's width — and stepped across by k/(SLATS-1) of the overflow.
+           ⚠️ background-origin/clip: border-box, because the two end slats
+           carry the band's edge and a border would otherwise shrink their
+           positioning area and shift their slice by a pixel against the
+           eight that have none. */
+        const src = srcOf(it);
+        let html = "";
+        for (let k = 0; k < SLATS; k++) {
+          html += '<span class="ring-slat" style="--k:' + k +
+                  ';background-image:url(&quot;' + src + '&quot;)"></span>';
+        }
+        b.innerHTML = html;
+
         if (canHover) {
           b.addEventListener("pointerenter", () => { hover = true; });
           b.addEventListener("pointerleave", () => { hover = false; });
@@ -1391,7 +1485,7 @@ const serviceRings = (() => {
       });
       stage.appendChild(ring);
       reel.appendChild(stage);
-      return { id, stage, ring, items, front: -1, picked: -1,
+      return { id, stage, ring, items, front: -1, picked: -1, lift: 0, liftNow: 0,
                nodes: Array.from(ring.querySelectorAll(".ring-item")) };
     });
     buildList();
@@ -1418,31 +1512,107 @@ const serviceRings = (() => {
     });
   }
 
+  /* The stage's perspective, read from the page rather than repeated here —
+     the fit below depends on it and a second copy of the number would go stale
+     the first time the CSS changed. */
+  function perspectiveOf(stage) {
+    const v = parseFloat(getComputedStyle(stage).perspective);
+    return Number.isFinite(v) && v > 0 ? v : 1500;
+  }
+
   function layout() {
     const box = win.getBoundingClientRect();
     const h = box.height || 380;
+    const W = box.width || 640;
     stages.forEach((s) => {
+      if (!s.items.length) return;
       const dims = sizes(s.items, h);
-      let rad = radius(dims, s.items.length);
-      /* ⚠️ Fit the ring to the WINDOW as well as to its own items. Since
-         2026-08-23 the ring lives in half the section on a desktop, and an
-         item at a quarter turn sits a full radius off the axis with nothing
-         foreshortening it — so a ring sized only from its height silently runs
-         out under `overflow: hidden`. Everything scales together, or the items
-         stop matching the orbit they sit on. */
+      /* the mark's UNTRANSFORMED width — its rect would be the 3D-projected
+         one, which is not the number the orbit has to clear */
+      const markEl = s.ring.querySelector(".ring-mark");
+      const markW = markEl ? (parseFloat(getComputedStyle(markEl).width) || 0) : 0;
+      let rad = radius(dims, s.items.length, markW);
+      const tilt = Math.abs(parseFloat(
+        getComputedStyle(s.ring).getPropertyValue("--tilt")) || 22) * Math.PI / 180;
+      const P = perspectiveOf(s.stage);
+
+      /* 🔴 FIT IN BOTH AXES, AND THROUGH THE PERSPECTIVE. This is the fix for
+         "it's cut down from the bottom, also sometimes the top" (2026-08-23b),
+         and the reason the old version only ever checked the width is that the
+         old ring had nothing to check: every item was billboarded upright at
+         z on a plane whose tilt each item undid, so an item's vertical extent
+         was just its own height. A real ring is different in two ways at once.
+
+           · The BAND itself rises and falls. rotateX(tilt) maps a point at
+             depth z to y = -z·sin(tilt), so the far half climbs and the near
+             half drops by rad·sin(tilt) — at 22° and a 300px radius that is
+             ±112px of travel that the item's own height knows nothing about.
+
+           · The NEAR half is magnified. It sits at z = +rad·cos(tilt) toward
+             the camera, so everything there is drawn P/(P-z) larger — about
+             1.25x at the numbers above. The item that clipped was always the
+             one at the front, which is exactly the one being enlarged.
+
+         So the half-extents are computed for the worst position an item can
+         reach, magnified, and the whole ring is scaled by whichever axis binds.
+         A 1.03 bleed on the width is deliberate — a ring that stops dead inside
+         its frame reads as a diagram — but the HEIGHT gets no bleed at all,
+         because a poster sliced along the bottom edge is what was complained
+         about. */
       const widest = dims.reduce((a, d) => Math.max(a, d.w), 0);
-      const need = 2 * rad + widest;
-      /* A little over 1: a ring that stops dead inside its frame reads as a
-         diagram. Letting the two items at the extremes run just under the
-         window's edge is what makes it read as an orbit that carries on. Much
-         more than this and the slice through a poster reads as a bug. */
-      const room = (box.width || need) * 1.05;
-      const fit = need > room ? room / need : 1;
+      const tallest = dims.reduce((a, d) => Math.max(a, d.h), 0);
+      const LIFT = 0.13;                    /* the picked item's proudness, of rad */
+      const fitFor = (k) => {
+        const r = rad * k;
+        const near = r * (1 + LIFT) * Math.cos(tilt);
+        const mag = P > near + 1 ? P / (P - near) : 8;
+        const halfW = (r * (1 + LIFT) + widest * k * 0.5) * mag;
+        const halfH = (r * (1 + LIFT) * Math.sin(tilt)
+                       + tallest * k * 0.5 * Math.cos(tilt)) * mag;
+        /* ⚠️ ASYMMETRIC ON PURPOSE. The sides get a 1.14 bleed and the top and
+           bottom get none, because those are two different readings. A poster
+           running under the left or right edge of the band says the orbit
+           carries on past the frame, which is what the section is for; a
+           poster sliced along the BOTTOM edge is the fault the agency
+           reported. On a 390px phone nine items cannot be both large and
+           entirely inside — nine widths of 1.12 spacing need a diameter of
+           3.2w before perspective, so something has to give, and it is the
+           sides. */
+        return { halfW, halfH, ok: halfW * 2 <= W * 1.14 && halfH * 2 <= h };
+      };
+      /* The magnification makes this non-linear, so it is solved rather than
+         divided: ten halvings of the interval land inside a pixel. */
+      let lo = 0.12, hi = 1;
+      if (!fitFor(1).ok) {
+        for (let i = 0; i < 24; i++) {
+          const mid = (lo + hi) / 2;
+          if (fitFor(mid).ok) lo = mid; else hi = mid;
+        }
+      } else {
+        lo = 1;
+      }
+      const fit = lo;
       rad *= fit;
+      s.lift = rad * LIFT;
+
       s.nodes.forEach((n, i) => {
-        n.style.setProperty("--w", (dims[i].w * fit).toFixed(1) + "px");
-        n.style.setProperty("--h", (dims[i].h * fit).toFixed(1) + "px");
-        n.style.setProperty("--rad", rad.toFixed(1) + "px");
+        const w = dims[i].w * fit;
+        const sw = w / SLATS;
+        /* The angle one slat subtends at the axis — a chord of sw on a circle
+           of radius rad. asin, not sw/rad: at the sizes here the two differ by
+           under a degree, but the apothem below is derived from the same angle
+           and a mismatch there opens a seam between every pair of slats. */
+        const dth = 2 * Math.asin(Math.min(0.9999, sw / (2 * rad)));
+        n.style.setProperty("--w", w.toFixed(2) + "px");
+        n.style.setProperty("--h", (dims[i].h * fit).toFixed(2) + "px");
+        n.style.setProperty("--sw", sw.toFixed(3) + "px");
+        n.style.setProperty("--dth", (dth * 180 / Math.PI).toFixed(4) + "deg");
+        /* ⚠️ The APOTHEM, not the radius. A slat is a flat chord across the
+           arc it covers; putting its centre on the circle pushes both of its
+           ends outside it, and ten of those make a cog rather than a ring.
+           rad·cos(dth/2) puts the slat's ENDS on the circle, which is what
+           makes two neighbours meet edge to edge. */
+        n.style.setProperty("--apo", (rad * Math.cos(dth / 2)).toFixed(2) + "px");
       });
     });
   }
@@ -1476,24 +1646,44 @@ const serviceRings = (() => {
        to stay visible all the way round, so the floor is 0.70 at half a turn.
        Depth is carried by perspective and by the front item's scale, which do
        not need the fade to do their job. */
+    /* 🔴 THE FRONT ITEM IS LIFTED OFF THE BAND, not scaled up, and on a real
+       ring that is the only move available. A scale would have to be applied
+       to a box whose children are placed by translateZ, so it would drag the
+       whole slice of cylinder off the circle with it — and any transform or
+       opacity on a wrapper between .ring and a slat forces transform-style
+       back to flat and collapses the bend. So the item stands PROUD instead:
+       its slats push out along the same normal they already sit on, like a
+       stone set above the band. Perspective does the rest — it is nearer the
+       eye, so it is drawn larger, which is what the old scale was imitating.
+       ⚠️ opacity is set on the ITEM and read by each slat, never applied to
+       the item itself, for the same flattening reason. */
     s.nodes.forEach((n, i) => {
-      const face = n.firstElementChild;
-      face.style.setProperty("--o", (1 - Math.min(away[i], 180) / 600).toFixed(3));
-      face.style.setProperty("--s", i === best ? (i === s.picked ? "1.3" : "1.14") : "1");
+      n.style.setProperty("--o", (1 - Math.min(away[i], 180) / 600).toFixed(3));
+      /* only the front item is ever proud; everything else lies on the band */
+      if (i !== best) n.style.setProperty("--lift", "0px");
       n.classList.toggle("is-front", i === best);
     });
+    /* ⚠️ The new front starts flat and RISES, rather than appearing already
+       lifted. paint() eases it — see liftTarget below. */
+    s.liftNow = 0;
     return best;
   }
 
+  /* ⚠️ THE SUBSECTION WINS, and the order of these two branches is the whole
+     of "unify their descriptions since they're all landing pages"
+     (2026-08-23b). A tech entry carries both a `project` and a `sub` now: the
+     project is where a click goes, the subsection is what the line says. Read
+     the project first and the three sites get three different lines again. */
   function line(s, i) {
     const it = s.items[i];
     if (!it) return "";
+    const sub = (SUBCATS[s.id] || []).find((x) => x.id === it.sub);
+    if (sub) return sub.desc[lang];
     if (it.project !== undefined) {
       const p = PROJECTS[it.project];
       return p ? p.desc[lang] : "";
     }
-    const sub = (SUBCATS[s.id] || []).find((x) => x.id === it.sub);
-    return sub ? sub.desc[lang] : "";
+    return "";
   }
 
   function paint() {
@@ -1520,6 +1710,17 @@ const serviceRings = (() => {
     const was = s.front;
     const i = front(s);
     if (descEl && i !== was) descEl.textContent = line(s, i);
+    /* 🔴 The front item stands PROUD of the band, and the amount is eased HERE
+       rather than by a CSS transition. A transition on a slat's transform also
+       catches the flat frame layout() leaves behind and turns it into a
+       half-second unfold on load and on every resize — see .ring-slat. This is
+       the same rule --spin and the glide already follow: what layout writes,
+       rAF eases; CSS transitions only touch what layout never sets. */
+    const target = (s.lift || 0) * (i === s.picked ? 1 : 0.45);
+    s.liftNow = prefersReduced ? target
+              : s.liftNow + (target - s.liftNow) * 0.16;
+    if (Math.abs(target - s.liftNow) < 0.2) s.liftNow = target;
+    if (s.nodes[i]) s.nodes[i].style.setProperty("--lift", s.liftNow.toFixed(1) + "px");
     /* Only the ring on screen is worth turning. */
     stages.forEach((x, n) => x.stage.setAttribute("aria-hidden", String(n !== at)));
   }
@@ -1539,7 +1740,7 @@ const serviceRings = (() => {
       if (s.picked < 0) return;
       s.nodes[s.picked].classList.remove("is-picked");
       s.picked = -1;
-      s.front = -1;             /* force front() to rewrite the scales */
+      s.front = -1;             /* force front() to rewrite the lifts */
     });
   }
 
@@ -1736,8 +1937,16 @@ const lightbox = (() => {
      the strip lays an emulsion wash over its frames so they read as exposed
      onto the stock, and the lightbox is where that comes off and the work is
      seen in its own colours. */
-  const OPENS = ".why .holder, .gw-tile, .lib-grid .tile, .sheet-shot, .clip-photo," +
-    " .film-frame, .ab-media";
+  /* ⚠️ `:not([data-project])` is load-bearing and was NOT always needed. A
+     project tile is a `.lib-grid .tile` like any other, and it used to fall
+     through here on its own because its cover was a placeholder data URI that
+     `itemOf` could not resolve. derive_shots.py gave every project a real
+     `-card.webp` on 2026-08-23, so it resolves now — and a click on a software
+     project opened the profile sheet AND floated the lightbox over it, with
+     two close buttons stacked on each other. The tile opens its profile and
+     nothing else. */
+  const OPENS = ".why .holder, .gw-tile, .lib-grid .tile:not([data-project])," +
+    " .sheet-shot, .clip-photo, .film-frame, .ab-media";
   const GROUPS = ".gwall, .lib-grid, .reelshow-track, .clippings, .wb1, .film-group," +
     " .ab-read, main";
   /* ⚠️ The carousel triples its slide set so the loop has no rewind, so the
@@ -1991,6 +2200,15 @@ const previews = (() => {
   function bandOf(node) {
     if (node.closest(".reelshow-track")) return "reel";
     if (node.closest(".wb1")) return "wb1";
+    /* ⚠️ ONE BAND EACH, not one band for the section. The agency asked on
+       2026-08-23b for the about page's clips to behave like GIFs — all of them
+       running, not one at a time — and a band plays exactly one member. Giving
+       each holder a band of its own is what lets five of them loop together,
+       and the intersection observer still stops any that scrolls away. They
+       are 4-5s each and 0.6-1.4 MB, which is why this is affordable here and
+       is not on the reel carousel, where the files run 17-83 MB. */
+    const ab = node.closest(".ab-read .ab-media");
+    if (ab) return "ab-" + [...ab.parentElement.parentElement.children].indexOf(ab.parentElement);
     const wall = node.closest(".gwall");
     if (wall) {
       if (phone()) return "wall";
@@ -2037,7 +2255,14 @@ const previews = (() => {
         if (at < v.duration - 0.3) v.currentTime = at;
       }, { once: true });
     }
-    node.appendChild(v);
+    /* ⚠️ Into the box that HOLDS THE PICTURE, not into the node. `video.preview`
+       is `position: absolute; inset: 0`, so it fills its nearest positioned
+       ancestor — and for every surface that existed before 2026-08-23b those
+       were the same element. The about page's clipping is not: its figure
+       carries a mat and a caption as well, so a video pinned to the figure
+       would cover both. The picture's own parent is the right box in all of
+       them. */
+    (img && img.parentElement ? img.parentElement : node).appendChild(v);
     node.classList.add("is-previewing");
     v.play().catch(() => stop(node));   // a refused autoplay must not strand it
   }
@@ -2052,8 +2277,11 @@ const previews = (() => {
     b.at = b.at % live.length;
     const node = live[b.at];
     play(node);
-    /* wb1 is the exception the agency asked for: it holds, it does not cycle */
-    if (name === "wb1" || name === "reel") return;
+    /* wb1 is the exception the agency asked for: it holds, it does not cycle.
+       So does every about-page clip — a band of one that re-advanced would
+       stop and restart its own only member every HOLD ms, which for a looping
+       four-second clip is a stutter every five seconds and nothing else. */
+    if (name === "wb1" || name === "reel" || name.startsWith("ab-")) return;
     b.timer = setTimeout(() => { b.at += 1; advance(name); }, HOLD);
   }
 
@@ -2090,9 +2318,28 @@ const previews = (() => {
   }
   refresh();
 
-  /* the centred slide changes without any intersection change */
+  /* The centred slide changes without any intersection change, so the carousel
+     has to be watched on scroll rather than through the observer.
+
+     🔴 DEBOUNCED, and unthrottled it was a real cost rather than a tidiness
+     matter. syncReel() calls play() or stop() for every member, and stop()
+     tears a <video> element down — removeAttribute("src"), load(), remove() —
+     while play() builds a new one and starts a network fetch. Bound directly
+     to `scroll`, that ran on every event of a smooth scroll, which on a phone
+     is dozens a second, each one destroying and recreating a video element on
+     the main thread. ⚠️ It compounds: play() catches a rejected play() by
+     calling stop(), and a play interrupted by the next scroll event rejects
+     with AbortError — so the churn feeds itself.
+
+     Steady state is cheap either way (both halves return early when there is
+     nothing to do), so the only thing lost by waiting for the scroll to settle
+     is 120ms before a newly centred reel starts playing. */
+  let reelSync = 0;
   document.getElementById("reelTrack")
-    ?.addEventListener("scroll", () => syncReel(), { passive: true });
+    ?.addEventListener("scroll", () => {
+      clearTimeout(reelSync);
+      reelSync = setTimeout(syncReel, 120);
+    }, { passive: true });
   /* re-band on resize: the phone collapses the wall's three bands into one */
   let rt = 0;
   window.addEventListener("resize", () => {
@@ -2649,8 +2896,14 @@ const reelShow = (() => {
   const slides = Array.from(track.querySelectorAll(".reel-slide"));
 
   const DWELL = 4200;
+  /* How long a programmatic scroll is allowed to be in flight before anything
+     is allowed to read the track's position as if it had settled. A smooth
+     scroll across one slide runs ~350-500ms on a phone; 700 covers it with
+     room and still releases well inside the 4.2s dwell. */
+  const FLIGHT = 700;
   let idx = -1, timer = null, raf = 0, settle = 0;
   let onScreen = true, held = false, dragging = false;
+  let flying = 0;                   // performance.now() of the last smooth scroll
 
   /* ⚠️ Measure slides by their CENTRE, never by an edge.
      A flanking slide sits at `transform: scale(0.94)` and the centred one at
@@ -2668,7 +2921,34 @@ const reelShow = (() => {
     return t.left + t.width / 2;
   };
 
-  function mark() {
+  /* 🔴 HYSTERESIS, and this is the fix for the fault the agency filmed on
+     2026-08-23b: on a phone the centred reel sat at the flank's 0.34 opacity
+     almost the whole time. Ten frames a second out of that recording show it
+     flickering between fully opaque, half faded and gone — which is not a
+     transition settling, it is `is-current` being taken off one slide and put
+     on another many times a second, restarting a 0.5s opacity transition from
+     wherever it had got to and never letting it arrive.
+
+     The cause is that this function reads a number three other things are
+     writing at the same time: the auto-advance's smooth scroll, the snap
+     engine, and recentre(). Whenever two slides are near-equidistant, a pixel
+     of jitter flips the winner, and near-equidistant is exactly where a
+     carousel spends its time while moving.
+
+     So a challenger has to be CLEARLY nearer — a quarter of a slide — before
+     it takes the class. Below that the current slide keeps it, and the
+     transition is left alone to finish. ⚠️ The margin is a fraction of a
+     slide, not a constant: --reel-w is 33.5% of the track on a desktop and 78%
+     on a phone, so a fixed pixel margin would be a different rule on each. */
+  const HOLD_MARGIN = 0.25;
+  /* 🔴 `force` IS NOT A CONVENIENCE. recentre() translates the track by one
+     whole set, which by construction leaves every slide looking exactly where
+     it was — so the slide that is now nearest the centre is a DIFFERENT index
+     at the SAME distance, and hysteresis would refuse to move the index onto
+     it. recentre() would then still see an index outside the middle set, and
+     translate again, and again. The margin exists to ignore jitter; a
+     deliberate re-index is not jitter. */
+  function mark(force) {
     const m = trackMid();
     let best = 0, bestD = Infinity;
     slides.forEach((s, i) => {
@@ -2676,12 +2956,19 @@ const reelShow = (() => {
       if (d < bestD) { bestD = d; best = i; }
     });
     if (best === idx) return;
+    if (!force && idx >= 0 && slides[idx]) {
+      const w = slides[idx].getBoundingClientRect().width || 1;
+      if (Math.abs(mid(idx) - m) - bestD < w * HOLD_MARGIN) return;
+    }
     idx = best;
     slides.forEach((s, i) => s.classList.toggle("is-current", i === idx));
   }
 
   function centerOn(i, instant) {
     if (!slides[i]) return;
+    /* ⚠️ Stamped BEFORE the scroll is asked for, so recentre() cannot fire
+       between the request and the first scroll event it produces. */
+    if (!(instant || prefersReduced)) flying = performance.now();
     track.scrollBy({
       left: mid(i) - trackMid(),
       /* "instant", not "auto". `auto` means "defer to CSS scroll-behavior",
@@ -2703,15 +2990,33 @@ const reelShow = (() => {
      where a translation preserves the exact visual offset and stays
      invisible. */
   function recentre() {
+    /* 🔴 NOT WHILE A SMOOTH SCROLL IS IN FLIGHT. This does an INSTANT
+       scrollBy, and an instant programmatic scroll cancels a smooth one that
+       is still running — leaving the track stopped between two slides, where
+       the snap engine takes over and the centre is whatever it lands on. The
+       settle timer is 140ms and a phone can go longer than that between scroll
+       events mid-animation, so "the scroll has stopped" was being inferred
+       from a gap that the animation itself produces. Measured from the
+       agency's recording: the carousel reached positions where NO slide
+       overlapped the centre at all and the strip went blank — the same "hole
+       where the track runs out" that fast clicking used to open. */
     if (n < 2 || dragging) return;
-    mark();
+    if (flying && performance.now() - flying < FLIGHT) return;
+    mark(true);
     if (idx >= n && idx < 2 * n) return;
     const target = n + ((idx % n) + n) % n;
     track.scrollBy({ left: mid(target) - mid(idx), behavior: "instant" });
-    mark();
+    mark(true);
   }
 
   function go(step) {
+    /* ⚠️ This call SUPERSEDES whatever was in flight, so it clears the guard
+       recentre() reads. Without this, a run of fast clicks would each be
+       inside the previous one's flight window, recentre() would be skipped
+       every time, and the index would walk straight out of the middle set —
+       which is the failure the note below already describes, arriving by a
+       new route. */
+    flying = 0;
     /* Come home BEFORE stepping, not on the next settle. Anyone clicking
        faster than the 140ms settle never lets it fire, and the index walks
        straight out of the middle set — measured, sixteen fast clicks reached
@@ -2781,11 +3086,12 @@ const reelShow = (() => {
      `overflow-anchor: none` on the track stops it happening again later. */
   if (n > 1) {
     centerOn(n, true);
-    requestAnimationFrame(() => { centerOn(n, true); mark(); });
+    requestAnimationFrame(() => { centerOn(n, true); mark(true); });
   }
-  mark();
+  mark(true);
   arm();
-  return { remeasure: mark };
+  /* the resize hook re-indexes deliberately, so it forces too */
+  return { remeasure: () => mark(true) };
 })();
 
 /* The gallery wall's tap-to-lift is gone (2026-08-15). It existed to give
