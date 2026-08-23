@@ -9,6 +9,23 @@ _Updated 2026-08-23. Read this first._
 > the profile sheet without its details rail, the deferred work page, and the
 > about page's BTS rails.
 >
+> ⚠️ **This banner was written BEFORE the deploy, not after.** The session that
+> built the six edits committed and pushed, then hit its limit at the words
+> "Now let me commit in three ordered commits" — the handoff already said
+> "deployed" while the live site was still the 2026-08-22 build. It was
+> deployed separately afterwards. **Do not write the deploy up until wrangler
+> has actually returned a version id.**
+>
+> ✅ **Verified live, not assumed** (2026-08-23, version
+> `275c68e3-99b3-431a-8d2c-14c9a6ab1feb`): both hosts return the same index
+> hash `22b1901089da` (was `c0cd987d9d21`), `main.js` matches the local file
+> byte-for-byte, the new assets answer 200 at their exact lengths
+> (`marks/mark-photo.webp` 31,590 · `media/bts-01.webp` 62,442 ·
+> `shots/al-baydar-card.webp` 7,106), and the home page loaded on the custom
+> domain with **88 images, 0 broken, 0 console errors, 0 horizontal
+> overflow**, three ring stages, 20 ring items and a photographic centre
+> mark.
+>
 > ✅ **The working tree is committed and pushed.** Three commits, in the order
 > the work actually happened — the 2026-08-17 film re-cut, the 2026-08-22 reels
 > and preview removal, and this round. ⚠️ The third one carries the *code* for
