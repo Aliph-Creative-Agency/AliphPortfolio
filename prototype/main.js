@@ -35,9 +35,18 @@ const I18N = {
      here before was written for the prototype and read as fact. ⚠️ The ENGLISH
      of every string that came out of that doc is still mine — the doc is
      Arabic only — so it needs the same sign-off the Arabic has already had. */
+  /* ⚠️ THE LAST TWO WORDS ARE BOUND WITH U+00A0 (2026-08-24), and it is
+     the widow guard the agency asked for: `9th.png` is the desktop lede with
+     «الياء.» alone on line three, ringed in red. `.dropcap-block`'s 20em
+     measure is what fixes the wide desktops; this is what covers the widths
+     where the measure never binds — measured at 1100, where the panel gives the
+     lede only 437px and no cap can reach it, the last line went from 11% of
+     the column to 19%. ⚠️ It is a REAL no-break space in the string, not an
+     `&nbsp;` entity: this table is assigned with textContent, which would
+     print the entity literally. */
   heroPara: {
-    ar: "لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، \n\n  وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.",
-    en: "liph is an agency that begins at the first letter. Every brand has an origin point it is built from and returns to, and our work is to find that point and help you get from A to Z.",
+    ar: "لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، \n\n  وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.",
+    en: "liph is an agency that begins at the first letter. Every brand has an origin point it is built from and returns to, and our work is to find that point and help you get from A to Z.",
   },
   /* the dropcap letter is baked into the sprite; this is what screen
      readers get */
@@ -117,7 +126,6 @@ const I18N = {
   cLabelWhats: { ar: "واتساب", en: "WhatsApp" },
   cLabelPlace: { ar: "الوكالة", en: "The agency" },
   cPlace: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
-  cClock: { ar: "بتوقيت القدس", en: "Jerusalem time" },
   legal: { ar: "ألِف © ٢٠٢٦ — جميع الحقوق محفوظة", en: "Aliph © 2026 — All rights reserved" },
 
   /* library + about */
@@ -156,21 +164,9 @@ const I18N = {
     ar: "ألِف وكالة إبداعية من القدس — من جبل الزيتون تحديدًا. بدأت بفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم، بل نظام يُبنى من نقطة أصله. واسمنا نفسه هو أوّل الحروف: النقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف.",
     en: "Aliph is a creative agency from Jerusalem — from the Mount of Olives, to be exact. It began on a single idea: that a brand is not a logo you draw, but a system you build from its point of origin. Our name is that point — the first letter, the place every word starts, and the measure the rest of the letters are drawn against.",
   },
-  abP2: {
-    ar: "نعمل بالعربيّة أوّلًا. ليست العربيّة عندنا لغةً تُضاف بعد أن يجهز التصميم الإنجليزي، بل هي اللغة التي يُرسم عليها النظام من السطر الأوّل: الخط، والاتّجاه، والإيقاع، وشكل الأرقام. ثم تأتي الإنجليزيّة لتقف إلى جانبها بالكفاءة نفسها، لا كترجمة متأخّرة.",
-    en: "We work in Arabic first. Arabic isn't a language we bolt on once the English design is finished — it's the language the system is drawn in from the first line: the type, the direction, the rhythm, the shape of the numerals. English then stands beside it with equal care, not as a late translation.",
-  },
-  abP3: {
-    ar: "نحن فريق صغير عن قصد. يعني ذلك أنّ من تُحدّثه في الاجتماع الأوّل هو نفسه من يعمل على مشروعك، وأنّ العمل لا يمرّ عبر طبقات حتى يفقد ما بدأ به. ويعني أيضًا أننا نختار المشاريع التي نستطيع أن نمنحها ما تستحقّه من وقت.",
-    en: "We are small on purpose. It means the person you meet first is the person who does the work, and that nothing passes through so many hands that it loses what it started as. It also means we take on the projects we can give the time they deserve.",
-  },
   abP4: {
     ar: "من الحرف الأوّل إلى آخر تفصيل: نصمّم الهويّة وما يُطبع منها، ونصوّر ما تحتاجه لتظهر — صورًا وفيديو وريلز — ونبرمج المواقع والأنظمة التي تُشغّلها. ثلاث خدمات على الورق، لكنها في العمل خطّ واحد متّصل — وهذا هو الفرق.",
     en: "From the first letter to the last detail: we design the identity and everything printed from it, shoot what it needs in order to appear — stills, film and reels — and build the sites and systems that keep it running. Three services on paper — one continuous line in practice, and that is the whole difference.",
-  },
-  abPull: {
-    ar: "لا نسلّم شعارًا ونمضي. نسلّم نظامًا يعرف كيف يتصرّف.",
-    en: "We don't hand over a logo and walk away. We hand over a system that knows how to behave.",
   },
 
   svcAboutBanner: { ar: "ماذا نقدّم؟", en: "What we offer" },
@@ -997,17 +993,6 @@ function initRansom() {
   ransomCycle.start();
 }
 
-function tickClock() {
-  const el = document.getElementById("clockTime");
-  if (!el) return;
-  el.textContent = new Intl.DateTimeFormat(lang === "ar" ? "ar-EG" : "en-GB", {
-    timeZone: "Asia/Jerusalem",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date());
-}
-
 function applyI18n() {
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
@@ -1036,7 +1021,6 @@ function applyI18n() {
   previews.refresh();
   rebuildLoops();
   filmLoop.rebuild();
-  tickClock();
 }
 
 /* language switch (pill) — click or keyboard */
@@ -1276,9 +1260,18 @@ const RINGS = {
      ring says the same thing for each and stops pretending three one-page
      sites are three different services. See line(). */
   tech: [
-    { shot: "queens-retreat-cover", project: 0, sub: "landing", r: 1 },
-    { shot: "al-baydar-cover", project: 1, sub: "landing", r: 1 },
-    { shot: "seeko-seeko-cover", project: 2, sub: "landing", r: 1 },
+    /* ⚠️ `shot` is what the RING shows and `full` is what the LIGHTBOX opens,
+       and on this ring alone they are different pictures. The mark is the only
+       thing that reads at ring size — a 1.6:1 crop of a page is a grey
+       rectangle — but a 640px logo tile blown up full screen says nothing at
+       all, and since 2026-08-24 a click opens the overlay rather than the
+       project's profile. So the overlay gets the site itself: the same
+       1600x1000 plate the profile sheet shows, which derive_shots.py already
+       cuts. This is the same split `data-full` already makes on the archive's
+       thumbnails — the tile is the small file, the overlay is the real one. */
+    { shot: "queens-retreat-cover", full: "queens-retreat-1", project: 0, sub: "landing", r: 1 },
+    { shot: "al-baydar-cover", full: "al-baydar-1", project: 1, sub: "landing", r: 1 },
+    { shot: "seeko-seeko-cover", full: "seeko-seeko-1", project: 2, sub: "landing", r: 1 },
   ],
 };
 
@@ -1322,7 +1315,18 @@ const serviceRings = (() => {
   const listEl = document.getElementById("svcList");
 
   const ORDER = SERVICES.map((s) => s.id);
-  const TURN = 26000;               // ms for one full revolution
+  /* ms for one full revolution, PER SERVICE (2026-08-24). It was one constant
+     for all three; the agency asked for صناعة محتوى specifically to be slowed
+     — that ring is the one carrying 9:16 reels and 3:2 stills, so an item
+     arrives at the front, changes the line under the ring and leaves again
+     before it can be read. ⚠️ It is also the dwell of a reel preview: the
+     front item plays (see T5 / previews.syncRing), and at 26s a nine-item ring
+     gives each piece 2.9s of screen. 42s gives the photo ring's eight items
+     5.25s each, which is a preview rather than a flash.
+     ⚠️ A full revolution is also what hands on to the next service, so this
+     number is how long صناعة محتوى holds the section. */
+  const TURNS = { design: 26000, photo: 42000, tech: 26000 };
+  const TURN_DEFAULT = 26000;
   const GLIDE = 620;                // ms to bring a clicked item to the front
   let at = 0;                       // which service
   let spin = 0;                     // degrees
@@ -1455,11 +1459,29 @@ const serviceRings = (() => {
         b.style.setProperty("--n", String(SLATS));
         b.dataset.i = String(i);
         b.dataset.service = id;
-        /* Where this piece lives on the work page. A media item is found by
-           its own filename; a software project by its index, because the sheet
-           is what shows it. */
-        if (it.project !== undefined) b.dataset.project = String(it.project);
-        else b.dataset.open = it.open || it.f;
+        /* ══════ what the LIGHTBOX shows for this piece (2026-08-24) ══════
+           A click on the ring used to bring the piece round and then, on a
+           second click, leave for the work page. The agency's instruction of
+           2026-08-24 is that a click opens the CATALOG instead — the same
+           overlay, stepping through the ring's own items as a group, that
+           every other media surface on the site opens.
+
+           🔴 The lightbox cannot find this item's picture by query. An item is
+           ten `.ring-slat` spans carrying the same URL as a BACKGROUND, not an
+           `<img>` — that is what makes the bend cost one decode — so
+           `node.querySelector("img")` returns null here and always will. The
+           node states its own contents instead, which is the same `data-full`
+           contract the archive's thumbnails already use for the file behind
+           the tile. */
+        b.dataset.full = it.full ? "assets/shots/" + it.full + ".webp" : srcOf(it);
+        /* A reel carries its film as well, and that one attribute does two
+           jobs: the previews module plays it in place on the front item (the
+           agency's "the ring's reels should play"), and the lightbox opens it
+           at the frame the preview had reached. */
+        const film = it.open && /\.mp4$/i.test(it.open) ? it.open : "";
+        if (film) b.dataset.preview = R2 + "/video/" + film;
+        const rec = MEDIA.find((x) => x.f === (it.open || it.f) || x.p === it.f);
+        if (rec && rec.d) b.dataset.date = fmtDate(rec.d);
 
         /* 🔴 SLATS, not one <img>. Each is the same picture with its own
            slice showing, by the ordinary sprite formula: the background is
@@ -1477,9 +1499,35 @@ const serviceRings = (() => {
         }
         b.innerHTML = html;
 
+        /* ══════ HOVER BRINGS A PIECE TO THE FRONT — DESKTOP ONLY ══════
+           "if u hover upon one item it moves to the center (the exact logic of
+           clicking) only for pc, since on phone u can only click"
+           (2026-08-24). So it is literally the click's own glide: pick(), the
+           same function the click used to call.
+
+           ⚠️ Gated on (hover: hover), like the pause it replaces. On touch
+           `pointerenter` fires once on the first tap and `pointerleave` never
+           fires at all — an ungated version would pick an item and, because
+           tick() holds still while something is picked, stop the ring for the
+           rest of the visit.
+
+           ⚠️ pointerleave RELEASES the pick, and that is not tidiness either:
+           tick() returns early while `picked >= 0`, so a pick that outlived
+           the pointer would be a permanently stopped ring. Leaving one item
+           for another fires leave-then-enter, so the release never eats the
+           next pick. */
         if (canHover) {
-          b.addEventListener("pointerenter", () => { hover = true; });
-          b.addEventListener("pointerleave", () => { hover = false; });
+          b.addEventListener("pointerenter", () => {
+            hover = true;
+            /* only the ring actually on screen may be picked — the other two
+               stages are translated a whole window away, not removed */
+            if (stages[at] && stages[at].id === id) pick(i);
+          });
+          b.addEventListener("pointerleave", () => {
+            hover = false;
+            clearPick();
+            paint();
+          });
         }
         ring.appendChild(b);
       });
@@ -1666,6 +1714,14 @@ const serviceRings = (() => {
     /* ⚠️ The new front starts flat and RISES, rather than appearing already
        lifted. paint() eases it — see liftTarget below. */
     s.liftNow = 0;
+    /* ══════ the front item's reel plays (2026-08-24) ══════
+       ⚠️ AN EVENT, not a call into `previews`. That module is defined several
+       hundred lines below this one, so a direct reference here is in the
+       temporal dead zone at build() time — and `typeof` does NOT protect
+       against a TDZ `const`, it throws like any other read. The event is also
+       the honest shape: the ring knows what is at the front and nothing about
+       video; previews knows about video and nothing about rings. */
+    reel.dispatchEvent(new CustomEvent("ringfront", { bubbles: true }));
     return best;
   }
 
@@ -1744,17 +1800,19 @@ const serviceRings = (() => {
     });
   }
 
-  /* ══════════ the two-step ══════════
-     ⚠️ ONE click used to leave the page, on a desktop and on a phone alike.
-     The agency's rule of 2026-08-23 is that the first click brings the piece
-     round to the front and grows it, and only a second click on the piece
-     already at the front opens it on the work page — so a ring you can look at
-     properly is not also a minefield of links. The same rule on touch, where
-     there is no hover to preview with and a stray tap used to navigate.
-
+  /* ══════════ bringing a piece round ══════════
      Bringing it round is an eased change to `spin`, driven by the same rAF
      that turns the ring, NOT a CSS transition: the transform depends on
-     --spin and is rewritten every frame, so a transition on it would smear. */
+     --spin and is rewritten every frame, so a transition on it would smear.
+
+     🔴 THE TWO-STEP IS GONE (2026-08-24). It was: first click glides the piece
+     to the front, second click on the piece already there leaves for the work
+     page. The agency removed the destination — "a click opens the catalog, not
+     the work page" — so there is no second step left to gate, and `pick()` is
+     now driven by HOVER on a desktop (see build()) rather than by a click.
+     ⚠️ Which means `picked` no longer decides where a click goes. All it does
+     now is hold the ring still and stand the piece proud of the band while a
+     pointer is resting on it. */
   function pickAngle(s, i) {
     const step = 360 / s.items.length;
     let d = -(i * step) - spin;
@@ -1762,28 +1820,17 @@ const serviceRings = (() => {
     return spin + d;
   }
 
-  reel.addEventListener("click", (e) => {
-    const b = e.target.closest(".ring-item");
+  function pick(i) {
     const s = stages[at];
-    if (!s) return;
-    if (!b) { clearPick(); paint(); return; }   /* a click off the work releases it */
-    held = true;
-    const i = +b.dataset.i;
-    if (s.picked === i && s.front === i) {
-      const q = b.dataset.project !== undefined
-        ? "?project=" + encodeURIComponent(b.dataset.project)
-        : "?open=" + encodeURIComponent(b.dataset.open);
-      location.href = "library.html" + q;
-      return;
-    }
+    if (!s || !s.nodes[i] || s.picked === i) return;
     clearPick();
     s.picked = i;
-    b.classList.add("is-picked");
+    s.nodes[i].classList.add("is-picked");
     s.front = -1;
     const to = pickAngle(s, i);
     /* ⚠️ Under prefers-reduced-motion nothing drives a frame — start() returns
-       without arming the rAF — so a glide would never arrive and the second
-       click could never find an item at the front. It jumps instead. */
+       without arming the rAF — so a glide would never arrive at all. It jumps
+       instead. */
     if (prefersReduced) {
       spin = ((to % 360) + 360) % 360;
       glide = null;
@@ -1792,6 +1839,15 @@ const serviceRings = (() => {
       start();
     }
     paint();
+  }
+
+  /* A click is the lightbox's now — it binds itself, delegated on the
+     document, and `.ring-item` is in its OPENS list. All this handler does is
+     end the service auto-advance for the visit, which is the rule of
+     2026-08-23: "unless something is clicked". */
+  reel.addEventListener("click", (e) => {
+    if (!e.target.closest(".ring-item")) return;
+    held = true;
   });
 
   /* One rAF for all three rings, and only the visible one advances. */
@@ -1811,8 +1867,13 @@ const serviceRings = (() => {
     /* A picked item waits where it was put: the second click has to land on
        the same piece, and a ring that carried it away would make that a game
        of timing. */
-    if (hover || document.hidden || stages[at].picked >= 0) return;
-    const d = (dt / TURN) * 360;
+    /* ⚠️ `lb-open` is in here since 2026-08-24. A click on a piece now opens
+       the lightbox over the section, and a ring that carried on turning behind
+       the overlay would hand the front item — and therefore the playing reel —
+       on to the next piece while the visitor is looking at this one. */
+    if (hover || document.hidden || stages[at].picked >= 0
+        || document.body.classList.contains("lb-open")) return;
+    const d = (dt / (TURNS[stages[at].id] || TURN_DEFAULT)) * 360;
     spin += d;
     turned += d;
     if (spin >= 360) spin -= 360;
@@ -1945,10 +2006,14 @@ const lightbox = (() => {
      project opened the profile sheet AND floated the lightbox over it, with
      two close buttons stacked on each other. The tile opens its profile and
      nothing else. */
+  /* ⚠️ `.ring-item` is here since 2026-08-24, and it is the whole of "a ring
+     click opens the catalog, not the work page". `.ring` is the group, so the
+     arrows walk that one service's own pieces — the overlay reads «٣ / ٩» on
+     the design ring, not «٣ / ٨٢» over the whole archive. */
   const OPENS = ".why .holder, .gw-tile, .lib-grid .tile:not([data-project])," +
-    " .sheet-shot, .clip-photo, .film-frame, .ab-media";
+    " .sheet-shot, .clip-photo, .film-frame, .ab-media, .ring-item";
   const GROUPS = ".gwall, .lib-grid, .reelshow-track, .clippings, .wb1, .film-group," +
-    " .ab-read, main";
+    " .ab-read, .ring, main";
   /* ⚠️ The carousel triples its slide set so the loop has no rewind, so the
      track holds 24 nodes showing 8 pictures. Counting the DOM gave "3 / 24"
      and made the arrows walk the same eight three times over — and a click
@@ -2011,7 +2076,13 @@ const lightbox = (() => {
     /* `data-full` is the archive file behind a thumbnail. Without it the
        overlay would enlarge the 600px tile derivative — which looks exactly
        like a broken image pipeline and is not one. */
-    const full = img && (img.dataset.full || img.currentSrc || img.src);
+    /* ⚠️ `node.dataset.full` is the last branch, and it is what makes the ring
+       openable at all: a `.ring-item` is ten background slats and has no
+       `<img>` for any of this to query, so it states its picture on the node.
+       Everything else keeps resolving through its own image first, so a
+       thumbnail with a `data-full` archive file is unaffected. */
+    const full = (img && (img.dataset.full || img.currentSrc || img.src))
+      || (node.dataset && node.dataset.full) || "";
     if (film) {
       return { video: `${R2}/video/${film}`, poster: full,
                date: date && date.textContent };
@@ -2027,10 +2098,16 @@ const lightbox = (() => {
     /* the preview has been torn down (off screen, or never started), but the
        node still knows its film and how far it got */
     if (node.dataset && node.dataset.preview) {
-      return { video: node.dataset.preview, poster: img && img.src,
-               at: parseFloat(node.dataset.at || "0") || 0 };
+      return { video: node.dataset.preview, poster: full || undefined,
+               at: parseFloat(node.dataset.at || "0") || 0,
+               date: (date && date.textContent) || node.dataset.date || "" };
     }
-    if (!img) return null;
+    if (!img) {
+      /* a ring item: no <img> anywhere in it, but the node names its file */
+      if (full) return { img: full, alt: node.dataset.alt || "",
+                         date: node.dataset.date || "" };
+      return null;
+    }
     /* a placeholder holder has nothing worth enlarging */
     if (img.src.startsWith("data:")) return null;
     return { img: full, alt: img.alt, date: date && date.textContent };
@@ -2200,6 +2277,10 @@ const previews = (() => {
   function bandOf(node) {
     if (node.closest(".reelshow-track")) return "reel";
     if (node.closest(".wb1")) return "wb1";
+    /* ⚠️ The ring is driven by the RING, not by an intersection test — see
+       syncRing below for why an observer cannot be trusted inside a
+       preserve-3d subtree that is translated a whole window off screen. */
+    if (node.closest(".ring-item")) return "ring";
     /* ⚠️ ONE BAND EACH, not one band for the section. The agency asked on
        2026-08-23b for the about page's clips to behave like GIFs — all of them
        running, not one at a time — and a band plays exactly one member. Giving
@@ -2207,8 +2288,14 @@ const previews = (() => {
        and the intersection observer still stops any that scrolls away. They
        are 4-5s each and 0.6-1.4 MB, which is why this is affordable here and
        is not on the reel carousel, where the files run 17-83 MB. */
+    /* ⚠️ ONE BAND PER CLIPPING, keyed on the node's own position in the
+       section rather than on its row. It used to be the row index, which was
+       the same thing while every row held exactly one piece of media; the
+       shape of 2026-08-24 puts TWO verticals side by side in a row, and a row
+       key would have made them share a band — and a band plays exactly one
+       member, so one of every pair would have sat still. */
     const ab = node.closest(".ab-read .ab-media");
-    if (ab) return "ab-" + [...ab.parentElement.parentElement.children].indexOf(ab.parentElement);
+    if (ab) return "ab-" + [...document.querySelectorAll(".ab-read .ab-media")].indexOf(ab);
     const wall = node.closest(".gwall");
     if (wall) {
       if (phone()) return "wall";
@@ -2247,7 +2334,10 @@ const previews = (() => {
     v.playsInline = true;
     v.loop = true;
     v.preload = "auto";
+    /* a ring item has no <img> — it states its poster on the node, the same
+       attribute the lightbox reads */
     if (img) v.poster = img.currentSrc || img.src;
+    else if (node.dataset.full) v.poster = node.dataset.full;
     v.src = node.dataset.preview;
     const at = parseFloat(node.dataset.at || "0") || 0;
     if (at > 0.2) {
@@ -2285,6 +2375,48 @@ const previews = (() => {
     b.timer = setTimeout(() => { b.at += 1; advance(name); }, HOLD);
   }
 
+  /* ══════════ the ring: the piece at the front plays ══════════
+     "the ring's reels should play … their poster frames should run like the
+     ones in لماذا ألِف؟ and on the about page" (2026-08-24). Only the item
+     FACING the viewer plays, which is the carousel's rule rather than the
+     about page's — and for the carousel's reason: these are the same 17–83 MB
+     reels the carousel streams, not the 0.6–1.4 MB behind-the-scenes clips.
+     Four of them running at once on a phone is not a preview, it is a bill.
+
+     🔴 DRIVEN BY THE RING, NOT BY THE OBSERVER, and the observer would be
+     wrong rather than merely redundant. A ring item lives inside a preserve-3d
+     subtree rotated on two axes, and two of the three stages are translated a
+     whole window off screen by `.ring-reel` — the same reason the ring's
+     centre marks are not lazy (see build()). What IS a plain box on the page
+     is the window the three stages slide inside, so that is what is observed;
+     which of the nine items is at the front is a thing only the ring knows,
+     and it says so with a `ringfront` event.
+
+     ⚠️ The video is appended to `.ring-item` itself, which is the one place a
+     flat plane can go without collapsing the bend: any transform or opacity on
+     a wrapper BETWEEN .ring and a slat forces transform-style back to flat.
+     A sibling of the slats is not between them. It is pushed out to the band's
+     own surface in CSS — see `.ring-item > video.preview`. */
+  const ringWin = document.getElementById("ringWindow");
+  let ringOn = !ringWin;             /* no ring on this page: nothing to gate */
+  function syncRing() {
+    document.querySelectorAll(".ring-item[data-preview]").forEach((n) => {
+      const stage = n.closest(".ring-stage");
+      const on = ringOn
+        && n.classList.contains("is-front")
+        && !!stage && stage.getAttribute("aria-hidden") === "false"
+        && !document.body.classList.contains("lb-open");
+      on ? play(n) : stop(n);
+    });
+  }
+  document.addEventListener("ringfront", syncRing);
+  if (ringWin && window.IntersectionObserver) {
+    new IntersectionObserver((es) => {
+      ringOn = es[0].isIntersecting;
+      syncRing();
+    }, { threshold: 0.25 }).observe(ringWin);
+  }
+
   /* the carousel drives itself: whatever is centred plays, nothing else */
   function syncReel() {
     const b = band("reel");
@@ -2312,9 +2444,15 @@ const previews = (() => {
     nodes.forEach((n) => {
       const name = bandOf(n);
       n.dataset.band = name;
+      /* ⚠️ The ring is NOT observed and has no band. Left in the observer it
+         would report "not intersecting" forever — the 3D transform means its
+         box is not where the test looks — and the callback would stop the
+         reel a frame after syncRing() started it. */
+      if (name === "ring") return;
       band(name).members.push(n);
       io.observe(n);
     });
+    syncRing();
   }
   refresh();
 
@@ -3189,7 +3327,6 @@ applyI18n();
 initDropCap();
 syncMenuBtn();
 openFromQuery();
-setInterval(tickClock, 20000);
 
 /* widths measured before Idris lands are wrong and leave a gap in the
    loops — remeasure once the fonts are applied */

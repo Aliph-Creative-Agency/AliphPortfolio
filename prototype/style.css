@@ -903,6 +903,41 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   font-weight: 500;
   color: rgba(15, 24, 32, 0.82);
 }
+/* 🔴 A 20em MEASURE, AND IT IS THE WHOLE OF `9th.png` (2026-08-24). The
+   agency ringed the desktop lede's third line — «الياء.», one word, alone
+   — and asked to "either squish the width to the point where theres almost 3
+   full lines or only 2 big ones". Squishing is the right half of that: the
+   copy is a fixed length, so a narrower measure moves words DOWN into the
+   short line until it fills.
+
+   Measured across six desktop widths, as a fraction of the column that the
+   LAST line covers:
+
+     |        | uncapped | 20em |
+     |--------|----------|------|
+     | 1920   |    7%    | 80%  |
+     | 1600   |   12%    | 80%  |
+     | 1440   |   22%    | 96%  |
+     | 1280   |   44%    | 80%  |
+
+   ⚠️ Three lines at every one of them, so the rule of 2026-08-23b — the
+   type reaches the bottom of the paper — survives: the gap at 1920 is
+   unchanged at −14px. ⚠️ AND IT IS A CLIFF: 19em tips 1440 and 1280 to four
+   lines with an 11% last line, which is the fault coming back one step
+   narrower. 20 is one whole em clear of it; do not trim it to taste.
+   ⚠️ It does not bind on a phone (20em is 456px against a ~340px column
+   there), which is why the phone's half of this edit is the setting below and
+   not the measure.
+
+   JUSTIFIED, at every width. The float shortens the first lines and the rest
+   run full, so the start edge steps in and out — which is the "a lil messy"
+   of `11th.jpg`. Flushing both edges turns a wobble into one clean step at the
+   line the float releases, and a justified column beside a dropped initial is
+   what this site's whole voice is: an Arabic newspaper. */
+.dropcap-block p {
+  max-width: 20em;
+  text-align: justify;
+}
 /* ── dropcap: the paper uncrumples ────────────────────────────────────
    A 24-frame sprite baked from the studio's crumple clip; see HANDOFF for
    the recipe.
@@ -954,26 +989,120 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
 .hero-cta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.7rem 0.9rem;
+  align-items: flex-start;
+  gap: 0.7rem clamp(0.6rem, 1.6vw, 1.6rem);
   margin-top: 1.1rem;
-  padding-top: 0.95rem;
+  padding-top: 1.2rem;
   border-top: 1px solid rgba(15, 24, 32, 0.3);
 }
-/* The pair sits on the panel's own cream, so the outlined oval that works
-   everywhere else gives two equal buttons and no lead. One is filled instead:
-   same ellipse, same swap, ink where the others have air. */
-.oval-btn.is-solid { color: var(--cream); }
-.oval-btn.is-solid::before {
-  background: var(--ink);
-  border-color: var(--ink);
-  opacity: 1;
+
+/* ══════ THE HERO'S TWO WAYS OUT ARE PINNED NOTES (2026-08-24) ══════
+   They were a solid oval and an outlined one. The agency sent two photographs
+   of a paper note held by a red push-pin and asked for them cut out, shadowed,
+   and "animated simply on hover and on click".
+
+   The picture is a BACKGROUND on the anchor and the label is the anchor's own
+   content, so the words are laid out inside the sheet rather than positioned
+   over it. `contain` and an `aspect-ratio` taken from the cut file keep the
+   two in register at every size — change a file's crop and its ratio below
+   moves with it, or the label drifts off the paper.
+
+   ⚠️ THE TWO NOTES ARE NOT THE SAME SHAPE and they are not meant to be. One
+   is square to the camera at 700x523, the other is tilted and curled at
+   680x633. Forcing both into one box would either letterbox them (a note
+   floating in a bigger invisible button, whose click target is then wrong) or
+   stretch them (paper does not stretch). They are sized to a common WIDTH and
+   each keeps its own height.
+
+   🔴 THE TRANSFORM ORIGIN IS THE PIN, and that is the whole of the motion.
+   Both notes are hung from one point near their top edge; anything that turns
+   about that point reads as paper swinging on a pin, and the same rotation
+   about the centre reads as a card being tilted by an invisible hand. The
+   origins below are measured off the cut files: the pin head sits at 49% x
+   9% on `note-start` and 43% x 15% on `note-contact`.
+
+   ⚠️ The shadow is a `drop-shadow` FILTER, not a `box-shadow`. The note is
+   an irregular cut-out with a curled corner — a box-shadow would draw the
+   shadow of the rectangular element, which is a hard grey rectangle behind a
+   piece of torn paper. */
+.note-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(140px, 12.5vw, 232px);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  color: var(--ink);
+  cursor: pointer;
+  /* two shadows, the way the dropcap's sheet is lit: a tight contact one that
+     seats the paper and a soft cast one that lifts it off the page */
+  filter: drop-shadow(0 2px 2px rgba(5, 9, 13, 0.28))
+          drop-shadow(0 12px 20px rgba(5, 9, 13, 0.26));
+  transition: transform 0.42s cubic-bezier(0.2, 0.8, 0.2, 1),
+              filter 0.42s ease;
+  transform: rotate(var(--swing, 0deg)) translateY(var(--lift, 0px));
 }
-/* ⚠️ The oval is a ::before UNDER the label, so a filled one needs the label
-   lifted out of its own stacking order or the ink paints straight over the
-   words. The outlined version never needed this — there was nothing to hide
-   behind. */
-.oval-btn.is-solid .oval-swap { position: relative; z-index: 1; }
-.oval-btn.is-solid:hover::before { opacity: 1; }
+.note-start {
+  background-image: url("assets/img/note-start.webp");
+  aspect-ratio: 700 / 523;
+  transform-origin: 49% 9%;
+  --swing: -1.6deg;
+}
+.note-contact {
+  background-image: url("assets/img/note-contact.webp");
+  aspect-ratio: 680 / 633;
+  transform-origin: 43% 15%;
+  --swing: 1.4deg;
+}
+/* On the sheet and CLEAR OF THE PIN. The label is pushed below the pin head by
+   the same fraction the origins above are measured at, and the second note's
+   line is turned to lie along its own top edge — measured off the cut, the
+   sheet's top runs down 130px over 560px, which is -13deg. A horizontal line
+   of type on a tilted sheet is the one thing that would give away that this is
+   a photograph with words dropped on top of it. */
+.nb-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(0.9rem, 1.35vw, 1.15rem);
+  line-height: 1.3;
+  text-align: center;
+  max-width: 74%;
+  pointer-events: none;
+}
+.note-start .nb-label { transform: translateY(10%); }
+.note-contact .nb-label { transform: translate(-2%, 8%) rotate(-13deg); }
+
+/* Hover: it swings straight and rises off the page. Click: it drops back onto
+   the pin. ⚠️ Both are on the ANCHOR's own transform, which is why --swing
+   and --lift are variables — a `:active` rule that restated `transform` would
+   have to repeat the rotation as well, and the two would drift apart. */
+@media (hover: hover) {
+  .note-btn:hover {
+    --swing: 0deg;
+    --lift: -6px;
+    filter: drop-shadow(0 3px 3px rgba(5, 9, 13, 0.24))
+            drop-shadow(0 22px 30px rgba(5, 9, 13, 0.3));
+  }
+}
+.note-btn:active {
+  --lift: 2px;
+  filter: drop-shadow(0 1px 1px rgba(5, 9, 13, 0.3))
+          drop-shadow(0 6px 10px rgba(5, 9, 13, 0.22));
+  transition-duration: 0.09s;
+}
+.note-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+/* ⚠️ The swing is motion, so it goes under reduced motion — but the notes
+   must still LOOK pinned, so the resting angle stays and only the travel is
+   removed. Setting --swing to 0 here would straighten them, which is a
+   different design rather than a calmer one. */
+@media (prefers-reduced-motion: reduce) {
+  .note-btn { transition: none; }
+  .note-btn:hover { --lift: 0px; --swing: var(--rest, 0deg); }
+}
 
 /* ── decorative separators ──────────────────────────────────────────
    The · and / marks are punctuation, not content, and are aria-hidden. They
@@ -1784,7 +1913,28 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
   position: absolute;
   inset: 0;
   margin: auto;
-  width: var(--sw);
+  /* 🔴 THE BLEED IS A LENGTH, NOT A RATIO, and that is the seam fix of
+     2026-08-24. What was here was `scaleX(1.012)` on a strip — 1.2% of a
+     measured 40px slat is 0.48px of overlap, a QUARTER of a pixel on each
+     side, and a browser antialiases each of two strips meeting at an angle
+     independently over about a whole pixel. Measured on the deployed build at
+     1440: nine vertical lines across the front item at x = 849, 889, 929, 968…
+     each ~2px wide and reading 200 against the picture's 115 — that is the
+     CREAM PAGE showing between the strips.
+
+     ⚠️ The complaint's diagnosis was the opposite fault and it was worth
+     testing before believing: two strips at opacity 0.8 overlapping composite
+     to 0.96, which would darken every seam. Both mechanisms are real; only one
+     of them was on the screen. The lines on the agency's maroon tile are
+     LIGHTER than the maroon, not darker — they were gaps all along.
+
+     So the strip is widened by a whole pixel on each side and the picture is
+     shifted back by the same pixel, which is why the slice is not stretched:
+     the neighbour's extra pixel shows a pixel of the neighbour's own content,
+     drawn from the same sprite, and it lands exactly where the page used to.
+     A scale could never do that — it stretches what it widens. */
+  --bleed: 1.1px;
+  width: calc(var(--sw) + var(--bleed) * 2);
   height: var(--h);
   background-repeat: no-repeat;
   background-origin: border-box;
@@ -1793,19 +1943,28 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
      instead would put the strip count in two files, and the sprite silently
      shows the wrong slice of the picture the day one of them changes. */
   background-size: calc(var(--sw) * var(--n)) 100%;
-  background-position: calc(var(--k) / (var(--n) - 1) * 100%) 0;
+  /* The percentage form this replaces — k/(n-1) * 100% — resolved to exactly
+     `-sw * k` for a strip of width sw. It cannot survive the widening: the
+     same percentage of a different overflow is a different offset, and the ten
+     slices would walk out of step by a pixel each. Stating the offset in
+     lengths keeps the sprite exact at any bleed. */
+  background-position: calc(var(--bleed) - var(--sw) * var(--k)) 0;
   border-top: var(--media-line);
   border-bottom: var(--media-line);
-  opacity: var(--o, 1);
+  /* 🔴 EVERY SLAT IS FULLY OPAQUE, and that is the whole of the seam fix of
+     2026-08-24. `opacity: var(--o)` used to live here, and it was incompatible
+     with the scaleX overlap below: two strips at opacity 0.8 overlapping
+     composite to 1 - 0.2² = 0.96 in the overlap, so every one of the nine
+     seams painted a band a fifth darker than the picture either side of it.
+     The agency's screenshot (2nd pic.png) is the maroon Al Baydar tile ruled
+     with exactly ten vertical lines — the overlap, not a gap.
+
+     Opaque-over-opaque overlaps are invisible, so the depth fade moves off the
+     compositing and into the PAINT: ::after lays a flat cream veil over the
+     picture at 1 - --o, which composites to the same colour the opacity did
+     against the cream page — and does it INSIDE the strip, where the overlap
+     cannot see it. See the veil below. */
   pointer-events: auto;
-  /* ⚠️ scaleX(1.012) is a SEAM FIX, not styling. Two neighbouring strips
-     meet along a shared edge at an angle, and a browser antialiases each of
-     them independently — which leaves a hairline of the page showing between
-     every pair, ten times across every item, and a picture ruled with vertical
-     lines reads as a broken sprite. Widening each strip by a little over one
-     percent about its own centre makes them overlap instead. It stretches the
-     slice by the same fraction: 1.2% of a 30px strip, which is a third of a
-     pixel. */
   /* 🔴 EVERY VAR HERE CARRIES A FALLBACK, and that is not defensive habit.
      build() inserts the slats and layout() writes --dth and --apo, but
      layout() opens by measuring the window — which flushes style for the nodes
@@ -1822,19 +1981,80 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
      never what CSS animates. */
   transform:
     rotateY(calc((var(--k, 0) - var(--kc, 0)) * var(--dth, 0deg)))
-    translateZ(calc(var(--apo, 0px) + var(--lift, 0px)))
-    scaleX(1.012);
+    translateZ(calc(var(--apo, 0px) + var(--lift, 0px)));
+}
+/* The depth fade, painted rather than composited — see the note above.
+
+   V = 1 - --o, in the page's own cream, so a strip at --o 0.70 reads exactly
+   as it did at opacity 0.70 over the cream ground. It is a CHILD of the strip,
+   so where two strips overlap the nearer one's picture AND its veil both paint
+   over the further one's — the pair composites to the same colour as a strip
+   with no neighbour, which is the property the opacity version could not have.
+
+   ⚠️ `border-radius: inherit` — the two end strips round their outer corners,
+   and a square veil over a rounded strip puts the seam back at the corners.
+   ⚠️ inset: 0 on an absolutely positioned child resolves against the PADDING
+   box, so the strip's own 1px rules stay at full strength all the way round
+   the band rather than fading with the picture. That is deliberate: the rule
+   is the band's edge, not part of the work. */
+.ring-slat::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--cream);
+  opacity: calc(1 - var(--o, 1));
   transition: opacity 0.45s ease-out;
 }
+/* ══════ A REEL PLAYING ON THE BAND (2026-08-24) ══════
+   The agency asked for the ring's reels to run the way the ones in لماذا ألِف؟
+   and on the about page do. A film cannot be sliced across ten background
+   strips the way the still is — `background-image` takes a URL, not a video —
+   so the piece that is playing is ONE flat plane standing on the band, and the
+   slats are still under it.
+
+   🔴 The plane is pushed out to translateZ(--apo), which is where the MIDDLE
+   slat already sits, plus 2px. Every other slat is at apo·cos((k−kc)·dth),
+   i.e. further back, so 2px clears the whole bulge — measured, the bend is
+   10.0px across an item but that is x-and-z travel around the axis, not depth
+   in front of the middle. Any less and the middle slat z-fights the film.
+
+   ⚠️ It is a CHILD OF THE ITEM, not a wrapper around the slats. Anything
+   between .ring and a slat that carries a transform or an opacity forces
+   transform-style back to flat and collapses the bend; a sibling does not.
+   ⚠️ --w, --h and --apo are all written on .ring-item by layout(), so the
+   film is exactly the piece's own box at exactly the band's own radius, and it
+   follows the ring's resize for free. */
+.ring-item > video.preview {
+  inset: 0;
+  margin: auto;
+  width: var(--w);
+  height: var(--h);
+  transform: translateZ(calc(var(--apo, 0px) + var(--lift, 0px) + 2px));
+  border: var(--media-line);
+  border-radius: clamp(6px, 0.9vw, 14px);
+}
+
 /* The band's own edges. Only the two end strips have an outside, so only they
    carry the side rule and the corner — the eight between them are interior
    and a border on any of them would draw a line across the picture. */
+/* ⚠️ The two ends keep the widening — a different width would move their
+   centre off the station, because `inset: 0; margin: auto` is what puts every
+   strip on the axis — and give the bleed back in the PICTURE instead. Without
+   this the outermost strip would show its bleed pixel as bare element inside
+   the band's own rule, which is a 1px transparent hairline down the outside
+   edge of every piece of work: the exact fault this fix is for, moved one
+   strip over. The picture is 1px out of step on the two end strips only, at
+   the very edge of the frame, where nothing can be read against it. */
 .ring-slat:first-child {
+  background-position: calc(0px - var(--sw) * var(--k)) 0;
   border-left: var(--media-line);
   border-top-left-radius: clamp(6px, 0.9vw, 14px);
   border-bottom-left-radius: clamp(6px, 0.9vw, 14px);
 }
 .ring-slat:last-child {
+  background-position: calc(var(--bleed) * 2 - var(--sw) * var(--k)) 0;
   border-right: var(--media-line);
   border-top-right-radius: clamp(6px, 0.9vw, 14px);
   border-bottom-right-radius: clamp(6px, 0.9vw, 14px);
@@ -1986,7 +2206,55 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
     justify-items: end;
     text-align: end;
   }
-  .ring-invite { text-align: end; max-width: none; }
+  /* Bigger, at the agency's request (2026-08-24) — it was 0.86–0.98rem, a
+     footnote under a button twice its weight, and it is the only sentence in
+     this column that says why the button is worth pressing. */
+  .ring-invite {
+    text-align: end;
+    max-width: none;
+    font-size: clamp(1rem, 1.35vw, 1.22rem);
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  /* Shrunk to make room for it beside the oval below — "shrink the oval if
+     that is what it takes to fit". 8.4rem is 202px at this root, still wider
+     than «كل الأعمال» sets. ⚠️ The swap mask is `100% + 2 x <inline padding>`
+     so its cut lands on the rim; narrowing the padding without narrowing the
+     mask puts the cut inside the ellipse, where nothing explains it. */
+  .ring-foot .oval-btn {
+    min-width: clamp(8.4rem, 14vw, 11rem);
+    padding-inline: 1.1rem;
+  }
+  .ring-foot .oval-swap {
+    width: calc(100% + 2 * 1.1rem);
+    margin-inline: -1.1rem;
+  }
+  .ring-foot .ob-face { font-size: 1rem; }
+}
+
+/* ⚠️ THE INVITATION MOVES BESIDE THE OVAL ONLY ABOVE 1200px, and the number is
+   measured rather than chosen. `6th.png` asks for the sentence beside the
+   button rather than above it, and the source order places them: the
+   invitation is written first so it takes the inline START track and the oval
+   the END — the edge that touches the ring, where the agency put it on
+   2026-08-23b and where it stays.
+
+   But the way-out column is 0.35 of the section, and the oval is 202px wide
+   whatever else happens to it. Measured: at 1440 the column is 459px and the
+   sentence gets 234 of it and sets on two lines; at 1024 the column is 326 and
+   the sentence gets 108 — three lines of two words each, wedged against a
+   button, which is worse than the stack it replaced. So the pairing applies
+   where there is room for it and the stack stays where there is not. */
+@media (min-width: 1361px) {
+  .ring-foot {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: clamp(0.7rem, 1.6vw, 1.3rem);
+  }
+  /* English sets longer and is scaled down to compensate — the house rule, and
+     here it decides a line count: at 1366 the Arabic sentence takes two lines
+     of the 212px it is given and the English one took three. */
+  html[lang="en"] .ring-invite { font-size: clamp(0.92rem, 1.18vw, 1.1rem); }
 }
 
 /* ═══════════════════════════════════════════
@@ -2483,9 +2751,19 @@ body.lib-index .lib-list { display: block; }
      already 600px tall, on a page whose top section packs five clippings into
      one board. The rhythm to match is the collage's, not a reading column's. */
   display: grid;
+  /* How tall a piece of media in this section may be. The width follows from
+     the ratio the medium states — same rule as the clippings — so a 9:16 clip
+     and a 16:9 montage read as the same weight of picture rather than the 9:16
+     coming out twice as tall as the board it is pinned to.
+     ⚠️ The montage overrides it below: it is alone on its row and can afford
+     the height two verticals sharing a column cannot. */
+  --abh: clamp(230px, 36vh, 380px);
   gap: clamp(0.9rem, 2vw, 1.6rem);
   padding: clamp(1.2rem, 3vh, 2rem) var(--pad) clamp(2rem, 5vh, 3.2rem);
-  border-bottom: var(--hair);
+  /* ⚠️ NO RULE ALONG THE BOTTOM (2026-08-24) — `12th.png` strikes it out.
+     It ran the full width of the page a few rem above the way out, so the
+     oval read as something that had been fenced off from the section it
+     belongs to rather than as its last line. */
 }
 .ab-row {
   display: grid;
@@ -2493,30 +2771,49 @@ body.lib-index .lib-list { display: block; }
   gap: clamp(1.1rem, 2.6vw, 2.2rem);
   align-items: center;
 }
-/* Placed by column, not by `order` — the picture and its card keep their
+/* Placed by column, not by `order` — the pictures and the card keep their
    document order (which is what the phone reads) and only the track they sit
    in changes. The tracks swap with them so the card always gets the wider of
    the two, whichever side it is on.
 
-   🔴 grid-row: 1 IS LOAD-BEARING ON THE EVEN ROWS, and without it those rows
-   were silently TWICE AS TALL as they should be. Auto-placement runs a cursor
-   forward through the grid: on an even row the picture is placed in column 2
-   first, so when the card asks for column 1 the cursor has already passed it
-   and the card drops to a second row — picture above, card below, in a layout
-   whose whole point is picture beside card. Measured before the fix:
-   `grid-template-rows: 493.531px 169.281px` on rows 2 and 4, a 713px row
-   holding a 494px picture. That is where most of the "huuuuuuuge spaces
-   between sections" the agency reported on 2026-08-23b actually came from; it
-   was never only the gap. Stating the row leaves nothing to auto-placement.
+   🔴 grid-row: 1 IS LOAD-BEARING ON THE FLIPPED ROW, and without it that row
+   is silently TWICE AS TALL as it should be. Auto-placement runs a cursor
+   forward through the grid: the pictures are placed in column 2 first, so when
+   the card asks for column 1 the cursor has already passed it and the card
+   drops to a second row — pictures above, card below, in a layout whose whole
+   point is pictures beside card. Measured before the fix on the old five-row
+   shape: `grid-template-rows: 493.531px 169.281px`, a 713px row holding a
+   494px picture. That is where most of the "huuuuuuuge spaces between
+   sections" the agency reported on 2026-08-23b actually came from; it was
+   never only the gap. Stating the row leaves nothing to auto-placement.
    ⚠️ The phone rule below has to put `grid-row: auto` back, or one column
-   collapses the pair on top of each other in a single row. */
-.ab-row > .ab-media { grid-column: 1; grid-row: 1; }
+   collapses the pair and the card on top of each other in a single row.
+
+   ⚠️ `.is-flip`, not `:nth-child(even)` — since 2026-08-24 this section's
+   first child is the full-width montage rather than a row, so counting
+   children flips the wrong one. */
+.ab-row > .ab-pair { grid-column: 1; grid-row: 1; }
 .ab-row > .ab-card { grid-column: 2; grid-row: 1; }
-.ab-row:nth-child(even) {
-  grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr);
+.ab-row.is-flip { grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr); }
+.ab-row.is-flip > .ab-pair { grid-column: 2; grid-row: 1; }
+.ab-row.is-flip > .ab-card { grid-column: 1; grid-row: 1; }
+
+/* 🔴 TWO VERTICALS SIDE BY SIDE, IN THE SCATTERED STYLE (2026-08-24) — the
+   agency's new shape for the long read. `align-items: flex-start` plus a top
+   margin on the second of each pair is what makes it scattered rather than a
+   pair of matching panels: the two hang at different heights off the same
+   line, like two clippings pinned to a board, which is the treatment the
+   collage at the top of this page already uses.
+   ⚠️ `justify-content: center` because the figures SHRINK-WRAP their
+   pictures now (see .ab-media) — the pair is narrower than its column, and
+   left where it fell it would hug one edge of a row whose other half is a
+   card. */
+.ab-pair {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(0.5rem, 1.4vw, 1.1rem);
 }
-.ab-row:nth-child(even) > .ab-media { grid-column: 2; grid-row: 1; }
-.ab-row:nth-child(even) > .ab-card { grid-column: 1; grid-row: 1; }
 
 /* 🔴 A CLIPPING, not a bordered box. The agency's note of 2026-08-23b was
    that the long read "didn't recreate the same style of the original top
@@ -2529,12 +2826,39 @@ body.lib-index .lib-list { display: block; }
    So .ab-media takes .clip's treatment exactly. ⚠️ The mat is the padding:
    without it the hairline sits on the picture's own edge and the whole thing
    reads as a border rather than as something pinned to a board. */
+/* 🔴 THE MAT SHRINK-WRAPS THE PICTURE (2026-08-24), and that is `13th.png`
+   against `14th.png`. The fault: `.ab-holder` capped its own width through the
+   height — `min(100%, 38vh * ratio)` — and then centred inside an `.ab-media`
+   that still spanned the whole grid track, so a 9:16 clip 200px wide sat in a
+   mat 560px wide with its caption stranded at the far corner. A mat is the
+   stock a clipping is mounted on: the picture's size plus a border, not the
+   column's.
+
+   `width: fit-content` is what fixes it, and the holder's width had to stop
+   being a percentage before it could work. A percentage inside a shrink-to-fit
+   parent is the circular case this file keeps warning about — the parent's
+   width depends on the child and the child's on the parent — and Chrome breaks
+   the circle by falling back to the intrinsic ratio, which is how the gallery
+   wall's أ came out 654px tall in a 447px tile. The holder states a definite
+   `--abh * ratio` instead, so its max-content contribution is a real number
+   and the figure can wrap to it.
+
+   ⚠️ The mat IS the padding: without it the hairline sits on the picture's
+   own edge and the whole thing reads as a border rather than as something
+   pinned to a board. */
 .ab-media {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
   background: var(--cream-warm);
   border: var(--hair);
   box-shadow: 0 8px 24px rgba(15, 24, 32, 0.12);
   padding: 0.8rem;
   cursor: zoom-in;
+  /* ⚠️ The angle is a VARIABLE and the transform is stated once. It used to
+     be a transform per row, which the hover rule below then had to out-specify
+     — and at four selectors deep it would silently stop being able to. */
+  transform: rotate(var(--pin, 0deg));
   transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .ab-media figcaption {
@@ -2542,21 +2866,24 @@ body.lib-index .lib-list { display: block; }
   color: var(--ink-mute);
   padding-top: 0.45rem;
 }
-/* ⚠️ Rotations are stated per row and they DO NOT REPEAT down the page. A
-   single value alternated by :nth-child(even) is a zigzag, which reads as a
-   pattern rather than as a board of pinned clippings — the collage above uses
-   five different angles for the same reason. The cards take a much smaller
-   one: a clipping is pinned, a card of running text is set on the page, and
-   more than half a degree under a paragraph is legibility spent on nothing. */
-.ab-row:nth-child(1) .ab-media { transform: rotate(-1.2deg); }
-.ab-row:nth-child(2) .ab-media { transform: rotate(0.9deg); }
-.ab-row:nth-child(3) .ab-media { transform: rotate(-0.7deg); }
-.ab-row:nth-child(4) .ab-media { transform: rotate(1.3deg); }
-.ab-row:nth-child(5) .ab-media { transform: rotate(-1deg); }
-.ab-row:nth-child(odd) .ab-card { transform: rotate(0.35deg); }
-.ab-row:nth-child(even) .ab-card { transform: rotate(-0.4deg); }
+/* ⚠️ Every piece gets its OWN angle and no value repeats. A single angle
+   alternated by :nth-child is a zigzag, which reads as a pattern rather than
+   as a board of pinned clippings — the collage above uses five different
+   angles for the same reason. The cards take a much smaller one: a clipping is
+   pinned, a card of running text is set on the page, and more than half a
+   degree under a paragraph is legibility spent on nothing.
+   ⚠️ The second of each pair also hangs LOWER. Two verticals of the same
+   height on the same line are a diptych; offset, they are two clippings. */
+.ab-wide { --pin: -0.8deg; }
+.ab-row:not(.is-flip) .ab-pair > .ab-media:first-child { --pin: -1.5deg; }
+.ab-row:not(.is-flip) .ab-pair > .ab-media:last-child  { --pin: 1.1deg; }
+.ab-row.is-flip .ab-pair > .ab-media:first-child { --pin: 1.3deg; }
+.ab-row.is-flip .ab-pair > .ab-media:last-child  { --pin: -0.7deg; }
+.ab-pair > .ab-media:last-child { margin-top: clamp(0.9rem, 2.6vw, 2.2rem); }
+.ab-row .ab-card { transform: rotate(0.35deg); }
+.ab-row.is-flip .ab-card { transform: rotate(-0.4deg); }
 /* the overlap that makes it a board rather than a list of rows */
-.ab-row:nth-child(even) { margin-top: clamp(-1.6rem, -2.4vw, -0.8rem); }
+.ab-row.is-flip { margin-top: clamp(-1.6rem, -2.4vw, -0.8rem); }
 
 /* ⚠️ 38vh, down from 56vh (2026-08-23b). The cap is what decides how tall a
    row is, and at 56vh a 9:16 clip stood 605px tall beside a card holding one
@@ -2567,8 +2894,12 @@ body.lib-index .lib-list { display: block; }
 .ab-holder {
   position: relative;
   aspect-ratio: var(--r, 1.3333);
-  width: min(100%, calc(38vh * var(--r, 1.3333)));
-  margin-inline: auto;
+  /* ⚠️ DEFINITE, not `min(100%, …)`. The percentage is what stopped the mat
+     shrink-wrapping it — see .ab-media. `max-width: 100%` still clamps the
+     used width, which is all the percentage was ever doing here, and it does
+     not poison the max-content contribution the way `width: %` does. */
+  width: calc(var(--abh) * var(--r, 1.3333));
+  max-width: 100%;
   overflow: hidden;
   background: var(--ink);
 }
@@ -2615,17 +2946,13 @@ body.lib-index .lib-list { display: block; }
 }
 .ab-lead::first-line { font-weight: 700; }
 
-/* The rule sits ABOVE the quote, not down its side: Aliph's device is the
-   logo's extending baseline, a horizontal stroke. Turned vertical beside a
-   blockquote it stops being the brand's mark and becomes the generic
-   quote-callout tab. */
-.ab-card-quote {
-  border-top: 3px solid var(--ink);
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(1.15rem, 2.1vw, 1.65rem);
-  line-height: 1.75;
-}
+/* The full-width piece at the head of the section — the AliphxBader montage,
+   the only 16:9 on the board and the only figure with no card beside it. It
+   still shrink-wraps; it is simply allowed to be taller.
+   ⚠️ `.ab-card-quote` was deleted with it (2026-08-24): the pull quote is
+   one of the three texts the agency took out of this section, and a rule for
+   an element no document contains is a rule nobody can check. */
+.ab-wide { --abh: clamp(260px, 48vh, 500px); }
 
 /* ── one section per service ──
    The photo and text swap sides every other block, which keeps a run of four
@@ -2726,14 +3053,40 @@ body.lib-index .lib-list { display: block; }
   justify-content: center;
   padding: 0 var(--pad) clamp(2.4rem, 6vh, 4rem);
 }
+/* "make the oval a little bigger" (2026-08-24, `12th.png`). The base oval is
+   min-width clamp(150px, 16vw, 210px) at 0.85rem/1.8rem of padding; this is
+   the same ellipse a third wider and a line taller, which is as far as it can
+   go before it stops being a button and becomes a banner. ⚠️ The swap mask has
+   to be widened WITH the padding — it is `100% + 2 x <inline padding>` so that
+   the cut lands on the rim, and leaving it at the base 1.8rem would put the
+   cut 0.7rem inside the ellipse on each side, where nothing explains it. */
+.ab-cta .oval-btn {
+  min-width: clamp(200px, 22vw, 290px);
+  padding: 1.1rem 2.5rem;
+}
+.ab-cta .oval-swap {
+  width: calc(100% + 2 * 2.5rem);
+  margin-inline: -2.5rem;
+}
+.ab-cta .ob-face { font-size: clamp(1.05rem, 1.7vw, 1.35rem); }
 
 /* ═══════════ FOOTER (shared) ═══════════ */
 .footer {
   background: var(--ink);
   color: var(--cream);
   position: relative;
+  /* the mark below runs off the bottom edge; this is the cut */
   overflow: hidden;
   margin-top: clamp(1.5rem, 4vh, 2.5rem);
+  /* ⚠️ ONE DECLARATION, THREE CONSUMERS. The mark's width, how far it hangs
+     below the page, and the room every other thing in the footer has to leave
+     for it are one decision — .contact-side, .rule-cream and .footer-legal all
+     read --mark-clear, and the phone block below re-states only these three
+     tokens rather than four rules. Change the width here and the clearances
+     move with it. */
+  --mark-w: clamp(160px, 19vw, 300px);
+  --mark-drop: clamp(-96px, -7vw, -44px);
+  --mark-clear: calc(var(--mark-w) + clamp(0.7rem, 2vw, 1.8rem));
 }
 /* the home page's last section already butts against the contact band, so
    the gap just read as a stray cream strip */
@@ -2749,6 +3102,9 @@ body[data-page="index"] .footer { margin-top: 0; }
   pointer-events: none;
 }
 .rule-cream { height: 1px; background: rgba(217, 217, 206, 0.5); margin: 0 var(--pad); }
+/* Stops short of the mark rather than crossing it — `8th.png` draws the rule
+   running only as far as the socials above it. */
+.footer .rule-cream { margin-inline-end: var(--mark-clear); }
 .footer-legal {
   position: relative;
   z-index: 1;
@@ -2757,6 +3113,7 @@ body[data-page="index"] .footer { margin-top: 0; }
   align-items: center;
   gap: 1rem;
   padding: 0.8rem var(--pad) 1rem;
+  padding-inline-end: var(--mark-clear);
   font-size: 0.72rem;
   color: rgba(217, 217, 206, 0.6);
 }
@@ -2807,7 +3164,12 @@ body[data-page="index"] .footer { margin-top: 0; }
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  /* ⚠️ EVEN, since 2026-08-24; it was 7 / 5. The end column has to hold the
+     three socials on ONE line beside a mark 300px wide — measured, the row
+     sets 311px and at 7 / 5 the column left it 221px, which broke it into two
+     ragged lines under a column of empty ink. The contact table gives the
+     width up cheaply: its longest value is info@aliphcreative.com at 415px. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: clamp(1.5rem, 4vw, 3.5rem);
   padding: clamp(2.2rem, 6vh, 4rem) var(--pad) clamp(1.4rem, 3vh, 2.2rem);
   align-items: start;
@@ -2843,91 +3205,82 @@ a.contact-value:hover .cv-real { transform: translateY(-105%); }
 a.contact-value:hover .cv-ghost { transform: translateY(0); }
 
 /* The spinning stamp used to be the mass in this column and was removed on
-   2026-08-11 at the agency's request. With it gone — and a fourth contact row
-   added beside it — the clock and socials huddled at the top against a column
-   of empty ink. Stretching and spacing them anchors the footer at both
-   corners instead. No-op once the grid is one column on a phone. */
+   2026-08-11 at the agency's request; the CLOCK that stood at the top of it
+   was removed on 2026-08-24 (see below). What is left in the flow here is the
+   socials, so the column no longer stretches to fill the footer — the mark
+   does that, from outside the grid. */
+/* 🔴 A FULL-WIDTH BAND, NOT THE SECOND COLUMN (2026-08-24), and the reason is
+   arithmetic rather than taste. `8th.png` sets the three socials on ONE line
+   beside the mark. Measured, that row is 440px wide — and the second column of
+   this grid is 648px at 1440, 576px at 1280 and 461px at 1024, of which the
+   mark's clearance takes 302 / 281 / 215. It fitted at 1920 and nowhere else,
+   and everywhere else it broke into three ragged lines. Spanning the grid
+   gives it 1050px at 1440 and 656px at the 901px breakpoint, so it is one line
+   at every width this rule applies to.
+   ⚠️ The column it left is not empty — it is where the mark now sits.
+
+   `align-items: flex-end` and a padding rather than a centre: the socials
+   stand right against the mark, which is the pairing that is drawn. */
 .contact-side {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: space-between;
-  align-self: stretch;
+  justify-content: flex-end;
   gap: 1.2rem;
   text-align: end;
-  /* So the clock can be sized from THIS COLUMN rather than from the viewport
-     — see .contact-clock. The width here is handed down by .contact-grid's
-     track, so containing the inline axis costs nothing. */
-  container-type: inline-size;
+  /* ⚠️ Clear of the mark. It is absolutely positioned against the FOOTER, so
+     nothing in this grid knows it is there and cream socials would set
+     straight over a cream letterform. --mark-clear is the mark's own width
+     plus a gutter, declared once on .footer. */
+  padding-inline-end: var(--mark-clear);
 }
-/* Sized to the WORDMARK below it, not to the type around it (2026-08-23b).
-   The mark is capped at `min(272px, 60%)` and the clock read at less than half
-   of that — two things stacked at the same edge, disagreeing about how wide
-   the column is. Five glyphs of Idris Sharp at this size measure the same span
-   as the logo does; the `vw` term keeps the pair in step as the column moves.
-   ⚠️ Change this and the mark's cap together or they drift apart again. */
-.contact-clock {
-  font-family: var(--font-display);
-  font-weight: 800;
-  /* ⚠️ Sized from the COLUMN, not from the viewport, because the thing it has
-     to match is. `.contact-mark img` is capped at `min(272px, 60%)` of this
-     column, so the clock is `min(272px, 60%) / 1.967` — the same two branches,
-     divided by the tabular ratio below. A `vw` term matched the mark at 1920
-     and missed it by 82px at 1024, where the 60% branch binds and the viewport
-     one does not. */
-  font-size: min(5.76rem, 30.5cqw);
-  line-height: 1.02;
-  /* 🔴 TABULAR FIGURES, and this is not a nicety — it is what makes the
-     rule above possible at all. Idris Sharp's Arabic-Indic digits are
-     PROPORTIONAL by default: measured at 163px, «١١:١١» sets 211px and
-     «٨٨:٨٨» sets 322px, so a clock sized to match the wordmark would only
-     match it for part of the day and would visibly jump on the minute. The
-     face ships a real `tnum`; with it every time sets the same 321px at 163px,
-     which is the constant this font-size is derived from. */
-  font-variant-numeric: tabular-nums;
-  /* the digits are the width; the label under them must not set it */
-  white-space: nowrap;
-}
-.contact-clock small {
-  display: block;
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
-  opacity: 0.6;
-  padding-top: 0.2rem;
-}
-/* The wordmark fills the 562px of empty ink the spinning stamp left between
-   the clock and the socials. As the THIRD child of a space-between column it
-   needs no positioning of its own.
 
-   ⚠️ Capped with max-*, never `width/height: 100%` + object-fit. A percentage
-   height does not resolve against an auto-sized flex line, so the browser
-   falls back to the intrinsic ratio and sizes from the width — the same trap
-   that made the gallery wall's أ 654px tall in a 447px tile. */
-/* Pushed to the same edge as the clock above it and the socials below it,
-   instead of centring itself in the column — it was the one thing in the
-   footer that lined up with nothing. `flex-end` and not a physical `left`
-   because the whole footer mirrors with the language.
+/* 🔴 THE CLOCK IS GONE (2026-08-24), markup, script, styles and I18N pair.
+   Neither of the agency's two footer drawings has one, and it had a second
+   fault of its own that is worth recording because the next session will be
+   tempted to re-introduce the cause:
 
-   ⚠️ `width: 100%` stays, and it is load-bearing twice over. The logo is an
-   SVG with a viewBox and NO width/height attributes, so it has a ratio but no
-   intrinsic size: let this box shrink-wrap and `width: auto` resolves to zero
-   and the mark vanishes — measured, a 0x0 box. It is also what the img's 60%
-   cap resolves against, and a percentage against a shrink-wrapped parent is
-   the circular case the rest of this file keeps warning about. */
+   🔴 NEVER PUT `font-variant-numeric: tabular-nums` ON IDRIS SHARP. The face
+   advertises a `tnum` feature and does not implement it: with it on, all ten
+   Arabic-Indic digits AND the colon collapse to exactly 50.4px at 120px —
+   a single `.notdef` advance — and the clock rendered as six white diamonds
+   (`7th.png`). The 2026-08-23b round measured that uniformity and read it as
+   proof the feature worked. It was proof that every glyph had become the same
+   empty box. If a display face ever needs tabular figures again, check the
+   RENDERED GLYPH, not the advance width.
+
+   🔴 THE MARK IS THE FOOTER'S MASS NOW, oversized and bleeding off the bottom
+   edge — `8th.png` and `10th.png`. It is positioned against .footer rather
+   than against this column because it has to run past .rule-cream and the
+   legal line, which are the grid's siblings, and .footer's `overflow: hidden`
+   is what cuts it.
+
+   ⚠️ `width` on the BOX, not a cap on the img. The mark is an SVG with a
+   viewBox and no width/height attributes — a ratio and no intrinsic size — so
+   a shrink-wrapped parent resolves `width: auto` to zero and the mark simply
+   vanishes with no error anywhere (measured, a 0x0 box, 2026-08-17). Either
+   the container carries a definite width or the image does; this one carries
+   it and the img takes 100% of it.
+
+   ⚠️ z-index 0, under .contact-grid and .footer-legal, which both state 1.
+   Cream type over a cream glyph is unreadable, so the clearances above and
+   below keep them apart — but a stacking order that puts the mark on top
+   would make a near-miss into an erasure. */
 .contact-mark {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  width: 100%;
-  opacity: 0.92;
+  position: absolute;
+  z-index: 0;
+  inset-inline-end: 0;
+  bottom: var(--mark-drop);
+  width: var(--mark-w);
+  line-height: 0;
+  opacity: 0.95;
+  pointer-events: none;
 }
 .contact-mark img {
-  width: auto;
+  display: block;
+  width: 100%;
   height: auto;
-  max-width: min(272px, 60%);
-  max-height: 190px;
 }
 .contact-socials {
   display: flex;
@@ -3023,26 +3376,40 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .banner h2 { white-space: normal; }
 
   /* about */
-  /* one holder, then one card, all the way down — the agency's phone rule of
-     2026-08-23. Source order is already media-then-card in every row, so the
-     collapse needs nothing but the column reset; without resetting the even
-     rows' explicit placement they would stack on top of each other, which is
-     the `order`-is-ignored-for-placed-items trap written up in HANDOFF. */
+  /* the pictures, then the card, all the way down — the agency's phone rule
+     of 2026-08-23. Source order is already pictures-then-card in both rows, so
+     the collapse needs nothing but the column reset; without resetting the
+     flipped row's explicit placement its two children would stack on top of
+     each other, which is the `order`-is-ignored-for-placed-items trap written
+     up in HANDOFF. */
   .ab-row,
-  .ab-row:nth-child(even) { grid-template-columns: 1fr; }
+  .ab-row.is-flip { grid-template-columns: 1fr; }
   /* ⚠️ `grid-row: auto` as well as the column. The desktop rules pin both
-     children to row 1 so the even rows do not stack (see there); at one column
-     that pin would put the picture and its card in the SAME cell, on top of
-     each other. Reset both or neither. */
-  .ab-row > .ab-media,
+     children to row 1 so the flipped row does not stack (see there); at one
+     column that pin would put the pair and its card in the SAME cell, on top
+     of each other. Reset both or neither. */
+  .ab-row > .ab-pair,
   .ab-row > .ab-card,
-  .ab-row:nth-child(even) > .ab-media,
-  .ab-row:nth-child(even) > .ab-card { grid-column: 1; grid-row: auto; }
-  /* ⚠️ No height cap on a phone. A cap and an aspect-ratio cannot both be
-     honoured and the cap wins silently — which is what was re-cropping 9:16
-     media on the smallest screens before 2026-08-10. */
-  .ab-holder,
-  .clip-img { width: 100%; }
+  .ab-row.is-flip > .ab-pair,
+  .ab-row.is-flip > .ab-card { grid-column: 1; grid-row: auto; }
+  /* 🔴 THE PAIR STAYS TWO-UP ON A PHONE, and it is not a compromise — it
+     is the one place the about page gets shorter rather than longer. Each
+     figure takes half the column instead of shrink-wrapping a height cap, so
+     a 9:16 clip comes out ~126px wide and ~224 tall where a full-width one
+     would be 342 x 608. Two of them together are shorter than one of them was.
+     ⚠️ `flex: 1 1 0` + `min-width: 0` overrides the desktop's `fit-content`;
+     a flex item's automatic minimum size is its content, and without the
+     min-width the two would refuse to shrink below their max-content width and
+     overflow the page.
+     ⚠️ No height cap here, only a width — a cap and an `aspect-ratio` cannot
+     both be honoured and the cap wins silently, which is what was re-cropping
+     9:16 media on the smallest screens before 2026-08-10. */
+  .ab-pair > .ab-media { flex: 1 1 0; min-width: 0; width: auto; }
+  .ab-pair > .ab-media .ab-holder,
+  .ab-wide .ab-holder,
+  .clip-img { width: 100%; max-width: 100%; }
+  .ab-wide { width: auto; }
+  .ab-media { padding: 0.5rem; }
   .asvc { grid-template-columns: 1fr; }
   .asvc:nth-child(even) .asvc-media { order: 0; }
   .asvc-media img { aspect-ratio: 3 / 2; }
@@ -3057,7 +3424,8 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .ab-media,
   .ab-card { transform: none !important; }
   .clip,
-  .ab-row { margin: 0 !important; }
+  .ab-row,
+  .ab-pair > .ab-media { margin: 0 !important; }
 
   /* The footer row is only the socials now — the language pill moved to the
      overlay's top-left corner, which is what used to push this row past the
@@ -3357,64 +3725,42 @@ body.sheet-open { overflow: hidden; }
   .svc-name,
   .ring-desc { text-align: center; }
 
-  /* Same wordmark, footer volume. ⚠️ Not `Aliph-Icon-cream.svg`, which looks
-     like the obvious "short" mark and is a 68x244 letterform — a 3.6:1 spike.
-     Capped to 54px wide it came out 194px TALL and grew the phone footer by
-     more than it saved. `HalfAliph-Stamp` is squarish and would fit, but the
-     stamp was removed from this footer on 2026-08-11 at the agency's request,
-     so bringing it back here would undo that. */
-  /* ⚠️ Grid, not the column flex above, because the mark shares the clock's
-     LINE on a phone — the clock at the start edge and the mark at the far end
-     of the same row, with the socials on their own row underneath. A column
-     flex cannot put two children side by side, and stacking clock/mark/socials
-     was three shallow bands of mostly-empty ink.
-     `justify-self: end` rather than a physical left: the whole footer mirrors
-     with the language, and in Arabic — the primary — end IS the left. */
-  /* ⚠️ STACKED AND CENTRED since 2026-08-23b, at the agency's request, which
-     reverses the two-up row this block used to carry. The row was chosen to
-     avoid "three shallow bands of mostly-empty ink"; what it actually produced
-     was a clock hugging one edge and a wordmark hugging the other with a hole
-     between them, and the agency asked for both on the centre line. The type
-     is large enough now (see .contact-clock) that the band is not shallow.
-     `text-align: center` as well as the flex alignment: the clock's own
-     «بتوقيت القدس» is a block inside it and takes its own alignment. */
+  /* 🔴 The phone footer is `10th.png`: the socials stacked at the inline
+     START, the legal lines under them, and the oversized cream أ filling the
+     inline END and running off the bottom of the page. There is no clock —
+     see the desktop block for why it is gone and what it did.
+
+     ⚠️ Everything here is three tokens on .footer, not four rules. The mark
+     is wider IN PROPORTION than it is on a desktop (45vw against 15vw)
+     because a phone has one column: the mark is not sharing the width with a
+     contact table, it is sharing it with three short words. */
+  .footer {
+    --mark-w: min(38vw, 152px);
+    --mark-drop: clamp(-72px, -14vw, -34px);
+    --mark-clear: calc(var(--mark-w) + 0.5rem);
+  }
+  /* ⚠️ START, not the centre this block carried on 2026-08-23b, and the
+     reason the centre is wrong now is the mark: the two are on the same line
+     and a centred column of socials would sit half on top of a cream glyph.
+     They read as a pairing against it instead, which is what is drawn. */
   .contact-side {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
-    text-align: center;
-    row-gap: 0.9rem;
+    text-align: start;
+    row-gap: 0.6rem;
+    padding-inline-end: var(--mark-clear);
   }
-  .contact-clock   { text-align: center; }
-  /* ⚠️ `justify-content: center`, NOT the flex-end the desktop uses — and the
-     width stays 100% for the reason the desktop rule gives at length: the logo
-     SVG has a viewBox and no intrinsic size, so a shrink-wrapped parent
-     resolves the img's percentage cap to zero and the mark vanishes. */
-  .contact-mark    { width: 100%; justify-content: center; margin: 0; }
-  .contact-socials { justify-content: center; }
-  /* Same wordmark, footer volume. ⚠️ Not `Aliph-Icon-cream.svg`, which looks
-     like the obvious "short" mark and is a 68x244 letterform — a 3.6:1 spike.
-     Capped to 54px wide it came out 194px TALL and grew the phone footer by
-     more than it saved. `HalfAliph-Stamp` is squarish and would fit, but the
-     stamp was removed from this footer on 2026-08-11 at the agency's request,
-     so bringing it back here would undo that. */
-  /* ⚠️ A definite width, not a cap, and not `width: auto`. The logo SVG has a
-     viewBox and no width/height, so with the grid sizing this track to its
-     content there is no percentage left to resolve and `auto` collapses it to
-     nothing. Sharing a line with the clock is also what pays for the smaller
-     mark: it no longer has a band to fill. */
-  /* Bigger than the 112px the two-up row could afford: on its own centred line
-     the mark no longer shares the width with the clock, and it is what the
-     clock above it is now measured against. */
-  .contact-mark img { width: 176px; max-width: 176px; max-height: 120px; }
-  /* ⚠️ A DEFINITE size, matched to the 176px mark above it, because the
-     agency's rule is "the clock is as wide as the logo beneath it" and on a
-     phone the logo is a constant. «٢١:٠٥» is five narrow glyphs: the ratio of
-     rendered width to font-size for Idris Sharp digits and a colon is ~1.66,
-     measured, so 176 / 1.66 is this number. Re-measure it if the mark's width
-     moves — the two are one decision. */
-  .contact-clock { font-size: 3.73rem; }
+  /* ⚠️ ONE PER LINE. `10th.png` stacks them, and it has to: the row of three
+     needs 300px of a 390px screen and the mark is taking 210 of it. */
+  .contact-socials {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+  }
 
   /* ⚠️ Stacked, because side by side does not fit and never did quite fit:
      measured at 375px the two halves need 310px of a 327px line, so each one
@@ -3432,8 +3778,21 @@ body.sheet-open { overflow: hidden; }
     align-items: stretch;
     gap: 0.4rem;
   }
-  .footer-legal > :first-child { text-align: start; }
-  .footer-legal .latin { text-align: end; }
+  /* ⚠️ BOTH at the start edge since 2026-08-24. They used to take an edge
+     each — legal at the start, the Latin wordmark at the end — which was the
+     edge the OLD mark sat on. The mark is now the whole of that end, so a
+     wordmark sent there would set over it.
+     ⚠️ And both SET SMALLER AND TIGHTER, because the mark has taken 40% of
+     the line: measured at 390, «ألِف © ٢٠٢٦ — جميع الحقوق محفوظة» sets 251px
+     at 0.72rem and ALIPH CREATIVE sets 285px at 0.18em of tracking, against
+     205px of room. Two ragged two-line stacks is not what `10th.png` draws —
+     it has one line each. 0.58rem and 0.07em bring them to 202 and 176. */
+  .footer-legal {
+    font-size: 0.58rem;
+  }
+  .footer-legal > :first-child,
+  .footer-legal .latin { text-align: start; }
+  .footer-legal .latin { letter-spacing: 0.07em; }
 
   .services  { padding-bottom: 0.7rem; }
 
@@ -3464,8 +3823,13 @@ body.sheet-open { overflow: hidden; }
   /* The two hero buttons centre with the rest of the panel on a phone.
      They also stretch: two ovals of different widths under a centred
      column read as a mistake, and there is room for exactly one each. */
+  /* ⚠️ The two notes stay SIDE BY SIDE on a phone. The ovals they replaced
+     were `flex: 1 1 100%` — one per line — because an ellipse at half of 342px
+     could not hold its label. A note is a picture with words inside it and
+     scales down without losing anything, and two notes pinned side by side is
+     what the pair is for. */
   .hero-cta { justify-content: center; }
-  .hero-cta .oval-btn { flex: 1 1 100%; }
+  .hero-cta .note-btn { flex: 1 1 0; min-width: 0; width: auto; }
 
   /* The pill is chrome pinned over the page at the one width where the page
      has no room to spare. Only the type inside it shrinks — the 3px frame and

@@ -164,6 +164,28 @@
     <div class="cb-track" id="contactBandTrack"></div>
   </a>
 
+
+  <!-- 🔴 THE MARK IS OVERSIZED, OUT OF THE FLOW, AND BLEEDS OFF THE
+       BOTTOM EDGE (2026-08-24). The agency drew this twice — `8th.png` for the
+       desktop end column, `10th.png` for the whole phone bottom — and both
+       show the socials and ALIPH CREATIVE set AGAINST a cream أ running off
+       the page. It cannot do that from inside .contact-side: the grid there
+       ends above .rule-cream and the legal line, and the two things the mark
+       has to run past are exactly those. So it is a child of the footer,
+       absolutely positioned, and .footer's own `overflow: hidden` is the cut.
+
+       ⚠️ `HalfAliph-Icon-cream.svg`, not `Aliph-Logo-Main-cream.svg`. The
+       lockup is the wordmark ألِف + ALIPH at 561x375 — a horizontal
+       signature, which is not what either drawing shows. This is the bare
+       letterform at 109x180, cut cream from the ink `HalfAliph-Icon.svg` on
+       2026-08-24 because no cream variant of it existed.
+       ⚠️ NOT the stamp: `HalfAliph-Stamp` is the same glyph inside a ring of
+       type, and that was removed from this footer on 2026-08-11 at the
+       agency's request. Bringing the ring back would undo that. -->
+  <div class="contact-mark" aria-hidden="true">
+    <img src="assets/img/HalfAliph-Icon-cream.svg" alt="">
+  </div>
+
   <div class="contact-grid">
     <div class="contact-lines">
       <div class="contact-row">
@@ -203,17 +225,6 @@
     </div>
 
     <div class="contact-side">
-      <p class="contact-clock">
-        <span id="clockTime">—</span>
-        <small data-i18n="cClock">بتوقيت القدس</small>
-      </p>
-      <!-- The mark the spinning stamp left behind (2026-08-16). Three children
-           under `justify-content: space-between` put it in the middle of the
-           column with no extra rule. Decorative: the agency's name is already
-           in the legal line below, so a screen reader gets it once, not twice. -->
-      <div class="contact-mark" aria-hidden="true">
-        <img src="assets/img/Aliph-Logo-Main-cream.svg" alt="">
-      </div>
       <nav class="contact-socials latin" lang="en" aria-label="Social">
         <a href="https://www.instagram.com/aliph.creative" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>
         <a href="https://www.facebook.com/share/19F5j4XM6g/" target="_blank" rel="noopener noreferrer">FACEBOOK</a>
