@@ -53,17 +53,42 @@ ruled with **ten evenly spaced vertical lines** — the slat boundaries.
 **The bend itself is right and stays.** "the bend is good and every other aspect
 but u gotta find a better solution."
 
-**Diagnosed:** `.ring-slat` carries `opacity: var(--o)` AND `scaleX(1.012)`. The
-scale was added to close antialiasing gaps by overlapping neighbours — but two
-overlapping strips at opacity 0.8 composite to 0.96 in the overlap, so every
-seam paints a darker band. The overlap fix and the per-slat opacity are
-incompatible: one of them has to go.
+🔴 **THE DIAGNOSIS BELOW WAS WRONG, and it is left here with its correction
+because it cost the implementing session time and would cost the next one the
+same.** It was written before anything was measured.
 
-**Suggested fix, not mandated:** make every slat fully opaque and bake the depth
-fade into the paint instead of the compositing — a flat cream veil as a second
-background layer, `linear-gradient(rgba(217,217,206,V), rgba(217,217,206,V))`
-over the picture, where `V = 1 − o`. Opaque-over-opaque overlaps are invisible,
-so the seams go and the fade survives.
+> ~~`.ring-slat` carries `opacity: var(--o)` AND `scaleX(1.012)`. The scale was
+> added to close antialiasing gaps by overlapping neighbours — but two
+> overlapping strips at opacity 0.8 composite to 0.96 in the overlap, so every
+> seam paints a darker band.~~
+
+**What the lines actually are: GAPS, not overlap bands.** Measured twice, by two
+sessions, independently.
+
+· On the agency's own `2nd pic.png`: the maroon tile reads luminance **47**,
+  the vertical lines read **116–171**, and the cream page beside the tile reads
+  **~205**. The lines are BRIGHTER than the work and sit between it and the
+  page — the signature of a partially covered gap. A dark overlap band would
+  read *below* 47, and there is no such pixel on that tile.
+
+· On the built page at 1440, with every slat's picture replaced by a flat
+  `#4a1520` so any line could only be an artefact: nine spikes at the nine
+  interior boundaries reading 130–184 against a slat of **43**, and none below
+  43. After the fix: **0** anomaly at every boundary, at four rotations.
+
+**Why the old overlap never closed them:** `scaleX(1.012)` on a measured 40px
+strip is 0.48px total — a quarter of a pixel per side — against roughly a whole
+pixel of antialiasing on each of two independently rasterised angled strips.
+
+**The fix that worked** is a LENGTH, not a ratio: each strip grows a fixed
+1.1px on each side and the sprite is pushed back by the same amount, so the
+extra pixel shows the neighbour's own content out of the same image. A scale
+cannot do this — it stretches what it widens.
+
+**The per-slat opacity still had to go**, but prospectively rather than as the
+cause: at a real 1.1px overlap, translucent strips *would* have composited to a
+dark band and traded one fault for the other. The depth fade is a painted cream
+veil inside each strip now, where an overlap cannot see it.
 
 ## T4 — the صناعة محتوى ring turns too fast
 

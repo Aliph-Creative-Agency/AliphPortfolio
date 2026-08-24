@@ -16,7 +16,7 @@ _Updated 2026-08-24. Read this first._
 > | # | the agency asked | what landed |
 > |---|---|---|
 > | 1 | صناعة محتوى's mark should be their own photographer | re-cut from `1st pic.jpg` with `birefnet-general-lite` — camera, lens and strap intact |
-> | 2 | تطوير برمجيات's mark, done properly | re-cut from `3rd pic.jpg` with `u2net`, the only model that keeps the monitor |
+> | 2 | تطوير برمجيات's mark, done properly | re-cut from `3rd pic.jpg` with `u2net`, the only model that keeps the monitor — 🔴 **but see the caveat below; this one is not finished** |
 > | 3 | 🔴 the ring is visibly sliced into ten strips | **they were GAPS, not overlaps** — the 1.2% scale was a quarter of a pixel of overlap; a whole-pixel bleed with the sprite shifted back by the same pixel |
 > | 4 | the صناعة محتوى ring turns too fast | `TURN` is per service now: 26s / **42s** / 26s |
 > | 5 | the ring's reels should play | the item at the FRONT plays, as one flat plane standing on the band |
@@ -67,6 +67,18 @@ _Updated 2026-08-24. Read this first._
 > kept as a full-width piece at the head of the long read with no card beside
 > it. One `<figure>` to move if they want it elsewhere.
 
+> 🔴 **THE DEVELOPER'S MARK IS LANDED BUT NOT FINISHED, and this is the only
+> place a future session will look for that.** It was written into
+> `resources/cut_people_marks.py` and into commit `522985a`'s message, and
+> neither is read at the start of a round. At its real render size of 202px the
+> head, the glasses and the screen full of real code all read correctly — and
+> his arm and shoulder come back as a torn black blob with jagged spikes,
+> because a black hoodie against an unlit room gives the segmenter nothing to
+> find. It is still a clear improvement on the AI-stock frame with a rectangle
+> painted behind it. Cropping the ragged part away takes the monitor with it,
+> so the fix is either a matting model that returns real alpha at the edges or
+> a differently lit frame from the agency.
+
 ---
 
 ## ⏭ The next round — what is open
@@ -107,13 +119,28 @@ _Updated 2026-08-24. Read this first._
 8. **The about page's phone height is 5,724px**, down from 8,713 — open
    question 7 is effectively closed by the new shape: two verticals sharing a
    row are shorter than one of them was full width. The desktop page is 4,105px,
-   down from 5,493.
+   down from **4,696** — ⚠️ not the 5,493 first written here. 5,493 was the
+   2026-08-23 evening figure and the page had moved since; the pre-round build
+   was rebuilt in a worktree and measured at 1440×900 to get the real baseline.
+   The improvement is genuine and smaller than first claimed. (The phone
+   figures reproduce exactly.)
 9. **One narrow band where the hero lede still orphans**: at ~1100px of window
    the panel gives the lede only 437px, which is below the 20em measure, so
    nothing there binds and the last line is 17% of the column. Measured; every
    other width from 1180 to 1920 sets three lines at 76–96%. The lever if it
    ever matters is `.dropcap`'s `margin-inline-end` — 0.9rem fixes 1100 and
    breaks 1024, so it is a trade rather than a fix.
+
+⚠️ **On a phone the ring cannot be stopped, and that is now a decision
+   waiting to be made rather than an oversight.** Hover-to-pause is gated on
+   `(hover: hover)` for a good reason — on touch `pointerenter` fires once and
+   `pointerleave` never does, so an ungated version stops the ring for the rest
+   of the visit. The consequence is that a phone visitor must tap a piece while
+   it is moving: 13.8°/s on the design and tech rings, 8.6°/s on
+   صناعة محتوى. The 2026-08-24 round improved this — the first tap now opens
+   the piece rather than doing nothing — but touch still has strictly less
+   control than a desktop pointer. A tap on the background, or a pause while
+   the lightbox is open, would both close the gap.
 
 ---
 
@@ -341,7 +368,10 @@ five distinct bands `ab-0 … ab-4`, three playing at once.
 **The pair stays two-up on a phone** and that is where the page gets shorter:
 `flex: 1 1 0` with `min-width: 0` overrides the desktop's `fit-content`, so each
 figure takes half the column — a 9:16 comes out 139×247 where a full-width one
-would be 316×562. **Phone 8,713 → 5,724px. Desktop 5,493 → 4,105px.**
+would be 316×562. **Phone 8,713 → 5,724px. Desktop 4,696 → 4,105px** — ⚠️ the desktop "before"
+was first written as 5,493, which was a stale figure from the previous round
+rather than a measurement of the build this replaced. Re-measured from a
+worktree of the pre-round commit.
 
 **The 16:9 montage is the flagged judgement call** — full width at the head of
 the section, no card. See the banner.
@@ -1542,6 +1572,12 @@ npx.cmd wrangler deploy
   `workers.dev`, which looks exactly like a half-finished deploy. Appending
   `?v=<timestamp>` shows the true origin. Assets are `max-age=0,
   must-revalidate`, so it clears itself; there is nothing to purge.
+- ⚠️ **Send a browser User-Agent when you verify.** Cloudflare answers a
+  scripting library's default UA with **403** on the SITE hosts too, not just
+  on the media bucket — confirmed 2026-08-24. A verification pass that 403s on
+  every file looks exactly like a failed deploy, and it is the same trap the
+  R2 checker fell into for a whole round. Real failures are partial; a check
+  that fails for every item is more likely broken than the thing it checks.
 - ⚠️ **Do not grep live Arabic through Git Bash.** The shell mangles the
   pattern and every match comes back empty, which reads as "the copy did not
   deploy". Fetch in Python and test with `in`. This box's cp1252 console has

@@ -1043,17 +1043,27 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
               filter 0.42s ease;
   transform: rotate(var(--swing, 0deg)) translateY(var(--lift, 0px));
 }
+/* ⚠️ --rest IS THE NUMBER; --swing only ever starts as a copy of it. Two
+   rules read a note's resting angle — this one and the reduced-motion hover at
+   the bottom of this block, which has to put the angle BACK after :hover has
+   set --swing to 0. Stating the angle twice is how those two drift apart, and
+   it already went wrong once: --rest was referenced there and defined nowhere,
+   so `var(--rest, 0deg)` fell through to its fallback and reduced motion did
+   exactly what the comment beside it forbids — straightened the notes on
+   hover. One source, read twice. */
 .note-start {
   background-image: url("assets/img/note-start.webp");
   aspect-ratio: 700 / 523;
   transform-origin: 49% 9%;
-  --swing: -1.6deg;
+  --rest: -1.6deg;
+  --swing: var(--rest);
 }
 .note-contact {
   background-image: url("assets/img/note-contact.webp");
   aspect-ratio: 680 / 633;
   transform-origin: 43% 15%;
-  --swing: 1.4deg;
+  --rest: 1.4deg;
+  --swing: var(--rest);
 }
 /* On the sheet and CLEAR OF THE PIN. The label is pushed below the pin head by
    the same fraction the origins above are measured at, and the second note's
@@ -1101,7 +1111,13 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
    different design rather than a calmer one. */
 @media (prefers-reduced-motion: reduce) {
   .note-btn { transition: none; }
-  .note-btn:hover { --lift: 0px; --swing: var(--rest, 0deg); }
+  /* ⚠️ No fallback on --rest, deliberately. A fallback here is what hid the
+     bug: the property was undefined, `0deg` won silently, and the notes
+     straightened under reduced motion for a whole release with nothing to
+     show for it. Without one, a missing --rest makes the declaration invalid
+     at computed-value time and the note simply keeps its resting angle —
+     which is the behaviour this rule exists to guarantee anyway. */
+  .note-btn:hover { --lift: 0px; --swing: var(--rest); }
 }
 
 /* ── decorative separators ──────────────────────────────────────────
@@ -1951,13 +1967,17 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
   background-position: calc(var(--bleed) - var(--sw) * var(--k)) 0;
   border-top: var(--media-line);
   border-bottom: var(--media-line);
-  /* 🔴 EVERY SLAT IS FULLY OPAQUE, and that is the whole of the seam fix of
-     2026-08-24. `opacity: var(--o)` used to live here, and it was incompatible
-     with the scaleX overlap below: two strips at opacity 0.8 overlapping
-     composite to 1 - 0.2² = 0.96 in the overlap, so every one of the nine
-     seams painted a band a fifth darker than the picture either side of it.
-     The agency's screenshot (2nd pic.png) is the maroon Al Baydar tile ruled
-     with exactly ten vertical lines — the overlap, not a gap.
+  /* 🔴 EVERY SLAT IS FULLY OPAQUE, and it is the SECOND half of the seam fix
+     of 2026-08-24 — the widening above is the first. `opacity: var(--o)` used
+     to live here, and it did NOT cause the lines the agency photographed;
+     those were gaps, measured, and the note above says so.
+
+     It had to go anyway, because the cure would have caused them. Two strips
+     at opacity 0.8 overlapping composite to 1 - 0.2² = 0.96 where they meet,
+     so widening each strip by a real 1.1px while it stayed translucent would
+     have closed a bright seam and opened a dark one in its place. The old
+     scaleX(1.012) was too small a nudge — 0.24px per side — for that to show,
+     which is why the two faults have never been on the screen together.
 
      Opaque-over-opaque overlaps are invisible, so the depth fade moves off the
      compositing and into the PAINT: ::after lays a flat cream veil over the
