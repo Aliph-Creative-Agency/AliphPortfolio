@@ -2,7 +2,13 @@
 
 _Updated 2026-08-24. Read this first._
 
-> ## 🟢 State on 2026-08-24: the agency's fourteen edits are built, verified and deployed
+> ## 🟢 State on 2026-08-24: the agency's fourteen edits are built, reviewed and deployed
+>
+> ✅ **Live version `6cba40be-1e7f-4ec9-b114-b6500f4f6c87`** (commit `7249ec1`).
+> ⚠️ The round DEPLOYED TWICE. `5db9d87b` is the build of the fourteen edits
+> and is what the section below reports; `6cba40be` is the corrections an
+> independent review turned up afterwards — see _The review pass_ at the end of
+> that section. If a version id here disagrees with wrangler, wrangler is right.
 >
 > A third round of screenshot notes — fourteen numbered images plus two asset
 > photographs. The full brief, every arrow written out in words with the "Nth
@@ -427,7 +433,8 @@ their device. Tell them to hard-refresh.
 ### The deploy — a real version id, and both hosts byte-compared
 
 `npx.cmd wrangler deploy` from the repo root, **version id
-`5db9d87b-6a2a-43b6-94a5-216e842aadd0`**. Ten files uploaded (179 already
+`5db9d87b-6a2a-43b6-94a5-216e842aadd0`** — ⚠️ the FIRST of this round's two
+deploys; the review below shipped `6cba40be` on top of it. Ten files uploaded (179 already
 uploaded by hash), then every one of them fetched from BOTH hosts with a
 `?v=<timestamp>` cache-buster and compared by sha256:
 
@@ -473,6 +480,49 @@ the hover glide, the front item's reel at `readyState 4`, the overlay's counter
 on all three rings, the ring resuming after the overlay closes, exactly one
 video playing in the reel carousel, and three of the five about clippings
 looping at once.
+
+### The review pass — and the four things it found
+
+The round was reviewed by a session that had not built it, working from the
+agency's screenshots and the live site rather than from the write-up above. It
+rebuilt the PRE-ROUND commit in a worktree so the two builds could be measured
+side by side, which is what settled the seam argument. Its verdict on all
+fourteen edits was that they hold. Four things did not, and all four are fixed
+in `7249ec1` / version `6cba40be`.
+
+🔴 **`--rest` was referenced and never defined, so reduced motion did the one
+thing its own comment forbids.** `.note-btn:hover { --swing: var(--rest, 0deg) }`
+fell through to the fallback, and the pinned notes STRAIGHTENED on hover —
+while the comment two lines above read "Setting --swing to 0 here would
+straighten them, which is a different design rather than a calmer one." Now
+`--rest` is the number, `--swing: var(--rest)` derives from it, and **the
+fallback is deliberately gone**: a fallback is precisely what let a missing
+property ship silently, and without one a missing `--rest` makes the
+declaration invalid at computed-value time, which leaves the note at its
+resting angle — the behaviour the rule exists to guarantee anyway.
+
+🔴 **The stylesheet contradicted itself inside one rule.** `.ring-slat` carried
+a correct note saying the lines on the agency's maroon tile were LIGHTER than
+the maroon and had been gaps all along — and, forty lines below it, the
+pre-investigation text still claiming they were the overlap compositing darker
+and calling itself "the whole of the seam fix". Both blocks were shipped. The
+second is rewritten: the opacity did have to go, but PROSPECTIVELY — at a real
+1.1px overlap translucent strips would have traded the bright seam for a dark
+one — not because it caused what was on the screen.
+
+⚠️ **A number that did not reproduce.** The desktop about page went
+**4,696 → 4,105px**, not 5,493 → 4,105. 5,493 was the previous round's figure
+carried forward rather than a measurement of the build this round replaced. The
+phone figures reproduce exactly. Corrected in place above.
+
+⚠️ **The developer's mark's caveat was written where nobody reads it** — in
+`resources/cut_people_marks.py` and in commit `522985a`'s message, neither of
+which is opened at the start of a round. It is in the banner now.
+
+⚠️ **Also recorded from the review**: Cloudflare answers a default scripting
+User-Agent with 403 on the SITE hosts, not only the media bucket (see _Running
+and deploying_); and a phone still cannot stop the ring, which is now an open
+decision rather than an oversight (see _The next round_).
 
 ---
 
