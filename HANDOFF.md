@@ -132,7 +132,10 @@ _Updated 2026-08-24. Read this first._
    figures reproduce exactly.)
 9. **One narrow band where the hero lede still orphans**: at ~1100px of window
    the panel gives the lede only 437px, which is below the 20em measure, so
-   nothing there binds and the last line is 17% of the column. Measured; every
+   nothing there binds and the last line is 17% of the column — ⚠️ a second
+   session measuring the same band with `Range` client rects got **12%**, and
+   the gap is method (justified line advance vs inked width), not disagreement.
+   Both say the same thing: it orphans there and nowhere else. Every
    other width from 1180 to 1920 sets three lines at 76–96%. The lever if it
    ever matters is `.dropcap`'s `margin-inline-end` — 0.9rem fixes 1100 and
    breaks 1024, so it is a trade rather than a fix.
@@ -1732,6 +1735,15 @@ tabular-nums` makes all ten Arabic-Indic digits AND the colon set to exactly
 worked; the agency's phone rendered the footer clock as six white diamonds
 (`7th.png`). **Look at the rendered GLYPH, never at the advance width alone**,
 and never put `tnum` on this face.
+
+✅ **Two `font-variant-numeric: tabular-nums` rules SURVIVE in `style.css` and
+both are correct — do not rip them out on the strength of the warning above.**
+They are on `.lb-cap` (the lightbox counter) and `.panel-count`, which inherit
+**Idris Flat**, not Idris Sharp. Flat ships a real `tnum` and implements it; the
+lightbox counter was checked visually and renders true Arabic-Indic digits, not
+notdef diamonds. The rule is face-specific, not a blanket ban — and a grep for
+`tabular-nums` finds these two, which is exactly how a correct rule gets deleted
+by someone who has just read a red warning.
 
 **A seam between two shapes can be a gap OR an overlap, and the two want
 opposite fixes.** The ring's ten vertical rules were diagnosed as the per-slat
