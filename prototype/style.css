@@ -46,6 +46,32 @@
   --ink-mute: rgba(15, 24, 32, 0.68);   /* labels, meta, captions */
   --ink-faint: rgba(15, 24, 32, 0.5);   /* large display only (≥24px) */
 
+  /* The masthead's own height, stated once so the hero can subtract it.
+     It is CONSTANT at every width — measured 104.797px at 390, 640, 900,
+     1024, 1194, 1440 and 1920 — because `.masthead-top`'s `min-height: 4.2rem`
+     always beats its content, and `.rule-double` under it is 4px. Change
+     either of those two and change this.
+     ⚠️ It is not decoration: `.hero` sizes itself against `100svh` minus
+     this, so a stale value here puts the film strip's bottom row under the
+     fold on exactly the short windows the correction was for. */
+  --mast-h: calc(4.2rem + 4px);
+
+  /* 🔴 ⚠️HAT COLOU🔴 IS THE G🔴OUND HE🔴E (2026-08-27). The two fixed controls D
+     the burger and the language pill — float over whatever scrolls under them
+     and have to invert to stay readable. That used to be decided by a list of
+     selectors in main.js naming every dark section on the site, which is a
+     fact about the design kept in a second file: a new dark band is invisible
+     to it until somebody remembers, and nothing about the band itself says so.
+
+     A section states its own ground instead, right where it is styled, and
+     because a custom property INHE🔴ITS, everything inside it states the same
+     thing for free — no descendant has to be listed. main.js reads the
+     inherited value at five points under each control and takes the majority.
+
+     ⚠️ The default is `light` and it lives here, on :root, so a surface that
+     says nothing is treated as paper — which the page mostly is. */
+  --ground: light;
+
   --font-display: "Idris Sharp", serif;
   --font-body: "Idris Flat", serif;
   --font-latin: Georgia, "Times New Roman", serif;
@@ -257,6 +283,42 @@ body { -webkit-tap-highlight-color: transparent; }
 }
 .menu-btn .bars span:nth-child(1) { top: 0; }
 .menu-btn .bars span:nth-child(2) { top: 12px; }
+/* 🔴 THE BA🔴S CA🔴🔴Y THEI🔴 O⚠️N G🔴OUND (2026-08-27), and that is `17th.jpeg`.
+   Inverting the bars answers a dark SECTION and nothing else. It cannot answer
+   dark TYPE on a light section, which is what the agency ringed in red: two
+   ink bars laid across an ink heading are not the wrong colour, they are the
+   same colour, and the control disappears into the letters. Neither state
+   fixes that — cream bars on cream paper vanish just as completely.
+
+   So the mark clears a space for itself. A radial wash in the ground's own
+   colour, opaque at the centre and gone by the edge, which flips with
+   `.on-dark` exactly as the bars do. Over plain paper it is cream on cream and
+   costs nothing; over a heading it veils the letters directly under the mark
+   and leaves them everywhere else. A rounded PLATE was the other option and it
+   was not taken: this control has been a bare mark since it was drawn, and a
+   box would be a new object on the page rather than the page giving way.
+
+   ⚠️ `z-index: -1` and no `isolation` on the parent, so the wash goes behind
+   the bars but stays in front of the page. */
+.menu-btn::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side,
+    rgba(217, 217, 206, 0.88) 0%, rgba(217, 217, 206, 0.72) 55%,
+    rgba(217, 217, 206, 0) 100%);
+  transition: background 0.3s;
+}
+.menu-btn.on-dark::before {
+  background: radial-gradient(closest-side,
+    rgba(15, 24, 32, 0.88) 0%, rgba(15, 24, 32, 0.72) 55%,
+    rgba(15, 24, 32, 0) 100%);
+}
+/* the overlay is a solid ink field of its own — nothing to clear */
+body.nav-open .menu-btn::before { background: none; }
 /* the button floats over cream and ink alike; JS sets .on-dark from what is
    actually under it so the bars never disappear */
 .menu-btn.on-dark .bars span { background: var(--cream); }
@@ -441,11 +503,26 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
 
 /* Pinned to the corner opposite the burger, physically left in both
    directions: the burger is physically right, so a logical start would stack
-   the two in RTL.
+   the two in 🔴TL.
 
    Fixed, not absolute, so it rides down the page with the burger instead of
-   scrolling away; `top` centres it on the burger's centre line. */
+   scrolling away; `top` centres it on the burger's centre line.
+
+   🔴 AND IT IS FILLED (2026-08-27) — the other half of `17th.jpeg`. `.lang-switch`
+   has no background of its own: it is a hairline ring, an ink knob and two
+   words, and the page shows straight through the middle of it. Over the
+   لماذا ألِف؟ heading that meant the black letters ran TH🔴OUGH the pill and
+   the ink knob merged with them, so the control read as a smudge on the type
+   and the type lost its last word to a knob it could not be told apart from.
+
+   The fill is the state's own colour, so nothing else about the pill changes:
+   cream body under an ink ring and an ink knob, inverting whole with
+   `.on-dark`. ⚠️ It is scoped to `.masthead` and not put on `.lang-switch`
+   itself, because the overlay's copy sits on a solid ink field where
+   transparent is already correct — and filling it there would paint a cream
+   patch onto the menu. */
 .masthead .lang-switch {
+  background: var(--cream);
   position: fixed;
   left: var(--pad);
   right: auto;
@@ -462,12 +539,17 @@ body.nav-open .masthead .lang-switch {
 
 /* Same treatment as the burger, but sampled separately: the two sit at
    opposite corners and are regularly over different sections at once. */
+.masthead .lang-switch.on-dark { background: var(--ink); }
 .lang-switch.on-dark { border-color: var(--cream); background: transparent; }
 .lang-switch.on-dark .ls-knob { background: var(--cream); }
 .lang-switch.on-dark .ls-opt { color: var(--cream); }
 html[lang="ar"] .lang-switch.on-dark .ls-opt[data-l="ar"],
 html[lang="en"] .lang-switch.on-dark .ls-opt[data-l="en"] { color: var(--ink); }
 .lang-switch.on-dark:hover { background: rgba(217, 217, 206, 0.12); }
+/* ⚠️ the shorthand REPLACES the fill above, so the masthead's copy needs the
+   lift pre-mixed into ink rather than laid over it — the overlay's copy has no
+   fill and keeps the translucent version. */
+.masthead .lang-switch.on-dark:hover { background: #1E2B36; }
 
 /* Overlay copy sits on ink, so the whole pill inverts — and it is pinned to
    the overlay's top-left rather than left in the footer row. Same physical
@@ -503,6 +585,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
 
 /* ── banner section headers ──────────────── */
 .banner {
+  --ground: dark;      /* see --ground on :root */
   margin: clamp(2rem, 5vh, 3.5rem) var(--pad) 0;
   background: var(--ink);
   overflow: hidden;
@@ -549,7 +632,40 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
 
 /* ── hero: film strip on a linen field + cream side panel ── */
 .hero {
+  /* 🔴 svh AND MINUS THE MASTHEAD (2026-08-27), and that is `16th.jpeg`.
+     What was here was `clamp(560px, 88vh, 940px)`, and 88% is an ARITHMETIC
+     COINCIDENCE rather than a proportion: the masthead is 104.8px, so on the
+     1440×900 window this was designed at, 88vh + 104.8 comes to 897 and the
+     hero appears to end exactly at the fold. It only holds at 900.
+
+     Two things break it on an iPad, and the agency's screenshot has both.
+     `vh` on iOS resolves against the LARGE viewport — the window as if the
+     browser chrome were hidden — so 88vh was measured against 834 while only
+     759 was on the screen; and 105px of masthead comes off the top of even
+     that. Measured from the screenshot: a 727px strip in 654px of room, so
+     73px went under the fold, and the bottom sprocket row is the bottom 19%
+     of the tile. The frames ran off the edge of a strip with perforations
+     along one side only, which stops reading as film at all.
+
+     `100svh` is the viewport with the chrome SHOWING, which is the one the
+     bottom row has to fit inside, and subtracting the masthead states the
+     relationship the 88% was standing in for. At 1440×900 it lands on 795
+     where the old expression gave 792, so the desktop the design was tuned on
+     does not move.
+
+     ⚠️ THE FLOOR CAME DOWN, 560px to 460px, and that is the fix rather than
+     a side effect. A floor is a promise to overflow: at 560 any window under
+     665px tall would have gone back to cutting the strip, which is the whole
+     fault. 460 + 104.8 = 565, so every window with 565px of viewport or more
+     now shows both rows of perforations. Below that the floor holds and the
+     strip is cut again — unavoidable without a hero too short to be one.
+     ⚠️ Only ever consulted at 901px and wider: the phone rule takes
+     `.filmstrip` out of the hero entirely and gives it `--film-h`.
+     ⚠️ The `vh` line stays underneath as the fallback for an engine with
+     no `svh` (Safari before 15.4, Chrome before 108), which drops the second
+     declaration and keeps the behaviour it has today. */
   --hero-h: clamp(560px, 88vh, 940px);
+  --hero-h: clamp(460px, calc(100svh - var(--mast-h)), 940px);
   position: relative;
   height: var(--hero-h);
   /* no background — the page's own textured cream is what shows through the
@@ -559,6 +675,8 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   border-bottom: 3px solid var(--ink);
 }
 .filmstrip {
+  /* the film base is ink — see --ground on :root */
+  --ground: dark;
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -1528,8 +1646,23 @@ html[lang="en"] .why { --why-type: 0.761; --why-title-type: 0.62; }
      centred reel sitting at this 0.34 permanently — which is what the agency
      filmed. mark()'s hysteresis is the actual fix; this is the second line of
      defence, so that any thrash that survives reads as a flicker rather than
-     as a reel that never lights up at all. */
-  opacity: 0.34;
+     as a reel that never lights up at all.
+
+     🔴 0.45, UP FROM 0.34 (2026-08-27), and that is `15th.mp4`: the two
+     flanking reels were — their words — washed out almost to invisibility.
+     The number was never wrong on a dark ground; it is wrong on THIS one.
+     Opacity over the page's cream does not dim a picture, it fades it TOWARD
+     the cream, so a light frame at 0.34 is two thirds paper and the subject
+     is gone. Nothing about the iPad they filmed it on is special — it is the
+     desktop value, and once it has been seen it is wrong at every width.
+
+     ⚠️ 0.45 is not a fresh guess: it is the number this site already dims
+     with. `.film-scroll.has-pop .film-frame:not(.pop) img` takes exactly that
+     when a hero frame is popped. Rendered side by side at 1194 against 0.55
+     and 0.65, it is the lowest of the three that leaves a flank readable as a
+     picture, which keeps the most distance from the centre — and that
+     distance is the whole job of a flank. */
+  opacity: 0.45;
   transform: scale(0.94);
   transition: opacity 0.26s ease, transform 0.26s ease;
 }
@@ -1995,8 +2128,37 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
      shifted back by the same pixel, which is why the slice is not stretched:
      the neighbour's extra pixel shows a pixel of the neighbour's own content,
      drawn from the same sprite, and it lands exactly where the page used to.
-     A scale could never do that — it stretches what it widens. */
-  --bleed: 1.1px;
+     A scale could never do that — it stretches what it widens.
+
+   🔴 2.2px, DOUBLED (2026-08-27), and the reason is a rendering PATH rather
+   than a number. `22th.png` says the seams are still there on a build that
+   already carries this fix, and it is not a stale cache: measured off the
+   agency's own crop, the pale lines solve to 69% page colour over the maroon,
+   which is a gap, not a dark composite. Every check this file records missed
+   it for one reason — HEADLESS CHROMIUM RASTERISES IN SOFTWARE. Driven
+   headed against the real GPU (NVIDIA D3D11), with every slat flat-filled so
+   nothing could hide in picture detail, the seams appeared; the identical run
+   headless did not have them. Both frames are kept:
+   `resources/notes/seam-2026-08-27-gpu.png` and `-software.png`.
+
+   ⚠️ IT IS INTERMITTENT, and that is stated rather than glossed. Four
+   further GPU sweeps — ring held and ring turning, mark shown and mark
+   hidden, at 1.1 / 2.2 / 3.4 / 5px — could not make it come back, and the
+   geometry itself is not in doubt: `resources/notes/slat-seam-bench.html`
+   stands the same ten facets up with no page around them and shows seams at
+   bleed 0 and none at 0.5px or more, on BOTH paths. So the fault is the
+   compositor dropping a sub-pixel at a junction under some batching it
+   chooses for itself, not an error in the chord or the apothem.
+
+   ⚠️ Which makes this a MARGIN, not a proof. Doubling the overlap doubles
+   how much the compositor has to lose before a junction opens, and it costs
+   almost nothing: the overlap shows the neighbour's own content from the same
+   sprite, and the only real price is the two END slats, whose picture is now
+   2.2px out of step instead of 1.1 — at the extreme outer edge of the
+   frame, where the note below says nothing can be read against it. If the
+   agency still sees them, the next lever is NOT a bigger number: it is
+   `will-change`/layer promotion on the slats, or fewer, wider facets. */
+  --bleed: 2.2px;
   width: calc(var(--sw) + var(--bleed) * 2);
   height: var(--h);
   background-repeat: no-repeat;
@@ -2747,6 +2909,11 @@ body.lib-index .lib-list { display: block; }
   grid-template-columns: repeat(12, 1fr);
   gap: 1rem;
   padding: clamp(1.6rem, 4vh, 2.6rem) var(--pad);
+  /* How tall a clipping's picture may be — the same lever the long read
+     below calls `--abh`. It used to be written inline as `38vh` inside one
+     calc; the mat now has to name the same number in order to hug the
+     picture, and a length in two places is a length that drifts. */
+  --clh: 38vh;
 }
 .clip {
   background: var(--cream-warm);
@@ -2761,13 +2928,48 @@ body.lib-index .lib-list { display: block; }
 }
 /* ⚠️ The ratio comes from the PICTURE, not the box — `--r` per clipping. A
    fixed 4/3 cropped the two portrait frames to a band across the middle.
-   The width is capped through the height so a 9:16 clipping does not come out
-   twice as tall as the collage it is pinned to: min() takes the column when
-   the picture is wide and the height cap when it is tall. */
+   The HEIGHT is what caps a clipping, so a 9:16 does not come out twice as
+   tall as the collage it is pinned to, and the width follows from the ratio.
+
+   🔴 THE MAT SHRINK-WRAPS THE PICTURE (2026-08-27), and that is `18th.png`
+   and `20th.png`. It is the SAME fault `13th.png` reported against `.ab-media`
+   on 2026-08-24 and got fixed there — the clippings the long read was
+   copying never got the same treatment, so the section that set the pattern
+   was the one still showing the fault.
+
+   TWO AXES, and the two screenshots are one each.
+
+   ACROSS (`20th.png`): the holder capped its own width through the height,
+   `min(100%, 38vh * ratio)`, inside a figure that still spanned its whole
+   4-column track. A 9:16 picture stayed 197px wide while the mat grew with
+   the window — measured dead cream PER SIDE: 57px at 1024, 97 at 1280,
+   122 at 1440, 147 at 1600, 178 at 1920, against a photograph 197px wide. The
+   landscape clipping was fine on this axis (21–23px): its picture is wide
+   enough to reach the track on its own.
+
+   DOWN (`18th.png`): the figure is a GRID ITEM and stretched to a row whose
+   height the TALL portrait clipping beside it sets, so the landscape one
+   carried its caption at the top of a mat with 164px of empty stock under it
+   at 1024, 104 at 1280 and 67 at 1440. `align-self: start` is the whole fix,
+   and `.c2` already carried `center` for the same reason.
+
+   ⚠️ The holder's width had to stop being a percentage before
+   `fit-content` could work — a percentage inside a shrink-to-fit parent is
+   the circular case `.ab-media`'s note spells out, and Chrome breaks the
+   circle by falling back to the intrinsic ratio. It states a definite
+   `--clh * ratio` instead, so its max-content contribution is a real number
+   and the mat can wrap to it; `max-width: 100%` still clamps the used width,
+   which is all the percentage was ever doing here. */
+.clip-photo {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  align-self: start;
+}
 .clip-img {
   aspect-ratio: var(--r, 1.3333);
-  width: min(100%, calc(38vh * var(--r, 1.3333)));
-  margin-inline: auto;
+  width: calc(var(--clh) * var(--r, 1.3333));
+  max-width: 100%;
   overflow: hidden;
 }
 .clip-img img {
@@ -2779,7 +2981,17 @@ body.lib-index .lib-list { display: block; }
 .c1 { grid-column: 1 / span 4; transform: rotate(1.4deg); }
 .c2 { grid-column: 5 / span 4; transform: rotate(-1deg); align-self: center; }
 .c3 { grid-column: 9 / span 4; transform: rotate(0.8deg); }
-.c4 { grid-column: 2 / span 5; transform: rotate(-0.5deg); margin-top: -1rem; padding: 1.3rem; }
+/* ⚠️ align-self ON THE TEXT CARD TOO, and that is `21th.png`. It is the
+   `18th.png` fault in a card instead of a mat: `.c4` shares its row with the
+   tall `.c5` clipping and stretched to it, so three lines of type sat in the
+   top 40% of a box with the rest empty — measured 148px of slack under the
+   last line at 1024, 192 at 1440, 302 at 1920. The sweep that failed to
+   reproduce this measured `.ab-card`, which is a different element on a
+   different section and is genuinely fine (2–3px at every width).
+   ⚠️ `start`, not `center`: the negative top margin is what pins this card
+   a little above its row, and centring it in a row it no longer fills would
+   quietly undo that. */
+.c4 { grid-column: 2 / span 5; transform: rotate(-0.5deg); margin-top: -1rem; padding: 1.3rem; align-self: start; }
 .c5 { grid-column: 8 / span 4; transform: rotate(1deg); margin-top: -2rem; }
 
 .clip-quote {
@@ -2806,6 +3018,12 @@ body.lib-index .lib-list { display: block; }
   margin-bottom: 0.5rem;
 }
 .clip-text p { margin-bottom: 1rem; color: rgba(15, 24, 32, 0.78); font-size: 0.95rem; }
+/* ⚠️ and the LAST paragraph keeps none of it. With the card no longer
+   stretching (see `.c4`), a trailing 1rem is the difference between this card
+   and the quote clipping beside it — measured 67px of stock under the last
+   line against the quote's 45. Even mats read as a set; uneven ones read as
+   one of them being wrong. */
+.clip-text p:last-child { margin-bottom: 0; }
 
 /* ── the long read: behind-the-scenes down one side, the copy in cards ──
    The agency's ask of 2026-08-23: fill the left and right of the page with
@@ -3148,6 +3366,7 @@ body.lib-index .lib-list { display: block; }
 
 /* ═══════════ FOOTER (shared) ═══════════ */
 .footer {
+  --ground: dark;      /* see --ground on :root */
   background: var(--ink);
   color: var(--cream);
   position: relative;
@@ -3485,6 +3704,11 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .ab-wide .ab-holder,
   .clip-img { width: 100%; max-width: 100%; }
   .ab-wide { width: auto; }
+  /* ⚠️ The desktop's `fit-content` comes OFF here, for the same reason
+     `.ab-wide`'s does: at one column the holder above is back to `100%`, and
+     a percentage inside a shrink-to-fit parent is circular. One column is
+     already the picture's own width — there is nothing left to hug. */
+  .clip-photo { width: auto; }
   .ab-media { padding: 0.5rem; }
   .asvc { grid-template-columns: 1fr; }
   .asvc:nth-child(even) .asvc-media { order: 0; }

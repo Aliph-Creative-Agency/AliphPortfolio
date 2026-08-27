@@ -1175,30 +1175,59 @@ if (menuBtn && overlay) {
   });
 }
 
-/* ══════════ menu button: invert over dark sections ══════════
-   The burger is fixed above the page, so whatever scrolls under it decides
-   its colour. Every opaque ink field is listed here.
+/* ══════════ the two fixed controls: invert over dark ground ══════════
+   The burger and the language pill are fixed above the page, so whatever
+   scrolls under them decides their colour.
 
-   The load curtain is deliberately NOT listed: it covers the button anyway,
-   and counting it left the button stuck dark after the curtain lifted. */
-const DARK_UNDER = [
-  ".filmstrip", ".banner", ".footer",
-  ".testi", ".sw-stage", ".svc-pick.is-active",
-].join(",");
+   🔴 THE SECTIONS SAY SO THEMSELVES NOW (2026-08-27). What was here was a
+   list of selectors — `.filmstrip, .banner, .footer, .testi, .sw-stage,
+   .svc-pick.is-active` — naming every dark field on the site, kept in this
+   file, away from the CSS that makes them dark. A list like that rots in both
+   directions, and this one had gone both ways: three of its six entries
+   (`.testi`, `.sw-stage`, `.svc-pick`) name things that no longer exist
+   anywhere in the stylesheet or the markup, and nothing would ever have said
+   so. Meanwhile a new dark band would have been invisible to it until somebody
+   remembered this file existed.
 
-/* The one thing here that does real main-thread work per scroll frame:
-   elementsFromPoint forces a synchronous layout flush and a full hit test.
-   queueMenuSync below spaces it out. */
-/** Is the point at this element's centre sitting over a dark section? */
+   A section states `--ground: dark` next to its own background instead, and
+   because a custom property INHERITS, every descendant answers the same
+   without being listed. Reading it is one lookup on an already-computed style
+   — no `closest()`, no selector matching, and nothing to keep in step.
+
+   🔴 AND FIVE POINTS, NOT ONE. The centre alone is a single sample of a
+   44px control: it says nothing about one straddling a section's edge, and the
+   pill is 86px wide, so its two ends can be over different fields entirely.
+   Four corners plus the centre, majority wins — and a tie stays light,
+   which is the page's own colour.
+
+   ⚠️ This is still the one thing here that does real main-thread work per
+   scroll: elementsFromPoint forces a synchronous layout flush and a hit test,
+   and there are five per control now rather than one. queueMenuSync below is
+   what makes that affordable — it spaces the whole sync out to ~100ms, so
+   the cost is ten hit tests every six frames, not ten every frame.
+
+   ⚠️ The load curtain is deliberately left saying nothing. It is ink, but
+   it COVERS the button while it is up, and counting it left the button stuck
+   dark after the curtain lifted — so it inherits `light` from :root, and
+   the old exception needs no code of its own any more. */
+const GROUND_AT = [[0.5, 0.5], [0.14, 0.22], [0.86, 0.22], [0.14, 0.78], [0.86, 0.78]];
+
+/** Is this fixed control sitting over ground that declares itself dark? */
 function overDark(el) {
   const r = el.getBoundingClientRect();
-  const stack = document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-  for (const node of stack) {
-    if (node === el || el.contains(node)) continue;
-    if (node === document.body || node === document.documentElement) break;
-    if (node.closest(DARK_UNDER)) return true;
+  if (!r.width || !r.height) return false;
+  let dark = 0, seen = 0;
+  for (const [fx, fy] of GROUND_AT) {
+    const stack = document.elementsFromPoint(r.left + r.width * fx,
+                                             r.top + r.height * fy);
+    for (const node of stack) {
+      if (node === el || el.contains(node)) continue;
+      seen++;
+      if (getComputedStyle(node).getPropertyValue("--ground").trim() === "dark") dark++;
+      break;
+    }
   }
-  return false;
+  return dark * 2 > seen;
 }
 
 function syncMenuBtn() {

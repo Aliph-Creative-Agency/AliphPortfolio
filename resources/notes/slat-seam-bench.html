@@ -1,0 +1,38 @@
+<!doctype html><meta charset="utf-8"><title>slat seam bench</title>
+<style>
+ body{margin:0;background:#D9D9CE;font:12px monospace;color:#0F1820}
+ .row{padding:10px 16px}
+ .win{perspective:900px;height:230px;display:flex;align-items:center;justify-content:center}
+ .ring{position:relative;width:220px;height:200px;transform-style:preserve-3d}
+ .item{position:absolute;inset:0;transform-style:preserve-3d}
+ .slat{position:absolute;inset:0;margin:auto;
+   width:calc(var(--sw) + var(--bleed)*2); height:190px;
+   background:#5A0607;
+   transform:rotateY(calc((var(--k) - 4.5) * var(--dth))) translateZ(var(--apo));}
+</style>
+<div id="out"></div>
+<script>
+const SLATS=10, W=200, RAD=420;
+const sw = W/SLATS;
+const dth = 2*Math.asin(Math.min(0.9999, sw/(2*RAD)));
+const apo = RAD*Math.cos(dth/2);
+const bleeds=[0,0.5,1.1,2.2,3.4,5];
+const out=document.getElementById('out');
+for(const b of bleeds){
+  const row=document.createElement('div'); row.className='row';
+  row.innerHTML='<div>--bleed: '+b+'px</div>';
+  const win=document.createElement('div'); win.className='win';
+  const ring=document.createElement('div'); ring.className='ring';
+  const item=document.createElement('div'); item.className='item';
+  item.style.setProperty('--sw', sw.toFixed(3)+'px');
+  item.style.setProperty('--dth', (dth*180/Math.PI).toFixed(4)+'deg');
+  item.style.setProperty('--apo', apo.toFixed(2)+'px');
+  item.style.setProperty('--bleed', b+'px');
+  for(let k=0;k<SLATS;k++){
+    const s=document.createElement('div'); s.className='slat';
+    s.style.setProperty('--k', k); item.appendChild(s);
+  }
+  ring.appendChild(item); win.appendChild(ring); row.appendChild(win); out.appendChild(row);
+}
+document.title='ready';
+</script>

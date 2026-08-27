@@ -1,3 +1,12 @@
+# SUPERSEDED 2026-08-27 by resources/replace_bts29.py. DO NOT RUN THIS.
+#
+# The agency answered the watermark themselves: instead of a frame to cut
+# they supplied a clean vertical master of the same clip, so bts-29 went back
+# to a true 9:16 and the 10% this script sacrificed came back with it. Kept on
+# disk because it is the whole recipe if a burnt-in handle ever needs cutting
+# again -- the measurement of where the ink actually sits, and the four-object
+# rule that a partial swap breaks -- and both of those outlive the clip.
+#
 # Crop the burnt-in handle off bts-29, everywhere it lives.
 #
 # The clip is a re-post: `@bader.events` and a line of Arabic are burnt into
