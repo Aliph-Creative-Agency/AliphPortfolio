@@ -1,8 +1,37 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-27. Read this first._
+_Updated 2026-08-27b. Read this first._
 
-> ## 🟢 State on 2026-08-27: EVERYTHING IS DEPLOYED
+> ## 🟡 State on 2026-08-27b: ONE ROUND BUILT, NOT DEPLOYED
+>
+> 🔴 **The keyboard round of 2026-08-27b is committed (`b52aeb9`) and NOT
+> deployed.** The live site is still `c5b80d8c-ce63-4c1a-8fe9-1686b2d1a75c`,
+> which carries everything up to and including 2026-08-27a. Deploying was not
+> done because nobody asked for it — see _Session 2026-08-27b_. Nothing about
+> that round is risky; it simply has not been pushed.
+>
+> 🔴 **A COMPUTED FOCUS RING IS NOT A VISIBLE ONE, and this file would have
+> recorded one as verified.** `getComputedStyle` read
+> `outline: rgb(187, 92, 57) solid 2px` on a carousel slide while a pixel
+> sweep of that same slide found **zero accent pixels** — the slide's own
+> `<img>` and its absolutely-positioned `video.preview` paint above an inset
+> outline. At the previous outset offset it had been clipped away instead,
+> because a slide is exactly as tall as its track. Two invisibility
+> mechanisms, neither visible to computed style. **Sample the rendered pixel
+> for anything whose whole job is to be seen.**
+>
+> 🔴 **`overflow: hidden` IS A SCROLL CONTAINER.** Tabbing to a hero film
+> frame made Chrome scroll it into view by setting `scrollLeft` on
+> `.filmstrip` to **-4121px**, permanently, stacked under the gsap
+> translation. `overflow: clip` clips the same and cannot be scrolled.
+>
+> ⚠️ **The 11 `.ring-item` buttons inside `aria-hidden` stages are FINE** —
+> they are `inert` too, which takes them out of the tab order. An audit sweep
+> for "focusable content inside aria-hidden" that does not also check `inert`
+> reports eleven false positives here. There was exactly one real one, and it
+> was introduced and fixed in the same round.
+>
+> ### Still true from 2026-08-27a — everything below IS deployed
 >
 > ✅ **The live site is version `c5b80d8c-ce63-4c1a-8fe9-1686b2d1a75c`.** It
 > carries the whole 2026-08-26 audit round — which had been sitting undeployed
@@ -280,12 +309,12 @@ for.
     it. The fix that closes it is `max-width: 21em` on `.dropcap-block p`, and it
     trades the agency's "type reaches the bottom of the paper" rule for their
     "no lone word" rule. Ask them which they want.
-12. **Six media surfaces still open the lightbox on click only.** The archive's
-    82 tiles, the ring and the about page's clips answer the keyboard now; the
-    reel carousel's slides, the gallery wall's 12 cells, the hero's 24 film
-    frames and the about page's 3 clippings do not. Making them all focusable
-    adds ~39 tab stops to the home page — a judgement about tab-order weight
-    rather than a bug.
+12. ✅ **CLOSED 2026-08-27b — every media surface answers the keyboard.** The
+    tab-order objection was real and is answered rather than paid: each field
+    is ONE composite widget, so it costs a single tab stop and the arrow keys
+    walk it. Four stops added to the home page and one to the about page, not
+    ~39. Walked with real Tab presses: **32 stops in both languages**. See
+    _Session 2026-08-27b_.
 13. **The English headline's full stop is the Arabic face's full stop.** Idris
     Sharp carries a full Latin set, so "things begin." is set entirely in it,
     period included — and that period is drawn for Arabic typesetting, so at
@@ -337,6 +366,196 @@ gesture has been invented for it.
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-08-27b — the last five media surfaces get a keyboard, and four ways a focus ring can be perfectly correct and completely invisible
+
+The brief was "read the handoff and start right away". Almost everything on
+_The next round_ is waiting on the agency — `19th.png` needs a question asked,
+the pill decision is theirs, the seam fix is conditional on them coming back,
+open questions 9/11/16/20/21 are all theirs. **Item 12 was the one thing on the
+list that needed nobody**, so that is what was built.
+
+🔴 **This round is committed (`b52aeb9`) and NOT DEPLOYED.** Deploying puts it
+on the agency's live domain and nobody asked for that; it is one
+`npx wrangler deploy` away whenever it is wanted.
+
+### What was open, and why it had been left
+
+Six media surfaces opened the lightbox **on click and on click only**. Three
+had been fixed one at a time in earlier rounds — the archive's 82 tiles, the
+ring, the about page's five `.ab-media` clips. Five never had been: the hero
+film strip, the gallery wall, the reel carousel, the about page's three
+clippings, and the still beside block 1 (which this file had never even
+counted — it lists six surfaces and there were seven).
+
+This file recorded the reason it had been left: *"Making them all focusable
+adds ~39 tab stops to the home page — a judgement about tab-order weight
+rather than a bug."* That count is right and it is also not the price of the
+feature. **A field of pictures is one composite widget**, not N controls: one
+tab stop, arrow keys within it, Home and End to the ends, Enter and Space to
+open. The home page gained **four** stops and the about page one.
+
+Walked with real Tab presses under Playwright, in both languages: **32 stops
+either way**, one per field.
+
+| field | openable nodes | nodes in the DOM | tab stops |
+|---|---|---|---|
+| hero film strip `.film-group` | 4 | 24 (6 cloned groups) | 1 |
+| gallery wall `.gwall` | 12 | 12 | 1 |
+| reel carousel `.reelshow-track` | 8 | 24 (tripled) | 1 |
+| block 1 still `.wb1` | 1 | 1 | 1 |
+| about clippings `.clippings` | 3 | 3 | 1 |
+
+✅ **Opening was already free and no new opening code was written.** Every
+selector above is in the lightbox's `OPENS` list, and its generic
+`[role="button"]` keydown handler already answered Enter and Space for anything
+matching it. Naming the nodes and letting the keyboard reach them was the whole
+job. Names come from the node's own `figcaption` or `alt` where it has one (the
+clippings, the wall's three brand marks) and from `mOpen`/`mPlay` plus a new
+`mOf` where it does not — «افتح الصورة — ٣ من ١٢», "Play film — 1 of 8".
+
+⚠️ **`#reelTrack` stopped being a tab stop by itself, and that is correct.** It
+is a scroll container with `role="group"`, and a browser makes such a thing
+focusable **only while it has no keyboard-focusable children**. Giving the
+slides a tab stop took the track's away, so the count is one and not two. It
+keeps its role and its name, which is now the group's name. Measured, not
+assumed — 0 stops land on it.
+
+### The four things that were wrong first
+
+Every one of these was found by measuring and would have shipped as "verified"
+on any weaker check.
+
+#### 1. 🔴 The strip's new tab stop lived inside `aria-hidden="true"`
+
+`.filmstrip` is authored `aria-hidden="true"` — four photographs repeated
+across the hero, plus a sprocket run, are decoration right up until something
+makes them openable. Putting a tab stop inside it is **focusable content inside
+aria-hidden**, the exact WCAG failure `inert` was brought in to fix on the
+ring's off-screen stages on 2026-08-26.
+
+The attribute now comes off **in the same function that names the frames**, not
+in the markup. Uncovering the strip and naming it have to be one act: a page
+whose script never ran would otherwise hand a screen reader twenty unnamed
+figures instead of a decorative strip it can ignore.
+
+⚠️ **NOT `inert` on the clones**, which is the other half of the ring's answer
+and would be wrong here: `inert` takes pointer events with it, and the strip
+travels, so most of the frames under the cursor at any moment **are** clones.
+They keep `aria-hidden` and `tabindex="-1"` — hidden and unreachable, still
+clickable.
+
+#### 2. 🔴 `overflow: hidden` is a SCROLL container, and the strip ran away by 4,121px
+
+Tabbing to a film frame made Chrome scroll it into view the only way it could:
+by setting **`scrollLeft` on `.filmstrip` to -4121px**. It never came back. That
+is a second, invisible offset sitting under the gsap translation, permanently
+misaligning the strip's window — and it happens on the real Tab key, not only
+under a scripted `.focus()`.
+
+`overflow: clip` clips identically and **is not scrollable**, so there is
+nothing for the browser to scroll. Both lines are in the rule, `hidden` first as
+the fallback, and `hold()` zeroes the offset where `clip` is not understood.
+
+#### 3. 🔴 The carousel's ring was invisible twice, and computed style said it was fine
+
+* **Outset**, the global `outline-offset: 3px` was **clipped away entirely**: a
+  slide is exactly as tall as the track that holds it — **806px against 806px**
+  at 1440 — so the whole ring lands outside the track's overflow.
+* **Inset** (`outline-offset: -3px`), it was **painted over**. `.holder` holds a
+  full-bleed `<img>` and an absolutely-positioned `video.preview`, and a
+  positioned descendant paints above its ancestor's outline.
+
+🔴 **`getComputedStyle` reported `rgb(187, 92, 57) solid 2px` for the inset
+version and a pixel sweep of the slide found ZERO accent pixels.** This round
+was one step from writing "focus ring verified" on that reading. It is a
+positioned `::after` above both children now, with `pointer-events: none` so
+the slide keeps its own click.
+
+#### 4. 🔴 The strip's ring was drawn on a node 3,704px off screen
+
+`xForFrame()` shifts by whole **periods** to the nearest x, so what it centres
+is whichever **copy** of a frame is closest — and the original, which is the
+node that actually holds focus, is routinely a period away. Measured on four
+consecutive arrow presses: the focused element sat at x -3704 with the strip
+running 0–1440. `visibleFrac: 0`, every time. A perfectly correct
+`:focus-visible` ring, drawn off screen, forever.
+
+✅ **The file already carried the fix.** `focus(id)` has always marked **every**
+copy with `.pop` for this exact geometry. `.is-kbd` is the same trick for the
+keyboard, written by `hold()` and cleared by `release()`; `:focus-visible` on
+`.film-frame` is turned off so there is one answer rather than two that
+disagree. Copies of one index are a whole period apart and the period is wider
+than the window, so **six copies marked, exactly one visible**, measured on
+every press.
+
+### The strip holds still while it is being read
+
+The strip travels at 34px/s, so a frame you have just arrowed onto slides out
+of the window while you look at it. `hold()` stops the loop and centres the
+frame — the same courtesy the service hover already got — and `release()`
+starts it again when focus leaves the strip.
+
+⚠️ **`release()` defers to `has-pop`.** A service can be focused in the ring
+while the strip is being tabbed, and the ring is the louder claim on the strip;
+restarting the loop under it would undo the centring `focus(id)` had just done.
+
+This is also a small win on **WCAG 2.2.2**: the strip has no pause control at
+all, and now at least stops for anyone reading it with a keyboard.
+
+### Verified, not assumed
+
+All of it driven by **real `page.keyboard.press()` calls**, not dispatched
+`KeyboardEvent`s — a synthetic event exercises the same listener but proves
+nothing about reachability by the **Tab key**, which is the whole point.
+
+- **32 sequential tab stops** in AR and in EN; 1 each on the strip, the wall,
+  the carousel and the block-1 still; **0** on `#reelTrack`.
+- Arrows follow **reading order and flip with the language**: RTL ArrowLeft
+  goes `gw-a → gw-b → gw-c`, EN ArrowRight does the same. Home and End reach
+  the ends; both ends **clamp** rather than wrap.
+- Enter and Space open the right **group**, not the whole page: «١ / ١٢» on the
+  wall, «١ / ٨» on the carousel, «1 / 3» on the clippings. Escape closes and
+  **returns focus to the tile it came from**.
+- Roving is real: 12 wall tiles, **1** tabbable; 3 clippings, **1** tabbable,
+  still 1 after arrowing.
+- The strip **moves** (d≈21px/600ms), is **held** while a frame has focus
+  (d=0.00), and **resumes** on blur (d≈21px).
+- `.filmstrip` `scrollLeft` stays **0** through Tab and arrows, on desktop and
+  on a 390px phone.
+- **Zero** focusable nodes inside `aria-hidden` once `inert` is honoured, and
+  **zero** `role="button"` nodes without an accessible name.
+- The accent ring **pixel-counted on all five fields** — 6833 / 4962 / 6675 /
+  28521 / 2211 accent pixels — after a sweep found 0 on the carousel.
+- Reduced motion, a 390×844 phone, and the three surfaces that already worked
+  (archive «١ / ٧٩», ring «١ / ٩», `.ab-media` «١ / ٥») all still pass.
+- **No console or page errors** on any page, in any of the three profiles.
+
+### Two things worth knowing for the next audit
+
+⚠️ **A "focusable content inside aria-hidden" sweep must honour `inert`.** The
+first sweep here reported **12**. Eleven were the ring's off-screen
+`.ring-item` buttons, which are `inert` as well as `aria-hidden` and therefore
+already out of the tab order — false positives, and this file had already
+written down why they are correct. There was exactly one real finding.
+
+⚠️ **A test that moves focus can move the thing it is measuring.** "The strip
+resumes when focus leaves" first reported **False**. The code was right:
+focusing the first link on the page scrolled to the top, took the strip out of
+the viewport, and the IntersectionObserver correctly paused it. The test's own
+side effect satisfied a *different* pause condition. A plain `blur()` in place
+passes.
+
+### Not touched
+
+The `.gw-tile.gw-mark` tiles — the three brand marks on the gallery wall — open
+the lightbox on a **logo** when clicked, and now from the keyboard too. That is
+pre-existing behaviour and it was left exactly as it was: changing which things
+open is a design call, and keyboard parity with the mouse is not. They are
+named by their own `alt` rather than by `mOpen`, so nothing announces a logo as
+a photograph. **Worth asking whether they should open at all.**
 
 ---
 
