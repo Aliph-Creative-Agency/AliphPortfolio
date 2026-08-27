@@ -541,6 +541,16 @@ first sweep here reported **12**. Eleven were the ring's off-screen
 already out of the tab order — false positives, and this file had already
 written down why they are correct. There was exactly one real finding.
 
+🔴 **`os.replace` LEAVES A CORPSE WHEN THE WRITE RAISES, AND `prototype/` IS
+THE DEPLOY DIRECTORY.** Every patch script here now writes to a temp file
+beside its target and `os.replace()`s it over the original — the rule adopted
+after a script truncated `style.css` to 0 bytes on 2026-08-27a. `mkstemp`
+creates that file in the TARGET's directory, so a run that raises between
+`mkstemp` and the write leaves a zero-byte `.tmp` in `prototype/`. Two of them
+were swept into `b52aeb9` by `git add -A` and would have deployed as two
+empty assets. `*.tmp` is gitignored now. **The safe-write rule is still right;
+it just needs the litter picking up.**
+
 ⚠️ **A test that moves focus can move the thing it is measuring.** "The strip
 resumes when focus leaves" first reported **False**. The code was right:
 focusing the first link on the page scrolled to the top, took the strip out of
