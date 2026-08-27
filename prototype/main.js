@@ -142,6 +142,10 @@ const I18N = {
      agency files them by run and by date — so the date is the only thing that
      tells one tile from the next out loud. */
   mOpen: { ar: "افتح الصورة", en: "Open image" },
+  /* Where a picture sits in its field. A photograph with no caption and no
+     alt has no other way of telling one tile from the next out loud, and a
+     field walked by the arrow keys needs to say how far along it is. */
+  mOf: { ar: "%1 من %2", en: "%1 of %2" },
   libIndex: { ar: "فهرس", en: "Index" },
   libGallery: { ar: "معرض", en: "Gallery" },
   aboutBanner: { ar: "من نحن؟", en: "Who are we?" },
@@ -830,6 +834,50 @@ const filmLoop = (() => {
       filmScroll.querySelectorAll(".film-frame.pop").forEach((f) => f.classList.remove("pop"));
       run();
     },
+    /* Keyboard focus gets the same courtesy the service hover gets, and for
+       the same reason: the strip travels at 34px/s, so a frame just arrowed
+       onto slides out of the window while it is being looked at. hold()
+       stops the loop and centres the frame; release() starts it again when
+       focus leaves the strip.
+       ⚠️ release() defers to has-pop. A service can be focused in the ring
+       while the strip is being tabbed through, and the ring is the louder
+       claim on the strip -- restarting the loop under it would undo the
+       centring focus(id) had just done. */
+    hold(frame) {
+      const i = first.indexOf(frame);
+      if (!ready || i < 0) return;
+      /* ⚠️ The fallback half of the `overflow: clip` fix in style.css. Where
+         `clip` is not understood the strip is still a scroll container, and
+         the browser will have scrolled the focused frame into view by moving
+         scrollLeft — which stacks on top of the translation below and never
+         unwinds. Zero it, then centre the frame the strip's own way. */
+      const box = strip();
+      if (box && box.scrollLeft) box.scrollLeft = 0;
+      stop();
+      if (!prefersReduced) {
+        gsap.to(filmScroll, { x: xForFrame(i), duration: 0.5, ease: "power3.out", overwrite: true });
+      }
+      /* 🔴 THE RING GOES ON EVERY COPY, and this is not belt and braces —
+         it is the only way it is ever seen. xForFrame() shifts by whole
+         PERIODS to the nearest x, so what it centres is whichever COPY of
+         frame i is closest; the original, which is the node that actually
+         holds focus, was measured 3,704px outside the strip on every one of
+         four arrow presses. A `:focus-visible` ring on the focused element
+         alone is drawn perfectly, off screen, forever.
+         focus(id) has always marked every copy with `.pop` for exactly this
+         reason; `.is-kbd` is the same trick for the same geometry. Copies of
+         one index are a whole period apart and the period is wider than the
+         window, so at most one of them is on screen at a time. */
+      filmScroll.querySelectorAll(".film-frame").forEach((f) => {
+        f.classList.toggle("is-kbd", +f.dataset.frame === i);
+      });
+    },
+    release() {
+      filmScroll.querySelectorAll(".film-frame.is-kbd")
+        .forEach((f) => f.classList.remove("is-kbd"));
+      if (filmScroll.classList.contains("has-pop")) return;
+      run();
+    },
     /* Paused rather than killed, so x survives and the strip resumes where it
        left off. */
     setVisible(v) {
@@ -1052,6 +1100,10 @@ function applyI18n() {
   previews.refresh();
   rebuildLoops();
   filmLoop.rebuild();
+  /* last, and after filmLoop.rebuild(): the strip it wires is torn down and
+     re-cloned in there, so anything wired before this is wired to nodes that
+     no longer exist. */
+  mediaKeys.refresh();
 }
 
 /* language switch (pill) — click or keyboard */
@@ -2419,6 +2471,170 @@ const lightbox = (() => {
   return { open, close };
 })();
 
+/* ══════════ every picture answers the keyboard ══════════
+   Six media surfaces opened the lightbox on click and on click only: the
+   hero's film strip, the gallery wall, the reel carousel, the about page's
+   clippings, and the still beside block 1. The archive's tiles, the ring and
+   the about page's clips had already been given `role="button" tabindex="0"`
+   one at a time; these are the ones that never were.
+
+   ⚠️ NOT one tab stop per picture. The obvious fix — a tabindex on each of
+   the 4+12+8+1 openable nodes — adds 25 stops to the home page before the
+   film strip's clones are counted, and the strip alone would have offered the
+   same four photographs six times over. The count is what stopped this being
+   done before, and the count is not the price of the feature: a field of
+   pictures is ONE composite widget, so each field takes a single tab stop and
+   the arrow keys walk it. Home and End jump to the ends. The home page gains
+   three stops and the about page one.
+
+   Opening is not handled here. Every selector below is already in the
+   lightbox's OPENS list, and its generic `[role="button"]` keydown handler
+   answers Enter and Space for anything that matches — so naming and reaching
+   the node is the whole job.
+
+   ⚠️ The arrow pair follows READING order and flips with the language, the
+   same rule the lightbox's own steppers use. Up and Down never flip; they are
+   not directional in a right-to-left document. */
+const mediaKeys = (() => {
+  /* `verb` is the I18N key a node is announced with when it has no name of
+     its own. A clipping and a gallery mark do have one — a figcaption, an
+     alt — and stating a second one over the top would replace it. */
+  const FIELDS = [
+    /* ⚠️ `first: true` — buildFilm() clones the group across the strip, so
+       `.film-group` matches six or seven times and every clone holds the same
+       four photographs. Only the original is content.
+       `reveal` is the strip itself: see uncover() below. */
+    { host: ".film-group", item: ".film-frame", verb: "mOpen", first: true,
+      reveal: ".filmstrip", scroll: false },
+    { host: ".gwall", item: ".gw-tile", verb: "mOpen" },
+    /* the clones are `.is-clone` and `aria-hidden`; a focusable node inside an
+       aria-hidden subtree is a defect in its own right, so they are excluded
+       here rather than merely skipped */
+    { host: ".reelshow-track", item: ".reel-slide:not(.is-clone) > .holder", verb: "mPlay",
+      scroll: "center" },
+    { host: ".clippings", item: ".clip-photo", verb: null },
+    { host: ".wb1", item: ".wb1-media", verb: "mOpen" },
+  ];
+
+  /* A node that can already say what it is keeps its own name. Name-from-
+     content covers the figcaption on a clipping and the alt on the wall's
+     three brand marks; `mOpen` over the top of either would silence it. */
+  const named = (el) => {
+    const cap = el.querySelector("figcaption");
+    if (cap && cap.textContent.trim()) return true;
+    const img = el.querySelector("img");
+    return !!(img && img.getAttribute("alt"));
+  };
+
+  const label = (el, verb, i, n) => {
+    if (!verb || named(el)) return null;
+    const of = I18N.mOf[lang].replace("%1", num(i + 1)).replace("%2", num(n));
+    return `${I18N[verb][lang]} — ${of}`;
+  };
+
+  /* Which item in a field currently holds the field's one tab stop. Reset by
+     wire(); moved by focusin so tabbing back returns to where you left. */
+  function rove(items, to) {
+    items.forEach((el, i) => { el.tabIndex = i === to ? 0 : -1; });
+  }
+
+  function wire(field) {
+    const hosts = [...document.querySelectorAll(field.host)];
+    if (!hosts.length) return;
+    /* 🔴 The hero strip is authored `aria-hidden="true"`: four photographs
+       repeated across the window, plus a sprocket run, are decoration right
+       up until something makes them openable. This is that something — and
+       FOCUSABLE CONTENT INSIDE aria-hidden IS A WCAG FAILURE, the same one
+       `inert` was brought in to fix on the ring's off-screen stages
+       (2026-08-26). So the attribute comes off HERE and not in the markup:
+       uncovering the strip and naming its frames have to be the same act,
+       or a page whose script never ran would hand a screen reader twenty
+       unnamed figures instead of a decorative strip it can ignore.
+       ⚠️ NOT `inert` on the clones, which is the other half of the ring's
+       answer and would be wrong here: `inert` takes pointer events with it,
+       and the strip travels, so most of the frames under the cursor at any
+       moment ARE clones. They stay clickable and merely unannounced. */
+    if (field.reveal) {
+      const d = document.querySelector(field.reveal);
+      if (d) d.removeAttribute("aria-hidden");
+    }
+    /* the clones are decoration; hide them from assistive tech as well as
+       from the tab order, so the strip is announced once and not seven times */
+    if (field.first) {
+      hosts.slice(1).forEach((h) => {
+        h.setAttribute("aria-hidden", "true");
+        h.querySelectorAll(field.item).forEach((el) => {
+          el.removeAttribute("role");
+          el.tabIndex = -1;
+        });
+      });
+    }
+    const host = hosts[0];
+    const items = [...host.querySelectorAll(field.item)];
+    if (!items.length) return;
+
+    items.forEach((el, i) => {
+      el.setAttribute("role", "button");
+      const l = label(el, field.verb, i, items.length);
+      if (l) el.setAttribute("aria-label", l);
+    });
+    rove(items, 0);
+
+    /* Idempotent: applyI18n re-runs on every language switch and the film
+       strip is rebuilt on resize as well, so a field can be wired many times
+       over the life of one page. The flag rides on the host, which is thrown
+       away and rebuilt with the DOM it belongs to. */
+    if (host.dataset.mkeys) return;
+    host.dataset.mkeys = "1";
+
+    host.addEventListener("focusin", (e) => {
+      const at = items.indexOf(e.target.closest(field.item));
+      if (at >= 0) rove(items, at);
+      if (field.host === ".film-group") filmLoop.hold(e.target.closest(field.item));
+    });
+    host.addEventListener("focusout", (e) => {
+      if (host.contains(e.relatedTarget)) return;
+      if (field.host === ".film-group") filmLoop.release();
+    });
+
+    host.addEventListener("keydown", (e) => {
+      const on = e.target.closest(field.item);
+      if (!on || !items.includes(on)) return;
+      const rtl = document.documentElement.dir === "rtl";
+      let to = null;
+      if (e.key === "ArrowRight") to = items.indexOf(on) + (rtl ? -1 : 1);
+      else if (e.key === "ArrowLeft") to = items.indexOf(on) + (rtl ? 1 : -1);
+      else if (e.key === "ArrowDown") to = items.indexOf(on) + 1;
+      else if (e.key === "ArrowUp") to = items.indexOf(on) - 1;
+      else if (e.key === "Home") to = 0;
+      else if (e.key === "End") to = items.length - 1;
+      if (to === null) return;
+      e.preventDefault();
+      to = Math.max(0, Math.min(items.length - 1, to));
+      rove(items, to);
+      /* `preventScroll`, then scroll deliberately. Letting focus() do it
+         fights the carousel's scroll-snap and jumps the page under the
+         gallery wall, and each field wants a different answer:
+           • the carousel CENTRES what it is showing, and `inline: "nearest"`
+             left the focus ring cut off against the track's leading edge
+             — measured, not guessed;
+           • 🔴 the film strip is not scrolled at ALL. It is TRANSLATED by
+             gsap inside an `overflow: hidden` box, and scrollIntoView would
+             set scrollLeft on that box — a second, invisible offset fighting
+             the tween. hold() has already centred the frame. */
+      items[to].focus({ preventScroll: true });
+      if (field.scroll !== false) {
+        items[to].scrollIntoView({ block: "nearest", inline: field.scroll || "nearest",
+                                   behavior: prefersReduced ? "auto" : "smooth" });
+      }
+    });
+  }
+
+  return {
+    refresh() { FIELDS.forEach(wire); },
+  };
+})();
+
 /* ══════════ inline previews ══════════
    A short, muted, looping piece of a film played inside its own tile, so the
    work moves on the page without anyone opening a player. Clicking still opens
@@ -3566,6 +3782,7 @@ if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
     rebuildLoops();
     filmLoop.rebuild();
+    mediaKeys.refresh();
     queueMenuSync();
     syncSubOffset();
   });
@@ -3607,6 +3824,7 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(() => {
     rebuildLoops();
     filmLoop.rebuild();
+    mediaKeys.refresh();
     /* The ring's item sizes and radius are pixels off the window's measured
        height, so they are stale the moment the window changes. */
     serviceRings.resize();

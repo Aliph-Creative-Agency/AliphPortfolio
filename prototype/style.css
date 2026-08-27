@@ -679,7 +679,18 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   --ground: dark;
   position: absolute;
   inset: 0;
+  /* 🔴 BOTH LINES, in this order, and the second is not a tidy-up.
+     `hidden` makes this a SCROLL container that merely hides its bars — so
+     when a film frame took focus (2026-08-27, the keyboard round) the
+     browser scrolled the frame into view by setting scrollLeft on this box
+     to -4121px, and it never came back: a second, invisible offset under
+     the gsap translation, permanently misaligning the strip's window.
+     `clip` clips identically WITHOUT being scrollable, so there is nothing
+     for the browser to scroll. `hidden` stays underneath it as the fallback
+     for anything that does not know `clip`, where main.js zeroes the offset
+     instead. */
   overflow: hidden;
+  overflow: clip;
   display: flex;
   align-items: center;
 }
@@ -1604,6 +1615,42 @@ html[lang="en"] .why { --why-type: 0.761; --why-title-type: 0.62; }
   --reel-w: 33.5%;
   --reel-gap: clamp(8px, 1vw, 18px);
 }
+/* 🔴 THE STRIP'S FOCUS RING IS NOT ON THE FOCUSED ELEMENT.
+   The hero strip is one group of four frames cloned across the window, and
+   filmLoop centres whichever COPY of a frame is nearest — so the node that
+   holds focus is routinely a period away, measured at 3,704px outside the
+   strip. `.is-kbd` is written to every copy of the focused index by
+   filmLoop.hold(), the same way `.pop` already marks the service hover, and
+   the ring rides that instead. The real `:focus-visible` ring is turned off
+   so there is exactly one answer rather than two that disagree. */
+.film-frame:focus-visible { outline: none; }
+.film-frame.is-kbd {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* 🔴 THE CAROUSEL'S FOCUS RING IS A PSEUDO-ELEMENT, and the two obvious
+   answers both fail in ways a computed style will not show you.
+     • The global outset ring is CLIPPED AWAY: a slide is exactly as tall as
+       the track (806px against 806px at 1440, measured), so all of
+       `outline-offset: 3px` lands outside the track's overflow.
+     • An INSET ring is PAINTED OVER. `.holder` holds a full-bleed <img> and
+       an absolutely-positioned `video.preview`, and a positioned descendant
+       paints above its ancestor's outline. getComputedStyle still reports
+       "rgb(187, 92, 57) solid 2px" — and a pixel sweep of the slide found
+       ZERO accent pixels. That is the whole reason this rule looks like this.
+   A positioned ::after above both children is the one thing that reaches the
+   screen. `pointer-events: none` so the slide keeps its own click. */
+.reelshow-track .holder:focus-visible { outline: none; }
+.reelshow-track .holder:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  z-index: 3;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+}
+
 .reelshow-track {
   display: flex;
   gap: var(--reel-gap);
