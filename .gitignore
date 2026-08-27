@@ -48,3 +48,9 @@ resources/edge-cdp*/
 # Derivative cache for thumb_media.py — pulled from R2 and re-derived on
 # demand, so nothing here is a source.
 resources/thumb-cache/
+
+# Splice scripts write to a temp file beside their target and os.replace() it
+# over the original — never opening the only copy for writing. A crash between
+# mkstemp and replace leaves a zero-byte .tmp behind, and prototype/ is the
+# DEPLOY DIRECTORY, so two of them shipped into a commit on 2026-08-27b.
+*.tmp
