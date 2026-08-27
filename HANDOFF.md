@@ -1,54 +1,272 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-24. Read this first._
+_Updated 2026-08-27. Read this first._
 
-> ## 🟢 State on 2026-08-24: the agency's fourteen edits are built, reviewed and deployed
+> ## 🟠 State on 2026-08-26: an audit round is BUILT AND NOT DEPLOYED
 >
-> ✅ **Live version `6cba40be-1e7f-4ec9-b114-b6500f4f6c87`** (commit `7249ec1`).
-> ⚠️ The round DEPLOYED TWICE. `5db9d87b` is the build of the fourteen edits
-> and is what the section below reports; `6cba40be` is the corrections an
-> independent review turned up afterwards — see _The review pass_ at the end of
-> that section. If a version id here disagrees with wrangler, wrangler is right.
+> ⚠️ **The live site is still version `6cba40be-1e7f-4ec9-b114-b6500f4f6c87`
+> (commit `7249ec1`) — the 2026-08-24 build.** Everything from 2026-08-26 is in
+> the working tree and verified locally; `npx.cmd wrangler deploy` has not been
+> run. Deploying is the first thing the next session should ask about.
 >
-> A third round of screenshot notes — fourteen numbered images plus two asset
-> photographs. The full brief, every arrow written out in words with the "Nth
-> pic" → filename mapping, is at **`resources/briefs/2026-08-24/TASKS.md`**, and
-> unlike the last round **the images are kept**, at
-> `C:\Users\Obaida\Desktop\issues\`. ⚠️ `5th .png` has a space before the
-> extension.
+> There was no brief this round. The instruction was "resolve the issues ur
+> aware of and check the website for any", so it is the open list below plus a
+> full sweep of the three pages under Playwright — 1440×900 and 390×844, both
+> languages, with and without reduced motion. The write-up is
+> _Session 2026-08-26_ and the short version is:
 >
-> ### What changed, in one line each
->
-> | # | the agency asked | what landed |
+> | | before | after |
 > |---|---|---|
-> | 1 | صناعة محتوى's mark should be their own photographer | re-cut from `1st pic.jpg` with `birefnet-general-lite` — camera, lens and strap intact |
-> | 2 | تطوير برمجيات's mark, done properly | re-cut from `3rd pic.jpg` with `u2net`, the only model that keeps the monitor — 🔴 **but see the caveat below; this one is not finished** |
-> | 3 | 🔴 the ring is visibly sliced into ten strips | **they were GAPS, not overlaps** — the 1.2% scale was a quarter of a pixel of overlap; a whole-pixel bleed with the sprite shifted back by the same pixel |
-> | 4 | the صناعة محتوى ring turns too fast | `TURN` is per service now: 26s / **42s** / 26s |
-> | 5 | the ring's reels should play | the item at the FRONT plays, as one flat plane standing on the band |
-> | 6 | hover brings an item to the front, PC only | it calls `pick()` — literally the click's own glide — gated on `(hover: hover)` |
-> | 7 | a ring click opens the catalog, not the work page | `.ring-item` is in the lightbox's `OPENS` and `.ring` is its group |
-> | 8 | the bts-29 watermark | ✅ **no code change** — verified clean on all three live objects; the agency is looking at a stale cache |
-> | 9 | the invitation beside the «كل الأعمال» oval | two columns above 1361px, bigger type, a narrower oval |
-> | 10 | 🔴 redesign the footer, delete the clock | an oversized cream أ bleeding off the bottom edge; the clock is gone from markup, script, styles and I18N |
-> | 11 | the hero lede orphans «الياء.» | a 20em measure, a justified setting, and U+00A0 binding the last two words |
-> | 12 | the about page's way out | oval a third wider, and the rule above it is gone |
-> | 13 | 🔴 the about page's oversized verticals, and a new shape | the mat shrink-wraps the picture; two rows of two verticals, two texts |
-> | 14 | the hero's CTAs become pinned notes | both photographs cut out, shadowed in CSS, swinging on their pin |
+> | index.html, phone, first load | 8.20 MB | **4.11 MB** |
+> | library.html / about.html, phone | 4.92 / 4.86 MB | **1.60 / 1.54 MB** |
+> | webfonts, every page | 3,918 KB | **503 KB** |
+> | the thirteen reels the page autoplays | 442.6 MB | **19.6 MB** |
+> | flagged tab stops on the home page | 43 of 88 | **0 of 87** |
 >
-> 🔴 **THE AGENCY'S DIAGNOSIS OF THE RING SEAMS WAS WRONG, AND SO WAS THE
-> BRIEF'S.** Both said the ten lines were the OVERLAP compositing darker — two
-> strips at opacity 0.8 make 0.96 where they cross. That mechanism is real and
-> it is not what was on the screen. Measured on the built page at 1440: the
-> lines sit at x = 849, 889, 929, 968 across the front item and read **200
-> against the picture's 115** — they are LIGHTER than the work, which can only
-> be the cream page showing through. They were gaps. `scaleX(1.012)` on a
-> measured 40px slat is 0.48px of overlap, a quarter of a pixel on each side,
-> and a browser antialiases two strips meeting at an angle over about a whole
-> one. **The fix went in anyway** — the slats are opaque and the depth fade is a
-> painted cream veil rather than compositing — because the two are incompatible
-> and the bleed had to grow. See _The ring_ below.
+> 🔴 **A CURSOR RESTING ANYWHERE ON THE RING MADE IT SPIN SEVEN TIMES TOO
+> FAST.** `pointerenter` was read as intent, but picking a piece moves it out
+> from under the cursor and slides the next one in, which picks, which moves —
+> 60 picks in 4.8s with the pointer parked and never moved, `--spin` climbing
+> ~520°/s against a design speed of 13.8. This is what three rounds of "is the
+> hover delightful or twitchy?" were actually looking at, and it never showed
+> because every previous check either called `.click()` (which skips
+> hit-testing) or ran in the Browser pane (which never composites). Fixed: the
+> pick is gated on the POINTER having moved, and the release moved from the
+> item to the ring window.
 >
+> 🔴 **THE PHONE'S FILM-GRAIN OVERRIDE HAD NEVER APPLIED — for fifteen days.**
+> The `@media (max-width: 900px)` rule naming the 23 KB grain sits ABOVE the
+> base rule naming the 657 KB one, and a media query adds no specificity, so
+> source order handed every phone the full-resolution tile. The note above it
+> in the stylesheet calls this "the phone's biggest cost".
+>
+> ⚠️ **Thirteen objects were added to R2 under `preview/`, and that IS
+> production.** They were additive — nothing live referenced them — but they
+> are what the working tree now points `data-preview` at, so the code and the
+> bucket must ship together.
+>
+> ⚠️ **`aliphcreative.com` injects a Cloudflare Web Analytics beacon into every
+> HTML response and `workers.dev` does not.** All three pages come back exactly
+> 359 bytes larger on the custom domain. CSS and JS are byte-identical. Do not
+> read that as a half-finished deploy — it is a zone setting, and it means the
+> two hosts can never byte-match on HTML.
+
+---
+
+## ⏳ INCOMING — handed over 2026-08-27
+
+> Four instructions arrived at the end of the 2026-08-26 session. **Only the
+> first is done.** The session was handed to another one before the rest were
+> started — what is below is the brief plus everything that was already
+> measured, so none of it has to be derived twice.
+>
+> ⚠️ Read _Session 2026-08-26_ first: that round is **built and still not
+> deployed**, so this round starts on top of an undeployed working tree.
+
+### 1. ✅ DONE — the full-quality reels are back on the page
+
+The 2026-08-26 round pointed every inline preview at a 540px / 700 kbps
+derivative under `preview/`. **The agency asked for that undone** — what plays
+on the page should be the master again. Reverted 2026-08-27 and verified:
+
+- `prototype/main.js` — the ring sets `data-preview` to `video/` again; the
+  `data-video` second URL is gone from the two `itemOf()` branches that read it.
+- `prototype/index.html` (8 slides) and `prototype/about.html` (5 clips) — the
+  `data-preview` / `data-video` pairs collapsed back to one `video/` URL.
+- Verified in a real browser: the carousel streams
+  `video/reels-alif-tuktuk.mp4` (16.8 MB) and the lightbox opens the same file
+  at 4.59s. No `/preview/` URL and no `data-video` remains anywhere.
+
+✅ **The thirteen `preview/` objects on R2 and `resources/make_previews.sh` are
+left in place, DORMANT.** Nothing points at them, they cost nothing, and they
+are the whole recipe if this is ever reversed again. Do not "clean them up"
+without saying so — and do not assume they are live.
+
+### 2. 🖼 EIGHT NEW SCREENSHOT NOTES — opened and read, NOT acted on
+
+In **`C:\Users\Obaida\Desktop\issues\`**, numbered on from the fourteen of
+2026-08-24. There is no written brief; the only instruction given was *"some of
+them are placement or alignment issues."* All eight were opened on 2026-08-27
+and this is what each one shows. ⚠️ **These are readings, not the agency's
+words** — confirm anything ambiguous before building.
+
+| file | device | what it shows |
+|---|---|---|
+| `15th.mp4` | iPad, EN, 5.2s | The reel carousel. The centre slide IS playing; the two side slides are **washed out almost to invisibility**, far paler than the desktop dim. The «we built from them.» heading is also cut by the browser chrome. |
+| `16th.jpeg` | iPad, AR, landscape | The hero. The film strip's frames **run off the bottom edge with no bottom sprocket row** — only the top row of sprockets is present. |
+| `17th.jpeg` | phone, AR | 🔴 **Ringed in red.** The fixed language pill sits **on top of** the لماذا ألِف؟ block-1 heading «نبدأ بالسؤال، لا بالإجابة» and hides the last word. |
+| `18th.png` | crop | An about-page clipping whose **mat is much bigger than the photograph** — same fault as `20th`. ⚠️ Dated 2026-08-24, older than the rest; may be a leftover from the last round. |
+| `19th.png` | desktop, crop | The hero, with a **red vertical line drawn** down the cream panel a little inside the film strip's edge. It marks a misalignment; **which two things are meant to line up is not clear from the crop** — ask. |
+| `20th.png` | desktop, crop | Two about-page clippings with **very large empty mats** beside the pictures. |
+| `21th.png` | ? | An about-page text card with the type in the top ~40% and **a large empty area beneath it**. ⚠️ Spelled `21th`. |
+| `22th.png` | crop | 🔴 A ring item with the **ten pale vertical seams still clearly visible**. Spelled `22th`. |
+
+⚠️ **All eight were taken against the LIVE site, which is the 2026-08-24
+build** — the 2026-08-26 work is not deployed. Check whether a complaint is
+already fixed in the working tree before building anything.
+
+#### What was already measured for these
+
+**The clipping mats (18th / 20th) reproduce, and the cause is known.** A
+portrait `.clip-photo` keeps its picture at a fixed 197px wide while the mat is
+sized by the GRID COLUMN, so the dead cream either side grows with the window:
+
+| viewport | card | picture | gap each side |
+|---|---|---|---|
+| 1024 | 311 | 197 | 57px |
+| 1280 | 391 | 197 | 97px |
+| 1440 | 441 | 197 | **122px** |
+| 1920 | 591 | 197 | **197px** — as wide as the photograph itself |
+
+The landscape clipping is correct (21–23px) until 1920, where it too opens to
+66px. At 900px and below every clipping is fine (20px). So this is a **desktop
+fault only**, and the fix is the mat hugging the picture — the same thing T13
+asked for on 2026-08-24 and got for `.ab-media` but evidently not for
+`.clip-photo`.
+
+**The text card (21th) did NOT reproduce.** `.ab-card` was measured at 900,
+1024, 1180, 1280, 1440, 1600 and 1920 × 900: slack between the content and the
+card's padding box is **2–3px at every one of them**. Whatever produces that
+empty half is a viewport this sweep missed — get the width and height it was
+taken at before hunting.
+
+**The pill overlap (17th) is by design, and that is the problem.** Both the
+language pill and the burger are `position: fixed; z-index: 940` —
+`style.css:447` and `style.css:234` — with a comment saying they are fixed
+deliberately "so it rides down the page with the burger instead of scrolling
+away". Nothing hides or fades them when they are over text, so on a narrow
+screen any centred heading passing through their band is covered. ⚠️ **Do not
+just move the pill** — the three obvious fixes (reserve the gutters, hide on
+scroll-down, fade while scrolling) all change an interaction the agency has
+been living with. Ask which they want.
+
+### 3. 🎬 THE CROPPED CLIP FINALLY ARRIVED — as a REPLACEMENT, not a crop
+
+This is the watermark clip: `@bader.events` and a line of Arabic burnt into the
+bottom of the frame, which the agency drew a line above on 2026-08-23b and asked
+about again on 2026-08-24 (T8, answered "stale cache").
+
+**They have supplied a replacement file instead**, already vertical and already
+clean:
+
+```
+C:\Users\Obaida\Desktop\new bts\AQNfQpohlL1Mvecj4xFHntkS_cuPNT1zjtBcTAn7ivDk7-buQ3vT5y33XZpXj_fna2LMQe6ujrr9UWrejy3D7GW_3GVXIqXuh0Tsu3g.mp4
+```
+
+654×1162 (9:16 to within a pixel), 4.80s, 4.35 MB, **has an audio track**.
+Written 2026-08-27 00:42 — the only file in that folder with today's date;
+everything else there is from the 2026-08-23 import.
+
+⚠️ **Confirm which `bts-NN` it replaces before importing.** The reasoning says
+bts-29 — that is the clip `resources/crop_bts29.py` was written for — but that
+has not been checked against the file itself. Play it and compare it with the
+current `bts-29` poster in `prototype/assets/media/`.
+
+⚠️ **FOUR OBJECTS, not one**, exactly as `crop_bts29.py` says in its own header:
+a local poster in `prototype/assets/media/`, and a clip, a poster and a thumb on
+R2. The thumb is what the archive draws, so a partial swap leaves the old frame
+in the most visible place.
+
+⚠️ **Strip the audio on import.** Nothing on this site plays sound.
+
+✅ If this lands, `crop_bts29.py` becomes history rather than a tool — leave it
+on disk with a line at the top saying it was superseded.
+
+### 4. ✅ DONE BY THE AGENCY — the programmer's mark is fixed and already in place
+
+The agency did not send a photograph to be cut; they dropped a finished cut-out
+straight into the tree. `prototype/assets/marks/mark-tech.webp` was replaced at
+**2026-08-27 02:59**, 48 KB -> 123 KB, and it is committed with this round.
+
+Checked at the real render size before committing: the head, the glasses, the
+monitor full of code and — the whole point — **the arm and the shoulder** all
+read correctly. The torn black blob with jagged spikes is gone. Nothing in the
+code changed; `RING_MARKS.tech` already pointed at that filename.
+
+⚠️ **Its shape changed and the stylesheet's note was corrected to match.** It
+went from 825x858 (0.96, near square) to **1624x1291 (1.26, landscape)**, so it
+now fills the width of the near-square mark box and letterboxes to 202x160
+rather than nearly filling both axes. That is `object-fit: contain` working;
+the three dimensions in the `.ring-mark.is-photo` comment are the whole reason
+that box is the shape it is, so a stale one would send the next reader wrong.
+
+⚠️ **`prototype/assets/marks/mark-tech.png` (703 KB, 2026-08-26 23:08) is
+committed alongside it and NOTHING REFERENCES IT.** It looks like the source
+the .webp was made from. It sits under `prototype/`, so it deploys — 703 KB of
+dead weight in the bundle. It was left exactly where the agency put it rather
+than moved or deleted on their behalf: **decide whether it belongs in
+`resources/` with the other source art, or nowhere.**
+
+✅ The red "landed but not finished" block that used to sit under
+_Carried forward from 2026-08-24_ has been removed. That is what it was waiting
+for.
+
+---
+
+## ⏭ The next round — what is open
+
+1. 🔴 **DEPLOY THE 2026-08-26 WORK.** It is built, verified and sitting in the
+   working tree. `npx.cmd wrangler deploy` from the repo root, then verify with
+   a cache-buster and a browser User-Agent (see _Running and deploying_).
+2. **The ring's motion has still never been SEEN by a person** — but it has now
+   been driven under a real pointer, which is how the runaway above was found.
+   What is still unknown is the FEEL of the fixed version: whether 42s is slow
+   enough for صناعة محتوى, and whether picking the piece you point at is the
+   right amount of eager now that it no longer picks the pieces that come to
+   you.
+3. **The carousel fix is still REASONED, NOT REPRODUCED on a phone.** Verified
+   again under Playwright — exactly one `video.preview` in `.reelshow` and it
+   is playing — but the reported fault was a phone stutter and no phone has
+   been in the loop. It is a much smaller bill now: the file it plays went from
+   16.8 MB to 1.25 MB.
+4. **Open question 20 is still open**: the founding year is stated nowhere on
+   the site. Settle it before a year goes back anywhere.
+5. **The three digital ads are still undated**, like the other nine — open
+   question 9.
+6. **`master/` still has nothing from the new imports** (open question 11), and
+   the 197 MB AliphxBader 4K master on the Desktop is archived nowhere but the
+   Desktop.
+7. **Two things blocked on the user.** The `SeekoSeeko-MovieNight` repo cannot
+   be created until `gh` is authenticated; the project is committed locally at
+   `D:\Personal\Projects\bader-movie-night` with its remote already set. And
+   `master/horizontal-maqasid.mp4` cannot be uploaded until an R2 API token
+   exists (open question 16). ✅ Note that `wrangler r2 object put --remote`
+   DOES work from this machine — it uploaded thirteen previews on 2026-08-26 —
+   with `CLOUDFLARE_ACCOUNT_ID=6c60bd775004cfa0082f768c356c7242` in the
+   environment, because this login can reach two accounts.
+8. **The hero lede's orphan is the agency's decision now, not a bug hunt.** It
+   is measured over a 7×5 grid of widths AND heights (see _Session 2026-08-26_,
+   item 10): 10 of 35 window sizes, not the one narrow band this file used to
+   claim. `text-wrap: pretty` has taken the worst off it. The fix that closes it
+   is `max-width: 21em` on `.dropcap-block p`, and it trades the agency's
+   "type reaches the bottom of the paper" rule for their "no lone word" rule.
+   Ask them which they want.
+9. **The developer's mark is landed but not finished** — see the red block
+   below. Unchanged this round.
+10. **Six media surfaces still open the lightbox on click only.** The archive's
+    82 tiles, the ring and the about page's clips all answer the keyboard now;
+    the reel carousel's slides, the gallery wall's 12 cells, the hero's 24 film
+    frames and the about page's 3 clippings do not. Making them all focusable
+    adds ~39 tab stops to the home page, which is a judgement about tab-order
+    weight rather than a bug — it needs a decision, not a patch.
+11. **The English headline's full stop is the Arabic face's full stop.** Idris
+    Sharp carries a full Latin set, so "things begin." is set entirely in it,
+    period included — and that period is drawn for Arabic typesetting, so at
+    display size it reads like a comma. One rule fixes it if it bothers anyone;
+    nothing was changed, because it is the face the agency chose.
+
+⚠️ **On a phone the ring cannot be stopped, and that is still a decision
+   waiting to be made rather than an oversight.** Hover-to-pause is gated on
+   `(hover: hover)` for a good reason — on touch `pointerenter` fires once and
+   `pointerleave` never does. A phone visitor must tap a piece while it is
+   moving: 13.8°/s on the design and tech rings, 8.6°/s on صناعة محتوى. The
+   2026-08-24 round made the first tap open the piece; a tap on the background
+   to pause, or a pause while the lightbox is open, would close the rest. The
+   2026-08-26 round deliberately did not invent that gesture — an invisible
+   toggle that stops the ring with no affordance reads as a broken page.
+
+### Carried forward from 2026-08-24 — still true, still load-bearing
+
 > 🔴 **NEVER PUT `font-variant-numeric: tabular-nums` ON IDRIS SHARP.** The
 > clock the agency has now deleted was rendering as **six white diamonds** on
 > their phone (`7th.png`, which they did not reference). The face advertises a
@@ -73,89 +291,304 @@ _Updated 2026-08-24. Read this first._
 > kept as a full-width piece at the head of the long read with no card beside
 > it. One `<figure>` to move if they want it elsewhere.
 
-> 🔴 **THE DEVELOPER'S MARK IS LANDED BUT NOT FINISHED, and this is the only
-> place a future session will look for that.** It was written into
-> `resources/cut_people_marks.py` and into commit `522985a`'s message, and
-> neither is read at the start of a round. At its real render size of 202px the
-> head, the glasses and the screen full of real code all read correctly — and
-> his arm and shoulder come back as a torn black blob with jagged spikes,
-> because a black hoodie against an unlit room gives the segmenter nothing to
-> find. It is still a clear improvement on the AI-stock frame with a rectangle
-> painted behind it. Cropping the ragged part away takes the monitor with it,
-> so the fix is either a matting model that returns real alpha at the edges or
-> a differently lit frame from the agency.
-
----
-
-## ⏭ The next round — what is open
-
-1. **The ring's motion has still never been SEEN by a person** — third round
-   running. ✅ It HAS now been driven and measured under Playwright, which does
-   composite: hovering item 2 of the photo ring glided `--spin` from 4.35° to
-   270°, the front item's reel reached `readyState 4` and `currentTime 1.16s`,
-   and a click opened the overlay on «٣ / ٨» at the frame the preview had
-   reached. So the logic is proven in a real engine. What is still unknown is
-   the FEEL — whether 42s is slow enough for صناعة محتوى, and whether an item
-   that picks itself the moment a pointer crosses it is delightful or twitchy.
-   ⚠️ The browser PANE in these sessions still does not composite; everything
-   above was measured with the Playwright recipe in _Things that will bite you_.
-2. **The carousel fix is still REASONED, NOT REPRODUCED on a phone.** Verified
-   again under Playwright this round — exactly one `video.preview` exists in
-   `.reelshow` and it is playing — but the reported fault was a phone stutter
-   and no phone has been in the loop.
-3. **`.ring-item` previews stream the FULL reels, 17–83 MB each.** Only the
-   front item plays and the `saveData` guard still applies, but the photo ring
-   turns a new item to the front every 5.25s, so a visitor who leaves the
-   section on screen will pull several. If the bill matters, the answer is a
-   short low-bitrate `preview/` derivative on R2, not a shorter dwell.
-4. **Open question 20 is still open**: the founding year is stated nowhere on
-   the site. Settle it before a year goes back anywhere.
-5. **The three digital ads are still undated**, like the other nine — open
-   question 9. They are on the ring and in the lightbox now, and the overlay
-   shows a date when it has one, so the gap is more visible than it was.
-6. **`master/` still has nothing from the new imports** (open question 11), and
-   the 197 MB AliphxBader 4K master on the Desktop is archived nowhere but the
-   Desktop.
-7. **Two things blocked on the user, both carried for several sessions.** The
-   `SeekoSeeko-MovieNight` repo cannot be created until `gh` is authenticated;
-   the project is committed locally at `D:\Personal\Projects\bader-movie-night`
-   with its remote already set. And `master/horizontal-maqasid.mp4` cannot be
-   uploaded until an R2 API token exists (open question 16). ✅ Note that
-   `wrangler r2 object put --remote` DOES work from this machine.
-8. **The about page's phone height is 5,724px**, down from 8,713 — open
-   question 7 is effectively closed by the new shape: two verticals sharing a
-   row are shorter than one of them was full width. The desktop page is 4,105px,
-   down from **4,696** — ⚠️ not the 5,493 first written here. 5,493 was the
-   2026-08-23 evening figure and the page had moved since; the pre-round build
-   was rebuilt in a worktree and measured at 1440×900 to get the real baseline.
-   The improvement is genuine and smaller than first claimed. (The phone
-   figures reproduce exactly.)
-9. **One narrow band where the hero lede still orphans**: at ~1100px of window
-   the panel gives the lede only 437px, which is below the 20em measure, so
-   nothing there binds and the last line is 17% of the column — ⚠️ a second
-   session measuring the same band with `Range` client rects got **12%**, and
-   the gap is method (justified line advance vs inked width), not disagreement.
-   Both say the same thing: it orphans there and nowhere else. Every
-   other width from 1180 to 1920 sets three lines at 76–96%. The lever if it
-   ever matters is `.dropcap`'s `margin-inline-end` — 0.9rem fixes 1100 and
-   breaks 1024, so it is a trade rather than a fix.
-
-⚠️ **On a phone the ring cannot be stopped, and that is now a decision
-   waiting to be made rather than an oversight.** Hover-to-pause is gated on
-   `(hover: hover)` for a good reason — on touch `pointerenter` fires once and
-   `pointerleave` never does, so an ungated version stops the ring for the rest
-   of the visit. The consequence is that a phone visitor must tap a piece while
-   it is moving: 13.8°/s on the design and tech rings, 8.6°/s on
-   صناعة محتوى. The 2026-08-24 round improved this — the first tap now opens
-   the piece rather than doing nothing — but touch still has strictly less
-   control than a desktop pointer. A tap on the background, or a pause while
-   the lightbox is open, would both close the gap.
+> ✅ **The developer's mark was finished by the agency on 2026-08-27** — a
+> real photograph of their own developer, cut out with the arm and shoulder
+> intact. The block that stood here for three days, warning that the arm came
+> back as a torn blob, is gone because it is no longer true. See item 4 of the
+> incoming brief above.
 
 ---
 
 **Standing rule: update this file at the end of every session.**
 
 ---
+
+## Session 2026-08-26 — the audit round: 3.4 MB of fonts, a runaway ring, and a page that shared as a bare URL
+
+No brief and no screenshots this time. The instruction was "resolve the issues
+ur aware of and check the website for any" — so this round is the open list
+from the top of this file plus a full sweep of the three pages under
+Playwright, at 1440×900 and 390×844, in both languages, with and without
+reduced motion.
+
+**Nothing was deployed.** Everything below is built and verified against
+`python -m http.server 8321 -d prototype`; `npx.cmd wrangler deploy` has not
+been run. The one thing that DID reach production is thirteen new objects on
+R2 under `preview/` — additive, referenced by nothing that was live at the
+time, and now referenced by the working tree.
+
+### The measured before and after
+
+| | before | after |
+|---|---|---|
+| index.html, phone, first load | 8.20 MB | **4.11 MB** |
+| library.html, phone | 4.92 MB | **1.60 MB** |
+| about.html, phone | 4.86 MB | **1.54 MB** |
+| webfonts, every page | 3,918 KB | **503 KB** |
+| the thirteen autoplaying reels | 442.6 MB | **19.6 MB** |
+| flagged tab stops on the home page | 43 of 88 | **0 of 87** |
+
+### 1. The fonts were raw OTF — 3.9 MB on every page, and 87% of it was air
+
+`@font-face` pointed at four `.otf` files and nothing else. Three of them load
+on every page (Flat Medium, Flat Bold, Sharp ExtraBold) and they are 1.3 MB
+each: **3,918 KB of webfont before a single picture**, served as
+`application/octet-stream`, on a site that is mostly opened on a phone in the
+street.
+
+`fontTools` repacks an OTF into WOFF2 losslessly — the same tables, brotli'd —
+and it took **87% off each one**. 3,918 KB → 503 KB. The `src:` lists woff2
+first and keeps the otf behind it as a fallback that no browser since 2016
+will reach.
+
+⚠️ **Proven glyph-identical, not assumed.** The `tnum` lesson at the top of
+_Things that will bite you_ is exactly this shape — a metric that matched
+while the rendering was broken — so this was checked twice over:
+
+- Canvas `measureText` across four faces and four strings (Arabic, Latin,
+  Arabic-Indic digits, the لا / لله ligatures), plus the rects of
+  `.hero-title`, `.why-title`, `.banner h2` and `body`: **identical to the
+  hundredth of a pixel**.
+- A page loading both formats as separate families, screenshotted at DPR 2 and
+  diffed: **zero pixels differ** on all three pairs once the crops are aligned
+  on their first inked row. Shaping, the ligatures, the Arabic-Indic digits
+  and the Latin kerning all survive.
+
+⚠️ The `.otf` files are still in the repo and still deploy. They are the
+fallback; they are never fetched.
+
+### 2. 🔴 The phone's film-grain override had never once applied
+
+`@media (max-width: 900px)` set `.film-frame::before` to the 23 KB
+`film-grain-m.webp` — and it sat at line 668, while the base rule that names
+the 657 KB `film-grain.webp` is at line 726. **A media query contributes no
+specificity.** Same selector, same specificity, and the later declaration wins
+at every width, so every phone since 2026-08-11 downloaded and decoded the
+full-resolution grain.
+
+This is the one the note above it calls "the phone's biggest cost", and the
+cost was never actually removed — only the `.film-scroll` half of it, which is
+declared *before* the query and therefore worked.
+
+The override now sits after the rule it overrides. While in there, the wash's
+mask joined it: `.film-scroll::after` was cutting itself out of the full
+`film.webp` at every width, so a phone fetched a 154 KB tile to mask a
+background painted from the 45 KB one. Mask-size is `--pitch` either way, so
+only the source resolution changes.
+
+Phone film assets: **873 KB → 68 KB**, and the decode goes with it.
+
+### 3. 🔴 A cursor resting on the ring made it spin seven times too fast
+
+The open list has asked three rounds running whether the ring's hover "is
+delightful or twitchy". It is neither: **it runs away.**
+
+`pointerenter` was read as "the visitor moved onto this piece" and called
+`pick()`. But picking a piece MOVES IT AWAY from the cursor, which slides the
+next piece underneath, which enters, which picks, which moves. Measured with
+the pointer parked on one item and never moved again:
+
+```
+  t+0.6s  spin  344.6°  picked 6  picks so far  7
+  t+1.8s  spin  950.4°  picked 0  picks so far 22
+  t+3.0s  spin 1566.7°  picked 3  picks so far 37
+  t+4.8s  spin 2494.5°  picked 7  picks so far 60
+```
+
+**60 picks in 4.8 seconds**, `--spin` climbing ~520°/s against the ring's own
+13.8°/s, for as long as a cursor rested anywhere over it. It compounds because
+`pickAngle()` takes the short way round from the CURRENT spin and `spin` is
+only folded back into 0–360 when a glide COMPLETES; a chain of interrupted
+glides adds up to 180° a time forever.
+
+Two changes, both in `serviceRings`:
+
+- **The pick is gated on the pointer's own position.** An enter whose
+  coordinates are within 6px of the last pick was caused by the ring arriving
+  at the cursor, not the cursor arriving at the ring, and is ignored. The first
+  enter of a visit compares against `NaN` — false — so a real hover is never
+  swallowed.
+- **The release moved from the item to the window.** An item-level
+  `pointerleave` cannot work once picking is what moves the piece: bringing it
+  to the front carries it out from under the cursor, so the pick released
+  itself the moment it succeeded. `#ringWindow` gets both `pointerenter` (hold
+  the ring still) and `pointerleave` (drop the pick, let it go again).
+
+After: **one pick, and everything holds still.** Same parked pointer, eight
+samples over 4.8s, `spin` fixed at 160.0°, `picked` fixed on the item the
+visitor actually pointed at. Moving across the ring still re-picks piece by
+piece; leaving it resumes the turn; a click still opens the overlay.
+
+⚠️ **This is why it was never caught.** Every earlier check either drove the
+item programmatically — `.click()` bypasses hit-testing entirely — or ran in
+the Browser pane, which never composites a frame. It only appears under a real
+pointer on a compositing engine.
+
+### 4. The reels the page plays by itself were the masters — 442.6 MB of them
+
+Open item 3, closed. `data-preview` pointed at `video/`, and `video/` is where
+the full-quality masters live: 16.8 to 79.2 MB each, one of them a 50 fps
+23 Mbps camera file. The ring turns a new piece to the front every 5.25s.
+
+`resources/make_previews.sh` derives a `preview/` twin of each: 540 on the long
+side, 25 fps, no audio, CRF 30 capped at 700 kbps, `+faststart`. All thirteen
+are on R2 now.
+
+**442.6 MB → 19.6 MB, 95.6% smaller.** The largest is 5.24 MB and the smallest
+is 0.27 MB.
+
+🔴 **Same duration to the frame, and that is a hard requirement, not a nicety.**
+The overlay opens the master at the preview's own `currentTime`; a derivative
+even a second short hands it a timestamp past its end. Every one is verified
+against its source after encoding — the script prints `DURATION DRIFT` if any
+pair differs by more than 0.1s.
+
+**The node now carries two URLs.** `data-preview` is the small one the page
+plays; `data-video` is the master, and `itemOf()` reads it FIRST so the
+lightbox still opens the real file. Verified end to end: the carousel plays
+`preview/reels-alif-tuktuk.mp4` (1.25 MB) and a click opens
+`video/reels-alif-tuktuk.mp4` (16.8 MB) **at 4.59s, the frame the preview had
+reached**. The ring plays `preview/reels-child-section-final.mp4` — 0.64 MB
+where it used to pull 72.3.
+
+Quality was checked, not assumed: frames pulled at t=10s from master and
+preview, side by side. Slightly softer in the fine detail, indistinguishable at
+the ~200–350 CSS px these actually draw at.
+
+### 5. The keyboard could not reach half the site, and the overlays leaked it
+
+A tab-walk of 90 stops on the home page: **43 of 88 flagged.**
+
+| what | was | now |
+|---|---|---|
+| `.ring-item` | 40 stops, none with a name | named from SUBCATS / PROJECTS — «إعلانات رقمية — ١ / ٩», «رتريت عودة الملكة» |
+| the two off-screen ring stages | `aria-hidden="true"` and still tabbable — 22 stops on pieces a window away | `inert`, written only when it changes |
+| the lightbox | `role="dialog"` sat on `.lb-body`, which does not contain the close, prev or next buttons — so a screen-reader user inside the modal could not reach the button that closes it | role + `aria-modal` + name on `.lb` itself |
+| the lightbox, again | Tab escaped to the masthead behind the scrim on the third press | cycles within the overlay |
+| the project sheet | six stops in, the seventh landed in the footer | cycles within `.sheet` |
+| 66 of the archive's 82 tiles | click-only; the 13 film tiles were keyboard-openable and the photographs beside them were not | every tile `role="button" tabindex="0"`, named with its date |
+| `.reelshow-track` | a focusable scroll container with no name | `role="group"` + a name |
+
+⚠️ **The `aria-hidden` guard on the ring stages is load-bearing and nearly got
+broken.** `previews.syncRing` asks for `aria-hidden === "false"` before it will
+play the front item's reel. The first version of the write-only-when-changed
+guard compared `.inert`, which starts `false` on a fresh element — so it would
+have skipped the very first write for the stage that IS showing, left its
+`aria-hidden` absent rather than `"false"`, and silently stopped every reel on
+the ring from ever starting. The guard reads the attribute.
+
+### 6. Sixteen aria-labels were hard-coded Arabic on a bilingual site
+
+The menu button announced «القائمة» to a screen reader on the English page. So
+did the main nav, the masthead logo, the contact band, the archive's view
+toggle and the sheet's thumbnail strip. `applyI18n` grew a second pass —
+`[data-i18n-label]` writes `aria-label` from the same table `[data-i18n]`
+writes text from — and every one of them is wired to it. Verified by toggling
+to English and re-reading every `aria-label` on all three pages: **0 left in
+Arabic** (the «ع» inside the language pill is the one Arabic string that is
+supposed to stay, and it is text, not a label).
+
+### 7. A link to this site unfurled as a bare URL
+
+All three pages had a `<title>` and nothing else — no description, no Open
+Graph, no canonical, no `robots.txt`, no sitemap. For an agency whose work
+travels by being posted to WhatsApp, Instagram and LinkedIn, that is the first
+thing anyone sees of it.
+
+Added to all three: description, canonical, theme-color, the full og:* set, and
+`twitter:card=summary_large_image`. **The Arabic is the site's own copy** —
+`I18N.heroPara` for the home page, `I18N.aboutP` for the about page. ⚠️ The
+archive's one sentence is the only line written for these tags and not by the
+agency; it needs the same sign-off the rest of the copy has had.
+
+`assets/img/og-card.jpg` is 1200×630 — the real logo on the real linen with the
+real tagline, rendered from the site's own stylesheet and screenshotted rather
+than mocked up elsewhere. JPEG, not WebP: several unfurlers still will not read
+WebP.
+
+⚠️ **These tags are static and do not follow the language pill.** An unfurler
+reads the HTML as served, and the served page is Arabic.
+
+### 8. Two pages had no `<h1>`
+
+`library.html`'s only headings were the four category names the accordion
+renders; `about.html` opened at `<h2>`. The archive's «الأرشيف» is an `<h1>`
+now (with `font: inherit` restated so the bar does not grow), and the about
+page's «من نحن؟» banner is an `<h1>` (`.banner h2` became `.banner :is(h1, h2)`
+in all three places it appears). index.html keeps `<h2>` on both of its banners
+— it has an `h1` in the hero, and two banners.
+
+Measured after: the about banner is the same box, 1354×336 at 208.8px, and the
+archive bar is unchanged at 71px tall.
+
+### 9. `I18N.svc1/svc2/svc3` were dead literals — removed
+
+Nothing read them. They were the fourth spelling of the three service names,
+kept in step by hand through three renames, rendered nowhere. This is the same
+shape as the `heroMeta3` literal removed on 2026-08-11 and the same rule
+applies: a copy that nothing renders cannot be seen to go stale.
+
+**The "six live copies" list in this file was wrong, and is now three.** The
+`data-i18n` fallback span and the `heroMeta3` fallback it named have not
+existed in the markup for a while. What is left: `CATS`, `SERVICES[].tag`, and
+`chat-worker/src/services.js`.
+
+### 10. The hero lede's orphan is four times bigger than this file said
+
+Open item 9 said "one narrow band where the hero lede still orphans", at
+~1100px, "every other width from 1180 to 1920 sets three lines at 76-96%".
+That is wrong, and the reason is instructive: **every measurement of it,
+including the table in the CSS, sampled one viewport HEIGHT.**
+
+Swept over a 7×5 grid of widths and heights, the lone-word last line appears at
+**10 of 35 window sizes** — 1100 at every height, and also 1180×1080,
+1280×1000, 1280×1080 and 1440×1080. Ordinary laptop windows. The wrap is a
+two-dimensional cliff because `--cap-h` is `clamp(130px, 16vh, 184px)`: the
+sheet grows with viewport HEIGHT while the copy is measured in em, so a taller
+window enlarges the float, shortens more lines, and pushes the copy onto one
+more.
+
+⚠️ **The lever this file nominated does not work.** `.dropcap`'s
+`margin-inline-end` at 0.9rem slides the cliff sideways by about 20px and, at
+1080px of height, makes 1100 worse rather than better — 38% down to 12%. Three
+`--cap-h` variants tying the sheet to `min(16vh, Nvw)` were swept as well: 10,
+8 and 10 orphans out of 35 against the current 10. The sheet's size is not the
+lever either.
+
+**What went in: `text-wrap: pretty` on `.dropcap-block p`.** Not a cure — the
+failing sizes still set four lines — but the last line goes from 12% of the
+column to 20–21% at every one of them, and at 1920×1080, 1600×900, 1440×900,
+1366×768, 1280×800 and 1024×768 it changes nothing at all: same line count,
+same percentage, same gap to the sheet. Engines without it ignore it.
+
+🔴 **The fix that actually closes it is one character, and it is the agency's
+call.** `max-width: 21em` turns 1280×1024 and 1180×1080 into three lines at
+55–65%. It costs: 1440×900's last line falls from 67% to 55%, and the gap from
+the type to the bottom of the sheet opens to −37px and −46px at the two sizes
+it fixes — which breaks the rule the agency drew on 2026-08-23b, that the type
+reaches the bottom of the paper. It trades one of their rules for the other, so
+it is written up in the stylesheet and not applied.
+
+### What was checked and found clean
+
+- No console errors, no page errors, no failed requests, no 4xx — on all three
+  pages, both languages, both viewports.
+- No horizontal overflow anywhere (`scrollWidth === clientWidth` at 390 and
+  1440 on all three).
+- No broken images, no empty links or buttons, no duplicate ids, no dead
+  in-page anchors.
+- Under `prefers-reduced-motion: reduce` every page reaches its full height
+  with nothing stranded at opacity 0.
+- Every external link already carries `rel="noopener noreferrer"`.
+- The two phone numbers really are different numbers, and the markup already
+  says so in a comment.
+- `fabric.webp` (372 KB, the biggest asset left) was tested at four lower
+  qualities: 22% smaller at best, with a mean error of 4.85/255 across a
+  texture that sits behind everything on the site. **Left alone** — that is a
+  visible change to the site's ground for 80 KB.
+
+---
+
 
 ## Session 2026-08-24 — the agency's fourteen screenshot edits
 
@@ -1457,7 +1890,7 @@ ruled out for good.
 ### Body copy is bold — and one solved size moved with it
 
 `body { font-weight: 700 }`, inherited, so every paragraph picks it up. Idris
-Flat ships a real 700 (`29LTIdris-FlatBold.otf`), so this resolves to the drawn
+Flat ships a real 700 (`29LTIdris-FlatBold.woff2`), so this resolves to the drawn
 face rather than a synthesised one — `document.fonts.check('700 16px "Idris
 Flat"')` is `true` on all three pages in both languages. Explicit weights (500
 meta, 800 display) are their own tiers and were left alone.
@@ -1631,6 +2064,15 @@ npx.cmd wrangler deploy
   every file looks exactly like a failed deploy, and it is the same trap the
   R2 checker fell into for a whole round. Real failures are partial; a check
   that fails for every item is more likely broken than the thing it checks.
+- ⚠️ **HTML will never byte-match between the two hosts.** `aliphcreative.com`
+  injects a Cloudflare Web Analytics beacon (+359 bytes on every page);
+  `workers.dev` does not. CSS and JS do match. See _Things that will bite you_.
+- ⚠️ **R2 from this machine needs the account id in the environment**, because
+  this login can reach two accounts and wrangler refuses to guess
+  non-interactively:
+  `CLOUDFLARE_ACCOUNT_ID=6c60bd775004cfa0082f768c356c7242 npx.cmd wrangler r2 object put aliph-media/<key> --file=<path> --remote --content-type=<type>`.
+  Confirmed working 2026-08-26 — it uploaded the thirteen `preview/` objects.
+  The bucket is `aliph-media`.
 - ⚠️ **Do not grep live Arabic through Git Bash.** The shell mangles the
   pattern and every match comes back empty, which reads as "the copy did not
   deploy". Fetch in Python and test with `in`. This box's cp1252 console has
@@ -1646,6 +2088,17 @@ npx.cmd wrangler deploy
   alpha — anything under ~0.65 fails AA on the cream.
 - **Type:** Idris Sharp Extrabold (display), Idris Flat (body), Georgia (Latin).
   Tokens are `--font-display` / `--font-body` / `--font-latin`.
+  ⚠️ **Served as WOFF2 since 2026-08-26** — 503 KB for the three that load,
+  where the OTFs were 3,918 KB. The `.otf` files are still on disk and still
+  listed second in every `src:`; nothing fetches them. Re-derive with
+  `fontTools` (`font.flavor = "woff2"; font.save(...)`) if a face is replaced,
+  and diff the RENDERING, not the metrics — see the `tnum` entry in
+  _Things that will bite you_.
+  ⚠️ **Idris carries a full Latin set** (A–Z, a–z, 0–9 and ASCII punctuation),
+  so English display lines are set in it, full stop included — and that full
+  stop is drawn for Arabic typesetting. At hero size the English headline's
+  period reads like a comma. It is the face the agency chose; nothing overrides
+  it.
 - `html { font-size: 150% }`, so **1rem = 24px**. Every rem number reads 1.5× larger
   than it looks.
 - **Media is in colour as of 2026-08-10.** `filter: grayscale(1)` was removed from
@@ -1681,7 +2134,7 @@ is scaled down to compensate, never the other way round.
 |---|---|---|
 | `design` | تصميم جرافيكي | Graphic Design |
 | `photo` | صناعة محتوى | Media Production |
-| `tech` | تطوير برمجيات | Software Development |
+| `tech` | حلول تقنية وبرمجية | Tech & Software Solutions |
 
 Each has three subcategories (`SUBCATS` in `main.js`). The ids are the join key across
 `CATS`, `SUBCATS`, `PROJECTS[].cat`, `SERVICE_FRAMES`, `SERVICES`, `data-service` in
@@ -1693,20 +2146,25 @@ classification breaks silently.
 تصوير احترافي / Professional Photography to صناعة محتوى / Media Production**,
 which widens it from photography to everything the feed is made of.
 
-**Six live copies, and they must all move together** — this string has gone stale
-twice by being changed in one place:
+**Three live copies, and they must all move together** — this string has gone
+stale twice by being changed in one place:
 
-1. `I18N.svc2` in `main.js`
+1. `CATS` in `main.js` — the names on screen, and what `I18N.heroMeta3` derives
+   from
 2. `SERVICES[].tag` in `main.js` (the uppercase Latin tag)
-3. `CATS` in `main.js` — which once carried a *third* spelling of its own
-4. the `data-i18n` fallback in `index.html` (the `svc2` span)
-5. the `heroMeta3` fallback in `index.html`
-6. `chat-worker/src/services.js`
+3. `chat-worker/src/services.js`
 
-`I18N.heroMeta3` itself is **derived from `CATS`** and needs no edit. A dead
-literal for it sat in the I18N table carrying the pre-rename short labels until
-2026-08-11; it was overwritten at boot and never rendered. It is gone — don't
-reintroduce one.
+⚠️ **This list said SIX until 2026-08-26, and three of the six had not existed
+for a while.** The `data-i18n` fallback span and the `heroMeta3` fallback it
+named are gone from the markup, and `I18N.svc1/svc2/svc3` — a fourth spelling
+kept in step by hand through three renames — were read by nothing at all and
+were deleted. A list of places to keep in sync is itself a thing that goes
+stale; check it against a grep before trusting it.
+
+`I18N.heroMeta3` is **derived from `CATS`** and needs no edit. A dead literal
+for it sat in the I18N table carrying the pre-rename short labels until
+2026-08-11; it was overwritten at boot and never rendered. It is gone, and so
+are `svc1/svc2/svc3` — don't reintroduce either.
 
 The keyword lists in `services.js` keep the **short** forms on purpose: a visitor
 types "تصميم", and "تصوير" still routes to `photo` because they still shoot.
@@ -1726,6 +2184,61 @@ echoes the exact name) and live the moment a real model answers.
 ## Things that will bite you
 
 Ordered by how much time each one cost.
+
+**A media query adds NO specificity, so an override written above the rule it
+overrides loses at every width.** `@media (max-width: 900px) { .film-frame::before
+{ background-image: url(film-grain-m.webp) } }` sat at line 668; the base
+`.film-frame::before` naming the 657 KB file is at line 726. Same selector, same
+specificity, later wins — so the phone override never once applied, for fifteen
+days, on the exact rule the comment above it calls "the phone's biggest cost".
+Its sibling `.film-scroll` worked only because its base rule happens to be
+declared *before* the query. Put narrowing overrides AFTER what they narrow, and
+when a stylesheet is 3,500 lines long, check the line numbers rather than the
+intent.
+
+**`pointerenter` means "these two now overlap". It does not mean "the visitor
+moved here", and when the handler MOVES the element the difference is a feedback
+loop.** The ring's hover called `pick()`, which glides the piece to the front —
+out from under the cursor — which slides the next piece in, which enters, which
+picks. 60 picks in 4.8s with the pointer parked and never moved, `--spin`
+climbing 520°/s against a design speed of 13.8. The fix is to ask whether the
+POINTER moved: compare the enter's coordinates with where the pointer was at the
+last activation, and ignore anything that has not moved. The same trap waits on
+any hover handler that animates its own target.
+
+**A test that reports "nothing happened" has to prove it did something first.**
+Verifying the fix above, a script picked "the first ring item that is not at the
+front", hovered it, re-ran the same scan for a second target and moved there. It
+reported "moving to another piece does not re-pick" — twice — and the fix looked
+broken. Both scans had returned the SAME screen coordinate: the first hover had
+moved that piece away and another had slid into exactly that spot, so the mouse
+was told to move to where it already was and no pointer event fired at all. Make
+a negative result print its own inputs.
+
+**`aria-modal="true"` is a promise made to assistive tech and to nothing else.**
+It hides the rest of the page from a screen reader; it does not stop Tab walking
+out of the dialog into the page behind the scrim. Both overlays here did exactly
+that until 2026-08-26 — the lightbox on the third Tab, the project sheet on the
+seventh. A modal needs the role AND a Tab cycle. And put the role on the element
+that CONTAINS THE CONTROLS: the lightbox had `role="dialog"` on `.lb-body`, whose
+siblings are the close, previous and next buttons, so a screen-reader user inside
+the modal could not reach the button that closes it.
+
+**`aliphcreative.com` injects a Cloudflare Web Analytics beacon into every HTML
+response; `workers.dev` does not.** All three pages come back exactly 359 bytes
+larger on the custom domain, byte-for-byte identical otherwise, and CSS and JS
+match on both. It is a zone setting, not a bad deploy — which means **HTML can
+never byte-match between the two hosts**, and the byte-compare in _Running and
+deploying_ has to be run per host or on CSS/JS only.
+
+**A line-wrap measured at one viewport height is measured at one point on a
+two-dimensional cliff.** The hero lede's orphan was recorded here as "one narrow
+band at ~1100px" through two sessions of measuring. Swept over widths AND
+heights it is 10 of 35 window sizes, including 1180×1080, 1280×1000, 1280×1080
+and 1440×1080. The cause is mixed units: `--cap-h` is `clamp(130px, 16vh, 184px)`
+and the copy is measured in em, so a taller window grows the float, shortens more
+lines and pushes the copy onto one more. Anything sized in vh beside anything
+sized in em needs a grid, not a row.
 
 **A display face can advertise `tnum` and not implement it, and the check most
 people run is the one that cannot tell.** Idris Sharp's `font-variant-numeric:
@@ -1896,8 +2409,9 @@ phone rule restates both axes **and** the container's aspect.
 `<p>` is always exactly as tall as its row. Use the inked extent:
 `document.createRange().selectNodeContents(el).getBoundingClientRect()`.
 
-**Measure after `document.fonts.ready`.** 5 MB of OTF lands after first paint and
-every number moves until it does.
+**Measure after `document.fonts.ready`.** The webfonts land after first paint
+and every number moves until they do. (503 KB of WOFF2 since 2026-08-26, down
+from 3.9 MB of OTF — faster, and still after first paint.)
 
 **Every scripted edit must assert its anchor.** `str.replace` on a miss is a no-op
 that looks like success. This has silently lost real edits.

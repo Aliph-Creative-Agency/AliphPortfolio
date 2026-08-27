@@ -4,6 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>الأعمال — ألِف</title>
+<!-- ══════ what a shared link looks like ══════
+     Added 2026-08-26. Until then all three pages had a <title> and nothing
+     else: a link posted to WhatsApp, Instagram or LinkedIn — which is how an
+     agency's site actually travels — unfurled as a bare URL with no picture
+     and no sentence. og:image is 1200x630, the size every one of them crops
+     to, and it is a JPEG rather than the WebP the rest of the site uses
+     because several unfurlers still will not read WebP.
+     ⚠️ The Arabic here is the site's OWN copy, lifted from I18N.heroPara and
+     I18N.aboutP. The archive's line is the one sentence written for this tag
+     and not by the agency; it needs the same sign-off the rest of the copy
+     has had. ⚠️ These are static and do NOT follow the language pill —
+     an unfurler reads the HTML as served, and the served page is Arabic. -->
+<meta name="description" content="أرشيف أعمال ألِف: تصميم جرافيكي، وصناعة محتوى، وحلول تقنية وبرمجية — مرتّبة من الأحدث إلى الأقدم.">
+<link rel="canonical" href="https://aliphcreative.com/library.html">
+<meta name="theme-color" content="#D9D9CE">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ألِف — ALIPH">
+<meta property="og:locale" content="ar_PS">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://aliphcreative.com/library.html">
+<meta property="og:title" content="الأعمال — ألِف">
+<meta property="og:description" content="أرشيف أعمال ألِف: تصميم جرافيكي، وصناعة محتوى، وحلول تقنية وبرمجية — مرتّبة من الأحدث إلى الأقدم.">
+<meta property="og:image" content="https://aliphcreative.com/assets/img/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="شعار ألِف — وكالة إبداعية من القدس">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="الأعمال — ألِف">
+<meta name="twitter:description" content="أرشيف أعمال ألِف: تصميم جرافيكي، وصناعة محتوى، وحلول تقنية وبرمجية — مرتّبة من الأحدث إلى الأقدم.">
+<meta name="twitter:image" content="https://aliphcreative.com/assets/img/og-card.jpg">
 <link rel="icon" href="assets/img/HalfAliph-Icon.svg">
 <link rel="stylesheet" href="style.css">
 <!-- chat widget hidden 2026-08-10 at the agency's request until it is finished.
@@ -16,7 +46,7 @@
   <img src="assets/img/Aliph-Icon-cream.svg" alt="">
 </div>
 
-<button class="menu-btn" id="menuBtn" aria-label="القائمة" aria-expanded="false">
+<button class="menu-btn" id="menuBtn" data-i18n-label="navMenu" aria-label="القائمة" aria-expanded="false">
   <span class="bars"><span></span><span></span></span>
 </button>
 
@@ -29,7 +59,7 @@
     <span class="ls-opt" data-l="en">EN</span>
   </div>
   <a class="nav-brand" href="index.html"><img src="assets/img/Aliph-Logo-Main-cream.svg" alt="ألِف ALIPH"></a>
-  <nav class="nav-big" aria-label="التنقّل الرئيسي">
+  <nav class="nav-big" data-i18n-label="navMain" aria-label="التنقّل الرئيسي">
     <a href="index.html" class="nav-item" data-i18n="navHome">الرئيسيّة</a>
     <a href="library.html" class="nav-item is-current" data-i18n="navWork">الأعمال</a>
     <a href="about.html" class="nav-item" data-i18n="navAbout">من نحن</a>
@@ -66,7 +96,7 @@
       <span class="ls-opt" data-l="ar">ع</span>
       <span class="ls-opt" data-l="en">EN</span>
     </div>
-    <a class="masthead-logo" href="index.html" aria-label="ألِف">
+    <a class="masthead-logo" href="index.html" data-i18n-label="logoHome" aria-label="ألِف — الرئيسية">
       <img src="assets/img/Aliph-Logo-Main.svg" alt="ألِف ALIPH">
     </a>
   </div>
@@ -75,13 +105,17 @@
 
 <!-- archive bar: title, stats, view toggle -->
 <div class="lib-bar">
-  <span class="lib-title" data-i18n="libTitle">الأرشيف</span>
+  <!-- ⚠️ AN H1, not a span (2026-08-26). The archive had no h1 at all: its
+       only headings were the four category names the accordion renders, so the
+       page announced itself with no title and opened at heading level 2. The
+       bar's own size and weight are restated in CSS so nothing moves. -->
+  <h1 class="lib-title" data-i18n="libTitle">الأرشيف</h1>
   <span class="lib-stats" data-i18n="libStats">الأحدث أوّلًا</span>
   <!-- The index/gallery toggle is out while the archive is media only. An
        index is a list of titles, and at the agency's request (2026-08-12)
        there are none yet — it rendered a column of bare dates. Left in place,
        not deleted: it comes straight back with the project names. -->
-  <span class="lib-toggle" role="group" aria-label="طريقة العرض" hidden>
+  <span class="lib-toggle" role="group" data-i18n-label="libView" aria-label="طريقة العرض" hidden>
     <button id="viewIndex" data-i18n="libIndex">فهرس</button>
     <span class="sep" aria-hidden="true">/</span>
     <button id="viewPhoto" class="on" data-i18n="libGallery">معرض</button>
@@ -107,7 +141,7 @@
           <p class="sheet-tagline" id="sheetTagline"></p>
         </div>
       </div>
-      <button class="sheet-close" id="sheetClose" data-close aria-label="إغلاق">
+      <button class="sheet-close" id="sheetClose" data-close data-i18n-label="pfClose" aria-label="إغلاق">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <path d="M4 4l12 12M16 4L4 16"/>
         </svg>
@@ -118,7 +152,7 @@
       <div class="sheet-gallery">
         <figure class="sheet-shot"><img id="sheetShot" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3' preserveAspectRatio='none'%3E%3Crect width='4' height='3' fill='%23c6c5ba'/%3E%3C/svg%3E" alt=""></figure>
         <span class="sheet-k sheet-k-shots" id="sheetShotsK">لقطات</span>
-        <div class="sheet-thumbs" id="sheetThumbs" role="group" aria-label="لقطات"></div>
+        <div class="sheet-thumbs" id="sheetThumbs" role="group" data-i18n-label="pfShots" aria-label="لقطات"></div>
 
         <div class="sheet-actions">
           <!-- An anchor, not a button: the work is live and this leaves for it.
@@ -160,7 +194,7 @@
 
 <!-- ══════════ CONTACT FOOTER (shared) ══════════ -->
 <footer class="footer" id="contact">
-  <a class="contact-band" href="mailto:info@aliphcreative.com" aria-label="راسلنا">
+  <a class="contact-band" href="mailto:info@aliphcreative.com" data-i18n-label="cWrite" aria-label="راسلنا">
     <div class="cb-track" id="contactBandTrack"></div>
   </a>
 

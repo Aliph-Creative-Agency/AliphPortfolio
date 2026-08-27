@@ -5,25 +5,29 @@
 
 @font-face {
   font-family: "Idris Sharp";
-  src: url("assets/fonts/29LTIdris-SharpExtraBold.otf") format("opentype");
+  src: url("assets/fonts/29LTIdris-SharpExtraBold.woff2") format("woff2"),
+       url("assets/fonts/29LTIdris-SharpExtraBold.otf") format("opentype");
   font-weight: 800;
   font-display: swap;
 }
 @font-face {
   font-family: "Idris Flat";
-  src: url("assets/fonts/29LTIdris-FlatRegular.otf") format("opentype");
+  src: url("assets/fonts/29LTIdris-FlatRegular.woff2") format("woff2"),
+       url("assets/fonts/29LTIdris-FlatRegular.otf") format("opentype");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Idris Flat";
-  src: url("assets/fonts/29LTIdris-FlatMedium.otf") format("opentype");
+  src: url("assets/fonts/29LTIdris-FlatMedium.woff2") format("woff2"),
+       url("assets/fonts/29LTIdris-FlatMedium.otf") format("opentype");
   font-weight: 500;
   font-display: swap;
 }
 @font-face {
   font-family: "Idris Flat";
-  src: url("assets/fonts/29LTIdris-FlatBold.otf") format("opentype");
+  src: url("assets/fonts/29LTIdris-FlatBold.woff2") format("woff2"),
+       url("assets/fonts/29LTIdris-FlatBold.otf") format("opentype");
   font-weight: 700;
   font-display: swap;
 }
@@ -503,7 +507,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   background: var(--ink);
   overflow: hidden;
 }
-.banner h2 {
+.banner :is(h1, h2) {
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(4rem, 14.5vw, 12rem);
@@ -525,7 +529,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
    untextured ones. Failing back to plain cream type is the whole point of the
    guard. */
 @supports ((background-clip: text) or (-webkit-background-clip: text)) {
-  .banner h2 {
+  .banner :is(h1, h2) {
     background-color: var(--cream);
     background-image: url("assets/img/paper-title.webp");
     /* Deliberately small — far smaller than the tile is "meant" to be shown
@@ -665,7 +669,17 @@ video.preview {
    device px and sizing to the CSS width would look soft. */
 @media (max-width: 900px) {
   .film-scroll { background-image: url("assets/img/film-m.webp"); }
-  .film-frame::before { background-image: url("assets/img/film-grain-m.webp"); }
+  /* the wash is masked by the film's own alpha, so it must be cut from the
+     SAME tile the background paints — mask-size is --pitch either way, so
+     only the source resolution changes */
+  .film-scroll::after {
+    -webkit-mask-image: url("assets/img/film-m.webp");
+    mask-image: url("assets/img/film-m.webp");
+  }
+  /* ⚠️ .film-frame::before's phone override is NOT here — it is below, after
+     the base rule. It sat here until 2026-08-26 and never applied: a media
+     query adds no specificity, and the base rule is declared later in the
+     file, so source order gave the 657 KB desktop grain to every phone. */
 }
 
 .film-group {
@@ -728,6 +742,15 @@ video.preview {
   background-position: calc(var(--fh) * -0.611967 * var(--gi, 0)) center;
   mix-blend-mode: overlay;
   opacity: 0.55;
+}
+/* ⚠️ AFTER the rule it overrides, and that is load-bearing rather than tidy.
+   Both declarations have the same specificity — a media query contributes
+   none — so whichever is written last wins at every width. Written above the
+   base rule (where it lived from 2026-08-11 to 2026-08-26) it lost silently,
+   and a 390px phone downloaded and decoded the 657 KB full-resolution grain
+   instead of the 23 KB one cut for it. */
+@media (max-width: 900px) {
+  .film-frame::before { background-image: url("assets/img/film-grain-m.webp"); }
 }
 .film-group .film-frame:nth-child(1) { --gi: 0; }
 .film-group .film-frame:nth-child(2) { --gi: 1; }
@@ -937,6 +960,30 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
 .dropcap-block p {
   max-width: 20em;
   text-align: justify;
+  /* ⚠️ THE 20em MEASURE IS NOT THE WHOLE GUARD, and the note above understates
+     the fault (measured 2026-08-26 over a 7x5 grid of widths AND heights).
+     The orphan is not "one narrow band at ~1100px": it is 10 of 35 window
+     sizes, including 1180x1080, 1280x1000, 1280x1080 and 1440x1080 — ordinary
+     laptop windows. Every earlier measurement, this file's table included,
+     sampled ONE viewport height, and the wrap is a two-dimensional cliff: the
+     dropcap's sheet is sized in vh and the copy in em, so a taller window
+     grows the float, shortens more lines, and pushes the copy onto one more.
+
+     `text-wrap: pretty` asks the engine not to leave a lone word on the last
+     line. It is not a cure — the failing sizes still set four lines — but it
+     pulls the last line from 12% of the column to 20-21% at every one of
+     them, and it changes NOTHING at 1920x1080, 1600x900, 1440x900, 1366x768,
+     1280x800 or 1024x768: same lines, same percentage, same gap to the sheet.
+     Engines without it ignore it.
+
+     🔴 THE FIX THAT ACTUALLY CLOSES IT IS `max-width: 21em`, AND IT IS THE
+     AGENCY'S CALL, NOT A CODE ONE. 21em turns 1280x1024 and 1180x1080 into
+     three lines — but it pulls 1440x900's last line from 67% down to 55% and
+     opens the sheet-to-type gap to -37px and -46px at the two sizes it fixes,
+     which breaks the other rule the agency drew on 2026-08-23b: the type
+     reaches the bottom of the paper. One rule for the other. Do not trade it
+     without asking. */
+  text-wrap: pretty;
 }
 /* ── dropcap: the paper uncrumples ────────────────────────────────────
    A 24-frame sprite baked from the studio's crumple clip; see HANDOFF for
@@ -2121,11 +2168,18 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
    width/height + object-fit — see the gallery wall's marks for what a
    percentage height costs in a box that does not resolve one. */
 /* ⚠️ The box is close to SQUARE since 2026-08-23b, because the three marks
-   are not one shape. The cameraman is 594x900 (0.66), the designer 451x320
-   (1.41) and the developer 825x858 (0.96) — a portrait box sized for the first
-   contained the designer to 170x121 and made the set read as one photograph
-   and two thumbnails. A near-square box lets each fill the axis it is long
-   on, and max-width/max-height below do the containing. */
+   are not one shape. The cameraman is 620x862 (0.72), the designer 451x320
+   (1.41) and the developer 1624x1291 (1.26) — a portrait box sized for the
+   first contained the designer to 170x121 and made the set read as one
+   photograph and two thumbnails. A near-square box lets each fill the axis it
+   is long on, and object-fit below does the containing.
+   ⚠️ The developer's numbers moved on 2026-08-27, when the agency replaced
+   that mark with a real photograph of their own developer. It went from
+   825x858 (0.96, near square) to 1624x1291 (1.26, landscape), so it now fills
+   the WIDTH and letterboxes to 202x160 in the 202x216 box rather than nearly
+   filling both axes. That is the box working as intended; it is only recorded
+   here because the three numbers above are the whole reason the box is the
+   shape it is, and a stale one would send the next reader the wrong way. */
 .ring-mark.is-photo {
   width: clamp(100px, 14vw, 210px);
   height: clamp(120px, 15vw, 240px);
@@ -2415,7 +2469,9 @@ html[dir="rtl"] .lb-step svg { transform: scaleX(-1); }
   font-size: 0.85rem;
   font-weight: 500;
 }
-.lib-bar .lib-title { font-weight: 700; }
+/* ⚠️ The title is an <h1> since 2026-08-26, so the UA sheet's 2em and its
+   block margins have to be answered here or the bar grows a tall first line. */
+.lib-bar .lib-title { font: inherit; font-weight: 700; margin: 0; }
 .lib-stats { color: var(--ink-mute); }
 .lib-toggle { display: flex; gap: 0.4rem; align-items: baseline; }
 /* `display: flex` above outranks the UA sheet's [hidden] rule, so the
@@ -3393,7 +3449,7 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
      steeper one made the names bigger at 900px than at 1000px. English still
      takes two lines below 900px, which is honest — "Film & Photography"
      cannot set beside two more names at headline scale. */
-  .banner h2 { white-space: normal; }
+  .banner :is(h1, h2) { white-space: normal; }
 
   /* about */
   /* the pictures, then the card, all the way down — the agency's phone rule

@@ -73,9 +73,15 @@ const I18N = {
 
   /* services */
   svcBanner: { ar: "ماذا نقدم؟", en: "What we do?" },
-  svc1: { ar: "تصميم جرافيكي", en: "Graphic Design" },
-  svc2: { ar: "صناعة محتوى", en: "Media Production" },
-  svc3: { ar: "حلول تقنية وبرمجية", en: "Tech & Software Solutions" },
+  /* ⚠️ svc1/svc2/svc3 LIVED HERE AND WERE READ BY NOTHING — removed
+     2026-08-26. They were the fourth spelling of the three service names, kept
+     in step through three renames by hand, and no markup or script had
+     referenced them since the section was rebuilt as the rings: the names on
+     screen come from CATS, and the uppercase tags from SERVICES[].tag. This is
+     the same dead literal heroMeta3 grew and the same rule applies — a copy
+     that nothing renders cannot be seen to go stale, so it goes. The service
+     names now have three homes, not six: CATS, SERVICES[].tag, and
+     chat-worker/src/services.js. */
 
   /* the example switcher under "what we do" */
   svcPrev: { ar: "الخدمة السابقة", en: "Previous service" },
@@ -132,6 +138,10 @@ const I18N = {
   libTitle: { ar: "الأرشيف", en: "Archive" },
   libStats: { ar: "الأحدث أوّلًا", en: "Newest first" },
   mPlay: { ar: "شغّل الفيلم", en: "Play film" },
+  /* the still tiles' name. The archive's photographs carry no titles — the
+     agency files them by run and by date — so the date is the only thing that
+     tells one tile from the next out loud. */
+  mOpen: { ar: "افتح الصورة", en: "Open image" },
   libIndex: { ar: "فهرس", en: "Index" },
   libGallery: { ar: "معرض", en: "Gallery" },
   aboutBanner: { ar: "من نحن؟", en: "Who are we?" },
@@ -141,6 +151,18 @@ const I18N = {
   pfShots: { ar: "لقطات", en: "Screenshots" },
   pfAbout: { ar: "عن المشروع", en: "About this project" },
   pfClose: { ar: "إغلاق", en: "Close" },
+  /* ══ names that are only ever heard, never seen ══
+     Written to aria-label by the [data-i18n-label] pass in applyI18n. */
+  navMenu: { ar: "القائمة", en: "Menu" },
+  navMain: { ar: "التنقّل الرئيسي", en: "Main navigation" },
+  logoHome: { ar: "ألِف — الرئيسية", en: "Aliph — Home" },
+  libView: { ar: "طريقة العرض", en: "View mode" },
+  cWrite: { ar: "راسلنا", en: "Write to us" },
+  reelTrack: { ar: "شريط الأعمال — مرّره أفقيًّا", en: "Work carousel — scroll sideways" },
+  /* the overlay's own name. A dialog with no accessible name is announced as
+     just "dialog", which tells a screen-reader user nothing about where they
+     have landed. */
+  lbTitle: { ar: "عارض الأعمال", en: "Work viewer" },
   /* Was pfPreview/pfPreviewNote — "preview build, no data is collected", which
      described a sandboxed iframe around a mock. The projects are real and live
      now, so the button leaves for the actual site and the note under it is the
@@ -1003,6 +1025,15 @@ function applyI18n() {
     const entry = I18N[el.dataset.i18n];
     if (entry) el.textContent = entry[lang];
   });
+  /* ⚠️ The SAME table, written to aria-label instead of to the text. Sixteen
+     labels in the markup were hard-coded Arabic (found 2026-08-26) — the menu
+     button, the main nav, the masthead logo, the contact band — so a screen
+     reader on the English page announced the furniture in Arabic. Anything
+     that is only ever read out loud belongs here rather than in a span. */
+  document.querySelectorAll("[data-i18n-label]").forEach((el) => {
+    const entry = I18N[el.dataset.i18nLabel];
+    if (entry) el.setAttribute("aria-label", entry[lang]);
+  });
   /* must run after the [data-i18n] loop above, which rewrites the headline's
      textContent and destroys the chips */
   initRansom();
@@ -1333,6 +1364,10 @@ const serviceRings = (() => {
   let turned = 0;                   // degrees since the last service change
   let held = false;                 // a click stops the service auto-advance
   let hover = false;
+  /* where the pointer was when the last pick was made — see the hover block
+     in build(). NaN until a real hover happens, so the first one always
+     counts. */
+  let pickX = NaN, pickY = NaN;
   let glide = null;                 // { from, to, t0 } while an item travels
   let raf = 0, last = 0;
   let stages = [];
@@ -1419,6 +1454,19 @@ const serviceRings = (() => {
     return Math.max(markW / 2 + widest * 0.55, chord);
   }
 
+  /* The accessible name of one piece on the ring. Reads from the same two
+     tables the line under the ring reads from, so it can never drift from
+     what is on screen. */
+  function itemLabel(id, it, i, total) {
+    if (it.project !== undefined) {
+      const p = PROJECTS[it.project];
+      if (p) return p[lang];
+    }
+    const sub = (SUBCATS[id] || []).find((x) => x.id === it.sub);
+    const what = sub ? sub[lang] : (CATS.find((c) => c.id === id) || {})[lang] || "";
+    return total > 1 ? what + " — " + num(i + 1) + " / " + num(total) : what;
+  }
+
   function build() {
     reel.innerHTML = "";
     stages = ORDER.map((id) => {
@@ -1459,6 +1507,16 @@ const serviceRings = (() => {
         b.style.setProperty("--n", String(SLATS));
         b.dataset.i = String(i);
         b.dataset.service = id;
+        /* ══════ THE PIECE HAS TO SAY WHAT IT IS ══════
+           A ring item is ten background slats and no text at all, so without
+           this every one of them announced itself as "button" and nothing
+           else — twenty unnamed stops on the home page's tab order (found
+           2026-08-26). The name is the same thing the eye gets: which kind of
+           work this is, and where it sits in the ring. The tech ring names the
+           client instead, because "landing page 2 of 3" says nothing and the
+           project's name says everything. Rebuilt on every language switch
+           along with the rest of build(). */
+        b.setAttribute("aria-label", itemLabel(id, it, i, items.length));
         /* ══════ what the LIGHTBOX shows for this piece (2026-08-24) ══════
            A click on the ring used to bring the piece round and then, on a
            second click, leave for the work page. The agency's instruction of
@@ -1479,6 +1537,18 @@ const serviceRings = (() => {
            agency's "the ring's reels should play"), and the lightbox opens it
            at the frame the preview had reached. */
         const film = it.open && /\.mp4$/i.test(it.open) ? it.open : "";
+        /* ⚠️ THE MASTER, and that is the agency's decision of 2026-08-27
+           reversing the 2026-08-26 round. That round pointed this at a 540px
+           700 kbps derivative under `preview/` and left `video/` for the
+           lightbox — 95% less to stream on a ring that turns a new piece to
+           the front every 5.25s. The agency looked at it and asked for the
+           full-quality file back on the page itself. So the cost is theirs and
+           it is a real one: these reels run 16.8 to 79.2 MB each, one of them
+           a 50fps 23 Mbps master.
+           ✅ The derivatives still exist on R2 under `preview/`, and
+           resources/make_previews.sh still derives them. They are DORMANT, not
+           deleted — nothing points at them — so reversing this again is one
+           string. */
         if (film) b.dataset.preview = R2 + "/video/" + film;
         const rec = MEDIA.find((x) => x.f === (it.open || it.f) || x.p === it.f);
         if (rec && rec.d) b.dataset.date = fmtDate(rec.d);
@@ -1511,22 +1581,41 @@ const serviceRings = (() => {
            tick() holds still while something is picked, stop the ring for the
            rest of the visit.
 
-           ⚠️ pointerleave RELEASES the pick, and that is not tidiness either:
-           tick() returns early while `picked >= 0`, so a pick that outlived
-           the pointer would be a permanently stopped ring. Leaving one item
-           for another fires leave-then-enter, so the release never eats the
-           next pick. */
+           🔴 GATED ON THE POINTER HAVING MOVED, and this is the fix for a
+           runaway measured on 2026-08-26. `pointerenter` does not mean "the
+           visitor moved onto this piece" — it means "this piece and the
+           pointer now overlap", and picking one MOVES IT AWAY from the
+           pointer, which slides the next piece underneath it, which enters,
+           which picks, which moves. With a cursor parked anywhere over the
+           ring and never moved again, that loop fired 60 picks in 4.8s and
+           drove `--spin` from 345° to 2,494° — climbing about 520°/s, seven
+           times the ring's own 13.8°/s, for as long as the pointer rested
+           there. Each hop also compounds: pickAngle() takes the short way
+           round from the CURRENT spin, and spin is only normalised when a
+           glide completes, so a chain of interrupted glides adds up to 180°
+           a time without ever folding back.
+
+           The test is the pointer's own position. An enter at the same
+           coordinates as the last pick was caused by the ring arriving at the
+           cursor, not by the cursor arriving at the ring, and is ignored. The
+           first enter of a visit compares against NaN, which is false, so a
+           real hover is never swallowed.
+
+           ⚠️ THE RELEASE IS ON THE WINDOW, NOT ON THE ITEM. It used to be an
+           item-level `pointerleave`, which cannot work once picking is what
+           moves the piece: bringing a piece to the front carries it out from
+           under the cursor, so the pick released itself the moment it
+           succeeded. Leaving the ring altogether is the only leave that means
+           "I am done looking at this". */
         if (canHover) {
-          b.addEventListener("pointerenter", () => {
-            hover = true;
+          b.addEventListener("pointerenter", (e) => {
             /* only the ring actually on screen may be picked — the other two
                stages are translated a whole window away, not removed */
-            if (stages[at] && stages[at].id === id) pick(i);
-          });
-          b.addEventListener("pointerleave", () => {
-            hover = false;
-            clearPick();
-            paint();
+            if (!stages[at] || stages[at].id !== id) return;
+            if (Math.hypot(e.clientX - pickX, e.clientY - pickY) < 6) return;
+            pickX = e.clientX;
+            pickY = e.clientY;
+            pick(i);
           });
         }
         ring.appendChild(b);
@@ -1777,8 +1866,29 @@ const serviceRings = (() => {
               : s.liftNow + (target - s.liftNow) * 0.16;
     if (Math.abs(target - s.liftNow) < 0.2) s.liftNow = target;
     if (s.nodes[i]) s.nodes[i].style.setProperty("--lift", s.liftNow.toFixed(1) + "px");
-    /* Only the ring on screen is worth turning. */
-    stages.forEach((x, n) => x.stage.setAttribute("aria-hidden", String(n !== at)));
+    /* Only the ring on screen is worth turning.
+       ⚠️ INERT as well as aria-hidden, and written only when it CHANGES.
+       aria-hidden alone hid the two off-screen rings from a screen reader and
+       left their buttons in the tab order — 22 of the home page's tab stops
+       landed on pieces translated a whole window away (found 2026-08-26),
+       which is both a WCAG failure (focusable content inside aria-hidden) and
+       a plain nuisance. `inert` is the one property that takes an element out
+       of BOTH trees at once. The guard matters because paint() runs on every
+       animation frame: this used to write an attribute to three elements 60
+       times a second to say the same thing it said the frame before.
+
+       🔴 The guard reads the ATTRIBUTE, not `.inert`. previews.syncRing asks
+       for `aria-hidden === "false"` before it will play the front item's reel,
+       and `.inert` starts false on a fresh element — so a guard on the
+       property would have skipped the very first write for the stage that IS
+       showing, left its aria-hidden absent rather than "false", and silently
+       stopped the ring's reels from ever starting. */
+    stages.forEach((x, n) => {
+      const off = n !== at;
+      if (x.stage.getAttribute("aria-hidden") === String(off)) return;
+      x.stage.inert = off;
+      x.stage.setAttribute("aria-hidden", String(off));
+    });
   }
 
   function go(next, byHand) {
@@ -1849,6 +1959,27 @@ const serviceRings = (() => {
     if (!e.target.closest(".ring-item")) return;
     held = true;
   });
+
+  /* ══════ THE RING HOLDS STILL WHILE A POINTER IS IN IT ══════
+     Both halves of the hover behaviour hang off the WINDOW rather than off the
+     pieces, because a piece moves and the window does not. Entering it stops
+     the ring's own turning (tick() returns early on `hover`) so the visitor
+     can read what is in front of them; leaving it drops the pick and lets the
+     ring go again. Bound on the window and not on `reel`, because the reel is
+     three windows tall and slides — its box is not where the pointer is.
+     ⚠️ pointerleave, not pointerout: out fires on every hop between the slats
+     inside one piece. */
+  if (canHover && win) {
+    win.addEventListener("pointerenter", () => { hover = true; });
+    win.addEventListener("pointerleave", () => {
+      hover = false;
+      pickX = NaN;
+      pickY = NaN;
+      clearPick();
+      paint();
+      start();
+    });
+  }
 
   /* One rAF for all three rings, and only the visible one advances. */
   function tick(t) {
@@ -2036,6 +2167,13 @@ const lightbox = (() => {
     root = document.createElement("div");
     root.className = "lb";
     root.hidden = true;
+    /* 🔴 THE DIALOG IS THE ROOT, not .lb-body. `aria-modal="true"` tells
+       assistive tech to ignore everything OUTSIDE the dialog — and the close,
+       previous and next buttons are siblings of .lb-body, not children of it.
+       With the role one level down, a screen-reader user inside the overlay
+       could not reach the button that closes it (found 2026-08-26). */
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
     root.innerHTML = `
       <div class="lb-scrim" data-lb-close></div>
       <button class="lb-close" data-lb-close type="button" aria-label="${I18N.pfClose[lang]}">
@@ -2051,7 +2189,7 @@ const lightbox = (() => {
         <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6"
              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 1l7 10-7 10"/></svg>
       </button>
-      <div class="lb-body" role="dialog" aria-modal="true">
+      <div class="lb-body">
         <div class="lb-stage"></div>
         <p class="lb-cap"><span class="lb-count"></span><span class="lb-date"></span></p>
       </div>`;
@@ -2092,8 +2230,14 @@ const lightbox = (() => {
        carries on from the frame that was on screen rather than restarting —
        the same continuity a YouTube thumbnail gives when you click it. */
     if (vid) {
-      return { video: vid.currentSrc || vid.src, poster: vid.poster,
-               at: vid.currentTime || 0 };
+      /* ⚠️ The playing element's own src, again, since 2026-08-27: what is on
+         the page IS the master now, so there is nothing bigger to reach for.
+         The `data-video` branch that sat here for one day — read it first,
+         because the element was playing a small derivative — went with the
+         derivative. Do not reintroduce a second URL unless the page goes back
+         to playing something other than the file the overlay opens. */
+      return { video: vid.currentSrc || vid.src,
+               poster: vid.poster, at: vid.currentTime || 0 };
     }
     /* the preview has been torn down (off screen, or never started), but the
        node still knows its film and how far it got */
@@ -2161,6 +2305,13 @@ const lightbox = (() => {
     at = Math.max(0, group.indexOf(node));
     if (!group.length) return;
     lastFocus = document.activeElement;
+    /* ⚠️ The chrome is built ONCE, lazily, on the first open — so its three
+       aria-labels froze in whatever language that was. Re-stated here, which
+       is the only moment they can be wrong. */
+    root.setAttribute("aria-label", I18N.lbTitle[lang]);
+    root.querySelector(".lb-close").setAttribute("aria-label", I18N.pfClose[lang]);
+    root.querySelector(".lb-prev").setAttribute("aria-label", I18N.reelPrev[lang]);
+    root.querySelector(".lb-next").setAttribute("aria-label", I18N.reelNext[lang]);
     root.hidden = false;
     document.body.classList.add("lb-open");
     paint();
@@ -2177,9 +2328,34 @@ const lightbox = (() => {
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
+  /* ══════ THE OVERLAY KEEPS THE KEYBOARD ══════
+     `aria-modal` is a promise made to assistive tech and nothing else: the
+     page behind the scrim stays perfectly tabbable, so before this a Tab from
+     the next-arrow walked straight out of the overlay into a masthead the
+     visitor could not see (found 2026-08-26). Cycling within the overlay is
+     what makes the word "modal" true for a keyboard as well.
+
+     ⚠️ Queried on every Tab rather than captured on open: which controls
+     exist changes with the piece — a group of one has no step arrows, and
+     .has-steps is toggled by paint(). */
+  function tabbables() {
+    return [...root.querySelectorAll("button, [href], video[controls], [tabindex]:not([tabindex=\"-1\"])")]
+      .filter((el) => el.offsetParent !== null || el === document.activeElement);
+  }
+
   document.addEventListener("keydown", (e) => {
     if (!root || root.hidden) return;
     if (e.key === "Escape") return close();
+    if (e.key === "Tab") {
+      const t = tabbables();
+      if (!t.length) return;
+      const first = t[0], last = t[t.length - 1];
+      const on = document.activeElement;
+      if (!root.contains(on)) { e.preventDefault(); return first.focus(); }
+      if (e.shiftKey && on === first) { e.preventDefault(); return last.focus(); }
+      if (!e.shiftKey && on === last) { e.preventDefault(); return first.focus(); }
+      return;
+    }
     /* the arrows follow READING order, so they flip with the language */
     if (e.key === "ArrowLeft") return step(document.documentElement.dir === "rtl" ? 1 : -1);
     if (e.key === "ArrowRight") return step(document.documentElement.dir === "rtl" ? -1 : 1);
@@ -2650,8 +2826,17 @@ function renderLibrary() {
          is now the thumbnail. */
       const full = m.v ? `${R2}/poster/${m.p}` : `${R2}/img/${m.f}`;
       const date = m.d ? `<figcaption><span class="t-date">${fmtDate(m.d)}</span></figcaption>` : "";
+      /* ⚠️ EVERY tile answers the keyboard, not only the films. Until
+         2026-08-26 the `role="button" tabindex="0"` rode along with
+         `data-film`, so in a grid of 82 pieces the 13 reels could be opened
+         from the keyboard and the 66 photographs beside them could not — an
+         arbitrary line through one grid. The generic [role=button] handler at
+         the foot of the lightbox module is what activates them; it asks only
+         that the node match OPENS, which every tile here does. */
+      const label = m.v ? I18N.mPlay[lang] : I18N.mOpen[lang];
+      const named = ` role="button" tabindex="0" aria-label="${label}${m.d ? " — " + fmtDate(m.d) : ""}"`;
       return `
-      <figure class="tile${m.v ? " is-film" : ""}"${m.v ? ` data-film="${m.f}" role="button" tabindex="0" aria-label="${I18N.mPlay[lang]}"` : ""}>
+      <figure class="tile${m.v ? " is-film" : ""}"${m.v ? ` data-film="${m.f}"` : ""}${named}>
         <div class="tile-img" style="aspect-ratio:${m.r}">
           <img src="${src}" data-full="${full}" alt="" loading="lazy" decoding="async">
           ${m.v ? '<span class="tile-play" aria-hidden="true"></span>' : ""}
@@ -2884,9 +3069,27 @@ const projectSheet = (() => {
   root.addEventListener("click", (e) => {
     if (e.target.closest("[data-close]")) close();
   });
+  /* ══════ THE SHEET KEEPS THE KEYBOARD ══════
+     `aria-modal="true"` on .sheet is a statement to assistive tech and nothing
+     more; the archive, the footer and the masthead behind the scrim stayed
+     tabbable. Measured 2026-08-26: six stops inside the sheet and the seventh
+     Tab landed on the footer's contact links, with the sheet still covering
+     them. Same cycle the lightbox uses — see the overlay's tabbables(). */
+  function sheetTabbables() {
+    return [...sheet.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex=\"-1\"])")]
+      .filter((x) => !x.disabled && x.offsetParent !== null);
+  }
+
   document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape" || root.hidden) return;
-    close();
+    if (root.hidden) return;
+    if (e.key === "Escape") return close();
+    if (e.key !== "Tab") return;
+    const t = sheetTabbables();
+    if (!t.length) return;
+    const first = t[0], last = t[t.length - 1], on = document.activeElement;
+    if (!sheet.contains(on)) { e.preventDefault(); return first.focus(); }
+    if (e.shiftKey && on === first) { e.preventDefault(); return last.focus(); }
+    if (!e.shiftKey && on === last) { e.preventDefault(); return first.focus(); }
   });
 
   return {

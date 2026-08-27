@@ -1,0 +1,5 @@
+# Aliph — https://aliphcreative.com
+User-agent: *
+Allow: /
+
+Sitemap: https://aliphcreative.com/sitemap.xml

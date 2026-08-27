@@ -4,6 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ألِف — وكالة إبداعية</title>
+<!-- ══════ what a shared link looks like ══════
+     Added 2026-08-26. Until then all three pages had a <title> and nothing
+     else: a link posted to WhatsApp, Instagram or LinkedIn — which is how an
+     agency's site actually travels — unfurled as a bare URL with no picture
+     and no sentence. og:image is 1200x630, the size every one of them crops
+     to, and it is a JPEG rather than the WebP the rest of the site uses
+     because several unfurlers still will not read WebP.
+     ⚠️ The Arabic here is the site's OWN copy, lifted from I18N.heroPara and
+     I18N.aboutP. The archive's line is the one sentence written for this tag
+     and not by the agency; it needs the same sign-off the rest of the copy
+     has had. ⚠️ These are static and do NOT follow the language pill —
+     an unfurler reads the HTML as served, and the served page is Arabic. -->
+<meta name="description" content="ألِف وكالة إبداعية من القدس تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.">
+<link rel="canonical" href="https://aliphcreative.com/">
+<meta name="theme-color" content="#D9D9CE">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ألِف — ALIPH">
+<meta property="og:locale" content="ar_PS">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://aliphcreative.com/">
+<meta property="og:title" content="ألِف — وكالة إبداعية">
+<meta property="og:description" content="ألِف وكالة إبداعية من القدس تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.">
+<meta property="og:image" content="https://aliphcreative.com/assets/img/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="شعار ألِف — وكالة إبداعية من القدس">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ألِف — وكالة إبداعية">
+<meta name="twitter:description" content="ألِف وكالة إبداعية من القدس تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.">
+<meta name="twitter:image" content="https://aliphcreative.com/assets/img/og-card.jpg">
 <link rel="icon" href="assets/img/HalfAliph-Icon.svg">
 <link rel="stylesheet" href="style.css">
 <!-- chat widget hidden 2026-08-10 at the agency's request until it is finished.
@@ -16,7 +46,7 @@
   <img src="assets/img/Aliph-Icon-cream.svg" alt="">
 </div>
 
-<button class="menu-btn" id="menuBtn" aria-label="القائمة" aria-expanded="false">
+<button class="menu-btn" id="menuBtn" data-i18n-label="navMenu" aria-label="القائمة" aria-expanded="false">
   <span class="bars"><span></span><span></span></span>
 </button>
 
@@ -32,7 +62,7 @@
     <span class="ls-opt" data-l="en">EN</span>
   </div>
   <a class="nav-brand" href="index.html"><img src="assets/img/Aliph-Logo-Main-cream.svg" alt="ألِف ALIPH"></a>
-  <nav class="nav-big" aria-label="التنقّل الرئيسي">
+  <nav class="nav-big" data-i18n-label="navMain" aria-label="التنقّل الرئيسي">
     <a href="index.html" class="nav-item is-current" data-i18n="navHome">الرئيسيّة</a>
     <a href="library.html" class="nav-item" data-i18n="navWork">الأعمال</a>
     <a href="about.html" class="nav-item" data-i18n="navAbout">من نحن</a>
@@ -71,7 +101,7 @@
       <span class="ls-opt" data-l="ar">ع</span>
       <span class="ls-opt" data-l="en">EN</span>
     </div>
-    <a class="masthead-logo" href="index.html" aria-label="ألِف — الرئيسية">
+    <a class="masthead-logo" href="index.html" data-i18n-label="logoHome" aria-label="ألِف — الرئيسية">
       <img src="assets/img/Aliph-Logo-Main.svg" alt="ألِف ALIPH">
     </a>
   </div>
@@ -177,7 +207,10 @@
     <h3 class="why-title" data-i18n="w2Title">نقاطٌ بحثنا عنها، وأعمالٌ بنيناها منها.</h3>
 
     <div class="reelshow" id="reelShow">
-      <div class="reelshow-track" id="reelTrack">
+      <!-- role + name because a scroll container is a tab stop in its own right:
+           the browser makes it focusable so the keyboard can scroll it, and
+           without these it announced as an unnamed group (2026-08-26). -->
+      <div class="reelshow-track" id="reelTrack" role="group" data-i18n-label="reelTrack" aria-label="شريط الأعمال — مرّره أفقيًّا">
         <div class="reel-slide">
           <figure class="holder" data-kind="reel"
                   data-preview="https://media.aliphcreative.com/video/reels-alif-tuktuk.mp4">
@@ -412,7 +445,7 @@
 
 <!-- ══════════ CONTACT FOOTER ══════════ -->
 <footer class="footer" id="contact">
-  <a class="contact-band" href="mailto:info@aliphcreative.com" aria-label="راسلنا">
+  <a class="contact-band" href="mailto:info@aliphcreative.com" data-i18n-label="cWrite" aria-label="راسلنا">
     <div class="cb-track" id="contactBandTrack"></div>
   </a>
 
