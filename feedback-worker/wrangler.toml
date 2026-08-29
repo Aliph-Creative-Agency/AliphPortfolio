@@ -23,6 +23,22 @@ account_id = "6c60bd775004cfa0082f768c356c7242"
 [observability]
 enabled = true
 
+# ── the public address ─────────────────────────────────────────────
+# `custom_domain = true` makes wrangler create the hostname AND its DNS record
+# on the aliphcreative.com zone at deploy time, so the address is part of this
+# file rather than a dashboard step nobody wrote down.
+#
+# ⚠️ This is the ONE thing here that reaches outside this Worker: it writes a
+# DNS record on the live zone. It does not touch the site — the site answers on
+# the apex and on www, this answers on `feedback`, and Cloudflare will refuse a
+# custom domain that collides with an existing record rather than overwrite it.
+#
+# The alternative, a route on `aliphcreative.com/feedback*`, is in SETUP.md and
+# needs the page's assets moved under /feedback/ first. Not taken.
+routes = [
+  { pattern = "feedback.aliphcreative.com", custom_domain = true }
+]
+
 # ⚠️ A Worker WITH a script has to serve its own assets — the binding is what
 # `env.ASSETS.fetch(request)` in src/index.js reads. The site's config has no
 # binding name because it has no script to hand them to.

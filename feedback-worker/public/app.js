@@ -67,6 +67,9 @@ const T = {
   errNetwork:  { ar: "تعذّر الإرسال. تحقّق من اتصالك وحاول مرّة أخرى.",
                  en: "That did not send. Check your connection and try again." },
 
+  notReady: { ar: "هذا النموذج لا يستقبل الردود بعد. سنفتحه قريبًا — أو راسلنا مباشرة.",
+              en: "This form is not accepting responses yet. It will open shortly — or write to us directly." },
+
   doneTitle: { ar: "وصلَنا رأيك.", en: "We have it." },
   doneText:  { ar: "شكرًا لوقتك ولثقتك. ملاحظاتك هي ما يجعل العمل القادم أفضل من الذي قبله.",
                en: "Thank you for your time and your trust. Your feedback is what makes the next piece of work better than the last." },
@@ -291,3 +294,30 @@ form.addEventListener("submit", async (e) => {
 });
 
 applyLang();
+
+/* ── is there a Sheet behind this yet? ────────────────────────── */
+
+/* 🔴 The Worker has to be deployed before `wrangler secret put` will take a
+   secret for it, so "live at a real address with nowhere to write" is a real
+   state and not a hypothetical one. Asking on load costs one small request and
+   is what stops a client writing eight answers into nothing.
+
+   ⚠️ Fails OPEN. If the check itself cannot be reached — offline, a blip — the
+   form stays usable: the Worker refuses the submission with its own message
+   anyway, and a form disabled because a status probe failed is a form that is
+   broken for everyone whenever anything twitches. */
+(async () => {
+  try {
+    const res = await fetch("/api/status", { cache: "no-store" });
+    const body = await res.json();
+    if (body && body.ready === false) {
+      document.getElementById("notReady").hidden = false;
+      submitBtn.disabled = true;
+      /* [disabled] alone reads as "not yet" to a mouse and as nothing at all to
+         anyone who cannot see the banner sitting above the questions. */
+      submitBtn.setAttribute("aria-describedby", "notReady");
+    }
+  } catch {
+    /* see above — fail open */
+  }
+})();

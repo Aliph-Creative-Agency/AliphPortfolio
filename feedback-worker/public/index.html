@@ -40,6 +40,14 @@
     <p class="meta" data-t="meta">ثماني أسئلة، أقل من ثلاث دقائق.</p>
   </div>
 
+  <!-- Shown only when /api/status answers `ready: false` — the Worker is up but
+       has no Sheet behind it yet. See the note in src/index.js: the Worker must
+       exist before its secrets can be set, so this state is real and reachable
+       rather than theoretical. role=status so it is announced when it appears. -->
+  <p class="notready" id="notReady" role="status" hidden data-t="notReady">
+    هذا النموذج لا يستقبل الردود بعد. سنفتحه قريبًا — أو راسلنا مباشرة.
+  </p>
+
   <hr class="splitter">
 
   <!-- novalidate: every message on this form is bilingual and written here, and

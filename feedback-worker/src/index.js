@@ -85,6 +85,22 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    /* 🔴 IS THERE A SHEET BEHIND THIS AT ALL?
+       The Worker has to be deployed BEFORE `wrangler secret put` will accept a
+       secret for it — the ordering is Cloudflare's, not a choice — so there is
+       always a window where the form is live at a real address and has nowhere
+       to write. Without this, a client fills in eight questions, presses send,
+       and gets a generic failure telling them to try again, which will never
+       work. The page asks this on load and refuses to take answers it cannot
+       keep. It also covers the case that outlives setup: a key rotated or
+       revoked months from now.
+       ⚠️ A BOOLEAN, and nothing else. Not which secret is missing, not a
+       length, not a prefix — the fact that it is unconfigured is all a public
+       endpoint has any business saying. */
+    if (url.pathname === "/api/status" && request.method === "GET") {
+      return json(200, { ok: true, ready: configured(env) });
+    }
+
     if (url.pathname === "/api/feedback") {
       if (request.method !== "POST") {
         return json(405, { ok: false, error: "method_not_allowed" });
@@ -114,7 +130,27 @@ export default {
 /* The endpoint                                                        */
 /* ------------------------------------------------------------------ */
 
+const configured = (env) =>
+  Boolean(env.SHEET_ID && env.GOOGLE_SA_EMAIL && env.GOOGLE_SA_PRIVATE_KEY);
+
 async function handleFeedback(request, env) {
+  /* Answered before anything is read, and answered as 503 rather than the 500
+     the missing-configuration throw used to produce: this is not a fault, it is
+     a service that is not open yet, and the difference is what the visitor is
+     told. Belt and braces with the page's own check — a form left open in a
+     tab since before the secrets were set still cannot lose someone's writing
+     into a generic error. */
+  if (!configured(env)) {
+    return json(503, {
+      ok: false,
+      error: "not_configured",
+      message: {
+        ar: "النموذج لا يستقبل الردود بعد. لم يُحفظ ما كتبته — من فضلك راسلنا مباشرة.",
+        en: "This form is not accepting responses yet. Nothing you wrote was saved — please write to us directly.",
+      },
+    });
+  }
+
   let body;
   try {
     body = await request.json();
