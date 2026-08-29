@@ -1,14 +1,37 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-27c. Read this first._
+_Updated 2026-08-29. Read this first._
 
-> ## 🟡 State on 2026-08-27c: TWO ROUNDS BUILT, NEITHER DEPLOYED
+> ## 🟡 State on 2026-08-29: THE FORM IS LIVE AND CLOSED; THE SITE IS BEHIND
 >
-> 🔴 **A CLIENT-FEEDBACK FORM IS NEW IN THIS REPO** — `feedback-worker/`,
-> a THIRD deployable beside the site and the chat. It is committed (`5e727ae`)
-> and **cannot be deployed usefully until a Google Sheet, a service account
-> and three secrets exist**; `feedback-worker/SETUP.md` is the whole
-> procedure. It does not touch the site. See _Session 2026-08-27c_.
+> ✅ **`feedback.aliphcreative.com` IS LIVE** — `feedback-worker/`, a THIRD
+> deployable beside the site and the chat, version
+> `fe8b50ba-17a3-4dd9-9573-179b1412cc13`. The custom domain and its DNS
+> record were created by the deploy itself. **The site is untouched**:
+> `aliphcreative.com` still answers 200 and is still `c5b80d8c-…`.
+>
+> 🔴 **IT IS DELIBERATELY NOT ACCEPTING RESPONSES, and it says so on the
+> page.** No Sheet, no service account, no secrets yet —
+> `feedback-worker/SETUP.md` is the whole procedure. A Worker must EXIST
+> before `wrangler secret put` will take a secret for it, so this window was
+> unavoidable; what it does in it is not. `/api/status` reports
+> `ready:false`, the page disables Send behind a notice, and a POST is a
+> **503 saying nothing was saved** rather than a generic failure telling a
+> client to try again. It fails OPEN if the probe itself dies. **No redeploy
+> is needed to open it** — the secrets take effect and the notice clears
+> itself.
+>
+> 🔴 **A MISPLACED KEY IN `wrangler.toml` DOES NOT FAIL — IT DOES NOTHING.**
+> `routes` was written under `[observability]`, and in TOML a bare key belongs
+> to whichever table header precedes it, so it became `observability.routes`.
+> wrangler deployed happily and published with **no custom domain**, warning
+> in one line printed above the asset-upload log. **Read the deploy summary's
+> trigger list, not the exit code.**
+>
+> ⚠️ **`aliph-feedback.ceo-6c6.workers.dev` IS OFF.** Declaring `routes`
+> disables workers.dev unless `workers_dev = true` is stated. One address is
+> the right end state — but do not read that host's silence as a broken
+> deploy.
 >
 > 🔴 **`[hidden]` IS ONLY `display: none` IN THE USER-AGENT SHEET.** Any
 > author rule setting `display` beats it. Three inputs on the new form carried
@@ -389,14 +412,23 @@ gesture has been invented for it.
 
 ---
 
-## Session 2026-08-27c — the client-feedback form, and four ways a form breaks in Arabic
+## Session 2026-08-29 — the client-feedback form, four ways a form breaks in Arabic, and a deploy that silently skipped its own address
+
+> ⚠️ **This round was filed as "2026-08-27c" until the deploy, and it was
+> never the 27th.** `date +%F` and every commit stamp say **2026-08-29**; the
+> keyboard round really was the 27th and this one inherited its label. Fixed
+> throughout. A dated handoff with a wrong date sends the next reader looking
+> for a session that does not exist.
 
 The agency sent a Tally form — *How Was Your Experience With Me?* — and asked
 for their own version of it: Aliph-themed, on its own page or subdomain,
 writing to a Google Sheet "like we did with queen's retreat".
 
-🔴 **Committed (`5e727ae`), NOT deployed, and it cannot be deployed until three
-secrets exist.** See _What is waiting on the agency_ below.
+✅ **Built, and then deployed the same day** to
+<https://feedback.aliphcreative.com> when the agency asked for it — see
+_The deploy_ at the foot of this section. It is live and **deliberately
+closed**: the three secrets do not exist yet, so the page says so and will
+not take an answer it cannot keep. Opening it needs no redeploy.
 
 ### Where it lives, and why it is not a page on the site
 
@@ -567,15 +599,111 @@ The page:
 Sheet. SETUP.md step 5 is the first real submission, and it is the only part of
 this that has never run.
 
+### The deploy — `feedback.aliphcreative.com`, live and deliberately closed
+
+✅ **Live at <https://feedback.aliphcreative.com>, version `fe8b50ba-17a3-4dd9-9573-179b1412cc13`.**
+The custom domain and its DNS record were created by the deploy itself, from
+`routes` in `feedback-worker/wrangler.toml`, so the address lives with the thing
+it points at rather than in somebody's memory of a dashboard.
+
+✅ **The site is untouched.** `aliphcreative.com` still answers 200 and is still
+`c5b80d8c-…`. The site holds the apex and `www`; this holds `feedback`.
+
+#### 🔴 The Worker had to be deployed BEFORE its secrets could exist
+
+`wrangler secret put` refuses a Worker that is not there —
+`Worker "aliph-feedback" not found. If this is a new Worker, run wrangler deploy
+first.` So **"live at a real address with no Sheet behind it" is a state this
+form was always going to pass through.** It is not a mistake in the ordering;
+it is the only ordering Cloudflare allows.
+
+Left alone, that window is the worst state the form has: a client answers eight
+questions, presses send, and gets the generic failure telling them to try again
+— which will never work, and their writing is gone. So the window was closed
+rather than noted:
+
+- **`GET /api/status`** answers `{ok, ready}` **and nothing else**. ⚠️ A
+  boolean, deliberately: not which secret is missing, not a length, not a
+  prefix. That an endpoint is unconfigured is all a public endpoint has any
+  business saying.
+- **`POST /api/feedback` while unconfigured is `503 not_configured`**, not the
+  generic 500 the missing-configuration throw used to produce, and its message
+  says plainly **that nothing was saved** and to write directly instead.
+- **The page asks on load**, shows a notice above the questions and disables
+  Send, with `aria-describedby` pointing at the notice — a greyed-out button is
+  nothing at all to someone who cannot see the banner explaining it.
+- ⚠️ **It FAILS OPEN.** If the probe itself cannot be reached the form stays
+  usable: the Worker refuses the submission with its own message anyway, and a
+  form disabled by a failed status probe is a form that breaks for everyone
+  whenever anything twitches. Verified by aborting the request.
+
+✅ **This outlives the setup window.** A key rotated or revoked months from now
+stops the form politely instead of eating submissions.
+
+#### 🔴 A MISPLACED KEY IN `wrangler.toml` DOES NOT FAIL — IT DOES NOTHING
+
+`routes` was written *underneath* `[observability]`. In TOML **a bare key
+belongs to whichever table header precedes it**, so it was read as
+`observability.routes`. wrangler deployed happily, published to `workers.dev`
+with **no custom domain at all**, and the only sign was one line —
+`Unexpected fields found in observability field: "routes"` — printed *above*
+the asset-upload log, where a successful-looking deploy scrolls it out of sight.
+
+The deploy summary is the thing to read, not the exit code: it prints the
+triggers it actually created. First attempt said
+`https://aliph-feedback.ceo-6c6.workers.dev`; the second said
+`feedback.aliphcreative.com (custom domain)`.
+
+⚠️ **`routes` now sits above every `[table]` header and carries a note saying
+why it must stay there.** The same trap applies to `account_id`, `main` and
+`compatibility_date` — every top-level key in that file.
+
+#### ⚠️ `workers.dev` is now OFF for this Worker
+
+A side effect of declaring `routes`: wrangler warned that because `workers_dev`
+is not in the config it would be disabled, and it was. `aliph-feedback.ceo-6c6.workers.dev`
+no longer answers. That is the right end state — one address, not two — but it
+is worth knowing before someone tries the workers.dev URL to test and reads its
+silence as a broken deploy. `workers_dev = true` brings it back.
+
+#### `.dev.vars` exists now, and it is gitignored
+
+The `not_configured` guard runs **before** validation — correctly, since with no
+Sheet nothing else matters — which meant the local suite could no longer reach
+any of the validation paths. `feedback-worker/.dev.vars` holds three dummy
+values so `configured()` is true under `wrangler dev`. ⚠️ They are **not
+credentials** and authenticate against nothing; every invalid payload returns
+before Sheets is ever called. It is gitignored, and `wrangler dev` only reads it
+at startup — create it before starting the server, or restart after.
+
+#### Verified on the live host
+
+- `/` → **200**, `https`, both faces loaded, no console errors
+- `/api/status` → `{"ok":true,"ready":false}`
+- `POST /api/feedback` → **503 `not_configured`**, bilingual, says nothing was
+  saved
+- the notice is shown, **Send is disabled**, no horizontal scroll
+- `aliphcreative.com` → **200**, unchanged
+
+🔴 **Still never run: the append.** It needs the three secrets and a shared
+Sheet. The agency's first real submission is the first time that code path
+executes.
+
 ### What is waiting on the agency
 
-1. 🔴 **The Google Sheet and the service account do not exist yet**, so the
-   Worker cannot be deployed usefully. `SETUP.md` is the whole procedure. ⚠️ The
-   step people skip is **sharing the Sheet with the service account's
+1. 🔴 **THE ONLY THING BETWEEN THIS AND WORKING: three secrets.** The Google
+   Sheet and the service account do not exist yet. `SETUP.md` is the whole
+   procedure; from `feedback-worker/`, `npx wrangler secret put SHEET_ID` and
+   the same for `GOOGLE_SA_EMAIL` and `GOOGLE_SA_PRIVATE_KEY`. **No redeploy.**
+   ✅ The Queen's Retreat service account can be reused — it exists and has
+   the Sheets API on already.
+   ⚠️ The step people skip is **sharing the Sheet with the service account's
    `client_email`** — Google answers a 403 that says nothing about sharing.
-2. 🔴 **The address has not been chosen** — `feedback.aliphcreative.com` or
-   `aliphcreative.com/feedback*`. See above; the second needs the assets moved
-   under `/feedback/` first.
+2. ✅ **CLOSED — the address is `feedback.aliphcreative.com`**, chosen by the
+   agency and deployed 2026-08-29. The `aliphcreative.com/feedback*` route is
+   still documented in `SETUP.md` as the alternative; it would need the page's
+   assets moved under `/feedback/` first, and its one real gain is same-origin
+   so the language a client picked on the site carries into the form.
 3. ⚠️ **Spam protection is a honeypot and a 4-second floor.** Both are speed
    bumps. If this is ever abused for real the answer is **Turnstile** — add the
    widget and verify the token before the append; nothing else changes.
