@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<!-- ⚠️ `lang` and `dir` are set here as Arabic and rtl and then rewritten by
+     app.js on load if the visitor has chosen English before. Arabic is the
+     default because it is the agency's first language, and shipping it in the
+     markup rather than applying it in script means the first paint is already
+     right way round — a form that flips direction after it appears reads as
+     broken. -->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>كيف كانت تجربتك معنا؟ — ألِف</title>
+<meta name="description" content="نموذج ملاحظات عملاء ألِف — رأيك يساعدنا على تطوير خدماتنا.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#D9D9CE">
+<link rel="icon" href="assets/img/HalfAliph-Stamp.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/29LTIdris-SharpExtraBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/29LTIdris-FlatRegular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="lang-switch js-lang" role="button" tabindex="0" aria-label="Language">
+    <span class="ls-knob" aria-hidden="true"></span>
+    <span class="ls-opt" data-l="ar">ع</span>
+    <span class="ls-opt" data-l="en">EN</span>
+  </div>
+  <a class="masthead-logo" href="https://aliphcreative.com" data-t-label="logoHome" aria-label="ألِف — الموقع">
+    <img src="assets/img/Aliph-Logo-Main.svg" alt="ألِف ALIPH">
+  </a>
+</header>
+<div class="rule-double"></div>
+
+<main class="sheet">
+
+  <div class="intro">
+    <h1 class="title" data-t="title">كيف كانت تجربتك معنا؟</h1>
+    <p class="lede" data-t="lede">شكرًا لاختيارك العمل مع ألِف. يهمّنا أن نسمع رأيك الصادق، لأن ملاحظاتك هي ما نبني عليه الخدمة القادمة.</p>
+    <p class="meta" data-t="meta">ثماني أسئلة، أقل من ثلاث دقائق.</p>
+  </div>
+
+  <hr class="splitter">
+
+  <!-- novalidate: every message on this form is bilingual and written here, and
+       the browser's own validation bubbles are neither — they arrive in the
+       browser's language, in the browser's voice, positioned by the browser. -->
+  <form id="feedbackForm" novalidate>
+
+    <!-- 🔴 THE HONEYPOT. Off screen rather than display:none — a bot that
+         skips hidden fields still finds this one, and a screen reader does not
+         because of aria-hidden, and a keyboard does not because of tabindex.
+         autocomplete="off" keeps a browser from helpfully filling it in and
+         throwing away a real person's submission. -->
+    <div class="hp" aria-hidden="true">
+      <label for="company_website">Company website</label>
+      <input type="text" id="company_website" name="company_website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <!-- 1 ─ name ─────────────────────────────────────────────────── -->
+    <section class="q">
+      <label class="q-label" for="name">
+        <span data-t="qName">الاسم أو المؤسسة</span><b class="req" aria-hidden="true">*</b>
+      </label>
+      <input class="field" type="text" id="name" name="name" maxlength="120"
+             autocomplete="organization" required>
+      <p class="err" data-err="name" hidden></p>
+    </section>
+
+    <!-- 2 ─ service ──────────────────────────────────────────────── -->
+    <section class="q">
+      <fieldset>
+        <legend class="q-label">
+          <span data-t="qService">ما الخدمة التي حصلت عليها؟</span><b class="req" aria-hidden="true">*</b>
+          <span class="hint" data-t="hintMulti">يمكنك اختيار أكثر من واحدة</span>
+        </legend>
+        <div class="opts">
+          <label class="opt"><input type="checkbox" name="services" value="design"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="svcDesign">تصميم جرافيكي</span></label>
+          <label class="opt"><input type="checkbox" name="services" value="photo"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="svcPhoto">صناعة محتوى</span></label>
+          <label class="opt"><input type="checkbox" name="services" value="tech"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="svcTech">حلول تقنية وبرمجية</span></label>
+          <label class="opt"><input type="checkbox" name="services" value="other"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="optOther">أخرى</span></label>
+        </div>
+        <input class="field field-other" type="text" name="servicesOther" maxlength="120"
+               data-t-ph="phOther" placeholder="اكتبها هنا" hidden>
+      </fieldset>
+      <p class="err" data-err="services" hidden></p>
+    </section>
+
+    <!-- 3 ─ communication ────────────────────────────────────────── -->
+    <section class="q">
+      <fieldset>
+        <legend class="q-label">
+          <span data-t="qComms">كيف تصف أسلوب التواصل والتعامل أثناء المشروع؟</span><b class="req" aria-hidden="true">*</b>
+        </legend>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="comms" value="clear"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="commsClear">واضح وسلس</span></label>
+          <label class="opt"><input type="radio" name="comms" value="organised"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="commsOrg">جيد لكن يحتاج تنظيمًا أكثر</span></label>
+          <label class="opt"><input type="radio" name="comms" value="unexpected"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="commsUnexp">لم يكن كما توقّعت</span></label>
+          <label class="opt"><input type="radio" name="comms" value="other"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="optOther">أخرى</span></label>
+        </div>
+        <input class="field field-other" type="text" name="commsOther" maxlength="120"
+               data-t-ph="phOther" placeholder="اكتبها هنا" hidden>
+      </fieldset>
+      <p class="err" data-err="comms" hidden></p>
+    </section>
+
+    <!-- 4 ─ value ────────────────────────────────────────────────── -->
+    <section class="q">
+      <fieldset>
+        <legend class="q-label">
+          <span data-t="qValue">هل شعرت أن الخدمة كانت تستحق قيمتها؟</span><b class="req" aria-hidden="true">*</b>
+        </legend>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="value" value="yes"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="valYes">نعم، تمامًا</span></label>
+          <label class="opt"><input type="radio" name="value" value="somewhat"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="valSome">إلى حدٍّ ما</span></label>
+          <label class="opt"><input type="radio" name="value" value="no"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="valNo">لا</span></label>
+          <label class="opt"><input type="radio" name="value" value="other"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="optOther">أخرى</span></label>
+        </div>
+        <input class="field field-other" type="text" name="valueOther" maxlength="120"
+               data-t-ph="phOther" placeholder="اكتبها هنا" hidden>
+      </fieldset>
+      <p class="err" data-err="value" hidden></p>
+    </section>
+
+    <!-- 5 ─ liked most ───────────────────────────────────────────── -->
+    <section class="q">
+      <label class="q-label" for="liked">
+        <span data-t="qLiked">ما أكثر شيء أعجبك في تجربتك معنا؟</span><b class="req" aria-hidden="true">*</b>
+      </label>
+      <textarea class="field" id="liked" name="liked" rows="4" maxlength="2000" required></textarea>
+      <p class="err" data-err="liked" hidden></p>
+    </section>
+
+    <!-- 6 ─ vision ───────────────────────────────────────────────── -->
+    <section class="q">
+      <fieldset>
+        <legend class="q-label">
+          <span data-t="qVision">هل عكست النتيجة النهائية رؤيتك وهويّتك؟</span><b class="req" aria-hidden="true">*</b>
+        </legend>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="vision" value="yes"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="visYes">نعم، تمامًا</span></label>
+          <label class="opt"><input type="radio" name="vision" value="partly"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="visPart">إلى حدٍّ ما</span></label>
+          <label class="opt"><input type="radio" name="vision" value="no"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="visNo">لا، ليس كما توقّعت</span></label>
+          <label class="opt"><input type="radio" name="vision" value="other"><span class="box" aria-hidden="true"></span><span class="opt-t" data-t="optOther">أخرى</span></label>
+        </div>
+        <input class="field field-other" type="text" name="visionOther" maxlength="120"
+               data-t-ph="phOther" placeholder="اكتبها هنا" hidden>
+      </fieldset>
+      <p class="err" data-err="vision" hidden></p>
+    </section>
+
+    <!-- 7 ─ rating ───────────────────────────────────────────────── -->
+    <section class="q">
+      <fieldset>
+        <legend class="q-label">
+          <span data-t="qRating">كيف تقيّم تجربتك العامة معنا؟</span><b class="req" aria-hidden="true">*</b>
+        </legend>
+        <!-- ⚠️ Five real radios, not a row of clickable spans. A rating widget
+             built out of divs is the classic thing that cannot be filled in
+             without a mouse; these arrow-key and announce for free, and the
+             stamps are drawn on ::before from the checked state.
+             direction:ltr on the group so ١..٥ always runs low-to-high
+             left-to-right, which is how a scale is read in both languages. -->
+        <div class="rating" id="rating">
+          <label class="star"><input type="radio" name="rating" value="1"><span class="star-mark" aria-hidden="true"></span><span class="sr" data-t="rate1">١ من ٥</span></label>
+          <label class="star"><input type="radio" name="rating" value="2"><span class="star-mark" aria-hidden="true"></span><span class="sr" data-t="rate2">٢ من ٥</span></label>
+          <label class="star"><input type="radio" name="rating" value="3"><span class="star-mark" aria-hidden="true"></span><span class="sr" data-t="rate3">٣ من ٥</span></label>
+          <label class="star"><input type="radio" name="rating" value="4"><span class="star-mark" aria-hidden="true"></span><span class="sr" data-t="rate4">٤ من ٥</span></label>
+          <label class="star"><input type="radio" name="rating" value="5"><span class="star-mark" aria-hidden="true"></span><span class="sr" data-t="rate5">٥ من ٥</span></label>
+        </div>
+        <p class="rating-read" id="ratingRead" aria-live="polite"></p>
+      </fieldset>
+      <p class="err" data-err="rating" hidden></p>
+    </section>
+
+    <!-- 8 ─ improve ──────────────────────────────────────────────── -->
+    <section class="q">
+      <label class="q-label" for="improve">
+        <span data-t="qImprove">ما الذي يمكن تحسينه برأيك؟</span><b class="req" aria-hidden="true">*</b>
+      </label>
+      <textarea class="field" id="improve" name="improve" rows="4" maxlength="2000" required></textarea>
+      <p class="err" data-err="improve" hidden></p>
+    </section>
+
+    <hr class="splitter">
+
+    <div class="send">
+      <button class="btn" type="submit" id="submitBtn"><span data-t="send">أرسل</span></button>
+      <!-- role=alert so a failure is announced, not just painted -->
+      <p class="form-err" id="formErr" role="alert" hidden></p>
+    </div>
+  </form>
+
+  <!-- The thank-you replaces the form in place rather than navigating: there is
+       nothing to come back to, and a new page would lose the language the
+       visitor picked. -->
+  <div class="done" id="done" hidden>
+    <span class="done-stamp" aria-hidden="true"><img src="assets/img/HalfAliph-Stamp.svg" alt=""></span>
+    <h2 class="done-title" data-t="doneTitle">وصلَنا رأيك.</h2>
+    <p class="done-text" data-t="doneText">شكرًا لوقتك ولثقتك. ملاحظاتك هي ما يجعل العمل القادم أفضل من الذي قبله.</p>
+    <a class="done-link" href="https://aliphcreative.com" data-t="doneLink">إلى موقع ألِف</a>
+  </div>
+
+</main>
+
+<footer class="foot">
+  <p data-t="legal">ألِف © ٢٠٢٦</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

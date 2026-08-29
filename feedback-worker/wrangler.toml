@@ -1,0 +1,42 @@
+# ══════════════════════════════════════════════════════════════════
+# Aliph client-feedback form — the THIRD deployable in this repo.
+#
+# ../wrangler.toml  → the site, assets-only, no `main`
+# ../chat-worker    → the chat backend
+# here              → the feedback form and the one endpoint behind it
+#
+# ⚠️ Run wrangler from the directory whose config you mean. From the repo
+# root you deploy the SITE; from here you deploy this. They are different
+# Workers with different names and neither can overwrite the other.
+# ══════════════════════════════════════════════════════════════════
+
+name = "aliph-feedback"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# The studio account, same as the site's and the chat's — see ../wrangler.toml
+# for why this is pinned rather than answered at a prompt. This login can reach
+# two accounts, and picking the wrong one publishes into the personal account at
+# a different hostname, looking exactly like a successful deploy.
+account_id = "6c60bd775004cfa0082f768c356c7242"
+
+[observability]
+enabled = true
+
+# ⚠️ A Worker WITH a script has to serve its own assets — the binding is what
+# `env.ASSETS.fetch(request)` in src/index.js reads. The site's config has no
+# binding name because it has no script to hand them to.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# ── secrets, NOT vars ──────────────────────────────────────────────
+# Set with `npx wrangler secret put <NAME>` from this directory, or in the
+# dashboard under Workers & Pages → aliph-feedback → Settings → Variables and
+# Secrets. See SETUP.md.
+#
+#   SHEET_ID               the Google Sheet id, from its URL
+#   GOOGLE_SA_EMAIL        the service account's client_email
+#   GOOGLE_SA_PRIVATE_KEY  the service account's private_key, BEGIN/END included
+#
+# 🔴 None of the three belongs in this file. It is committed.
