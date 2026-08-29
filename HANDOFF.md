@@ -1,8 +1,28 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-27b. Read this first._
+_Updated 2026-08-27c. Read this first._
 
-> ## 🟡 State on 2026-08-27b: ONE ROUND BUILT, NOT DEPLOYED
+> ## 🟡 State on 2026-08-27c: TWO ROUNDS BUILT, NEITHER DEPLOYED
+>
+> 🔴 **A CLIENT-FEEDBACK FORM IS NEW IN THIS REPO** — `feedback-worker/`,
+> a THIRD deployable beside the site and the chat. It is committed (`5e727ae`)
+> and **cannot be deployed usefully until a Google Sheet, a service account
+> and three secrets exist**; `feedback-worker/SETUP.md` is the whole
+> procedure. It does not touch the site. See _Session 2026-08-27c_.
+>
+> 🔴 **`[hidden]` IS ONLY `display: none` IN THE USER-AGENT SHEET.** Any
+> author rule setting `display` beats it. Three inputs on the new form carried
+> the attribute, reported `el.hidden === true`, and were on the page the whole
+> time — found by walking Tab, not by looking.
+>
+> 🔴 **THREE STANDARD CSS IDIOMS ARE WRONG IN AN RTL DOCUMENT.** All three
+> were written, shipped into the working tree, and caught by measuring:
+> `left: -9999px` on a hidden field made a 390px page **10389px** wide, because
+> the inline start is on the right and the page can scroll to it;
+> `border-inline-start` drew a checkbox tick as a `>` chevron, because the
+> logical pair mirrors and **a tick is a shape, not a direction**; and forcing
+> `direction: ltr` on a rating scale put it against the left edge of a
+> right-aligned page with its own read-out at the far right.
 >
 > 🔴 **The keyboard round of 2026-08-27b is committed (`b52aeb9`) and NOT
 > deployed.** The live site is still `c5b80d8c-ce63-4c1a-8fe9-1686b2d1a75c`,
@@ -366,6 +386,206 @@ gesture has been invented for it.
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-08-27c — the client-feedback form, and four ways a form breaks in Arabic
+
+The agency sent a Tally form — *How Was Your Experience With Me?* — and asked
+for their own version of it: Aliph-themed, on its own page or subdomain,
+writing to a Google Sheet "like we did with queen's retreat".
+
+🔴 **Committed (`5e727ae`), NOT deployed, and it cannot be deployed until three
+secrets exist.** See _What is waiting on the agency_ below.
+
+### Where it lives, and why it is not a page on the site
+
+`feedback-worker/` is a **third deployable** in this repo:
+
+| | |
+|---|---|
+| `../wrangler.toml` | the site — assets only, **no `main`** |
+| `chat-worker/` | the chat backend |
+| `feedback-worker/` | the form and the one endpoint behind it |
+
+⚠️ **The obvious reading of "a separate page" would have been wrong.** A page on
+the main site needs an endpoint behind it, and the site's own `wrangler.toml`
+says in its header that it has no `main` and must keep it that way. Giving a
+live assets-only Worker a script to add a form is a much bigger change than
+standing a small Worker up beside it.
+
+✅ **The URL is not lost by doing it this way.** Both addresses are *routing* on
+the `aliphcreative.com` zone and neither touches the site's deploy:
+
+- **`feedback.aliphcreative.com`** — Add custom domain. This is what it is built
+  for as it stands.
+- **`aliphcreative.com/feedback`** — Add route `aliphcreative.com/feedback*`.
+  ⚠️ The star is load-bearing: the page also fetches `/style.css`, `/app.js` and
+  `/assets/…`, and without it those fall through to the site and 404. Taking
+  this option means moving the assets under `/feedback/` first.
+  ✅ Its one real gain: same origin, so the language a client picked on
+  `aliphcreative.com` carries into the form — `localStorage` is per-origin.
+
+### The Sheets path is Queen's Retreat's, deliberately
+
+Lifted from `D:\Personal\Projects\عودة الملكة-landing page\src\worker.js`: a
+service-account JWT signed with WebCrypto and exchanged for an OAuth token. No
+dependencies, nothing to keep updated, and it is code the agency has had in
+production since July. ✅ **The service account can be Queen's Retreat's own** —
+it already exists with the Sheets API enabled. A new one is tidier if these ever
+change hands separately.
+
+The header row writes itself on the first submission, so there is no setup step
+that can be forgotten and no empty-looking Sheet to wonder about.
+
+### Two decisions taken, and they were put to the user
+
+1. **The services are Aliph's own three plus أخرى**, not the freelancer's list
+   on the Tally form (packaging / marketing campaign / visual identity / social
+   content). The Tally list names three things the site never mentions;
+   تصميم جرافيكي / صناعة محتوى / حلول تقنية وبرمجية are the names the site, the
+   ring and the archive already use, so the feedback sorts against real service
+   lines.
+2. **AR/EN toggle, the site's own pill**, rather than printing both languages in
+   every label the way Tally does.
+
+⚠️ **The form's voice changed from singular to plural.** The Tally form is a
+freelancer's — "with me", «معي». Every string here is «معنا».
+
+### What lands in the Sheet
+
+Ten columns, **written in Arabic whichever language the visitor used** — the
+language they used is column J. The agency reads this Sheet in Arabic; the
+visitor's choice of interface is not the same question as what the row says.
+
+⚠️ **Column H is a plain `1`–`5`, not «٤/٥» and not stars.** It is the one
+column meant to be averaged and sorted, and a Sheet cannot average a string.
+
+⚠️ **The timestamp is Asia/Jerusalem, not UTC.** Off by two or three hours
+depending on the season, which is exactly enough to put an evening submission
+on the wrong day.
+
+### The four things that were wrong first
+
+Every one found by measuring, and each would have shipped looking fine.
+
+#### 1. 🔴 `[hidden]` is only `display: none` in the USER-AGENT sheet
+
+So any author rule that sets `display` beats it — and `.field { display: block }`
+did. The three «أخرى» inputs carried the attribute, reported
+`el.hidden === true`, and **were on the page the whole time**, in the tab order.
+Found by walking Tab and seeing `INPUT[servicesOther]` between the services and
+the next question.
+
+`[hidden] { display: none !important }` now sits at the top of the stylesheet.
+The `!important` is not a shortcut around a specificity fight; it is the only
+way an attribute meaning "this is not here" can outrank a class that happens to
+mention display.
+
+#### 2. 🔴 `left: -9999px` is an RTL bug
+
+The standard way to hide a honeypot, and it is wrong in an Arabic document: the
+inline start is on the **right**, so content parked 9999px to the left is
+content the page can **scroll to**. Measured at 390px wide, `scrollWidth` came
+back **10389** against a 390px viewport — the whole form sat in a window that
+slid ten thousand pixels sideways.
+
+1px, `clip-path: inset(50%)`, at its own static position now. It renders, it
+occupies nothing it can overflow with, and it stays as findable to something
+filling every input as it ever was.
+
+#### 3. 🔴 The checkbox tick was a `>` chevron in Arabic
+
+It was drawn with `border-inline-start` + `border-block-end` rotated -45°, which
+is a tick in LTR — and in RTL the logical properties resolve to the **mirror
+pair**, so the two lit borders drew a chevron. **A tick is a shape, not a
+direction**; it points the same way in both languages. Physical `border-right` +
+`border-bottom` now, and that is the one place in this stylesheet that reaches
+for physical properties on purpose.
+
+#### 4. 🔴 The rating was forced `direction: ltr`
+
+Reasoning: "so low is always on the left". What it produced was the single row
+of stamps hard against the **left** edge of an otherwise right-aligned Arabic
+page, with its own «٤ من ٥» read-out stranded at the far right — the label for a
+control sitting as far from it as the page allows. A rating scale starts where
+the reading starts: rightmost in Arabic, leftmost in English. The fill logic is
+DOM-order `:has()`, so it follows the direction for free.
+
+⚠️ **And a measurement trap while checking it.** A first sweep read "0 of 5
+stamps lit" with rating 4 chosen. The CSS was right: Playwright's `check()` is a
+real click, so the pointer was still resting on the star, and what was measured
+was the **hover preview** (0.45) overriding the chosen state. Parking the mouse
+at (5, 5) first gives `1 1 1 1 0.16`.
+
+### Also: two decorative spans were eating their own inputs
+
+`.opt .box` and `.star-mark` are drawn exactly over the transparent input they
+illustrate, and were taking the click. A person never notices — the whole row is
+a `<label>`, so the click reaches the input anyway — but the input was not
+something that could be aimed at directly, which is a state no control should be
+in. Both are `pointer-events: none` now; they are `aria-hidden` decoration and
+have no business in the hit test.
+
+⚠️ **The inputs are NOT `display: none`.** A hidden input is not focusable, so
+the whole set would drop out of the tab order and the arrow keys would stop
+moving between radios — the exact "cannot be filled in without a mouse" failure.
+They are transparent and sized over the drawn box instead.
+
+### Verified, not assumed
+
+Against `wrangler dev` on :8341, with real `page.keyboard.press()` and real
+POSTs. **Every validation path returns before Sheets is touched**, so all of it
+runs with no credentials at all.
+
+The endpoint:
+
+- honeypot filled → **200 and the row is dropped**. Answering `ok` is the point:
+  a rejection tells the sender what tripped and the next attempt comes back
+  without it.
+- a submission in 300ms → `too_fast`. There is a 4s floor.
+- all **eight** missing fields → 400 `missing_field`, naming the field
+- `rating: 9`, an unknown service, an unknown radio value → 400, each naming its
+  field
+- `GET /api/feedback` → **405**
+
+The page:
+
+- **14 tab stops**: pill → logo → name → 4 service boxes → comms → value →
+  liked → vision → rating → improve → send. Arrow keys move within a radio
+  group.
+- «أخرى» reveals its field **and gives it focus**; unchecking hides it and the
+  text survives
+- the rating reads «٤ من ٥» / "4 of 5" and lights 4 of 5
+- the toggle restates **what is already on screen** — the rating read-out and
+  any error showing — not just the static labels
+- a full submission hides the form and the intro, shows the card, and **moves
+  focus to it**
+- **no horizontal scroll at 390px**, both languages, no console errors
+
+🔴 **NOT verified: the append itself.** It needs the three secrets and a shared
+Sheet. SETUP.md step 5 is the first real submission, and it is the only part of
+this that has never run.
+
+### What is waiting on the agency
+
+1. 🔴 **The Google Sheet and the service account do not exist yet**, so the
+   Worker cannot be deployed usefully. `SETUP.md` is the whole procedure. ⚠️ The
+   step people skip is **sharing the Sheet with the service account's
+   `client_email`** — Google answers a 403 that says nothing about sharing.
+2. 🔴 **The address has not been chosen** — `feedback.aliphcreative.com` or
+   `aliphcreative.com/feedback*`. See above; the second needs the assets moved
+   under `/feedback/` first.
+3. ⚠️ **Spam protection is a honeypot and a 4-second floor.** Both are speed
+   bumps. If this is ever abused for real the answer is **Turnstile** — add the
+   widget and verify the token before the append; nothing else changes.
+4. ⚠️ **The palette is duplicated** at the top of
+   `feedback-worker/public/style.css`. If the ink, cream or terracotta move in
+   `prototype/style.css` they have to move here too. The fonts and the linen are
+   **copied, not linked** (508 KB of WOFF2 + 381 KB `fabric.webp`) so this
+   page's first paint does not depend on the main site being up.
+5. ⚠️ **`noindex` is set.** This is a link the agency sends to a client, not
+   something that should turn up in a search for Aliph.
 
 ---
 
