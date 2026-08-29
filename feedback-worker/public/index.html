@@ -15,7 +15,7 @@
 <meta name="theme-color" content="#D9D9CE">
 <link rel="icon" href="assets/img/HalfAliph-Stamp.svg" type="image/svg+xml">
 <link rel="preload" href="assets/fonts/29LTIdris-SharpExtraBold.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/29LTIdris-FlatRegular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/29LTIdris-FlatBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -166,9 +166,10 @@
         <!-- ⚠️ Five real radios, not a row of clickable spans. A rating widget
              built out of divs is the classic thing that cannot be filled in
              without a mouse; these arrow-key and announce for free, and the
-             stamps are drawn on ::before from the checked state.
-             direction:ltr on the group so ١..٥ always runs low-to-high
-             left-to-right, which is how a scale is read in both languages. -->
+             stamps are drawn from the checked state with :has().
+             ⚠️ NO `direction: ltr` on the group, and this comment used to say
+             there was. A scale starts where the reading starts — rightmost in
+             Arabic, leftmost in English; see the note in style.css. -->
         <div class="rating" id="rating">
           <label class="star"><input type="radio" name="rating" value="1"><span class="star-mark" aria-hidden="true"></span><span class="sr" data-t="rate1">١ من ٥</span></label>
           <label class="star"><input type="radio" name="rating" value="2"><span class="star-mark" aria-hidden="true"></span><span class="sr" data-t="rate2">٢ من ٥</span></label>
@@ -203,7 +204,11 @@
        nothing to come back to, and a new page would lose the language the
        visitor picked. -->
   <div class="done" id="done" hidden>
-    <span class="done-stamp" aria-hidden="true"><img src="assets/img/HalfAliph-Stamp.svg" alt=""></span>
+    <!-- The DOUBLE ALIPH, not the half-aliph stamp that closed this page
+         first: the agency asked for a different mark here. It is the bare pair
+         of letterforms rather than a seal, and it is 63x208 — sized by HEIGHT
+         in the stylesheet, because a width would draw it 252px tall. -->
+    <span class="done-stamp" aria-hidden="true"><img src="assets/img/DoubleAliph-Icon.svg" alt=""></span>
     <h2 class="done-title" data-t="doneTitle">وصلَنا رأيك.</h2>
     <p class="done-text" data-t="doneText">شكرًا لوقتك ولثقتك. ملاحظاتك هي ما يجعل العمل القادم أفضل من الذي قبله.</p>
     <a class="done-link" href="https://aliphcreative.com" data-t="doneLink">إلى موقع ألِف</a>

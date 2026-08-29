@@ -19,14 +19,24 @@
 }
 @font-face {
   font-family: "Idris Flat";
-  src: url("assets/fonts/29LTIdris-FlatRegular.woff2") format("woff2");
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Idris Flat";
   src: url("assets/fonts/29LTIdris-FlatMedium.woff2") format("woff2");
   font-weight: 500;
+  font-display: swap;
+}
+/* ⚠️ 700 IS THE BODY WEIGHT HERE, because it is the body weight on the site —
+   see the note on `body`. Idris Flat ships a real Bold, so this resolves to the
+   drawn face rather than a synthesised smear: a missing weight does not error,
+   the browser quietly fakes one, and a faked bold on an Arabic face reads as
+   the wrong font. Check `document.fonts.check('700 16px "Idris Flat"')` after
+   any font change here.
+
+   ⚠️ The 400 Regular this file used to declare is GONE, and its woff2 with it.
+   Nothing on the page asks for 400 any more, and CSS weight matching sends a
+   stray 400 UP to the 500 Medium — a real drawn face, not a synthesis. */
+@font-face {
+  font-family: "Idris Flat";
+  src: url("assets/fonts/29LTIdris-FlatBold.woff2") format("woff2");
+  font-weight: 700;
   font-display: swap;
 }
 
@@ -72,8 +82,19 @@ body {
   position: relative;
   min-height: 100svh;
   font-family: var(--font-body);
-  font-size: 0.62rem;
-  line-height: 1.75;
+  /* 🔴 THE SITE'S BODY SETTING, not a form's. The first build set 0.62rem at
+     weight 400 — 14.9px against the site's 22.8px at 700 — and the agency
+     could barely read it. `html` is 150% here exactly as it is on the site and
+     neither has a responsive override, so a rem means the same thing on both
+     at every width: 0.92rem is `.clip-text p`'s 0.95rem to within a hair, and
+     700 is the weight the site inherits into every paragraph.
+
+     ⚠️ Both numbers are the site's and they move together — bold sets WIDER,
+     so a size solved against 400 is not transferable to 700. Everything below
+     is a step off this one. */
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.85;
   color: var(--ink);
   background: transparent;
   display: flex;
@@ -167,9 +188,11 @@ html[lang="en"] .ls-knob { left: 50%; }
 .ls-opt {
   position: relative;
   padding: 0.05rem 0.7rem;
-  font-size: 0.42rem;
-  font-weight: 500;
+  /* the site's own .ls-opt, to the decimal — it is the same control */
+  font-size: 0.62rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
+  line-height: 1.7;
   text-align: center;
   transition: color 0.3s;
 }
@@ -193,19 +216,25 @@ html[lang="en"] .ls-opt[data-l="ar"] { color: var(--ink); }
 .title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.15rem, 5.4vw, 1.62rem);
+  font-size: clamp(1.45rem, 6.6vw, 2.1rem);
   line-height: 1.15;
   /* the site's rule for display type: it is set tight and left to breathe */
   text-wrap: balance;
 }
+/* A step ABOVE the questions and a weight below them, which is the site's own
+   lede setting: `.dropcap-block` is 500, not the 700 its paragraphs inherit. */
 .lede {
-  margin-top: 0.7rem;
+  margin-top: 0.8rem;
+  font-size: 1.02rem;
+  font-weight: 500;
+  line-height: 1.8;
   color: var(--ink-soft);
   text-wrap: pretty;
 }
 .meta {
-  margin-top: 0.4rem;
-  font-size: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--ink-mute);
 }
@@ -225,20 +254,24 @@ html[lang="en"] .ls-opt[data-l="ar"] { color: var(--ink); }
   border-inline-start: 2px solid var(--accent);
   background: var(--cream-warm);
   color: var(--ink-soft);
-  font-size: 0.54rem;
-  line-height: 1.6;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.7;
 }
 
 /* ── a question ───────────────────────────────────────────────── */
 
-.q { margin-bottom: clamp(1.4rem, 4.5vw, 2.1rem); }
+.q { margin-bottom: clamp(1.6rem, 5vw, 2.4rem); }
 .q fieldset { border: 0; }
 
+/* The question is the body weight; the ANSWERS below step down to 500. Two
+   real drawn weights, so the hierarchy is in the face rather than in a size
+   difference nobody can see at arm's length. */
 .q-label {
   display: block;
-  font-weight: 500;
-  line-height: 1.5;
-  margin-bottom: 0.55rem;
+  font-weight: 700;
+  line-height: 1.55;
+  margin-bottom: 0.7rem;
   text-wrap: pretty;
 }
 .req {
@@ -248,10 +281,11 @@ html[lang="en"] .ls-opt[data-l="ar"] { color: var(--ink); }
 }
 .hint {
   display: block;
-  font-weight: 400;
-  font-size: 0.48rem;
+  font-weight: 500;
+  font-size: 0.7rem;
+  line-height: 1.6;
   color: var(--ink-mute);
-  margin-top: 0.1rem;
+  margin-top: 0.18rem;
 }
 
 /* ── text fields ──────────────────────────────────────────────── */
@@ -260,11 +294,17 @@ html[lang="en"] .ls-opt[data-l="ar"] { color: var(--ink); }
   display: block;
   width: 100%;
   font: inherit;
+  /* ⚠️ AFTER the `font` shorthand, which resets both. What a client TYPES is
+     set at the answer weight, not the question's — a form that renders your
+     own writing in the same bold as the thing asking for it reads as shouting
+     back at you. */
+  font-size: 0.88rem;
+  font-weight: 500;
   color: var(--ink);
   background: var(--cream-warm);
   border: var(--line);
-  border-radius: 2px;
-  padding: 0.5rem 0.6rem;
+  border-radius: 3px;
+  padding: 0.6rem 0.72rem;
   transition: border-color 0.2s, background 0.2s;
 }
 .field:hover { border-color: rgba(15, 24, 32, 0.5); }
@@ -274,13 +314,28 @@ html[lang="en"] .ls-opt[data-l="ar"] { color: var(--ink); }
   background: #E9E7DE;
 }
 .field:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
+textarea.field { resize: vertical; min-height: 5.4rem; line-height: 1.8; }
 
-.field-other { margin-top: 0.5rem; }
+.field-other { margin-top: 0.75rem; }
 
-/* ── options: checkbox and radio, one treatment ───────────────── */
+/* ── options: a RULED LIST, not a stack of boxes ───────────────── */
 
-.opts { display: grid; gap: 0.28rem; }
+/* 🔴 THESE WERE BOXES AND THE AGENCY ASKED FOR THEM NOT TO BE. Every option
+   was its own full-width rectangle — hairline border, 2px radius, its own warm
+   fill — so a four-answer question read as four hard-edged buttons stacked in
+   a column, which is the one thing a page set in this newsprint vocabulary is
+   not. The rectangle is gone. What is left is a ruled list, the way answers sit
+   on a printed form: hairlines BETWEEN the rows, a rule above and below the
+   set, and nothing drawn around any single row.
+
+   ⚠️ The affordance had to move somewhere, and it moved onto the marker and
+   the row's ink — the marker is always drawn, it fills on choosing, the row's
+   colour comes up from --ink-soft to full ink, and a terracotta rule lights at
+   the reading edge. A set of options with nothing drawn at all reads as prose. */
+.opts {
+  display: grid;
+  border-block: var(--line);
+}
 
 .opt {
   /* ⚠️ Load-bearing: the input below is absolutely positioned, and without a
@@ -290,15 +345,23 @@ textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.42rem 0.6rem;
-  border: var(--line);
-  border-radius: 2px;
-  background: var(--cream-warm);
+  gap: 0.55rem;
+  padding: 0.55rem 0.1rem;
+  color: var(--ink-soft);
+  /* The chosen row is marked by a rule at the reading edge, reserved
+     TRANSPARENT here so lighting it moves nothing sideways.
+
+     ⚠️ `border-inline-start` ON PURPOSE, and this is NOT the mistake the tick
+     made further down. A rule at the edge the reading starts from is a
+     DIRECTION and must mirror — right in Arabic, left in English. A tick is a
+     SHAPE and must not. The logical property is right here and wrong there. */
+  border-inline-start: 2px solid transparent;
+  padding-inline-start: 0.6rem;
   cursor: pointer;
-  transition: border-color 0.18s, background 0.18s;
+  transition: color 0.18s, border-color 0.18s, background 0.18s;
 }
-.opt:hover { border-color: rgba(15, 24, 32, 0.5); }
+.opt + .opt { border-block-start: var(--line); }
+.opt:hover { color: var(--ink); background: rgba(15, 24, 32, 0.035); }
 
 /* 🔴 THE INPUT IS NOT display:none. A hidden input is not focusable, so the
    whole set drops out of the tab order and the arrow keys stop moving between
@@ -314,10 +377,15 @@ textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
 }
 .opt .box {
   flex: none;
-  width: 0.72rem;
-  height: 0.72rem;
-  margin-top: 0.32em;
-  border: 1px solid var(--ink);
+  width: 0.86rem;
+  height: 0.86rem;
+  margin-top: 0.36em;
+  /* Not full ink at rest. With no rectangle around it the marker is the only
+     drawn thing in the row, and a hard ink outline on every unchosen answer is
+     exactly the stiffness the boxes had. It comes up to full ink on hover and
+     fills on choosing. */
+  border: 1px solid rgba(15, 24, 32, 0.45);
+  border-radius: 2px;
   background: transparent;
   position: relative;
   transition: background 0.18s, border-color 0.18s;
@@ -331,11 +399,12 @@ textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
 /* a checkbox is a square, a radio is a disc — the shapes stay honest */
 .opt input[type="radio"] ~ .box { border-radius: 50%; }
 
-.opt input:checked ~ .box { background: var(--ink); }
+.opt:hover .box { border-color: var(--ink); }
+.opt input:checked ~ .box { background: var(--ink); border-color: var(--ink); }
 .opt input:checked ~ .box::after {
   content: "";
   position: absolute;
-  inset: 0.16rem;
+  inset: 0.2rem;
   background: var(--cream);
 }
 .opt input[type="radio"]:checked ~ .box::after { border-radius: 50%; }
@@ -349,24 +418,28 @@ textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
   inset: auto;
   top: 44%;
   left: 50%;
-  width: 0.24rem;
-  height: 0.44rem;
+  width: 0.28rem;
+  height: 0.5rem;
   background: none;
   border-right: 2px solid var(--cream);
   border-bottom: 2px solid var(--cream);
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
-.opt:has(input:checked) { border-color: var(--ink); background: #E9E7DE; }
-.opt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.opt:has(input:checked) { color: var(--ink); border-inline-start-color: var(--accent); }
+/* ⚠️ offset 1px, not the 2px the boxes could afford. The rows share their
+   edges now — an outline pushed 2px out would sit on top of the neighbouring
+   row's hairline. */
+.opt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-.opt-t { line-height: 1.55; }
+/* the answers step down from the question's 700 — see .q-label */
+.opt-t { font-weight: 500; line-height: 1.6; }
 
 /* ── the rating ───────────────────────────────────────────────── */
 
 .rating {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.3rem;
   /* ⚠️ NO `direction: ltr` HERE, and it was there first. Forcing the scale to
      run left-to-right "so low is always on the left" put the one row of stamps
      against the left edge of an otherwise right-aligned Arabic page, with its
@@ -386,8 +459,8 @@ textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
 }
 .star-mark {
   display: block;
-  width: 1.45rem;
-  height: 1.45rem;
+  width: 1.65rem;
+  height: 1.65rem;
   background: var(--ink);
   opacity: 0.16;
   transition: opacity 0.18s, transform 0.18s;
@@ -415,17 +488,19 @@ textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
 .star:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 .rating-read {
-  min-height: 1.1rem;
-  margin-top: 0.35rem;
-  font-size: 0.5rem;
+  min-height: 1.35rem;
+  margin-top: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 500;
   color: var(--ink-mute);
 }
 
 /* ── errors ───────────────────────────────────────────────────── */
 
 .err, .form-err {
-  margin-top: 0.4rem;
-  font-size: 0.5rem;
+  margin-top: 0.45rem;
+  font-size: 0.72rem;
+  line-height: 1.6;
   color: var(--accent);
   font-weight: 500;
 }
@@ -433,16 +508,17 @@ textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
 
 /* ── send ─────────────────────────────────────────────────────── */
 
-.send { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
+.send { display: flex; flex-direction: column; gap: 0.7rem; align-items: flex-start; }
 
 .btn {
+  font-size: 0.88rem;
   font-weight: 500;
   letter-spacing: 0.03em;
   color: var(--cream);
   background: var(--ink);
   border: 1px solid var(--ink);
-  border-radius: 2px;
-  padding: 0.5rem 1.7rem;
+  border-radius: 3px;
+  padding: 0.6rem 2rem;
   transition: background 0.2s, color 0.2s;
 }
 .btn:hover { background: transparent; color: var(--ink); }
@@ -476,17 +552,25 @@ textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
 /* ── the thank-you ────────────────────────────────────────────── */
 
 .done { padding: clamp(1.5rem, 6vw, 3rem) 0; }
-.done-stamp img { width: 3.2rem; height: auto; opacity: 0.9; margin-bottom: 1rem; }
+/* 🔴 SIZED BY HEIGHT, and it has to be. The half-aliph STAMP that used to
+   close this page is a seal on a 354x343 canvas — near square, so a width drove
+   it. The double aliph the agency asked for instead is the bare pair of
+   letterforms at 63x208, a ratio of 0.31: the same `width: 3.2rem` would have
+   drawn it 252px TALL.
+   ⚠️ If this mark is ever swapped again, check which axis is the long one
+   before copying the rule across. */
+.done-stamp img { height: 3.8rem; width: auto; opacity: 0.9; margin-bottom: 1.1rem; }
 .done-title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.05rem, 4.6vw, 1.4rem);
+  font-size: clamp(1.3rem, 5.6vw, 1.85rem);
   line-height: 1.2;
 }
-.done-text { margin-top: 0.6rem; color: var(--ink-soft); text-wrap: pretty; }
+.done-text { margin-top: 0.7rem; color: var(--ink-soft); text-wrap: pretty; }
 .done-link {
   display: inline-block;
-  margin-top: 1.1rem;
+  margin-top: 1.2rem;
+  font-size: 0.88rem;
   font-weight: 500;
   border-bottom: 1px solid var(--ink);
   padding-bottom: 1px;
@@ -498,7 +582,8 @@ textarea.field { resize: vertical; min-height: 4.4rem; line-height: 1.7; }
 .foot {
   padding: 1rem var(--pad) 1.4rem;
   border-top: var(--hair);
-  font-size: 0.46rem;
+  font-size: 0.68rem;
+  font-weight: 500;
   color: var(--ink-mute);
   text-align: center;
 }

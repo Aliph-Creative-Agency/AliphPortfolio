@@ -2,13 +2,35 @@
 
 _Updated 2026-08-29. Read this first._
 
-> ## 🟡 State on 2026-08-29: THE FORM IS LIVE AND CLOSED; THE SITE IS BEHIND
+> ## 🟡 State on 2026-08-29: THE FORM IS LIVE AND CLOSED; THE SITE AND THE FORM'S NEW LOOK ARE BOTH BEHIND
 >
 > ✅ **`feedback.aliphcreative.com` IS LIVE** — `feedback-worker/`, a THIRD
 > deployable beside the site and the chat, version
 > `fe8b50ba-17a3-4dd9-9573-179b1412cc13`. The custom domain and its DNS
 > record were created by the deploy itself. **The site is untouched**:
 > `aliphcreative.com` still answers 200 and is still `c5b80d8c-…`.
+>
+> ⚠️ **THE FORM LOOKS DIFFERENT AS OF 2026-08-29b AND THAT IS NOT DEPLOYED.**
+> Three edits the agency asked for: the type came up to the site's scale, the
+> option boxes became a ruled list, and the double aliph replaced the
+> half-aliph stamp at the thank-you. Committed and verified against
+> `wrangler dev` in both languages — **not pushed**. The live form is still
+> `fe8b50ba-…`, which carries the first build's small type.
+>
+> 🔴 **A SATELLITE PAGE COPIED THE SITE'S TOKENS AND INVENTED ITS OWN TYPE
+> SCALE.** Palette, faces and linen were lifted; the scale was not. Body was
+> `0.62rem` at weight 400 against the site's `0.92rem` at 700 — and because
+> both files set `html { font-size: 150% }` with no responsive override, that
+> is a flat 1.5× size gap plus two weight steps at **every** width, phone
+> included. The site's real Bold face had never been copied either, so matching
+> the weight meant shipping a font file, not changing a number.
+>
+> ⚠️ **`getComputedStyle` READ IN THE SAME TASK AS THE CLICK CAN MISS
+> `:has()`.** Ticking a box and reading the row's computed border in the same
+> evaluation returned the UNCHECKED values while the rule was painting
+> correctly the whole time. Read it again in a second call, or sample the
+> pixel. A single computed read that contradicts what you expect is
+> inconclusive, not a finding — and the same staleness can report a false PASS.
 >
 > 🔴 **IT IS DELIBERATELY NOT ACCEPTING RESPONSES, and it says so on the
 > page.** No Sheet, no service account, no secrets yet —
@@ -412,7 +434,167 @@ gesture has been invented for it.
 
 ---
 
-## Session 2026-08-29 — the client-feedback form, four ways a form breaks in Arabic, and a deploy that silently skipped its own address
+## Session 2026-08-29b — the form's type comes up to the site's, the option boxes stop being boxes, and a different mark closes it
+
+The agency read the deployed form and sent three notes: *"text are small i can
+barly read, match to sizes in the website homepage"*, *"the choices boxes feel
+boxy and stiff, change their look"*, and *"dont use the aliph stamp at the end,
+use another asset like the double aliph"*.
+
+All three are built and verified. 🔴 **None of it is deployed** — nobody asked,
+and the deploy is one command from `feedback-worker/`.
+
+### 1. 🔴 The type was never the site's — it was a form's, invented beside it
+
+The first build copied the site's `:root` wholesale: the palette, both faces,
+the linen, the double rule, the language pill. It did **not** copy the scale,
+and nothing in the file admitted that:
+
+| | the site | the form, before | now |
+|---|---|---|---|
+| `html` | `150%` → 24px | `150%` → 24px | unchanged |
+| body size | `0.95rem` ≈ 22.8px | **`0.62rem` = 14.9px** | `0.92rem` = 22.1px |
+| body weight | **700**, a real drawn Bold | **400** | 700 |
+| body line-height | 1.85 | 1.75 | 1.85 |
+
+⚠️ **Both files set `html { font-size: 150% }` and NEITHER has a responsive
+override**, so a rem is the same number of pixels on both pages at every width.
+That is what makes the comparison exact rather than approximate — and it is the
+first thing to check before trusting any rem-to-rem comparison between two
+stylesheets. The gap was a flat 1.5× plus two weight steps, on a phone as much
+as on a desktop.
+
+🔴 **The site's Bold face had never been copied into this Worker.** `prototype/`
+declares four `@font-face` rules — Sharp ExtraBold 800, Flat Regular 400,
+Medium 500 and **Bold 700** — and the form carried the first three. Asking for
+`font-weight: 700` without it would have got a synthesised smear, which on an
+Arabic face reads as the wrong font and does not error. `29LTIdris-FlatBold.woff2`
+is in the bundle now and `document.fonts.check('700 16px "Idris Flat"')` answers
+true in the browser.
+
+✅ **The payload did not grow: the 400 Regular came OUT.** Nothing asks for 400
+any more, and CSS weight matching sends a stray 400 **up** to the 500 Medium —
+a real drawn face, not a synthesis. Three faces in, three faces out; the preload
+in `index.html` moved with it.
+
+**The rest of the scale, in one place** — every value is a step off the body:
+
+| | before | now |
+|---|---|---|
+| `.title` | `clamp(1.15rem, 5.4vw, 1.62rem)` | `clamp(1.45rem, 6.6vw, 2.1rem)` |
+| `.lede` | inherited 0.62/400 | `1.02rem`, weight **500** |
+| `.q-label` | 0.62rem, weight 500 | inherits 0.92rem, weight **700** |
+| `.opt-t` | inherited | weight **500** |
+| `.field` | `font: inherit` | `0.88rem`, weight 500 |
+| `.hint` / `.meta` | 0.48 / 0.5rem | 0.7rem, weight 500 |
+| `.notready` | 0.54rem | 0.78rem |
+| `.err`, `.rating-read` | 0.5rem | 0.72rem |
+| `.ls-opt` | 0.42rem, 500 | **0.62rem, 700** — the site's, to the decimal |
+| `.foot` | 0.46rem | 0.68rem |
+
+⚠️ **The question is 700 and the answers are 500, and that is deliberate.** Both
+are real drawn weights, so the hierarchy lives in the face rather than in a size
+difference nobody can see at arm's length. The same reason puts `.field` at 500:
+a form that renders what a client TYPES in the same bold as the thing asking for
+it reads as shouting back at them.
+
+⚠️ **`.field` sets its size AFTER `font: inherit`.** The shorthand resets both
+size and weight; a rule written above it does nothing.
+
+✅ **The measure improved by itself.** `.sheet` is still `max-width: 34rem` — but
+34rem of 0.62rem text is a 55em line, and 34rem of 0.92rem text is 37em. The
+width did not move; the type filling it did. Nothing was tuned here.
+
+### 2. 🔴 The option boxes are gone — it is a ruled list now
+
+Every option was its own full-width rectangle: hairline border, 2px radius, its
+own warm fill. A four-answer question was four hard-edged buttons stacked in a
+column, which is the one thing a page set in this newsprint vocabulary is not.
+That is the "boxy and stiff" the agency named.
+
+**What replaced it:** hairlines BETWEEN the rows and a rule above and below the
+set, and nothing at all drawn around any single row — answers on a printed form.
+
+⚠️ **The affordance had to move somewhere, and it moved onto the marker and the
+row's ink.** A set of options with nothing drawn is prose. So: the marker is
+always drawn and is no longer a full-ink outline at rest (`rgba(…, 0.45)` — a
+hard outline on every unchosen answer is exactly the stiffness the boxes had);
+it comes to full ink on hover; it fills on choosing; the row's text lifts from
+`--ink-soft` to full ink; and a **terracotta rule lights at the reading edge**.
+
+🔴 **`border-inline-start` ON PURPOSE, and it is NOT the mistake the tick made
+on 2026-08-29a.** A rule at the edge the reading starts from is a **direction**
+and must mirror — right in Arabic, left in English. A tick is a **shape** and
+must not. Both were checked in the rendered page: the rule is on the right in
+Arabic and on the left in English, and the tick points the same way in both.
+
+⚠️ **The rule is reserved TRANSPARENT at rest**, so lighting it moves nothing
+sideways. And the focus outline dropped from `offset: 2px` to `1px`: the rows
+share their edges now, and a ring pushed 2px out sits on the neighbour's
+hairline.
+
+### 3. ✅ The double aliph closes the page, not the stamp
+
+`assets/img/DoubleAliph-Icon.svg`, copied from
+`Brand/Assets/Icon/Double Aliph/`. The bare pair of letterforms rather than the
+seal — the agency asked for a mark that is not the stamp, and the half-aliph
+stamp is what the site itself uses on the home page.
+
+🔴 **It is sized by HEIGHT, and it has to be.** `HalfAliph-Stamp.svg` is a seal
+on a 354×342 canvas — near square, so `width: 3.2rem` drove it. The double aliph
+is **63×208**, a ratio of 0.31: the same rule would have drawn it **252px tall**.
+It is `height: 3.8rem` now, rendering 27.8×91.2. If this mark is ever swapped
+again, check which axis is the long one before copying the rule across.
+
+⚠️ **`HalfAliph-Stamp.svg` is still the FAVICON** and still in the bundle. The
+instruction was about the end of the page. Worth raising separately: the site's
+own three pages use `HalfAliph-Icon.svg` for theirs, and an 18 KB seal is not
+what a 16px tab icon wants.
+
+### Verified, not assumed
+
+Against `wrangler dev` on :8341, in a real browser, both languages.
+
+- body computes **22.08px / 700 / 40.85px line** — the site's setting
+- all three faces are real: `fonts.check()` true at **700, 500 and 800**
+- the option rows compute with **no background, no radius**, a transparent 2px
+  inline-start border, and 62.7px of height per row
+- a chosen row: `rgb(187, 92, 57)` rule, `rgb(15, 24, 32)` text, ink-filled
+  marker — **seen in the render**, in Arabic on the right edge and in English on
+  the left
+- **14 tab stops**, unchanged, honeypot still excluded
+- four real `Tab` presses land on the first checkbox and the terracotta focus
+  ring is **visible in the captured pixels**, not merely computed
+- `scrollWidth === clientWidth === 390` in **both** languages — no horizontal
+  scroll
+- `.done-stamp img` renders 27.8 × 91.2 from `DoubleAliph-Icon.svg`
+- no console errors
+
+⚠️ **`getComputedStyle` LIED ONCE WHILE CHECKING THIS.** Ticking a box and
+reading the row's computed border in the same evaluation returned the UNCHECKED
+values — transparent rule, soft text — while the rule was painting correctly the
+whole time. A second call returned the truth, and the screenshot agreed with the
+second call. Style invalidation is asynchronous with respect to the script that
+triggers it, and `:has()` on an ancestor is the case where it shows. **Read it in
+a separate call, or sample the pixel** — and treat a single contradicting
+computed read as inconclusive rather than as a finding, because the same
+staleness can report a false PASS.
+
+⚠️ **The preview pane's screenshots go stale after a scroll on this page** — a
+fixed `body::before` linen layer and a small pane between them produced blank
+and tiled captures. What worked was a tall emulated viewport with no scrolling
+at all. Measure with script; capture without scrolling.
+
+### Not touched
+
+`src/index.js`, the endpoint, the validation, the status probe, the Sheets path,
+`wrangler.toml`, `SETUP.md`. This round is `public/style.css`, `public/index.html`
+and two asset files. **The form still has no Sheet behind it** — see the section
+below, which is unchanged.
+
+---
+
+## Session 2026-08-29a — the client-feedback form, four ways a form breaks in Arabic, and a deploy that silently skipped its own address
 
 > ⚠️ **This round was filed as "2026-08-27c" until the deploy, and it was
 > never the 27th.** `date +%F` and every commit stamp say **2026-08-29**; the
