@@ -20,8 +20,6 @@ compatibility_date = "2026-08-01"
 # a different hostname, looking exactly like a successful deploy.
 account_id = "6c60bd775004cfa0082f768c356c7242"
 
-[observability]
-enabled = true
 
 # ── the public address ─────────────────────────────────────────────
 # `custom_domain = true` makes wrangler create the hostname AND its DNS record
@@ -35,9 +33,19 @@ enabled = true
 #
 # The alternative, a route on `aliphcreative.com/feedback*`, is in SETUP.md and
 # needs the page's assets moved under /feedback/ first. Not taken.
+#
+# 🔴 THIS BLOCK MUST STAY ABOVE EVERY `[table]` HEADER. It sat under
+# `[observability]` on the first attempt and TOML read it as
+# `observability.routes` -- a bare key belongs to whichever table precedes it.
+# wrangler deployed happily, warned `Unexpected fields found in observability
+# field: "routes"` in among the upload log, and published to workers.dev with
+# NO custom domain. A misplaced key here does not fail; it does nothing.
 routes = [
   { pattern = "feedback.aliphcreative.com", custom_domain = true }
 ]
+
+[observability]
+enabled = true
 
 # ⚠️ A Worker WITH a script has to serve its own assets — the binding is what
 # `env.ASSETS.fetch(request)` in src/index.js reads. The site's config has no
