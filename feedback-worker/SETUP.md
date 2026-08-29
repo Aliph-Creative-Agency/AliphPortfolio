@@ -70,44 +70,71 @@ and Secrets**, all three as **Secret**, not as Variable.
 Pasting it through a dashboard sometimes turns the newlines into literal `\n` —
 [src/index.js](src/index.js) already handles that, so either form works.
 
-## 5. Deploy
+## 5. ✅ Already done — deployed, and at its real address
+
+> The Worker is **live at <https://feedback.aliphcreative.com>** as of
+> 2026-08-29. Steps 5 and 6 are recorded here because they explain the state
+> you are walking into, not because there is anything left to do in them.
+
+🔴 **Setting a secret needs the Worker to already exist** — `wrangler secret put`
+answers `Worker "aliph-feedback" not found` otherwise. That is why the deploy
+came first and why the form spent a window live with no Sheet behind it. It
+says so on the page and refuses submissions with a 503 rather than losing them;
+see `src/index.js`. **Adding the three secrets needs no redeploy** — they take
+effect on their own and the notice clears itself.
+
+⚠️ **`aliph-feedback.ceo-6c6.workers.dev` is OFF.** Declaring `routes` disables
+workers.dev unless `workers_dev = true` says otherwise. One address is the right
+end state, but do not read that host's silence as a broken deploy.
+
+**Redeploying**, after a change to the page or the Worker:
 
 ```bash
 npx wrangler deploy
 ```
 
-That publishes to `https://aliph-feedback.ceo-6c6.workers.dev`. Then:
+🔴 **Read the deploy summary's trigger list, not the exit code.** It prints the
+addresses it actually published to. A misplaced key in `wrangler.toml` does not
+fail — it does nothing: `routes` written under `[observability]` became
+`observability.routes`, and wrangler deployed happily to workers.dev with no
+custom domain at all.
 
-- open it, submit one test entry, and confirm the row lands in the Sheet
-- delete the test row afterwards; nothing caches it
+## 6. The address, and the alternative that was not taken
 
-## 6. Give it a real address
+`feedback.aliphcreative.com` is a **custom domain declared in
+[wrangler.toml](wrangler.toml)**, not a dashboard click — `custom_domain = true`
+makes wrangler create the hostname and its DNS record at deploy time, so the
+address lives with the thing it points at. **Neither this nor the alternative
+touches the site's own deploy**; both are routing on the `aliphcreative.com`
+zone, and the site keeps the apex and `www`.
 
-Two options, and **neither one touches the site's own deploy** — both are
-routing, configured in the Cloudflare dashboard on the `aliphcreative.com` zone.
+**The alternative, still available** — `aliphcreative.com/feedback`
 
-**A subdomain** — `feedback.aliphcreative.com`
-
-> Workers & Pages → aliph-feedback → Settings → Domains & Routes → **Add custom
-> domain** → `feedback.aliphcreative.com`. Cloudflare creates the DNS record.
-
-**A path on the main domain** — `aliphcreative.com/feedback`
-
-> Same screen → **Add route** → `aliphcreative.com/feedback*` → zone
+> A route rather than a custom domain: `aliphcreative.com/feedback*` on zone
 > `aliphcreative.com`. Requests matching that path go to this Worker; everything
 > else still goes to the site.
 >
-> ⚠️ The route has to be `/feedback*` with the star, because the page also
-> fetches `/style.css`, `/app.js` and `/assets/…` — without the star those fall
-> through to the site Worker and 404. If you take this option, move the page's
-> assets under `/feedback/` first, or the form will load unstyled.
+> ⚠️ The star is load-bearing, because the page also fetches `/style.css`,
+> `/app.js` and `/assets/…` — without it those fall through to the site Worker
+> and 404. Taking this option means moving the page's assets under `/feedback/`
+> first, or the form loads unstyled.
 >
-> ✅ The one real gain: same origin as the site, so the language a client picked
+> ✅ Its one real gain: same origin as the site, so the language a client picked
 > on `aliphcreative.com` carries into the form (`localStorage` is per-origin —
 > see the note in [public/app.js](public/app.js)).
 
-The subdomain is the simpler of the two and is what this is built for as it
-stands.
+## 7. The first real submission
+
+🔴 **The Sheets append has never run.** Every validation path was exercised
+against `wrangler dev` with no credentials at all, because they all return
+before Sheets is touched — but the append itself needs the three secrets and a
+shared Sheet, so the first submission after step 4 is the first time that code
+executes.
+
+- open <https://feedback.aliphcreative.com>, confirm the "not accepting
+  responses" notice is **gone** and Send is enabled
+- submit one test entry and confirm the row lands in the Sheet
+- delete the test row afterwards; nothing caches it
 
 ---
 
