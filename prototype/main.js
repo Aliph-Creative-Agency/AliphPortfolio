@@ -1703,7 +1703,11 @@ const serviceRings = (() => {
       });
       stage.appendChild(ring);
       reel.appendChild(stage);
+      /* pop/popNow are the scale twins of lift/liftNow — the target layout()
+         solves the ring against, and the value paint() eases toward it. They
+         start at 1 rather than 0: this one is a multiplier. */
       return { id, stage, ring, items, front: -1, picked: -1, lift: 0, liftNow: 0,
+               pop: 1, popNow: 1,
                nodes: Array.from(ring.querySelectorAll(".ring-item")) };
     });
     buildList();
@@ -1780,13 +1784,22 @@ const serviceRings = (() => {
       const widest = dims.reduce((a, d) => Math.max(a, d.w), 0);
       const tallest = dims.reduce((a, d) => Math.max(a, d.h), 0);
       const LIFT = 0.13;                    /* the picked item's proudness, of rad */
+      /* 🔴 THE FRONT PIECE IS SCALED UP (2026-08-30), and the solver has to
+         know: the piece that is enlarged is the front one, which is exactly
+         the one already nearest the top and side edges. Solving against the
+         unscaled size and then scaling the winner is how a poster ends up cut
+         along the bottom — the fault the agency reported about the film strip.
+         So the widest and tallest are measured AT POP before the ring is
+         sized, and the ring simply comes out a little smaller to pay for it.
+         ⚠️ Must equal the picked value paint() eases --pop toward. */
+      const POP = 1.18;
       const fitFor = (k) => {
         const r = rad * k;
         const near = r * (1 + LIFT) * Math.cos(tilt);
         const mag = P > near + 1 ? P / (P - near) : 8;
-        const halfW = (r * (1 + LIFT) + widest * k * 0.5) * mag;
+        const halfW = (r * (1 + LIFT) + widest * POP * k * 0.5) * mag;
         const halfH = (r * (1 + LIFT) * Math.sin(tilt)
-                       + tallest * k * 0.5 * Math.cos(tilt)) * mag;
+                       + tallest * POP * k * 0.5 * Math.cos(tilt)) * mag;
         /* ⚠️ ASYMMETRIC ON PURPOSE. The sides get a 1.14 bleed and the top and
            bottom get none, because those are two different readings. A poster
            running under the left or right edge of the band says the orbit
@@ -1812,6 +1825,7 @@ const serviceRings = (() => {
       const fit = lo;
       rad *= fit;
       s.lift = rad * LIFT;
+      s.pop = POP;
 
       s.nodes.forEach((n, i) => {
         const w = dims[i].w * fit;
@@ -1879,11 +1893,15 @@ const serviceRings = (() => {
       n.style.setProperty("--o", (1 - Math.min(away[i], 180) / 600).toFixed(3));
       /* only the front item is ever proud; everything else lies on the band */
       if (i !== best) n.style.setProperty("--lift", "0px");
+      /* ...and only the front item is ever enlarged. 1 is the identity here,
+         not 0 — a piece left at --pop: 0 would scale to nothing. */
+      if (i !== best) n.style.setProperty("--pop", "1");
       n.classList.toggle("is-front", i === best);
     });
     /* ⚠️ The new front starts flat and RISES, rather than appearing already
        lifted. paint() eases it — see liftTarget below. */
     s.liftNow = 0;
+    s.popNow = 1;
     /* ══════ the front item's reel plays (2026-08-24) ══════
        ⚠️ AN EVENT, not a call into `previews`. That module is defined several
        hundred lines below this one, so a direct reference here is in the
@@ -1947,6 +1965,17 @@ const serviceRings = (() => {
               : s.liftNow + (target - s.liftNow) * 0.16;
     if (Math.abs(target - s.liftNow) < 0.2) s.liftNow = target;
     if (s.nodes[i]) s.nodes[i].style.setProperty("--lift", s.liftNow.toFixed(1) + "px");
+    /* The same easing, on the scale (2026-08-30). Written on the same node in
+       the same frame so the piece grows and stands proud as one move.
+       ⚠️ The 0.45 is applied to the DISTANCE FROM 1, not to the scale — a
+       piece at 0.45 * 1.18 would shrink to just over half size. The picked
+       piece reaches POP, which is the value layout() sized the ring against;
+       the merely-front piece gets a smaller share of the same travel, the way
+       the lift already does. */
+    const popT = 1 + ((s.pop || 1) - 1) * (i === s.picked ? 1 : 0.45);
+    s.popNow = prefersReduced ? popT : s.popNow + (popT - s.popNow) * 0.16;
+    if (Math.abs(popT - s.popNow) < 0.002) s.popNow = popT;
+    if (s.nodes[i]) s.nodes[i].style.setProperty("--pop", s.popNow.toFixed(3));
     /* Only the ring on screen is worth turning.
        ⚠️ INERT as well as aria-hidden, and written only when it CHANGES.
        aria-hidden alone hid the two off-screen rings from a screen reader and

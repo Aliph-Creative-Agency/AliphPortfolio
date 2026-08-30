@@ -521,8 +521,35 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
    itself, because the overlay's copy sits on a solid ink field where
    transparent is already correct — and filling it there would paint a cream
    patch onto the menu. */
+/* 🔴 THE FILL BECAME THE BU🔴GE🔴'S ⚠️ASH (2026-08-30). The block above
+   describes the fill that was here, and the agency's answer to it was "i dont
+   like what u did with the lang button, how about replicating what u did with
+   the nav button for it". They are right, and the two controls should never
+   have been solved differently: a solid cream pill stops the heading tangling
+   with the knob by DELETING the words behind it, which trades a smudge for a
+   hole. The burger's answer — a radial wash in the ground's own colour, opaque
+   under the mark and gone by the edge — veils the letters directly under the
+   control and leaves them everywhere else, so the heading reads THROUGH the
+   gap between the pill and the words.
+
+   Same gradient, same stops, same `.on-dark` flip as `.menu-btn::before`; only
+   the shape differs, because `closest-side` on a wide box draws the ellipse
+   the pill needs where the burger's square gets a circle.
+
+   ⚠️ `overflow: hidden` HAD TO GO for the masthead's copy, and that is the
+   whole reason this is not simply a `background`. The wash has to bleed past
+   the pill to fade out; clipped to the border-radius it is a hard-edged
+   cream pill again, which is the thing being removed. ✅ The clip was not
+   holding anything in: measured in both languages, the knob sits 4px inside
+   the pill on three sides and 64px on the fourth, so it never reached an
+   edge to be clipped at. Nothing had to move to take the clip away — but
+   check that again if .ls-knob's `left`/`width` pair is ever re-expressed.
+   ⚠️ Scoped to `.masthead`. The overlay's copy sits on a solid ink field
+   where there is nothing to clear, and a wash there would be a cream smear
+   on the menu. */
 .masthead .lang-switch {
-  background: var(--cream);
+  background: transparent;
+  overflow: visible;
   position: fixed;
   left: var(--pad);
   right: auto;
@@ -530,6 +557,29 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
   transform: translateY(-50%);
   z-index: 940;
 }
+/* ⚠️ `z-index: -1` under `isolation: isolate` on the pill, exactly as the
+   burger does it: behind the ring, the knob and the words, in front of the
+   page. The knob is `z-index: -1` too and comes later in paint order, so it
+   still sits over the wash. */
+.masthead .lang-switch::before {
+  content: "";
+  position: absolute;
+  inset: -9px -13px;
+  z-index: -1;
+  border-radius: 99px;
+  pointer-events: none;
+  background: radial-gradient(closest-side,
+    rgba(217, 217, 206, 0.88) 0%, rgba(217, 217, 206, 0.72) 55%,
+    rgba(217, 217, 206, 0) 100%);
+  transition: background 0.3s;
+}
+.masthead .lang-switch.on-dark::before {
+  background: radial-gradient(closest-side,
+    rgba(15, 24, 32, 0.88) 0%, rgba(15, 24, 32, 0.72) 55%,
+    rgba(15, 24, 32, 0) 100%);
+}
+/* the overlay is a solid ink field of its own — nothing to clear */
+body.nav-open .masthead .lang-switch::before { background: none; }
 /* the overlay carries its own copy in its footer — without this you see two
    pills, since the fixed one sits above the overlay */
 body.nav-open .masthead .lang-switch {
@@ -539,17 +589,32 @@ body.nav-open .masthead .lang-switch {
 
 /* Same treatment as the burger, but sampled separately: the two sit at
    opposite corners and are regularly over different sections at once. */
-.masthead .lang-switch.on-dark { background: var(--ink); }
+/* ⚠️ The masthead's copy no longer paints a fill in EITHER state — its
+   ::before wash above flips instead, which is the burger's arrangement. */
 .lang-switch.on-dark { border-color: var(--cream); background: transparent; }
 .lang-switch.on-dark .ls-knob { background: var(--cream); }
 .lang-switch.on-dark .ls-opt { color: var(--cream); }
 html[lang="ar"] .lang-switch.on-dark .ls-opt[data-l="ar"],
 html[lang="en"] .lang-switch.on-dark .ls-opt[data-l="en"] { color: var(--ink); }
 .lang-switch.on-dark:hover { background: rgba(217, 217, 206, 0.12); }
-/* ⚠️ the shorthand REPLACES the fill above, so the masthead's copy needs the
-   lift pre-mixed into ink rather than laid over it — the overlay's copy has no
-   fill and keeps the translucent version. */
-.masthead .lang-switch.on-dark:hover { background: #1E2B36; }
+/* 🔴 THE MASTHEAD'S COPY HOVE🔴S ON THE ⚠️ASH, not on a fill (2026-08-30).
+   Both hover rules above set a solid background, and on a pill that is now
+   transparent either one would put back the opaque plate this round removed —
+   for as long as the pointer is on it. The wash deepens instead, so hover
+   reads as the control pressing a little harder into the page rather than as
+   a card appearing under the pointer. */
+.masthead .lang-switch:hover,
+.masthead .lang-switch.on-dark:hover { background: transparent; }
+.masthead .lang-switch:hover::before {
+  background: radial-gradient(closest-side,
+    rgba(217, 217, 206, 0.97) 0%, rgba(217, 217, 206, 0.85) 55%,
+    rgba(217, 217, 206, 0) 100%);
+}
+.masthead .lang-switch.on-dark:hover::before {
+  background: radial-gradient(closest-side,
+    rgba(15, 24, 32, 0.97) 0%, rgba(15, 24, 32, 0.85) 55%,
+    rgba(15, 24, 32, 0) 100%);
+}
 
 /* Overlay copy sits on ink, so the whole pill inverts — and it is pinned to
    the overlay's top-left rather than left in the footer row. Same physical
@@ -632,7 +697,11 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
 
 /* ── hero: film strip on a linen field + cream side panel ── */
 .hero {
-  /* 🔴 svh AND MINUS THE MASTHEAD (2026-08-27), and that is `16th.jpeg`.
+  /* 🔴 svh AND MINUS THE MASTHEAD (2026-08-27), and that is the FI🔴ST
+     `16th.jpeg`. ⚠️ The agency re-used that filename on 2026-08-30 for an
+     unrelated shot of the dropcap's shadow — the file on the Desktop is now
+     the second one, and this note describes a screenshot that no longer
+     exists there. A number in that folder identifies a REPORT, not a file.
      What was here was `clamp(560px, 88vh, 940px)`, and 88% is an ARITHMETIC
      COINCIDENCE rather than a proportion: the masthead is 104.8px, so on the
      1440×900 window this was designed at, 88vh + 104.8 comes to 897 and the
@@ -666,6 +735,10 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
      declaration and keeps the behaviour it has today. */
   --hero-h: clamp(560px, 88vh, 940px);
   --hero-h: clamp(460px, calc(100svh - var(--mast-h)), 940px);
+  /* The lede's type size, named here because TWO rules need it: the lede
+     itself, and .hero-panel's width, which hugs 20 of these plus its padding
+     (2026-08-30). Declared on the hero so both are inside it. */
+  --lede-fs: clamp(0.95rem, 1.62vw, 1.3rem);
   position: relative;
   height: var(--hero-h);
   /* no background — the page's own textured cream is what shows through the
@@ -932,9 +1005,42 @@ video.preview {
 }
 .hero-overlay > * { pointer-events: auto; }
 /* cream panel pinned to the start side, film visible beside it */
+/* 🔴 THE PANEL HUGS ITS COPY (2026-08-30), and that is `19th.png`. The agency
+   drew a red vertical line down the cream and asked for the panel to be cut
+   to it. Nothing was ALIGNED to that line — it marks where the dead cream
+   starts. Measured at the screenshot's own 1920x960: the panel ran 1022..1905
+   while the lede, capped at its 20em measure, only reached 1225. So 143px of
+   the panel was empty stock that grew with the window, and the line was drawn
+   through the middle of it.
+
+   The width is the measure plus the panel's own padding, so the panel is
+   exactly as wide as the widest thing in it. `min()` with the old 46vw keeps
+   the previous width wherever there is no slack to take.
+
+   ⚠️ `calc(20 * var(--lede-fs))`, NOT `20em`. This is the same length as
+   `.dropcap-block p`'s measure and it has to STAY the same length, so it is
+   read from one variable — but a custom property holding `20em` resolves
+   against whatever element uses it, and the panel's font-size is not the
+   lede's. A multiplied length is the only form that means the same thing in
+   both places.
+
+   ⚠️ Measured across the width sweep before and after: the lede's line count
+   is UNCHANGED at every width — 3 lines at 1920 and 1440, 4 at 1280 and
+   below, exactly as before — because the measure never moves; only the empty
+   stock beside it goes. At 1100 and narrower 46vw already wins and this is
+   inert, which is what keeps it clear of the 19em four-line cliff the measure
+   note below warns about.
+
+   ⚠️ It lands 29px short of the agency's line at 1920 (panel edge at 1168,
+   line at 1197). That 29px is the panel's own padding: they drew inside it,
+   and taking it would push the copy against the panel's edge. Raise it only
+   by cutting the padding, never by squeezing the measure.
+
+   ⚠️ The old `40rem` cap is gone because it can no longer bind — the hug
+   tops out at 26rem + 2 * --pad, which is under 40rem at every viewport. */
 .hero-panel {
   position: relative;
-  width: min(40rem, 46vw);
+  width: min(46vw, calc(20 * var(--lede-fs) + 2 * var(--pad)));
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1050,7 +1156,8 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
    reach it. At this size the Arabic runs to three lines and the two bottoms
    meet. Measured, not guessed — re-measure if --cap-h moves. */
 .dropcap-block {
-  font-size: clamp(0.95rem, 1.62vw, 1.3rem);
+  /* the number lives on .hero — the panel's width reads it too */
+  font-size: var(--lede-fs);
   line-height: 1.85;
   font-weight: 500;
   color: rgba(15, 24, 32, 0.82);
@@ -1087,7 +1194,10 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
    line the float releases, and a justified column beside a dropped initial is
    what this site's whole voice is: an Arabic newspaper. */
 .dropcap-block p {
-  max-width: 20em;
+  /* 20em, written as a multiple so .hero-panel's width can read the same
+     length — see the panel. An `em` inside a shared custom property would
+     resolve against the panel's font-size there and mean something else. */
+  max-width: calc(20 * var(--lede-fs));
   text-align: justify;
   /* ⚠️ THE 20em MEASURE IS NOT THE WHOLE GUARD, and the note above understates
      the fault (measured 2026-08-26 over a 7x5 grid of widths AND heights).
@@ -1138,10 +1248,43 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   height: var(--cap-h);
   margin-inline: 0.1rem 1.2rem;
   margin-bottom: 0.45rem;
-  /* two shadows: a tight contact one to seat the sheet, and a soft cast one —
-     cream paper on a cream field needs both to read */
-  filter: drop-shadow(0 2px 2px rgba(5, 9, 13, 0.34))
-          drop-shadow(0 14px 24px rgba(5, 9, 13, 0.3));
+  /* 🔴 THE SHADO⚠️ MOVED DO⚠️N ONTO THE SHEET (2026-08-30), and that is the
+     second `16th.jpeg` — the agency re-used the number for a new shot, so the
+     note in `.hero` about the film strip belongs to the OLD one. What this one
+     rings is the أ scrap, and the words were "the shadow of the aliph paper
+     part is not where its supposed to be after triggering the animation for
+     the first time".
+
+     Measured off the screenshot: a HA🔴D-EDGED grey rectangle offset to the
+     left of the scrap and below it, with nothing at all on its right. The
+     shadow declared here is `0 2px` and `0 14px` — straight down, soft, and
+     symmetric about the vertical. A hard rectangle with a sideways offset is
+     not this shadow rendered badly; it is a stale raster of it, left behind
+     at the position and shape the filter had before the sheet moved.
+
+     🔴 The cause is the SHAPE of the construction, not the numbers. A
+     `drop-shadow` filter derives its shadow from the alpha of the subtree it
+     is on. Here it sat on the PARENT while the only thing that paints —
+     `.dc-sheet`'s background-position — animated inside it, so the filter's
+     input changed 24 times without the filtered element itself painting
+     anything. That is the exact case a compositor is entitled to serve from a
+     cached layer, and iOS does. Nothing on desktop Chrome shows it, which is
+     why three rounds of looking at this in a headless browser found nothing.
+
+     The filter is on `.dc-sheet` now. The element that paints and the element
+     that is filtered are the same one, so a frame change cannot invalidate the
+     paint without invalidating the shadow — the stale case has nowhere left to
+     live. The two shadows are unchanged: a tight contact one to seat the
+     sheet, and a soft cast one, because cream paper on a cream field needs
+     both to read.
+
+     ⚠️ NOT VE🔴IFIED ON AN iPAD — there is no iOS device in this loop, and
+     the fault cannot be reproduced in Chrome at any viewport. What is verified
+     is that the rendered shadow is unchanged on desktop, and that the
+     construction that allowed the staleness is gone. If it survives, the next
+     lever is baking the shadow into the sprite's own pixels and dropping the
+     filter altogether — which needs the cells re-cut with margin, because
+     frame 23's paper already fills 318 of its 320px cell. */
 }
 .dc-sheet {
   position: absolute;
@@ -1150,6 +1293,8 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   background-repeat: no-repeat;
   background-size: 600% 400%;
   background-position: 0% 0%;
+  filter: drop-shadow(0 2px 2px rgba(5, 9, 13, 0.34))
+          drop-shadow(0 14px 24px rgba(5, 9, 13, 0.3));
 }
 html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp"); }
 /* the letter is baked into the sprite, so keep a real one for screen readers */
@@ -2131,7 +2276,38 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
   background: none;
   cursor: pointer;
   transform-style: preserve-3d;
-  transform: rotateY(var(--a));
+  /* 🔴 THE C⚠️🔴🔴ENT PIECE IS SCALED, AND THE Z IS PAID BACK (2026-08-30).
+     The agency asked to "just make the current item bigger". The lift this
+     ring already had does not do that, and measuring is what showed it: at
+     apo 264 a 40px lift takes the front piece from 199x210 to 232x216 — 17%
+     WIDER and 3% taller. Pushing slats out along their own normals fans the
+     arc into a longer chord; it does not enlarge anything. It reads as the
+     piece spreading, which is why three rounds of raising it never answered
+     the note.
+
+     A scale does enlarge, and the objection recorded against it — that
+     scaling a box whose children are placed by translateZ drags the slice of
+     cylinder off the circle — is true and is paid for here rather than
+     avoided. The parent's own translateZ is applied BEFORE the scale in the
+     matrix chain, so it is NOT scaled: a slat ends at
+     apo·(1−pop) + pop·(apo + lift) = apo + pop·lift. The face lands back on
+     the band's radius at every value of --pop, and the piece grows in place
+     instead of coming off the ring.
+
+     ⚠️ A transform on the ITEM is safe; the rule this file states twice is
+     about a wrapper BETWEEN .ring and a slat, and about opacity. The item
+     already carried rotateY here and the bend survives it — scale joins the
+     same matrix.
+     ⚠️ --pop is eased by paint(), never by a transition. --a is written by
+     layout() and --spin changes every frame; a transition on this transform
+     would smear the whole ring. Same rule as --lift.
+     ⚠️ layout()'s fit solver multiplies the widest and tallest item by POP
+     before it solves, or the enlarged piece grows straight through the top
+     of the stage — which is the fault `16th.jpeg` reported about the film
+     strip, one section down. */
+  transform: rotateY(var(--a))
+             translateZ(calc(var(--apo, 0px) * (1 - var(--pop, 1))))
+             scale(var(--pop, 1));
   /* 🔴 The BUTTON gives its clicks up and the slats take them, for exactly
      the reason .ring does above: this box is a flat plane at z = 0 sitting
      across the middle of the stage, and its own children have all been
@@ -2208,6 +2384,19 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
   --bleed: 2.2px;
   width: calc(var(--sw) + var(--bleed) * 2);
   height: var(--h);
+  /* 🔴 OPACITY ONLY, and it lives HE🔴E rather than in the .is-previewing
+     rule below (2026-08-30). A transition declared in the same rule that
+     changes the value does not run: the before-change style has no
+     transition for the property, so the change is instant in both
+     directions, and the slats would snap off under a film that is still
+     fading in. Stated on the base, it exists in both states and the two
+     cross over.
+     ⚠️ `opacity`, never `all`. This is a slat, and the file's standing rule
+     is that nothing between .ring and a slat may transition on transform —
+     --spin rewrites that every frame and a transition would smear the whole
+     ring sixty times a second. Naming the one property is what keeps a later
+     transform out of it by accident. */
+  transition: opacity 0.45s ease;
   background-repeat: no-repeat;
   background-origin: border-box;
   background-clip: border-box;
@@ -2311,6 +2500,26 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
   border: var(--media-line);
   border-radius: clamp(6px, 0.9vw, 14px);
 }
+/* 🔴 THE SLATS GO O⚠️T ⚠️NDE🔴 THE FILM (2026-08-30), and that is `18th.png`.
+   The agency read it as "its like u put another one on top of it with the
+   previous ones bounders showing", and that is exactly what it was. The film
+   is ONE FLAT plane at translateZ(apo + 2px); the still under it is ten slats
+   BENT around the axis, so every slat except the middle one sits further back
+   AND further out, and their rules came round the edge of the flat plane as a
+   second, offset outline. Nothing was doubled — the still was simply still
+   there, and a bent rectangle cannot hide behind a flat one.
+
+   Once the film is running the still has no job left, so it goes. Fading on
+   the same 0.45s the film fades in means the two cross over rather than one
+   snapping off under the other.
+
+   ⚠️ On the SLAT, never on `.ring-item`. Opacity on the item would flatten
+   transform-style and collapse the bend for the whole piece — the rule this
+   file states twice already. A slat is a leaf; its only child is the ::after
+   veil, which goes with it.
+   ⚠️ `.ring-item` is the selector and not `.is-front`, because a piece can
+   still be previewing for a frame or two after the ring has moved on. */
+.ring-item.is-previewing .ring-slat { opacity: 0; }
 
 /* The band's own edges. Only the two end strips have an outside, so only they
    carry the side rule and the corner — the eight between them are interior
@@ -3098,7 +3307,14 @@ body.lib-index .lib-list { display: block; }
      coming out twice as tall as the board it is pinned to.
      ⚠️ The montage overrides it below: it is alone on its row and can afford
      the height two verticals sharing a column cannot. */
-  --abh: clamp(230px, 36vh, 380px);
+  /* 🔴 ⚠️P F🔴OM 36vh (2026-08-30) — "make them bigger too". The overlap
+     above is what pays for it: two mats that used to sit side by side with a
+     gap now share --ab-lap of their width, so the pair fits the same column
+     at a size that would not have fitted before. Measured at 1920x960, mat
+     245 -> 313 wide and the pair's dead column 259px -> 79px.
+     ⚠️ The 380 cap went with it. A cap that binds at ordinary laptop heights
+     is the "bigger" being taken away again exactly where it was asked for. */
+  --abh: clamp(230px, 50vh, 470px);
   gap: clamp(0.9rem, 2vw, 1.6rem);
   padding: clamp(1.2rem, 3vh, 2rem) var(--pad) clamp(2rem, 5vh, 3.2rem);
   /* ⚠️ NO RULE ALONG THE BOTTOM (2026-08-24) — `12th.png` strikes it out.
@@ -3149,12 +3365,50 @@ body.lib-index .lib-list { display: block; }
    pictures now (see .ab-media) — the pair is narrower than its column, and
    left where it fell it would hug one edge of a row whose other half is a
    card. */
+/* 🔴 THE T⚠️O VE🔴TICALS OVE🔴LAP NO⚠️ (2026-08-30), and that is the second
+   half of `20th`. The agency sent a mock-up — "20th part 2" — with the two
+   pictures pulled together and one laid over the other, and asked for it on
+   every vertical in the section, bigger, "because theres still a lot of
+   spaces".
+
+   The spaces were real and they were measured before anything moved: at
+   1920 the pair's own column is 748px and the two mats and their gap came to
+   489, so 259px of the column — a third of it — was empty. The collage at the
+   top of this page had been doing the right thing all along; c3 and c5 there
+   overlap by 102px, and this section, which was written to copy it, kept a
+   positive gap.
+
+   ⚠️ A NEGATIVE MA🔴GIN, because `gap` cannot go below zero. The gap is 0 and
+   the second figure is pulled back over the first — `margin-inline-start`, so
+   it mirrors and the overlap stays on the reading side in both languages.
+   ⚠️ The overlap is a fraction of the mat, not a fixed length: --ab-lap is in
+   the same clamp family as the height, so growing the pictures does not turn
+   a deliberate overlap into a touch.
+   ⚠️ The one that is pulled BACK is the one that paints ON TOP — later
+   sibling, and both carry a rotate, so each is its own stacking context and
+   DOM order decides. That is also what the mock-up shows: the near card's
+   whole edge and shadow crossing the far one. */
 .ab-pair {
+  --ab-lap: clamp(1.6rem, 4.4vw, 3.6rem);
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: clamp(0.5rem, 1.4vw, 1.1rem);
+  gap: 0;
 }
+/* 🔴 AND THE A⚠️TO MA🔴GINS HAD TO GO, ⚠️HICH IS ⚠️HE🔴E THE SPACE ACT⚠️ALLY
+   ⚠️AS. `.ab-media` carries `margin-inline: auto` so a lone mat centres in the
+   grid track it was written for. Inside this flex row an auto margin is not a
+   centring device, it is a CLAIM ON THE F🔴EE SPACE — and it is settled before
+   `justify-content` is consulted, so the container's `center` never ran at
+   all. Measured with the overlap already in: the first mat took 70.6px of
+   margin on each side and the second another 70.6, so 212px of the column was
+   being handed to the margins, and the −84px overlap was being paid straight
+   back out. The pair read as two pictures pushed apart, which is exactly the
+   "lot of spaces" the agency was pointing at.
+   ⚠️ It has to be zeroed before the negative margin below, or the two
+   declarations fight over the same longhand. */
+.ab-pair > .ab-media { margin-inline: 0; }
+.ab-pair > .ab-media + .ab-media { margin-inline-start: calc(-1 * var(--ab-lap)); }
 
 /* 🔴 A CLIPPING, not a bordered box. The agency's note of 2026-08-23b was
    that the long read "didn't recreate the same style of the original top

@@ -197,8 +197,24 @@
         </div>
         <figcaption data-i18n="abCap2">تجهيز الكاميرا</figcaption>
       </figure>
-      <figure class="ab-media" data-film="bts-29.mp4"
-              data-preview="https://media.aliphcreative.com/video/bts-29.mp4" role="button" tabindex="0">
+      <!-- 🔴 ?v=2 IS NOT DECORATION AND IT IS NOT A CACHE-BUSTER FOR
+           DEVELOPMENT. The clean bts-29 replaced the watermarked one on the
+           bucket on 2026-08-27, and on 2026-08-30 a plain GET of the bare URL
+           still returned the OLD 1.14 MB clip: cf-cache-status HIT, Age
+           616452, held under the `public, max-age=31536000, immutable` that
+           resources/import_bts.py used to send. Cloudflare will hold that
+           entry until roughly 2027-08. The query is a different cache key, so
+           this is what actually puts the clean clip in front of a visitor
+           today — the agency has now reported the old clip TWICE.
+           ⚠️ BOTH attributes carry it: `data-preview` is the inline autoplay
+           and `data-film` is what the lightbox turns into ${R2}/video/… , so
+           versioning one leaves the other serving the watermark.
+           ✅ REMOVE BOTH once the URL has been purged in the Cloudflare
+           dashboard (Caching → Configuration → Purge Custom URL). The upload
+           scripts no longer send `immutable`, so nothing new can get stuck
+           this way. -->
+      <figure class="ab-media" data-film="bts-29.mp4?v=2"
+              data-preview="https://media.aliphcreative.com/video/bts-29.mp4?v=2" role="button" tabindex="0">
         <div class="ab-holder" style="--r:0.563">
           <img src="assets/media/bts-29.webp" alt="" loading="lazy" decoding="async">
           <span class="tile-play" aria-hidden="true"></span>

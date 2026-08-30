@@ -16,6 +16,41 @@ _Updated 2026-08-30. Read this first._
 > to the working tree, the Bold woff2 answers 200, the dropped Regular answers
 > **404**, and the body rule reads `0.92rem / 700 / 1.85`.
 >
+> 🔴 **THE EDGE ⚠️AS SE🔴VING A 🔴EPLACED CLIP FO🔴 A ⚠️EEK, AND `HEAD` SAID IT
+> ⚠️AS FINE.** A plain GET of `media.aliphcreative.com/video/bts-29.mp4`
+> returned the OLD 1.14 MB watermarked clip — `cf-cache-status: HIT`, `Age:
+> 616452`, held under `public, max-age=31536000, immutable` — while a `HEAD` of
+> the same URL answered with the NEW object's ETag and length. **HEAD and GET
+> are separate edge entries**, which is how the 2026-08-27 swap was recorded as
+> "verified live" and stayed broken. `import_bts.py` and `thumb_media.py` no
+> longer send `immutable`, and `about.html` carries `?v=2` on bts-29.
+> 🔴 **STILL O⚠️ED: purge that URL in the Cloudflare dashboard** (Caching →
+> Configuration → Purge Custom URL), then remove both `?v=2`. **Verify any
+> replace-in-place with an unmodified GET and a hash of the BODY** — a
+> cache-buster is a different cache key and proves nothing.
+>
+> 🔴 **THE SITE IS T⚠️O 🔴O⚠️NDS BEHIND NO⚠️.** The 2026-08-27b keyboard round
+> and the whole 2026-08-30 screenshot round are committed and undeployed;
+> `aliphcreative.com` is still `c5b80d8c-…`.
+>
+> ⚠️ **A SC🔴EENSHOT N⚠️MBE🔴 IS A 🔴EPO🔴T, NOT A FILE.** `16th.jpeg` and
+> `20th.png` on the Desktop were both REPLACED on 2026-08-30 with unrelated
+> shots. Several `style.css` comments cite the old ones; `.hero`'s citation has
+> been annotated rather than deleted. Check the file's date before trusting a
+> note that names one.
+>
+> 🔴 **`python -m http.server` SE🔴VES YO⚠️🔴 EDITS F🔴OM CHROME'S CACHE.** No
+> `Cache-Control`, so heuristic freshness wins through a normal reload, a
+> query-string reload and a forced navigation alike — subresources keep their
+> own cache keys. Several measurements this round were taken against pre-edit
+> files. **Use `aliph-prototype-nocache` on port 8323 for anything being
+> MEASURED**, and compare `decodedBodySize` against the file on disk.
+>
+> ⚠️ **A HIDDEN B🔴O⚠️SE🔴 PANE F🔴EEZES `requestAnimationFrame` AND CSS
+> T🔴ANSITIONS.** Zero frames, and transitions never advance — so animated
+> state reads as broken when it is correct. Suppress the transition and read
+> the end state instead of sampling.
+>
 > 🔴 **THE SHEET WAS THE QUEEN'S RETREAT SHEET, AND IT WAS STILL IN USE.** The
 > agency renamed and emptied `تسجيلات عودة الملكة` to serve as the feedback log —
 > but `queensretreat` was **still deployed and still reading it**, which one
@@ -330,25 +365,44 @@ for.
 
 ## ⏭ The next round — what is open
 
-1. 🔴 **`19th.png` IS THE ONE THING FROM THIS ROUND NOBODY CAN BUILD.** A red
-   vertical line is drawn down the hero's cream panel, 122px inside the film
-   strip's edge in a 627px crop. Nothing sits at that x: the hairline rule under
-   the lede ends 58px in, the lede's own leftmost line reaches 189px, and the
-   pinned notes start further right again. **Ask which two things are meant to
-   line up** — and for the full screen rather than a crop, because the crop
-   carries no landmark to scale it by.
-2. ⚠️ **The heading under the pill is still interrupted.** `17th.jpeg` is
-   fixed in the sense the agency meant — the controls are legible now — but a
-   filled pill OCCLUDES the words behind it where it used to tangle with them.
-   If they come back wanting the words as well, that is the hide-on-scroll /
-   fade-while-scrolling / reserve-the-gutters decision, still unmade.
+0. 🔴 **T⚠️O PA🔴TS OF THE 2026-08-30 🔴O⚠️ND A🔴E NOT B⚠️ILT, and both are
+   blocked on being able to MEASURE.** "Make the cards bigger" — `.ab-card` is
+   still 993px wide at 1920 — and the collage's own verticals (`c3`, `c5`,
+   still `--clh: 38vh`). Both want the width×height sweep this file demands for
+   anything sized in `vh`, and the browser tooling stopped answering partway
+   through that round. **Do not guess a number.** See _Session 2026-08-30_,
+   _What was left_.
+   ⚠️ Everything in that round after the block — the `.ab-pair` auto-margin
+   fix, `--abh`'s 470 cap, the dropcap's moved filter, `--pop` in motion — is
+   reasoned and code-checked but **never seen rendered**.
+1. ✅ **CLOSED 2026-08-30 — `19th.png` was never an alignment mark.** The red
+   line marks where the cream panel's DEAD STOCK begins: reconstructed at
+   1920×960, the panel ran 1022..1905 while the lede stopped at 1225, so 143px
+   of it was empty. The panel hugs its measure plus its padding now and the
+   lede's line count is unchanged at every width. It lands 29px short of the
+   line because that 29px is the panel's own padding.
+2. ⚠️ **The heading under the pill is no longer OCCLUDED, but it is still
+   veiled.** ✅ 2026-08-30 replaced the filled pill with the burger's radial
+   wash at the agency's request, so the words read through it instead of
+   disappearing behind it. What has still never been decided is whether the
+   controls should get out of the way at all — the hide-on-scroll /
+   fade-while-scrolling / reserve-the-gutters question.
 3. ⚠️ **bts-29 is 4.27 MB now on a page that autoplays it**, up from the
    1.14 MB the cropped re-encode served. That is `import_bts.py`'s house rule
    (remux the master, never re-encode) meeting a 7.1 Mbps 4.8s source, and it is
    the trade the agency asked for when they had the page's previews put back to
    masters. One `-c:v libx264 -crf 23` in `resources/replace_bts29.py` is the
    whole change if they want it down.
-4. ⚠️ **The ring seams may not be fixed.** The bleed is doubled and the
+4. ⚠️ **The ring seams may not be fixed, and the agency has now said the fix
+   itself looks wrong** — *"the fix u implemented for them doesnt look good
+   either"* (2026-08-30). That is the doubled bleed: the overlap duplicates
+   pixels at every junction, so a wider one is more visible smearing, and it
+   was only ever a margin. It was NOT reduced this round — the agency's own
+   suggestion was to enlarge the current piece instead, which is what `--pop`
+   does, and taking the bleed back down at the same time would have confounded
+   the two. **If they still see seams, drop the bleed to 1.1 first and judge
+   the two changes separately.** The original note follows.
+   ⚠️ **The bleed is doubled and the**
    mechanism is finally identified — GPU compositing, see the state block — but
    the fault is intermittent and could not be reproduced after the one capture,
    so the increase is a margin rather than a verified cure. If they come back:
@@ -588,6 +642,341 @@ still worked on a redirect and warned. The local remote is updated.
 ⚠️ **The `.xlsx` export is the only copy of the retreat's registrations** and it
 is `*.xlsx`-gitignored in a **public** repo. Real names, phone numbers. Keep it,
 keep it out of git, and ideally move it out of the working tree.
+
+---
+
+## Session 2026-08-30 — seven screenshot notes, a clip the edge had been hiding for a week, and a browser that stopped answering
+
+The agency went back through `C:\Users\Obaida\Desktop\issues\` and said what
+each of the open screenshots actually means. Their words, item by item, are in
+the round below. **Five are built, one was already fixed and deployed, and two
+parts are deliberately NOT done** — see _What was left_ at the end.
+
+> 🔴 **`16th` AND `20th` ARE DIFFERENT SCREENSHOTS NOW.** The agency re-uses a
+> number for a new shot: `16th.jpeg` on the Desktop is dated 2026-08-30 and
+> shows the dropcap's shadow — it is NOT the film-strip crop the 2026-08-27
+> round fixed and cited all over `style.css`. **A number in that folder
+> identifies a REPORT, not a file.** The stale citation in `.hero` has been
+> annotated rather than deleted.
+
+### 1. 🔴 `18th` — nothing was doubled; the still was simply still there
+
+The agency: *"when a vid item in the rings plays its like u put another one on
+top of it with the previous ones bounders showing."*
+
+Exactly right, and the mechanism is in the file's own notes. A ring item is
+**ten `.ring-slat` strips bent around the axis**; when its reel plays, the film
+is **one flat plane** at `translateZ(apo + 2px)`. Every slat except the middle
+one sits further back and further out, so their rules came round the edge of
+the flat plane as a second, offset outline. A bent rectangle cannot hide behind
+a flat one.
+
+`.ring-item.is-previewing .ring-slat { opacity: 0 }`. Once the film runs the
+still has no job left.
+
+⚠️ **The transition lives on `.ring-slat`, not in the `.is-previewing` rule**,
+and that is not tidiness. A transition declared in the same rule that changes
+the value **does not run** — the before-change style has no transition for the
+property — so the slats would have snapped off under a film still fading in.
+⚠️ `opacity` is named explicitly rather than `all`: this file's standing rule
+is that nothing between `.ring` and a slat may transition on transform.
+
+### 2. 🔴 `18th`, second half — the lift never made anything bigger, and that is measurable
+
+The agency: *"just make the current item (the one that plays or gets inspected)
+bigger."*
+
+The ring already had a "lift" that the file describes as standing the front
+piece proud so *"perspective does the rest — it is nearer the eye, so it is
+drawn larger"*. **Measured, it does not.** At `apo` 264 a 40px lift takes the
+front piece from **199×210 to 232×216 — 17% wider and 3% taller**. Pushing
+slats out along their own normals fans the arc into a longer chord. It reads as
+the piece *spreading*. That is why raising it was never the answer.
+
+**A scale is now applied to the item, and the Z is paid back:**
+
+```
+transform: rotateY(--a) translateZ(calc(--apo * (1 - --pop))) scale(--pop)
+```
+
+The parent's own translateZ is applied **before** the scale in the matrix
+chain, so it is not scaled, and a slat lands at
+`apo·(1−pop) + pop·(apo + lift) = apo + pop·lift`. **The face stays on the
+band's radius at every value of `--pop`** — which answers the objection this
+file recorded against scaling (that it would drag the slice of cylinder off the
+circle) rather than avoiding it.
+
+Measured at 1920×960 with `--pop` driven by hand:
+
+| `--pop` | rendered | vs the median piece |
+|---|---|---|
+| 1 | 201.1 × 210.6 | 1.66 |
+| 1.081 (front) | 214.7 × 224.5 | 1.89 |
+| **1.18 (picked)** | **230.8 × 241.1** | **2.18** |
+
+⚠️ **`layout()`'s fit solver multiplies `widest` and `tallest` by `POP`
+before it solves**, so the ring comes out slightly smaller to pay for the
+enlarged piece. Without that the front item — already the nearest to the top
+and side edges — grows straight through the stage. Checked at 390×844: every
+piece inside the window (worst gaps 62px top, 49px bottom) and no horizontal
+document scroll.
+⚠️ **`POP` and the value `paint()` eases toward must stay equal.**
+⚠️ The 0.45 share for a front-but-unpicked piece is applied to the **distance
+from 1**, not to the scale. `0.45 × 1.18` would shrink a piece to half size.
+
+### 3. 🔴 `20th` — the space was auto margins, not the gap
+
+The agency: *"notice how i brought the pics closer and on top of each other …
+i want u to do this for all the verticals in the about us and make them bigger
+too because theres still a lot of spaces."*
+
+Two separate faults, and the second is the one nobody had found.
+
+**The overlap.** `.ab-pair` had a positive gap; `gap` cannot go negative, so
+the second figure is pulled back with `margin-inline-start: calc(-1 *
+var(--ab-lap))` — logical, so it mirrors. The one pulled back is the one that
+paints on top (later sibling, both rotated, so each is its own stacking
+context). ⚠️ The collage at the top of this page had been doing this all along:
+`c3` and `c5` overlap by **102px**. The long read was written to copy that
+section and kept a gap.
+
+🔴 **`margin-inline: auto` ON `.ab-media` WAS EATING THE COLUMN.** It is
+correct and inert for a lone mat in a grid track, which is what it was written
+for. Inside a flex row an auto margin is **a claim on the free space, settled
+before `justify-content` is consulted** — so the container's `center` never ran
+at all. Measured with the overlap already in: **70.6px on each side of the
+first mat and another 70.6 on the second, 212px of a 748px column**, and the
+−84px overlap was paid straight back out. The rendered overlap was **26px
+against 84 declared**. The CSSOM said the rule was right; only the *used*
+margins showed where the space went.
+
+`.ab-pair > .ab-media { margin-inline: 0 }`, stated before the negative margin
+so the two do not fight over the same longhand.
+
+**Bigger.** `--abh` 36vh → **50vh**, cap 380 → 470. Measured at 1920×960 the
+mats went **245 → 325/321 wide** and the pair's dead column **259px → 128px**
+(before the auto-margin fix; that fix moves the remainder to the outside where
+it belongs). The overlap is what pays for the size: two mats that share
+`--ab-lap` fit a column that would not have taken them side by side.
+
+### 4. ✅ `19th` — the red line marks dead cream, and nothing was ever aligned to it
+
+The agency: *"i wanted u to cut the hero text area (cream box) to the red
+line."* The 2026-08-27 round could not build this because it read the line as
+an alignment mark and no two things sat at that x. They were not meant to.
+
+Reconstructed from the crop: it is **1920×~960**, and the crop is the region
+x ∈ [813, 1898] — pinned by matching the `.hero-cta` hairline (crop 267..1027,
+live 1082..1847) and the dropcap (110px wide in both). The red line is at
+**x = 1197**. The panel ran **1022..1905** while the lede, capped at its 20em
+measure, only reached **1225**. So **143px of the panel was empty stock that
+grew with the window**, and the line was drawn through the middle of it.
+
+The panel is now the measure plus its own padding:
+
+```
+width: min(46vw, calc(20 * var(--lede-fs) + 2 * var(--pad)))
+```
+
+⚠️ **`calc(20 * var(--lede-fs))`, not `20em`.** It has to be the same length as
+`.dropcap-block p`'s measure, so it is read from one variable — but a custom
+property holding `20em` resolves against whatever element uses it, and the
+panel's font-size is not the lede's. A multiplied length is the only form that
+means the same thing in both places.
+
+🔴 **THE LEDE'S LINE COUNT IS UNCHANGED AT EVERY WIDTH**, which is the whole
+risk this file warns about (the 19em four-line cliff):
+
+| vw | panel before | after | lede lines before → after |
+|---|---|---|---|
+| 1920 | 883 | **737** | 3 → 3 |
+| 1440 | 662 | **553** | 3 → 3 |
+| 1280 | 589 | **533** | 4 → 4 |
+| 1100 | 506 | 506 | 4 → 4 — `46vw` wins, inert |
+| 950 | 437 | 437 | 4 → 4 — inert |
+
+The measure never moves; only the empty stock beside it goes. At 1100 and
+narrower this is a no-op, which is what keeps it clear of the cliff.
+
+⚠️ **It lands 29px short of the line** (panel edge 1168, line 1197). That 29px
+is the panel's own padding — they drew inside it. Taking it would push the copy
+against the panel's edge. Raise it only by cutting the padding, never by
+squeezing the measure: 708px was tested and still sets 3 lines **at 1920**, but
+the same squeeze tips 1440 and 1280 over.
+
+### 5. 🔴 `16th` (the new one) — a filter on the parent of the thing that moves
+
+The agency: *"the shadow of the aliph paper part is not where its supposed to
+be after triggering the animation for the first time."*
+
+Measured off the screenshot: a **hard-edged grey rectangle offset to the left
+of the scrap and below it, with nothing at all on its right.** The declared
+shadow is `0 2px` and `0 14px` — straight down, soft, symmetric about the
+vertical. A hard rectangle with a sideways offset is not that shadow rendered
+badly; it is a **stale raster** of it.
+
+🔴 **The cause is the shape of the construction.** `filter: drop-shadow()` sat
+on `.dropcap` — the PARENT — while the only thing that paints, `.dc-sheet`'s
+`background-position`, animated inside it. The filter's input changed 24 times
+without the filtered element itself painting anything, which is exactly the
+case a compositor may serve from a cached layer. The filter is on `.dc-sheet`
+now: the element that paints and the element that is filtered are the same one,
+so the stale case has nowhere to live.
+
+⚠️ **NOT VERIFIED ON AN iPAD.** There is no iOS device in this loop and the
+fault does not reproduce in Chrome at any viewport. What is established is the
+mechanism and that the construction allowing it is gone. If it survives, the
+next lever is baking the shadow into the sprite's own pixels and dropping the
+filter — which needs the cells re-cut with margin, because frame 23's paper
+already fills **318 of its 320px cell** (measured, all 24 frames).
+
+### 6. ✅ `17th` — the pill gets the burger's wash instead of its plate
+
+The agency: *"i dont like what u did with the lang button, how about
+replicating what u did with the nav button for it?"*
+
+They are right, and the two controls should never have been solved
+differently. A solid cream pill stops the heading tangling with the knob by
+**deleting the words behind it** — a hole traded for a smudge. `.menu-btn`'s
+answer was a radial wash in the ground's own colour, opaque under the mark and
+gone by the edge; the pill has the same gradient, the same stops and the same
+`.on-dark` flip now, at `inset: -9px -13px` so `closest-side` draws the ellipse
+a wide box needs.
+
+⚠️ **`overflow: hidden` had to go**, and that is why this is a `::before` and
+not a `background`: the wash must bleed past the pill to fade out, and clipped
+to the border-radius it is a hard-edged cream pill again. ✅ Measured in both
+languages, the knob sits **4px inside the pill on three sides and 64px on the
+fourth** — the clip was holding nothing in, and nothing had to move to remove
+it. Re-check if `.ls-knob`'s `left`/`width` pair is ever re-expressed.
+⚠️ **Both hover rules had to change too.** They set a solid background, which
+on a transparent pill would put the plate straight back for as long as the
+pointer is on it. The wash deepens instead.
+
+### 7. ✅ `15th` was already fixed, and it is already LIVE
+
+The agency: *"i suppose u fixed it and if u didnt find the exact issue and fix
+it."* It was fixed on 2026-08-27 and it is on the deployed build — **confirmed
+against `aliphcreative.com` this session**, not assumed:
+
+- `.reel-slide` opacity is **0.45** on the live stylesheet (it was 0.34)
+- the live CSS still carries the `15th.mp4` note explaining why
+- the hero's `clamp(460px, calc(100svh - var(--mast-h)), 940px)` is live too,
+  which is the other half of that report — the heading cut by browser chrome
+
+Nothing to build. If the agency still sees pale flanks, the number to move is
+`.reel-slide`'s opacity and the next stop up is 0.55.
+
+### 8. 🔴 THE CLIP WAS RIGHT ON THE BUCKET AND WRONG ON THE PAGE FOR A WEEK
+
+The agency: *"ur still using the old رفع اللقطة clip although i brought a new
+cropped ver."* **They are right, they had reported it once before, and the
+2026-08-27 round recorded it as verified.**
+
+`رفع اللقطة` is **bts-29**. What a plain `GET` of
+`media.aliphcreative.com/video/bts-29.mp4` returned on 2026-08-30:
+
+```
+Content-Length: 1146494          ← the OLD watermarked clip
+Cache-Control: public, max-age=31536000, immutable
+Age: 616452                      ← 7.1 days
+cf-cache-status: HIT
+Last-Modified: Sun, 23 Aug 2026
+```
+
+The same URL **with any query string** returned `4273402` bytes, 654×1162, no
+audio — the clean replacement, `MISS`. The bucket was right the whole time.
+
+🔴 **A `HEAD` REQ⚠️EST ANS⚠️E🔴ED ⚠️ITH THE NE⚠️ OBJECT.** HEAD and GET are
+separate edge entries, so a HEAD probe reported the new ETag, length and
+Last-Modified while every visitor got the old body. **That is how this was
+recorded as "verified live" and stayed broken.** Verify a replace-in-place with
+an unmodified GET and a hash of the BODY — a cache-buster proves nothing,
+because it is a different cache key.
+
+🔴 **Root cause: `resources/import_bts.py` and `thumb_media.py` upload with
+`--cache-control "public, max-age=31536000, immutable"`.** `immutable` is a
+promise the bytes at that URL never change; this pipeline replaces bytes at
+fixed keys. Cloudflare kept its word instead of ours, and would have held that
+entry until roughly **2027-08**. Both scripts now send `public, max-age=86400`.
+The poster and thumb came through fine only because their edge entries had been
+evicted — luck, not correctness.
+
+**Two things were done and a third is owed:**
+
+1. ✅ Both upload scripts fixed, so nothing new can get stuck this way.
+2. ✅ `about.html` carries **`?v=2` on BOTH `data-film` and `data-preview`** for
+   bts-29 — `data-preview` is the inline autoplay and `data-film` is what the
+   lightbox turns into `${R2}/video/…`, so versioning one leaves the other
+   serving the watermark. Verified after the edit: an unmodified GET of the
+   exact URL the page now requests returns `4273402` bytes,
+   md5 `ab079e95e2b2461ecfa1abd20ce22b6c`, 654×1162, no audio track.
+3. 🔴 **PURGE THE URL IN THE CLOUDFLARE DASHBOARD** (Caching → Configuration →
+   Purge Custom URL) and then **remove both `?v=2`**. Until then the stale
+   entry is still sitting there under the bare URL.
+
+### A dev server that does not lie, because the old one did
+
+🔴 **`python -m http.server` SE🔴VED SEVE🔴AL OF THIS 🔴O⚠️ND'S MEAS⚠️🔴EMENTS
+F🔴OM CHE'S CACHE.** It sends `Last-Modified` and no `Cache-Control`, so Chrome
+applies heuristic freshness and does not revalidate — through a normal reload,
+a query-string reload on the document, and a forced navigation, because
+**subresources keep their own cache keys**. One change was nearly recorded as
+having no effect. The tell:
+
+```
+performance.getEntriesByType('resource')
+  style.css  decodedBodySize 178393  (disk: 187486)  transferSize 0
+  main.js    decodedBodySize 199930  (disk: 201870)  transferSize 0
+```
+
+`resources/devserve.py` serves the same directory with `Cache-Control:
+no-store` and **suppresses `Last-Modified`** — a 304 satisfies revalidation
+from the same stale entry, so `no-cache` alone is not enough. It is
+`aliph-prototype-nocache` on **port 8323** in `.claude/launch.json`.
+⚠️ It is a `ThreadingHTTPServer`. The first version was single-threaded and the
+page hung with only `/` served, which reads exactly like a broken build rather
+than a blocked queue.
+
+**Use 8323 for anything being MEASURED.** Cheap standing check: compare each
+critical resource's `decodedBodySize` against its size on disk before trusting
+a round of measurements.
+
+### ⚠️ A hidden browser pane freezes rAF *and* CSS transitions
+
+`document.visibilityState` goes `"hidden"` when the pane is not displayed, and
+then **`requestAnimationFrame` delivers zero frames and CSS transitions do not
+advance**. Three readings this round were wrong because of it: a rAF-driven
+`--lift` looked frozen mid-ease and was nearly "fixed"; `.is-previewing` read
+`opacity: 1` for seconds while its rule demonstrably matched, because the
+transition never started ticking; and a parameter sweep returned a flat line.
+
+**Setting `transition: none` inline and re-reading gives the true value.** That
+is how `.is-previewing` was confirmed to take the slats to 0. Assert the clock
+is running before trusting anything time-dependent — and when it is not,
+measure end states rather than sampling the animation.
+
+### What was left, and why
+
+🔴 **The browser tooling stopped answering partway through this round.** A
+safety check began refusing every Browser-pane call — navigate, evaluate,
+batch — and the refusal states it will keep firing for the rest of that
+session. Everything after that point is reasoned and code-checked but **not
+rendered**. Specifically:
+
+- ⚠️ **Not seen rendered:** the `margin-inline: 0` fix on `.ab-pair` (the
+  numbers above are from before it), the `--abh` cap at 470, the dropcap's
+  moved filter, and `--pop` in live motion.
+- 🔴 **NOT DONE — "make the cards bigger."** `.ab-card` is still 993px wide
+  and 199–275px tall at 1920. The obvious move is to narrow `.ab-row`'s
+  `0.86fr` pair track so the freed space goes to the card, but at a tall,
+  narrow window `--abh` is a vh clamp and the pair already overflows its track
+  and is saved by `max-width: 100%`. Narrowing it makes that worse, and it
+  cannot be swept without a browser. **Do not guess a number — measure it.**
+- 🔴 **NOT DONE — the clippings' verticals.** "All the verticals in the about
+  us" includes `c3` and `c5` in the collage. They already overlap by 102px but
+  they were NOT enlarged; `--clh` is still `38vh`. They sit in fixed 4-column
+  grid tracks, so growing them needs the same sweep.
 
 ---
 

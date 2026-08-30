@@ -92,11 +92,31 @@ def clip(src, name, out):
             "video": mp4, "poster": poster, "thumb": small}
 
 
+# 🔴 NOT `immutable`, AND NOT A YEAR (2026-08-30).
+# What was here was `public, max-age=31536000, immutable`, and it is the whole
+# of the agency's "ur still using the old رفع اللقطة clip". `immutable` is a
+# promise that the bytes at this URL will never change. This pipeline REPLACES
+# bytes at fixed keys — bts-29 was swapped on 2026-08-27 — so the promise was
+# false, and Cloudflare kept its word instead of ours: measured on 2026-08-30,
+# a plain GET of video/bts-29.mp4 returned `cf-cache-status: HIT`, `Age:
+# 616452` and the 1.14 MB watermarked clip from 2026-08-23, seven days after
+# the 4.27 MB replacement went into the bucket.
+#
+# ⚠️ AND A HEAD REQ⚠️EST DID NOT SHO⚠️ IT. HEAD on the same URL answered with
+# the NEW ETag and length — HEAD and GET are separate edge entries — which is
+# why the replacement was recorded as "verified live" and stayed broken for
+# three days. Verify a replace-in-place with an unmodified GET and a hash of
+# the BODY. A cache-buster query proves nothing: it is a different cache key.
+#
+# A day is long enough that the edge still absorbs the traffic and short
+# enough that a replacement is everywhere by tomorrow. The real end state is
+# versioned keys — bts-29.v2.mp4 — which is the only way to have both a long
+# max-age and replaceable media; until then, this is the number.
 def upload(key, path, ctype):
     subprocess.run(
         ["npx.cmd", "wrangler", "r2", "object", "put", BUCKET + "/" + key,
          "--file", path, "--content-type", ctype,
-         "--cache-control", "public, max-age=31536000, immutable", "--remote"],
+         "--cache-control", "public, max-age=86400", "--remote"],
         cwd=ROOT, check=True,
         env=dict(os.environ, CLOUDFLARE_ACCOUNT_ID=ACCOUNT),
         stdout=subprocess.DEVNULL)

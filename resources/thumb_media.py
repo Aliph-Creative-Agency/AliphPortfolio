@@ -92,11 +92,15 @@ def derive(src, dst):
     return im.size
 
 
+# 🔴 NOT `immutable` — see the long note on the same function in
+# resources/import_bts.py. These keys are replaced in place too, and a year of
+# declared immutability is what left a replaced clip serving its old bytes from
+# the edge for a week without any probe noticing.
 def upload(key, path):
     subprocess.run(
         ["npx.cmd", "wrangler", "r2", "object", "put", BUCKET + "/" + key,
          "--file", path, "--content-type", "image/webp",
-         "--cache-control", "public, max-age=31536000, immutable", "--remote"],
+         "--cache-control", "public, max-age=86400", "--remote"],
         cwd=ROOT, check=True,
         env=dict(os.environ, CLOUDFLARE_ACCOUNT_ID=ACCOUNT),
         stdout=subprocess.DEVNULL)
