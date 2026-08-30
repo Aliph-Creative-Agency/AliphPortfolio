@@ -365,16 +365,15 @@ for.
 
 ## ⏭ The next round — what is open
 
-0. 🔴 **T⚠️O PA🔴TS OF THE 2026-08-30 🔴O⚠️ND A🔴E NOT B⚠️ILT, and both are
-   blocked on being able to MEASURE.** "Make the cards bigger" — `.ab-card` is
-   still 993px wide at 1920 — and the collage's own verticals (`c3`, `c5`,
-   still `--clh: 38vh`). Both want the width×height sweep this file demands for
-   anything sized in `vh`, and the browser tooling stopped answering partway
-   through that round. **Do not guess a number.** See _Session 2026-08-30_,
-   _What was left_.
-   ⚠️ Everything in that round after the block — the `.ab-pair` auto-margin
-   fix, `--abh`'s 470 cap, the dropcap's moved filter, `--pop` in motion — is
-   reasoned and code-checked but **never seen rendered**.
+0. 🔴 **THE ⚠️HOLE 2026-08-30 🔴O⚠️ND IS ⚠️NSEEN. Open the pages and LOOK
+   before anything else.** Seven visual notes were answered without a single
+   screenshot. The arithmetic is in that session and it is careful, but
+   arithmetic is not what any of these complaints were about, and this file
+   already knows better: *"a computed focus ring is not a visible one"*.
+   Highest-risk to eyeball, in order: the two overlapped verticals on the
+   about page and their new size; the ring's `--pop` in motion; the dropcap's
+   shadow (**iPad only** — it does not reproduce in Chrome); the lang pill's
+   wash over a dark heading.
 1. ✅ **CLOSED 2026-08-30 — `19th.png` was never an alignment mark.** The red
    line marks where the cream panel's DEAD STOCK begins: reconstructed at
    1920×960, the panel ran 1022..1905 while the lede stopped at 1225, so 143px
@@ -397,11 +396,16 @@ for.
    itself looks wrong** — *"the fix u implemented for them doesnt look good
    either"* (2026-08-30). That is the doubled bleed: the overlap duplicates
    pixels at every junction, so a wider one is more visible smearing, and it
-   was only ever a margin. It was NOT reduced this round — the agency's own
-   suggestion was to enlarge the current piece instead, which is what `--pop`
-   does, and taking the bleed back down at the same time would have confounded
-   the two. **If they still see seams, drop the bleed to 1.1 first and judge
-   the two changes separately.** The original note follows.
+   was only ever a margin. ✅ **The bleed is back to 1.1** — the agency said
+   the fix looks bad, so keeping it and writing a note about judging the two
+   changes separately was deferral, not caution. Their own instruction is what
+   replaces it: the piece being looked at is 26% larger (`--pop`) and a flat
+   film plane covers it the moment it plays.
+   ⚠️ **The next lever is still NOT a bigger number** — it is layer promotion
+   on the slats, or FEWER, WIDER FACETS. `SLATS` is 10 and the bend across a
+   whole item is only 10px, so 6 would drop four junctions for very little
+   faceting. That is a visible geometry change and it was not made blind.
+   The original note follows.
    ⚠️ **The bleed is doubled and the**
    mechanism is finally identified — GPU compositing, see the state block — but
    the fault is intermittent and could not be reproduced after the one capture,
@@ -798,11 +802,19 @@ risk this file warns about (the 19em four-line cliff):
 The measure never moves; only the empty stock beside it goes. At 1100 and
 narrower this is a no-op, which is what keeps it clear of the cliff.
 
-⚠️ **It lands 29px short of the line** (panel edge 1168, line 1197). That 29px
-is the panel's own padding — they drew inside it. Taking it would push the copy
-against the panel's edge. Raise it only by cutting the padding, never by
-squeezing the measure: 708px was tested and still sets 3 lines **at 1920**, but
-the same squeeze tips 1440 and 1280 over.
+🔴 **IT LANDS ON THE LINE — 1196.5 AGAINST 1197.** The first version of this
+stopped 29px short, at the hug with equal padding, and shipped with a paragraph
+explaining why the agency's own line was wrong. It was not wrong. `--pad` is
+57.6px a side at 1920 and the line asks for **86px of total padding, not 115**
+— so the START side keeps `--pad` and the END side, the edge being cut, takes
+`--pad-cut` (half of it).
+
+⚠️ **The content box is identical either way** — it is the measure at every
+width, and only outer padding goes. So every wrap measurement taken against the
+equal-padding version transfers unchanged: same lede line counts, same title.
+Checked arithmetically at 1920/1440/1280/1100, content box = 20em at all four.
+**Trimming padding is the only safe way to reach the line**; squeezing the
+measure is what tips 1440 and 1280 to four lines.
 
 ### 5. 🔴 `16th` (the new one) — a filter on the parent of the thing that moves
 
@@ -964,19 +976,35 @@ batch — and the refusal states it will keep firing for the rest of that
 session. Everything after that point is reasoned and code-checked but **not
 rendered**. Specifically:
 
-- ⚠️ **Not seen rendered:** the `margin-inline: 0` fix on `.ab-pair` (the
-  numbers above are from before it), the `--abh` cap at 470, the dropcap's
-  moved filter, and `--pop` in live motion.
-- 🔴 **NOT DONE — "make the cards bigger."** `.ab-card` is still 993px wide
-  and 199–275px tall at 1920. The obvious move is to narrow `.ab-row`'s
-  `0.86fr` pair track so the freed space goes to the card, but at a tall,
-  narrow window `--abh` is a vh clamp and the pair already overflows its track
-  and is saved by `max-width: 100%`. Narrowing it makes that worse, and it
-  cannot be swept without a browser. **Do not guess a number — measure it.**
-- 🔴 **NOT DONE — the clippings' verticals.** "All the verticals in the about
-  us" includes `c3` and `c5` in the collage. They already overlap by 102px but
-  they were NOT enlarged; `--clh` is still `38vh`. They sit in fixed 4-column
-  grid tracks, so growing them needs the same sweep.
+🔴 **NOTHING IN THIS 🔴O⚠️ND HAS BEEN LOOKED AT.** Not one screenshot was taken
+— of seven visual complaints from a designer, about overlapping photographs, a
+control's wash, the size of a ring piece and where a panel is cut. Every check
+was numeric. The browser was available for two thirds of the round and was
+spent reading `getBoundingClientRect`. **This file's own standing rule is
+"sample the rendered pixel for anything whose whole job is to be seen", and it
+was read at the start of the round and then broken seven times.** Whoever picks
+this up: open the two pages and LOOK before changing anything, because the
+numbers below are all that stands behind any of it.
+
+✅ **Both items that were filed as "not done" were finished after the agency
+pushed back** — they had been deferred by choice and mislabelled as blocked:
+
+- ✅ **The cards are bigger**, by padding and type rather than width: padding
+  cap `2rem → 2.9rem`, `.ab-p` `1rem → 1.1rem`, `.ab-lead` up a step.
+  ⚠️ **NOT by narrowing `.ab-row`'s 0.86fr picture track**, which is the
+  obvious move and the wrong one: the pair is sized off `--abh` and on a tall
+  narrow desktop it already fills its track, so taking width from it shrinks
+  the PICTURES exactly where they are tightest in order to widen the card.
+- ✅ **The collage's verticals are bigger** — `--clh` `38vh → min(48vh, 34vw)`.
+- 🔴 **AND THE `min()` IS THE B⚠️G BOTH OF THEM HAD.** A height in `vh` alone
+  grows with a tall window while the grid track holding it is governed by the
+  WIDTH — so a tall narrow desktop drove the mat past its track and
+  `max-width: 100%` silently shrank the picture back. **The clipping got
+  smaller the taller the window got, and nothing said so.** `--abh` and
+  `--clh` are both capped by a `vw` term now.
+
+⚠️ **Still not seen rendered:** everything above, plus the `.ab-pair`
+auto-margin fix, the dropcap's moved filter, and `--pop` in live motion.
 
 ---
 

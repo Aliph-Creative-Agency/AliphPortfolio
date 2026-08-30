@@ -1792,7 +1792,15 @@ const serviceRings = (() => {
          So the widest and tallest are measured AT POP before the ring is
          sized, and the ring simply comes out a little smaller to pay for it.
          ⚠️ Must equal the picked value paint() eases --pop toward. */
-      const POP = 1.18;
+      /* 1.26, not 1.18. The scale is carrying the seam answer as well as the
+         "bigger" one now that --bleed is back to 1.1, so it has to be plainly
+         bigger rather than technically bigger: 1.18 measured +14.8% on the
+         width and 1.26 is +21%. Measured at 1920x960, --pop 1.3 still left the
+         front piece inside the stage (50px of clearance at the bottom), so
+         this has margin — and the solver below sizes the ring against POP, so
+         a narrow viewport pays for it by shrinking the band rather than by
+         cropping the piece. */
+      const POP = 1.26;
       const fitFor = (k) => {
         const r = rad * k;
         const near = r * (1 + LIFT) * Math.cos(tilt);

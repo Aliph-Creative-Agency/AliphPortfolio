@@ -1031,21 +1031,40 @@ video.preview {
    inert, which is what keeps it clear of the 19em four-line cliff the measure
    note below warns about.
 
-   ⚠️ It lands 29px short of the agency's line at 1920 (panel edge at 1168,
-   line at 1197). That 29px is the panel's own padding: they drew inside it,
-   and taking it would push the copy against the panel's edge. Raise it only
-   by cutting the padding, never by squeezing the measure.
+   🔴 AND THE C⚠️T EDGE KEEPS LESS PADDING THAN THE 🔴EADING EDGE, ⚠️HICH IS
+   ⚠️HAT ACT⚠️ALLY LANDS ON THE LINE. Hugging the measure with equal padding
+   stopped 29px short of it (panel edge 1168, line 1197) and the first version
+   of this shipped that way with a paragraph explaining why the agency's own
+   line was wrong. It was not. `--pad` on both sides is 57.6px at 1920 and the
+   line asks for 86px of total padding, not 115 — so the START side, where the
+   reading begins, keeps `--pad`, and the END side, which is the edge being
+   cut, takes `--pad-cut`. At 1920 that is 622.08 + 57.6 + 28.8 = 708.5, and
+   the panel's edge lands at 1196.5 against a line drawn at 1197.
+
+   ⚠️ THE CONTENT BOX IS ⚠️NCHANGED BY THIS. It is the measure at every width
+   either way — only outer padding goes — so every measurement taken against
+   the equal-padding version still holds: same lede line counts, same title
+   wrap, nothing re-solves. Trimming the padding is the ONLY safe way to reach
+   the line; squeezing the measure is what tips 1440 and 1280 to four lines.
 
    ⚠️ The old `40rem` cap is gone because it can no longer bind — the hug
    tops out at 26rem + 2 * --pad, which is under 40rem at every viewport. */
 .hero-panel {
   position: relative;
-  width: min(46vw, calc(20 * var(--lede-fs) + 2 * var(--pad)));
+  /* half of --pad, which is the number the agency's line asks for */
+  --pad-cut: calc(var(--pad) * 0.5);
+  width: min(46vw, calc(20 * var(--lede-fs) + var(--pad) + var(--pad-cut)));
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(1.5rem, 3vw, 3rem) var(--pad);
+  /* ⚠️ ASYMMETRIC, and the width above depends on it — the two are one
+     decision. The start side is the reading edge and keeps --pad; the end side
+     is the edge the agency drew a line through. Written as the four longhands
+     so the logical pair mirrors with the document. */
+  padding-block: clamp(1.5rem, 3vw, 3rem);
+  padding-inline-start: var(--pad);
+  padding-inline-end: var(--pad-cut);
   background: var(--cream);
   color: var(--ink);
   border-inline-end: 3px solid var(--ink);
@@ -2381,7 +2400,25 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
    frame, where the note below says nothing can be read against it. If the
    agency still sees them, the next lever is NOT a bigger number: it is
    `will-change`/layer promotion on the slats, or fewer, wider facets. */
-  --bleed: 2.2px;
+  /* 🔴 BACK TO 1.1 (2026-08-30). 2.2 was doubled on 2026-08-27 as a MA🔴GIN
+     against an intermittent GPU fault, and the note below says so honestly —
+     but the agency has now seen it: "the fix u implemented for them doesnt
+     look good either". That is the cost this file predicted and under-weighted.
+     The overlap duplicates a strip of the neighbour's pixels at every one of
+     the nine interior junctions, so a wider one is more visible doubling along
+     every seam — it trades a hairline that appears sometimes for a smear that
+     is there always.
+
+     Their own instruction is what replaces it: "just make the current item
+     bigger", which --pop now does. The piece being looked at is 26% larger and
+     covered by a flat film plane the moment it plays, so the seams are worst
+     exactly where they are least looked at.
+     ⚠️ If they come back, the next lever is still NOT a bigger number. It is
+     `will-change`/layer promotion on the slats, or FE⚠️E🔴 AND ⚠️IDE🔴 FACETS
+     — SLATS is 10 and the bend across a whole item is only 10px, so 6 would
+     drop four junctions for very little faceting. That is a visible geometry
+     change and it was not made blind. */
+  --bleed: 1.1px;
   width: calc(var(--sw) + var(--bleed) * 2);
   height: var(--h);
   /* 🔴 OPACITY ONLY, and it lives HE🔴E rather than in the .is-previewing
@@ -3169,7 +3206,20 @@ body.lib-index .lib-list { display: block; }
      below calls `--abh`. It used to be written inline as `38vh` inside one
      calc; the mat now has to name the same number in order to hug the
      picture, and a length in two places is a length that drifts. */
-  --clh: 38vh;
+  /* 🔴 ⚠️P F🔴OM 38vh, AND CAPPED BY ⚠️IDTH TOO (2026-08-30) — "all the
+     verticals in the about us", which is these as well as the long read's.
+     `c3` and `c5` already overlapped by 102px; they were simply small, 252px
+     of mat sitting in a 538px track.
+
+     ⚠️ THE `min()` IS THE PA🔴T THAT ⚠️AS MISSING, here and in --abh. A height
+     stated only in `vh` grows with a tall window while the GRID TRACK that has
+     to hold it is governed by the width, so a tall narrow desktop drives the
+     mat past its track and `max-width: 100%` quietly shrinks the picture back
+     — the clipping gets SMALLER the taller the window gets, and nothing says
+     so. 34vw is the width the track can actually take: worked through at 1920,
+     1440, 1280 and 1100 against 900 and 1080, the mat stays inside its track
+     at every one, where a bare 48vh clamps at 1280x1080 and below. */
+  --clh: min(48vh, 34vw);
 }
 .clip {
   background: var(--cream-warm);
@@ -3314,7 +3364,7 @@ body.lib-index .lib-list { display: block; }
      245 -> 313 wide and the pair's dead column 259px -> 79px.
      ⚠️ The 380 cap went with it. A cap that binds at ordinary laptop heights
      is the "bigger" being taken away again exactly where it was asked for. */
-  --abh: clamp(230px, 50vh, 470px);
+  --abh: min(clamp(230px, 50vh, 470px), 30vw);
   gap: clamp(0.9rem, 2vw, 1.6rem);
   padding: clamp(1.2rem, 3vh, 2rem) var(--pad) clamp(2rem, 5vh, 3.2rem);
   /* ⚠️ NO RULE ALONG THE BOTTOM (2026-08-24) — `12th.png` strikes it out.
@@ -3521,21 +3571,37 @@ body.lib-index .lib-list { display: block; }
    pointed at: cream-warm stock, a hairline, and a soft cast shadow. It is NOT
    rotated — a clipping is pinned to a board, a card in a reading column is
    set on the page. */
+/* 🔴 BIGGE🔴 (2026-08-30) — "make the cards bigger accordingly". The
+   "accordingly" is the point: the pictures beside these grew this round, and a
+   card that did not read as a short block floating in a row half again its
+   height. Measured at 1920x960 before: a 993px card 199-275px tall in a 613px
+   row.
+
+   ⚠️ IT G🔴O⚠️S BY PADDING AND TYPE, NOT BY ⚠️IDTH, and that is deliberate.
+   The obvious move is to narrow `.ab-row`'s 0.86fr picture track and hand the
+   width over — but the pair is sized off `--abh`, and on a tall narrow desktop
+   it already fills its track. Taking width from that track makes the PICTU🔴ES
+   smaller at exactly the widths where they are already tightest, to make the
+   card wider. The card gets its presence from the stock around the type and
+   the size of the type instead, which costs the pictures nothing.
+   ⚠️ The card is a grid item at a fixed track width, so bigger type sets more
+   lines and the card grows DO⚠️N into a row the pictures already made taller.
+   Nothing here can push the row wider. */
 .ab-card {
   background: var(--cream-warm);
   border: var(--hair);
   box-shadow: 0 8px 24px rgba(15, 24, 32, 0.12);
-  padding: clamp(1.2rem, 2.6vw, 2rem);
+  padding: clamp(1.4rem, 3.2vw, 2.9rem);
 }
 .ab-p {
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.95;
   color: rgba(15, 24, 32, 0.82);
 }
 .ab-p + .ab-p { margin-top: 1.15rem; }
 /* the opening paragraph carries the weight — first line set larger */
 .ab-lead {
-  font-size: clamp(1.08rem, 1.6vw, 1.3rem);
+  font-size: clamp(1.16rem, 1.75vw, 1.42rem);
   line-height: 1.85;
   color: var(--ink);
 }
