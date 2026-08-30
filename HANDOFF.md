@@ -2,13 +2,14 @@
 
 _Updated 2026-08-30. Read this first._
 
-> ## 🟡 State on 2026-08-30: THE FORM IS LIVE, RESTYLED AND STILL CLOSED; THE SITE IS BEHIND
+> ## 🟡 State on 2026-08-30: THE FORM IS LIVE, RESTYLED AND STILL CLOSED; THE SITE IS CURRENT AND UNSEEN
 >
 > ✅ **`feedback.aliphcreative.com` IS LIVE** — `feedback-worker/`, a THIRD
 > deployable beside the site and the chat, version
 > `fe8b50ba-17a3-4dd9-9573-179b1412cc13`. The custom domain and its DNS
-> record were created by the deploy itself. **The site is untouched**:
-> `aliphcreative.com` still answers 200 and is still `c5b80d8c-…`.
+> record were created by the deploy itself. **The site was untouched by it**:
+> a separate deployable, on its own version line. (The site has since moved
+> to `950f0645-…` under its own deploy — see below.)
 >
 > ✅ **THE RESTYLE IS DEPLOYED — version `5966511b-dc24-4cc1-b707-cada1d55a6c8`.**
 > The type is at the site's scale, the option boxes are a ruled list, and the
@@ -16,38 +17,69 @@ _Updated 2026-08-30. Read this first._
 > to the working tree, the Bold woff2 answers 200, the dropped Regular answers
 > **404**, and the body rule reads `0.92rem / 700 / 1.85`.
 >
-> 🔴 **THE EDGE ⚠️AS SE🔴VING A 🔴EPLACED CLIP FO🔴 A ⚠️EEK, AND `HEAD` SAID IT
-> ⚠️AS FINE.** A plain GET of `media.aliphcreative.com/video/bts-29.mp4`
+> 🔴 **THE EDGE WAS SERVING A REPLACED CLIP FOR A WEEK, AND `HEAD` SAID IT
+> WAS FINE.** A plain GET of `media.aliphcreative.com/video/bts-29.mp4`
 > returned the OLD 1.14 MB watermarked clip — `cf-cache-status: HIT`, `Age:
 > 616452`, held under `public, max-age=31536000, immutable` — while a `HEAD` of
 > the same URL answered with the NEW object's ETag and length. **HEAD and GET
 > are separate edge entries**, which is how the 2026-08-27 swap was recorded as
 > "verified live" and stayed broken. `import_bts.py` and `thumb_media.py` no
 > longer send `immutable`, and `about.html` carries `?v=2` on bts-29.
-> 🔴 **STILL O⚠️ED: purge that URL in the Cloudflare dashboard** (Caching →
-> Configuration → Purge Custom URL), then remove both `?v=2`. **Verify any
-> replace-in-place with an unmodified GET and a hash of the BODY** — a
-> cache-buster is a different cache key and proves nothing.
+> 🔴 **STILL OWED, AND RE-MEASURED 2026-08-30c: THE EDGE IS STILL
+> SERVING THE OLD CLIP.** A plain GET with no query returns **1,146,494
+> bytes**, `cf-cache-status: HIT`, `Age: 643933` (~7.5 days and simply
+> ageing — `max-age` is a year). `?v=2` returns the right **4,273,402**
+> bytes, `REVALIDATED`.
+> 🔴 **SO DO NOT REMOVE THE `?v=2` YET.** It is currently the only
+> reason a visitor gets the correct video. The order is: purge, re-verify
+> with an unmodified GET, and only then take the busters off.
+> 🔴 **THIS MACHINE CANNOT PURGE IT.** `wrangler whoami` lists
+> `zone (read)`; a purge needs Zone.Cache Purge (write). It is the dashboard
+> (Caching → Configuration → Purge Custom URL) or a new scoped API token.
+> **Verify any replace-in-place with an unmodified GET and a hash of the
+> BODY** — a cache-buster is a different cache key and proves nothing.
 >
-> 🔴 **THE SITE IS T⚠️O 🔴O⚠️NDS BEHIND NO⚠️.** The 2026-08-27b keyboard round
-> and the whole 2026-08-30 screenshot round are committed and undeployed;
-> `aliphcreative.com` is still `c5b80d8c-…`.
+> ✅ **THE SITE IS CURRENT — version
+> `c3804b1c-0d1e-4940-a9f1-efd646c630be`, the second deploy of 2026-08-30c,
+> which carries the stylesheet comment repair. The first was
+> `950f0645-ae72-4a29-a061-8f80544c1b6d`.** It closes the
+> two-round gap: the 2026-08-27b keyboard round and the whole 2026-08-30
+> screenshot round are live. Three files changed — `about.html`,
+> `style.css`, `main.js`. Verified with a browser UA and a cache-buster: CSS
+> and JS md5-identical to the tree, `/`, `/about` and `/library` all 200, and
+> `about.html` differing from the tree by exactly the analytics beacon.
 >
-> ⚠️ **A SC🔴EENSHOT N⚠️MBE🔴 IS A 🔴EPO🔴T, NOT A FILE.** `16th.jpeg` and
+> ⚠️ **DEPLOYED IS NOT SEEN.** The 2026-08-30 round is now live and
+> still has not been looked at by anyone — see item 0. Shipping it only
+> moved the unseen work in front of the public.
+>
+> ✅ **THE EMOJI CORRUPTION IS FIXED EVERYWHERE — 47 lines across three
+> files**, closed 2026-08-30c: 14 in this file, 31 in `prototype/style.css`,
+> 1 in `resources/import_bts.py`. The stylesheet is redeployed and the LIVE
+> copy is clean, with all 194 status markers intact.
+> ✅ **The stylesheet edit was PROVED comment-only** — with every `/* */`
+> stripped, the old and new files are byte-identical
+> (`8f41a5ae5ba61f39e6596911dc50be25`). That is the check worth repeating
+> before deploying any comment repair, and it is cheaper than reading the
+> diff.
+> ⚠️ **Grep for an emoji adjacent to a letter after any scripted write.** It
+> is never legitimate here — a status mark is always followed by a space.
+>
+> ⚠️ **A SCREENSHOT NUMBER IS A REPORT, NOT A FILE.** `16th.jpeg` and
 > `20th.png` on the Desktop were both REPLACED on 2026-08-30 with unrelated
 > shots. Several `style.css` comments cite the old ones; `.hero`'s citation has
 > been annotated rather than deleted. Check the file's date before trusting a
 > note that names one.
 >
-> 🔴 **`python -m http.server` SE🔴VES YO⚠️🔴 EDITS F🔴OM CHROME'S CACHE.** No
+> 🔴 **`python -m http.server` SERVES YOUR EDITS FROM CHROME'S CACHE.** No
 > `Cache-Control`, so heuristic freshness wins through a normal reload, a
 > query-string reload and a forced navigation alike — subresources keep their
 > own cache keys. Several measurements this round were taken against pre-edit
 > files. **Use `aliph-prototype-nocache` on port 8323 for anything being
 > MEASURED**, and compare `decodedBodySize` against the file on disk.
 >
-> ⚠️ **A HIDDEN B🔴O⚠️SE🔴 PANE F🔴EEZES `requestAnimationFrame` AND CSS
-> T🔴ANSITIONS.** Zero frames, and transitions never advance — so animated
+> ⚠️ **A HIDDEN BROWSER PANE FREEZES `requestAnimationFrame` AND CSS
+> TRANSITIONS.** Zero frames, and transitions never advance — so animated
 > state reads as broken when it is correct. Suppress the transition and read
 > the end state instead of sampling.
 >
@@ -118,11 +150,9 @@ _Updated 2026-08-30. Read this first._
 > `direction: ltr` on a rating scale put it against the left edge of a
 > right-aligned page with its own read-out at the far right.
 >
-> 🔴 **The keyboard round of 2026-08-27b is committed (`b52aeb9`) and NOT
-> deployed.** The live site is still `c5b80d8c-ce63-4c1a-8fe9-1686b2d1a75c`,
-> which carries everything up to and including 2026-08-27a. Deploying was not
-> done because nobody asked for it — see _Session 2026-08-27b_. Nothing about
-> that round is risky; it simply has not been pushed.
+> ✅ **The keyboard round of 2026-08-27b (`b52aeb9`) IS DEPLOYED** — closed
+> 2026-08-30c, together with the screenshot round. It sat undeployed for three
+> days for one reason: nobody asked for it.
 >
 > 🔴 **A COMPUTED FOCUS RING IS NOT A VISIBLE ONE, and this file would have
 > recorded one as verified.** `getComputedStyle` read
@@ -147,11 +177,10 @@ _Updated 2026-08-30. Read this first._
 >
 > ### Still true from 2026-08-27a — everything below IS deployed
 >
-> ✅ **The live site is version `c5b80d8c-ce63-4c1a-8fe9-1686b2d1a75c`.** It
-> carries the whole 2026-08-26 audit round — which had been sitting undeployed
-> — plus this round's work. Verified on `aliphcreative.com` with a cache-buster
-> and a browser User-Agent: `style.css` and `main.js` are md5-identical to the
-> working tree and all three HTML pages match byte for byte.
+> ✅ **Superseded 2026-08-30c: the live site is now
+> `950f0645-ae72-4a29-a061-8f80544c1b6d`**, not the
+> `c5b80d8c-ce63-4c1a-8fe9-1686b2d1a75c` this subsection was written about.
+> Everything below is still deployed — the newer version only adds to it.
 >
 > ⚠️ **`/index.html`, `/about.html` and `/library.html` now 307 to `/`,
 > `/about` and `/library`.** A `curl` without `-L` returns 0 bytes and reads
@@ -365,15 +394,20 @@ for.
 
 ## ⏭ The next round — what is open
 
-0. 🔴 **THE ⚠️HOLE 2026-08-30 🔴O⚠️ND IS ⚠️NSEEN. Open the pages and LOOK
-   before anything else.** Seven visual notes were answered without a single
-   screenshot. The arithmetic is in that session and it is careful, but
-   arithmetic is not what any of these complaints were about, and this file
-   already knows better: *"a computed focus ring is not a visible one"*.
-   Highest-risk to eyeball, in order: the two overlapped verticals on the
-   about page and their new size; the ring's `--pop` in motion; the dropcap's
-   shadow (**iPad only** — it does not reproduce in Chrome); the lang pill's
-   wash over a dark heading.
+0. ✅ **CLOSED 2026-08-30c — the round has been SEEN.** All four notes were
+   checked on the live site across six viewports and all four pass; the
+   measurements, and the two false findings that nearly went in this file,
+   are in that session. What is left over from it:
+   ⚠️ **the dead column beside the about-page pair is 218px at 1920x960,
+   not the 79px `--abh`'s comment claims** — 108px of it is empty linen to
+   the right of the pair against the card's 57px inset on the left. A
+   composition call for the agency, not a bug.
+   🔴 **whether a real pointer can pick a ring piece is UNTESTED.**
+   Playwright's `hover` does not land on a 3D-transformed item, so `pick()`
+   was driven with a dispatched event. The pop logic is proven; the hit test
+   is not.
+   🔴 **the seams are still unanswered** — headless cannot answer them,
+   and this pass was headless. Unchanged from item 4 below.
 1. ✅ **CLOSED 2026-08-30 — `19th.png` was never an alignment mark.** The red
    line marks where the cream panel's DEAD STOCK begins: reconstructed at
    1920×960, the panel ran 1022..1905 while the lede stopped at 1225, so 143px
@@ -503,6 +537,187 @@ gesture has been invented for it.
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-08-30c — the two-round gap is closed, and this file's own headlines had been corrupted
+
+Two instructions: deploy the site, then look at the screenshots. The deploy is
+done and verified; the screenshots are next. Cleaning this file turned up a
+fault in the file itself.
+
+⚠️ **This is the THIRD session dated 2026-08-30** and the first two are
+unlettered, which is why this one is `c`. Read the order from the file, not
+from the dates.
+
+### 1. ✅ The site is deployed — `950f0645-ae72-4a29-a061-8f80544c1b6d`
+
+The gap is closed. `aliphcreative.com` had been carrying
+`c5b80d8c-ce63-4c1a-8fe9-1686b2d1a75c` since 2026-08-27a, two rounds back.
+
+Only **three** files were new to the bucket — `about.html`, `style.css`,
+`main.js` — out of 205 read. Two committed rounds came to 0.37 KiB of upload,
+which is what a round of CSS and copy edits actually weighs.
+
+⚠️ **The trigger list named only `aliphcreative.ceo-6c6.workers.dev`**, with no
+custom domain — exactly the shape that looked like a failure on the Queen's
+Retreat deploy earlier the same day, and it is fine for the same reason: the
+root `wrangler.toml` declares no `routes`, so the custom domain stays
+dashboard-managed and is not touched. Confirmed rather than assumed: `/`,
+`/about` and `/library` all answer **200** on `aliphcreative.com`.
+
+Verified the way this file demands — browser User-Agent, cache-buster, `-L`:
+
+- `style.css` and `main.js` md5-**identical** to the working tree.
+- `about.html` live is 21,296 bytes against the tree's 20,937, and the diff is
+  **one line**: the Cloudflare Web Analytics beacon. +359 bytes, the same
+  number measured on 2026-08-26.
+- the bts-29 `?v=2` cache-buster is present live, which is correct — it stays
+  until the purge.
+
+### 2. 🔴 Fourteen headlines in this file had letters replaced by emoji
+
+`R` had become 🔴 and `W`/`U` had become ⚠️ **inside words**: line 19 read
+`THE EDGE ⚠️AS SE🔴VING A 🔴EPLACED CLIP FO🔴 A ⚠️EEK`. Fourteen lines,
+concentrated in the state block at the top — the part most likely to be read
+first, and the part written in the loudest voice.
+
+🔴 **It came from this project's own patch scripts.** `git log` puts 12 of the
+14 in `9e80672` and the last 2 in `248db42`; every revision before those is
+clean. The lines were **born corrupted** — there is no earlier good copy to
+recover, so they were reconstructed from context.
+
+⚠️ **A mechanical substitution would have been wrong.** ⚠️ stands for **two
+different letters** — `⚠️AS` is WAS but `N⚠️MBE🔴` is NUMBER — and line 933 had
+lost characters outright, reading `CHE'S` where `CHROME'S` belonged. A global
+find-and-replace would have written `NWMBER` and left `CHE'S` standing.
+
+The repair substituted only ASCII-letters-plus-emoji runs, so no em-dash,
+arrow or apostrophe was ever retyped, and it asserted per line that the old
+text was corrupt and the new text was not. `git diff --stat` came back
+**14 insertions, 14 deletions**.
+
+⚠️ **Verify a scripted edit of this file by reading it back.** The scripts that
+write these session entries are the scripts that mangled them, and the damage
+sat in the most-read block of the file across two commits without being
+noticed. After any scripted write, grep for an emoji adjacent to a letter:
+that pattern is never legitimate here — a status mark is always followed by a
+space.
+
+⚠️ **`PYTHONIOENCODING=utf-8`, or print to a file.** The first attempt to even
+LIST the corrupt lines died on `UnicodeEncodeError: 'charmap' codec` — this
+box's console is cp1252 and cannot print 🔴 at all. That is one more false
+failure from the same console; see _Things that will bite you_.
+
+### 3. What did NOT change
+
+The purge is still owed, and the form is still closed and waiting on the
+agency's service account. ✅ The round being unseen did NOT survive the
+session — see below.
+
+### 4. ✅ The round has now been SEEN — four notes checked on the live site
+
+Item 0 is closed. Checked headless against `aliphcreative.com` at 1920x960,
+1440x900, 1280x1080, 1100x1080, 1024x1366 and 390x844.
+
+🔴 **TWO FALSE FINDINGS ALMOST WENT IN THIS FILE, BOTH FROM MEASURING THE
+WRONG THING.** They are the reason this section is worth reading.
+
+- **A screenshot of an element does not scroll it into view.** The overlapped
+  verticals photographed washed-out and nearly invisible — a serious-looking
+  defect. They were at `opacity: 0` because the reveal had never fired.
+  Computed opacity read `0` below the fold and `1` after scrolling in. **Assert
+  the end-state property before believing any capture.** The ring measured
+  completely static for the same reason.
+- **`querySelector('.lang-switch')` returns the OVERLAY's copy.** There are
+  two, and the first in the DOM is the `visibility: hidden` one inside
+  `.nav-overlay`, which correctly has no wash. Reading it says the wash is
+  missing from the deploy. The visible one is `.masthead .lang-switch`. **Scope
+  by `.closest('.masthead')`.**
+
+**1. The two overlapped verticals — PASS.** `overflow` is `visible` on
+`.ab-pair`, so the 2-4px the rotation throws past the box is painted, not
+clipped. The two pairs are near-identical (≈75px overlap, ≈38px offset), and
+row 0's pair clearing row 1's by -6px is harmless because row 1 is `.is-flip`
+and sits on the opposite side. ✅ **The `min()` is confirmed doing its job**:
+across all six viewports the pair never exceeds its track, so the
+shrink-back-on-a-tall-window fault is really gone.
+⚠️ **But the dead column is 218px at 1920x960, not the 79px the comment
+claims.** The pair spans 537px of a 755px track. Measured from the row edges it
+reads as 158px between card and pair and **108px of empty linen to the right of
+the pair**, against the card's 57px inset on the left — a lopsided composition
+on the picture side. That is a judgement call for the agency, not a bug, but
+the number in `--abh`'s comment does not reconcile and should not be trusted.
+
+**2. The ring's `--pop` — PASS, mechanism exactly as documented.** `popMax`
+measured **1.117** at rest and **1.260** with a piece picked, which is
+`popT = 1 + (POP-1) * (picked ? 1 : 0.45)` computing exactly right for
+POP = 1.26. The ring does turn once it is on screen. The front piece is
+**plainly** bigger, which was the stated goal over "technically bigger".
+⚠️ **The seams are still NOT answered and this pass could not answer them.**
+Headless rasterises in software; this file's own rule stands. What is new is
+only that the scale is real and reads as intended.
+⚠️ **Playwright's `hover` does not land on a ring item** — the 3D transform
+means the hit test finds something else, so `pick()` never runs. It was driven
+with a dispatched `pointerenter`, which proves the pop logic and proves nothing
+about whether a real pointer can pick a piece. **That is untested.**
+
+**3. The dropcap's shadow — the CONSTRUCTION is verified, the fault is not.**
+Both `drop-shadow` filters sit on `.dc-sheet`, the element whose
+`background-position` actually animates, and all four ancestors read
+`filter: none`. So the stale-cached-layer case genuinely has nowhere left to
+live. ⚠️ Still no iPad in the loop; the symptom itself remains unreproduced.
+
+**4. The lang pill's wash — PASS, and it is measurable.** The heading only
+reaches the pill on a PHONE: glyph left edge 64px against the pill's right edge
+128px at 390 wide, while at 768, 1024 and 1440 the RTL heading stops well clear
+of it. So `17th.jpeg` was a phone shot, and a desktop check will never show the
+complaint. At 390x844, scroll 1000, the letters cross the control and the wash
+veils them to **p50 luminance 78, against 224 for the same glyph just below the
+pill** — about 35%, visible but subdued, with the knob and `EN` reading clearly
+over the top. It does what the agency asked for.
+⚠️ A grey glyph fragment still crosses the gap between the knob and `EN`. That
+is the wash's deliberate trade — it veils rather than deletes — and it is the
+weakest moment of the control.
+
+### 6. ✅ The corruption is repaired everywhere, and the cache is re-measured
+
+**47 lines across three files.** The 31 in `style.css` and the 1 in
+`import_bts.py` were repaired with the same token-level method as this
+file's 14 — 51 distinct corrupt tokens, decoded from context, applied
+longest-first so `⚠️HE🔴E`→WHERE resolves before `HE🔴E`→HERE.
+
+⚠️ **An invariant caught its own flaw before anything was written.** The
+guard asserted that the count of "emoji followed by space" was unchanged, to
+prove no status marker was eaten. It fired — because tokens ending in the
+emoji (`BIGGE🔴 `) are also followed by a space, so they counted as markers.
+The replacement was right and the invariant was wrong; it was narrowed to
+emoji **surrounded** by whitespace. Nothing had been written yet.
+
+✅ **The stylesheet change is provably comment-only**: strip every `/* */`
+from the old and new files and the remainder is byte-identical. Deployed as
+`c3804b1c-0d1e-4940-a9f1-efd646c630be`; the live `style.css` is md5-identical
+to the tree, has zero corrupt lines and keeps all 194 markers.
+
+🔴 **The bts-29 cache is still stale, measured properly this time.** See
+the state block: plain GET 1,146,494 bytes on a HIT, `?v=2` 4,273,402 on a
+REVALIDATE. The buster stays until someone purges. **This login cannot** —
+`zone (read)` is not `Zone.Cache Purge`.
+
+### 5. 🔴 The emoji corruption is NOT confined to this file (closed — see 6)
+
+The same fault is in **31 lines of `prototype/style.css`** and one line of
+`resources/import_bts.py`. All inside comments, so nothing renders wrong and
+nothing behaves wrong — but `style.css` is **deployed**, so the mangled
+documentation is live, and these comments are where this project keeps its
+reasoning.
+
+Same signature: `R` and `W`/`U` replaced by 🔴 and ⚠️ inside words, in the
+loud all-caps headline sentences — `THE T⚠️O VE🔴TICALS OVE🔴LAP NO⚠️`,
+`⚠️P F🔴OM 38vh`, `IT G🔴O⚠️S BY PADDING AND TYPE`. Fixing it means editing
+`style.css` and redeploying, so it was left alone rather than folded into a
+visual-QA round. **Scan for it after any scripted write**: an emoji adjacent to
+a letter is never legitimate in this codebase.
 
 ---
 
@@ -899,7 +1114,7 @@ Last-Modified: Sun, 23 Aug 2026
 The same URL **with any query string** returned `4273402` bytes, 654×1162, no
 audio — the clean replacement, `MISS`. The bucket was right the whole time.
 
-🔴 **A `HEAD` REQ⚠️EST ANS⚠️E🔴ED ⚠️ITH THE NE⚠️ OBJECT.** HEAD and GET are
+🔴 **A `HEAD` REQUEST ANSWERED WITH THE NEW OBJECT.** HEAD and GET are
 separate edge entries, so a HEAD probe reported the new ETag, length and
 Last-Modified while every visitor got the old body. **That is how this was
 recorded as "verified live" and stayed broken.** Verify a replace-in-place with
@@ -929,8 +1144,8 @@ evicted — luck, not correctness.
 
 ### A dev server that does not lie, because the old one did
 
-🔴 **`python -m http.server` SE🔴VED SEVE🔴AL OF THIS 🔴O⚠️ND'S MEAS⚠️🔴EMENTS
-F🔴OM CHE'S CACHE.** It sends `Last-Modified` and no `Cache-Control`, so Chrome
+🔴 **`python -m http.server` SERVED SEVERAL OF THIS ROUND'S MEASUREMENTS
+FROM CHROME'S CACHE.** It sends `Last-Modified` and no `Cache-Control`, so Chrome
 applies heuristic freshness and does not revalidate — through a normal reload,
 a query-string reload on the document, and a forced navigation, because
 **subresources keep their own cache keys**. One change was nearly recorded as
@@ -976,7 +1191,7 @@ batch — and the refusal states it will keep firing for the rest of that
 session. Everything after that point is reasoned and code-checked but **not
 rendered**. Specifically:
 
-🔴 **NOTHING IN THIS 🔴O⚠️ND HAS BEEN LOOKED AT.** Not one screenshot was taken
+🔴 **NOTHING IN THIS ROUND HAS BEEN LOOKED AT.** Not one screenshot was taken
 — of seven visual complaints from a designer, about overlapping photographs, a
 control's wash, the size of a ring piece and where a panel is cut. Every check
 was numeric. The browser was available for two thirds of the round and was
@@ -996,7 +1211,7 @@ pushed back** — they had been deferred by choice and mislabelled as blocked:
   narrow desktop it already fills its track, so taking width from it shrinks
   the PICTURES exactly where they are tightest in order to widen the card.
 - ✅ **The collage's verticals are bigger** — `--clh` `38vh → min(48vh, 34vw)`.
-- 🔴 **AND THE `min()` IS THE B⚠️G BOTH OF THEM HAD.** A height in `vh` alone
+- 🔴 **AND THE `min()` IS THE BUG BOTH OF THEM HAD.** A height in `vh` alone
   grows with a tall window while the grid track holding it is governed by the
   WIDTH — so a tall narrow desktop drove the mat past its track and
   `max-width: 100%` silently shrank the picture back. **The clipping got

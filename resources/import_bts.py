@@ -102,7 +102,7 @@ def clip(src, name, out):
 # 616452` and the 1.14 MB watermarked clip from 2026-08-23, seven days after
 # the 4.27 MB replacement went into the bucket.
 #
-# ⚠️ AND A HEAD REQ⚠️EST DID NOT SHO⚠️ IT. HEAD on the same URL answered with
+# ⚠️ AND A HEAD REQUEST DID NOT SHOW IT. HEAD on the same URL answered with
 # the NEW ETag and length — HEAD and GET are separate edge entries — which is
 # why the replacement was recorded as "verified live" and stayed broken for
 # three days. Verify a replace-in-place with an unmodified GET and a hash of

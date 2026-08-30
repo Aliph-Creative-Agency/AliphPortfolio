@@ -56,7 +56,7 @@
      fold on exactly the short windows the correction was for. */
   --mast-h: calc(4.2rem + 4px);
 
-  /* 🔴 ⚠️HAT COLOU🔴 IS THE G🔴OUND HE🔴E (2026-08-27). The two fixed controls D
+  /* 🔴 WHAT COLOUR IS THE GROUND HERE (2026-08-27). The two fixed controls D
      the burger and the language pill — float over whatever scrolls under them
      and have to invert to stay readable. That used to be decided by a list of
      selectors in main.js naming every dark section on the site, which is a
@@ -64,7 +64,7 @@
      to it until somebody remembers, and nothing about the band itself says so.
 
      A section states its own ground instead, right where it is styled, and
-     because a custom property INHE🔴ITS, everything inside it states the same
+     because a custom property INHERITS, everything inside it states the same
      thing for free — no descendant has to be listed. main.js reads the
      inherited value at five points under each control and takes the majority.
 
@@ -283,7 +283,7 @@ body { -webkit-tap-highlight-color: transparent; }
 }
 .menu-btn .bars span:nth-child(1) { top: 0; }
 .menu-btn .bars span:nth-child(2) { top: 12px; }
-/* 🔴 THE BA🔴S CA🔴🔴Y THEI🔴 O⚠️N G🔴OUND (2026-08-27), and that is `17th.jpeg`.
+/* 🔴 THE BARS CARRY THEIR OWN GROUND (2026-08-27), and that is `17th.jpeg`.
    Inverting the bars answers a dark SECTION and nothing else. It cannot answer
    dark TYPE on a light section, which is what the agency ringed in red: two
    ink bars laid across an ink heading are not the wrong colour, they are the
@@ -503,7 +503,7 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
 
 /* Pinned to the corner opposite the burger, physically left in both
    directions: the burger is physically right, so a logical start would stack
-   the two in 🔴TL.
+   the two in RTL.
 
    Fixed, not absolute, so it rides down the page with the burger instead of
    scrolling away; `top` centres it on the burger's centre line.
@@ -511,7 +511,7 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
    🔴 AND IT IS FILLED (2026-08-27) — the other half of `17th.jpeg`. `.lang-switch`
    has no background of its own: it is a hairline ring, an ink knob and two
    words, and the page shows straight through the middle of it. Over the
-   لماذا ألِف؟ heading that meant the black letters ran TH🔴OUGH the pill and
+   لماذا ألِف؟ heading that meant the black letters ran THROUGH the pill and
    the ink knob merged with them, so the control read as a smudge on the type
    and the type lost its last word to a knob it could not be told apart from.
 
@@ -521,7 +521,7 @@ html[lang="en"] .ls-opt[data-l="en"] { color: var(--cream); }
    itself, because the overlay's copy sits on a solid ink field where
    transparent is already correct — and filling it there would paint a cream
    patch onto the menu. */
-/* 🔴 THE FILL BECAME THE BU🔴GE🔴'S ⚠️ASH (2026-08-30). The block above
+/* 🔴 THE FILL BECAME THE BURGER'S WASH (2026-08-30). The block above
    describes the fill that was here, and the agency's answer to it was "i dont
    like what u did with the lang button, how about replicating what u did with
    the nav button for it". They are right, and the two controls should never
@@ -597,7 +597,7 @@ body.nav-open .masthead .lang-switch {
 html[lang="ar"] .lang-switch.on-dark .ls-opt[data-l="ar"],
 html[lang="en"] .lang-switch.on-dark .ls-opt[data-l="en"] { color: var(--ink); }
 .lang-switch.on-dark:hover { background: rgba(217, 217, 206, 0.12); }
-/* 🔴 THE MASTHEAD'S COPY HOVE🔴S ON THE ⚠️ASH, not on a fill (2026-08-30).
+/* 🔴 THE MASTHEAD'S COPY HOVERS ON THE WASH, not on a fill (2026-08-30).
    Both hover rules above set a solid background, and on a pill that is now
    transparent either one would put back the opaque plate this round removed —
    for as long as the pointer is on it. The wash deepens instead, so hover
@@ -697,7 +697,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
 
 /* ── hero: film strip on a linen field + cream side panel ── */
 .hero {
-  /* 🔴 svh AND MINUS THE MASTHEAD (2026-08-27), and that is the FI🔴ST
+  /* 🔴 svh AND MINUS THE MASTHEAD (2026-08-27), and that is the FIRST
      `16th.jpeg`. ⚠️ The agency re-used that filename on 2026-08-30 for an
      unrelated shot of the dropcap's shadow — the file on the Desktop is now
      the second one, and this note describes a screenshot that no longer
@@ -1031,8 +1031,8 @@ video.preview {
    inert, which is what keeps it clear of the 19em four-line cliff the measure
    note below warns about.
 
-   🔴 AND THE C⚠️T EDGE KEEPS LESS PADDING THAN THE 🔴EADING EDGE, ⚠️HICH IS
-   ⚠️HAT ACT⚠️ALLY LANDS ON THE LINE. Hugging the measure with equal padding
+   🔴 AND THE CUT EDGE KEEPS LESS PADDING THAN THE READING EDGE, WHICH IS
+   WHAT ACTUALLY LANDS ON THE LINE. Hugging the measure with equal padding
    stopped 29px short of it (panel edge 1168, line 1197) and the first version
    of this shipped that way with a paragraph explaining why the agency's own
    line was wrong. It was not. `--pad` on both sides is 57.6px at 1920 and the
@@ -1041,7 +1041,7 @@ video.preview {
    cut, takes `--pad-cut`. At 1920 that is 622.08 + 57.6 + 28.8 = 708.5, and
    the panel's edge lands at 1196.5 against a line drawn at 1197.
 
-   ⚠️ THE CONTENT BOX IS ⚠️NCHANGED BY THIS. It is the measure at every width
+   ⚠️ THE CONTENT BOX IS UNCHANGED BY THIS. It is the measure at every width
    either way — only outer padding goes — so every measurement taken against
    the equal-padding version still holds: same lede line counts, same title
    wrap, nothing re-solves. Trimming the padding is the ONLY safe way to reach
@@ -1267,14 +1267,14 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
   height: var(--cap-h);
   margin-inline: 0.1rem 1.2rem;
   margin-bottom: 0.45rem;
-  /* 🔴 THE SHADO⚠️ MOVED DO⚠️N ONTO THE SHEET (2026-08-30), and that is the
+  /* 🔴 THE SHADOW MOVED DOWN ONTO THE SHEET (2026-08-30), and that is the
      second `16th.jpeg` — the agency re-used the number for a new shot, so the
      note in `.hero` about the film strip belongs to the OLD one. What this one
      rings is the أ scrap, and the words were "the shadow of the aliph paper
      part is not where its supposed to be after triggering the animation for
      the first time".
 
-     Measured off the screenshot: a HA🔴D-EDGED grey rectangle offset to the
+     Measured off the screenshot: a HARD-EDGED grey rectangle offset to the
      left of the scrap and below it, with nothing at all on its right. The
      shadow declared here is `0 2px` and `0 14px` — straight down, soft, and
      symmetric about the vertical. A hard rectangle with a sideways offset is
@@ -1297,7 +1297,7 @@ html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
      sheet, and a soft cast one, because cream paper on a cream field needs
      both to read.
 
-     ⚠️ NOT VE🔴IFIED ON AN iPAD — there is no iOS device in this loop, and
+     ⚠️ NOT VERIFIED ON AN iPAD — there is no iOS device in this loop, and
      the fault cannot be reproduced in Chrome at any viewport. What is verified
      is that the rendered shadow is unchanged on desktop, and that the
      construction that allowed the staleness is gone. If it survives, the next
@@ -2295,7 +2295,7 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
   background: none;
   cursor: pointer;
   transform-style: preserve-3d;
-  /* 🔴 THE C⚠️🔴🔴ENT PIECE IS SCALED, AND THE Z IS PAID BACK (2026-08-30).
+  /* 🔴 THE CURRENT PIECE IS SCALED, AND THE Z IS PAID BACK (2026-08-30).
      The agency asked to "just make the current item bigger". The lift this
      ring already had does not do that, and measuring is what showed it: at
      apo 264 a 40px lift takes the front piece from 199x210 to 232x216 — 17%
@@ -2400,7 +2400,7 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
    frame, where the note below says nothing can be read against it. If the
    agency still sees them, the next lever is NOT a bigger number: it is
    `will-change`/layer promotion on the slats, or fewer, wider facets. */
-  /* 🔴 BACK TO 1.1 (2026-08-30). 2.2 was doubled on 2026-08-27 as a MA🔴GIN
+  /* 🔴 BACK TO 1.1 (2026-08-30). 2.2 was doubled on 2026-08-27 as a MARGIN
      against an intermittent GPU fault, and the note below says so honestly —
      but the agency has now seen it: "the fix u implemented for them doesnt
      look good either". That is the cost this file predicted and under-weighted.
@@ -2414,14 +2414,14 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
      covered by a flat film plane the moment it plays, so the seams are worst
      exactly where they are least looked at.
      ⚠️ If they come back, the next lever is still NOT a bigger number. It is
-     `will-change`/layer promotion on the slats, or FE⚠️E🔴 AND ⚠️IDE🔴 FACETS
+     `will-change`/layer promotion on the slats, or FEWER AND WIDER FACETS
      — SLATS is 10 and the bend across a whole item is only 10px, so 6 would
      drop four junctions for very little faceting. That is a visible geometry
      change and it was not made blind. */
   --bleed: 1.1px;
   width: calc(var(--sw) + var(--bleed) * 2);
   height: var(--h);
-  /* 🔴 OPACITY ONLY, and it lives HE🔴E rather than in the .is-previewing
+  /* 🔴 OPACITY ONLY, and it lives HERE rather than in the .is-previewing
      rule below (2026-08-30). A transition declared in the same rule that
      changes the value does not run: the before-change style has no
      transition for the property, so the change is instant in both
@@ -2537,7 +2537,7 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
   border: var(--media-line);
   border-radius: clamp(6px, 0.9vw, 14px);
 }
-/* 🔴 THE SLATS GO O⚠️T ⚠️NDE🔴 THE FILM (2026-08-30), and that is `18th.png`.
+/* 🔴 THE SLATS GO OUT UNDER THE FILM (2026-08-30), and that is `18th.png`.
    The agency read it as "its like u put another one on top of it with the
    previous ones bounders showing", and that is exactly what it was. The film
    is ONE FLAT plane at translateZ(apo + 2px); the still under it is ten slats
@@ -3206,12 +3206,12 @@ body.lib-index .lib-list { display: block; }
      below calls `--abh`. It used to be written inline as `38vh` inside one
      calc; the mat now has to name the same number in order to hug the
      picture, and a length in two places is a length that drifts. */
-  /* 🔴 ⚠️P F🔴OM 38vh, AND CAPPED BY ⚠️IDTH TOO (2026-08-30) — "all the
+  /* 🔴 UP FROM 38vh, AND CAPPED BY WIDTH TOO (2026-08-30) — "all the
      verticals in the about us", which is these as well as the long read's.
      `c3` and `c5` already overlapped by 102px; they were simply small, 252px
      of mat sitting in a 538px track.
 
-     ⚠️ THE `min()` IS THE PA🔴T THAT ⚠️AS MISSING, here and in --abh. A height
+     ⚠️ THE `min()` IS THE PART THAT WAS MISSING, here and in --abh. A height
      stated only in `vh` grows with a tall window while the GRID TRACK that has
      to hold it is governed by the width, so a tall narrow desktop drives the
      mat past its track and `max-width: 100%` quietly shrinks the picture back
@@ -3357,7 +3357,7 @@ body.lib-index .lib-list { display: block; }
      coming out twice as tall as the board it is pinned to.
      ⚠️ The montage overrides it below: it is alone on its row and can afford
      the height two verticals sharing a column cannot. */
-  /* 🔴 ⚠️P F🔴OM 36vh (2026-08-30) — "make them bigger too". The overlap
+  /* 🔴 UP FROM 36vh (2026-08-30) — "make them bigger too". The overlap
      above is what pays for it: two mats that used to sit side by side with a
      gap now share --ab-lap of their width, so the pair fits the same column
      at a size that would not have fitted before. Measured at 1920x960, mat
@@ -3415,7 +3415,7 @@ body.lib-index .lib-list { display: block; }
    pictures now (see .ab-media) — the pair is narrower than its column, and
    left where it fell it would hug one edge of a row whose other half is a
    card. */
-/* 🔴 THE T⚠️O VE🔴TICALS OVE🔴LAP NO⚠️ (2026-08-30), and that is the second
+/* 🔴 THE TWO VERTICALS OVERLAP NOW (2026-08-30), and that is the second
    half of `20th`. The agency sent a mock-up — "20th part 2" — with the two
    pictures pulled together and one laid over the other, and asked for it on
    every vertical in the section, bigger, "because theres still a lot of
@@ -3428,7 +3428,7 @@ body.lib-index .lib-list { display: block; }
    overlap by 102px, and this section, which was written to copy it, kept a
    positive gap.
 
-   ⚠️ A NEGATIVE MA🔴GIN, because `gap` cannot go below zero. The gap is 0 and
+   ⚠️ A NEGATIVE MARGIN, because `gap` cannot go below zero. The gap is 0 and
    the second figure is pulled back over the first — `margin-inline-start`, so
    it mirrors and the overlap stays on the reading side in both languages.
    ⚠️ The overlap is a fraction of the mat, not a fixed length: --ab-lap is in
@@ -3445,10 +3445,10 @@ body.lib-index .lib-list { display: block; }
   align-items: flex-start;
   gap: 0;
 }
-/* 🔴 AND THE A⚠️TO MA🔴GINS HAD TO GO, ⚠️HICH IS ⚠️HE🔴E THE SPACE ACT⚠️ALLY
-   ⚠️AS. `.ab-media` carries `margin-inline: auto` so a lone mat centres in the
+/* 🔴 AND THE AUTO MARGINS HAD TO GO, WHICH IS WHERE THE SPACE ACTUALLY
+   WAS. `.ab-media` carries `margin-inline: auto` so a lone mat centres in the
    grid track it was written for. Inside this flex row an auto margin is not a
-   centring device, it is a CLAIM ON THE F🔴EE SPACE — and it is settled before
+   centring device, it is a CLAIM ON THE FREE SPACE — and it is settled before
    `justify-content` is consulted, so the container's `center` never ran at
    all. Measured with the overlap already in: the first mat took 70.6px of
    margin on each side and the second another 70.6, so 212px of the column was
@@ -3571,21 +3571,21 @@ body.lib-index .lib-list { display: block; }
    pointed at: cream-warm stock, a hairline, and a soft cast shadow. It is NOT
    rotated — a clipping is pinned to a board, a card in a reading column is
    set on the page. */
-/* 🔴 BIGGE🔴 (2026-08-30) — "make the cards bigger accordingly". The
+/* 🔴 BIGGER (2026-08-30) — "make the cards bigger accordingly". The
    "accordingly" is the point: the pictures beside these grew this round, and a
    card that did not read as a short block floating in a row half again its
    height. Measured at 1920x960 before: a 993px card 199-275px tall in a 613px
    row.
 
-   ⚠️ IT G🔴O⚠️S BY PADDING AND TYPE, NOT BY ⚠️IDTH, and that is deliberate.
+   ⚠️ IT GROWS BY PADDING AND TYPE, NOT BY WIDTH, and that is deliberate.
    The obvious move is to narrow `.ab-row`'s 0.86fr picture track and hand the
    width over — but the pair is sized off `--abh`, and on a tall narrow desktop
-   it already fills its track. Taking width from that track makes the PICTU🔴ES
+   it already fills its track. Taking width from that track makes the PICTURES
    smaller at exactly the widths where they are already tightest, to make the
    card wider. The card gets its presence from the stock around the type and
    the size of the type instead, which costs the pictures nothing.
    ⚠️ The card is a grid item at a fixed track width, so bigger type sets more
-   lines and the card grows DO⚠️N into a row the pictures already made taller.
+   lines and the card grows DOWN into a row the pictures already made taller.
    Nothing here can push the row wider. */
 .ab-card {
   background: var(--cream-warm);
