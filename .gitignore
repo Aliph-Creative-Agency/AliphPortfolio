@@ -54,3 +54,24 @@ resources/thumb-cache/
 # mkstemp and replace leaves a zero-byte .tmp behind, and prototype/ is the
 # DEPLOY DIRECTORY, so two of them shipped into a commit on 2026-08-27b.
 *.tmp
+
+# ── Google service-account keys ────────────────────────────────────
+# 🔴 A downloaded service-account key is a PRIVATE KEY. Google names the
+# file after the project (`my-project-4f3a91c2b7.json`), so it does not look
+# like a credential in a directory listing, and it lands in ~/Downloads with a
+# name nobody recognises a week later. These patterns are here so that dropping
+# one into the tree to pipe into `wrangler secret put` cannot commit it.
+#
+# ⚠️ The secrets themselves live in Cloudflare, write-only. The downloaded JSON
+# is the ONLY copy of the key that will ever exist -- keep it somewhere durable
+# and OUTSIDE this repo. See feedback-worker/SETUP.md step 2.
+# ⚠️ `*-*.json` is deliberately BROAD -- it catches any hyphenated .json,
+# not only a key. That is the trade: no tracked file in this repo has a hyphen
+# in its name, and a silently-ignored config is a cheaper mistake than a
+# committed private key. `git add -f` if you ever need one through.
+*-*.json
+sa.json
+service-account*.json
+*service_account*.json
+*.pem
+*.p12
