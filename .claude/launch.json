@@ -49,6 +49,18 @@
         "feedback-worker"
       ],
       "port": 8341
+    },
+    {
+      "name": "queens-retreat-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8351",
+        "-d",
+        "C:/Users/Obaida/AppData/Local/Temp/claude/D--Personal-Projects-aliph-portfolio/7064c1a8-4f2c-4443-8f39-57acdfddd2d7/scratchpad/qr-static"
+      ],
+      "port": 8351
     }
   ]
 }

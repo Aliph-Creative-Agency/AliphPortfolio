@@ -12,7 +12,20 @@ Deploying this cannot affect either. Run `wrangler` from **this** directory.
 
 ---
 
-## 1. Create the Google Sheet
+## 1. The Google Sheet
+
+> ✅ **Done 2026-08-30.** The agency repurposed the Queen's Retreat
+> registration spreadsheet: renamed, emptied, and its registrations exported to
+> an `.xlsx` kept outside git. The ID is not written here — this file is
+> committed, and the ID is one of the three secrets.
+>
+> 🔴 **Queen's Retreat had to be archived off that sheet first, and it was.**
+> Its Worker read the same first tab and counted every row with a non-empty
+> column B as an occupied seat — which is exactly what a feedback row has, the
+> client's name. See the ARCHIVED block in that project's `src/worker.js`. Its
+> page is still live as a portfolio piece; it just no longer touches a Sheet.
+
+If you ever start a fresh one:
 
 1. Go to <https://sheets.google.com> and create a spreadsheet — call it
    something like *ملاحظات عملاء ألِف*.
@@ -23,11 +36,24 @@ Deploying this cannot affect either. Run `wrangler` from **this** directory.
 
 ## 2. Create a Google service account
 
-> ⚠️ You can **reuse the Queen's Retreat service account** instead of making a
-> new one — it already exists and already has the Sheets API enabled. If you do,
-> skip to step 3 with its `client_email` and `private_key`, and share the new
-> Sheet with it. A separate account is tidier if these ever change hands
-> separately; the same account is one less thing to rotate.
+> 🔴 **YOU CANNOT REUSE THE QUEEN'S RETREAT SERVICE ACCOUNT.** An earlier
+> version of this file said you could, and it was wrong in a way that costs an
+> afternoon to discover.
+>
+> **A Cloudflare secret cannot be read back** — not from the dashboard, not
+> from `wrangler`. You can set one and you can overwrite one; you cannot see
+> one. The Queen's Retreat Worker is *using* that private key, and nothing can
+> show it to you. There is no key JSON anywhere on the studio machine either
+> (Downloads, Desktop, Documents and the whole Projects tree were searched for
+> `"type": "service_account"` — nothing).
+>
+> ⚠️ You **can** still read that account's `client_email`: open the Sheet →
+> Share, and it is listed as an Editor. That is a trap, not a shortcut. An
+> email without its private key authenticates nothing.
+>
+> ✅ So: make a new service account, under an account the agency controls, and
+> **keep the downloaded JSON somewhere durable.** That file is the only copy of
+> the key that will ever exist.
 
 1. <https://console.cloud.google.com> → create a project (e.g. `aliph-feedback`).
 2. **APIs & Services → Library** → search **Google Sheets API** → **Enable**.
@@ -41,8 +67,13 @@ Deploying this cannot affect either. Run `wrangler` from **this** directory.
 
 ## 3. Share the Sheet with the service account
 
-In the spreadsheet: **Share** → paste the `client_email` → **Editor** → untick
-"Notify people".
+In the spreadsheet: **Share** → paste the **new** account's `client_email` →
+**Editor** → untick "Notify people".
+
+⚠️ The Queen's Retreat account may already be listed there as an Editor from
+the sheet's previous life. That is harmless — its Worker no longer reads or
+writes anything — but it is not the account this form uses, and leaving it does
+not save you this step.
 
 ⚠️ Skipping this is the single most common way this fails, and the error it
 produces is a 403 from Google that says nothing about sharing.

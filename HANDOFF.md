@@ -1,8 +1,8 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-29. Read this first._
+_Updated 2026-08-30. Read this first._
 
-> ## 🟡 State on 2026-08-29: THE FORM IS LIVE AND CLOSED; THE SITE AND THE FORM'S NEW LOOK ARE BOTH BEHIND
+> ## 🟡 State on 2026-08-30: THE FORM IS LIVE, RESTYLED AND STILL CLOSED; THE SITE IS BEHIND
 >
 > ✅ **`feedback.aliphcreative.com` IS LIVE** — `feedback-worker/`, a THIRD
 > deployable beside the site and the chat, version
@@ -10,12 +10,26 @@ _Updated 2026-08-29. Read this first._
 > record were created by the deploy itself. **The site is untouched**:
 > `aliphcreative.com` still answers 200 and is still `c5b80d8c-…`.
 >
-> ⚠️ **THE FORM LOOKS DIFFERENT AS OF 2026-08-29b AND THAT IS NOT DEPLOYED.**
-> Three edits the agency asked for: the type came up to the site's scale, the
-> option boxes became a ruled list, and the double aliph replaced the
-> half-aliph stamp at the thank-you. Committed and verified against
-> `wrangler dev` in both languages — **not pushed**. The live form is still
-> `fe8b50ba-…`, which carries the first build's small type.
+> ✅ **THE RESTYLE IS DEPLOYED — version `5966511b-dc24-4cc1-b707-cada1d55a6c8`.**
+> The type is at the site's scale, the option boxes are a ruled list, and the
+> double aliph closes the thank-you. Verified live: `style.css` is md5-identical
+> to the working tree, the Bold woff2 answers 200, the dropped Regular answers
+> **404**, and the body rule reads `0.92rem / 700 / 1.85`.
+>
+> 🔴 **THE SHEET WAS THE QUEEN'S RETREAT SHEET, AND IT WAS STILL IN USE.** The
+> agency renamed and emptied `تسجيلات عودة الملكة` to serve as the feedback log —
+> but `queensretreat` was **still deployed and still reading it**, which one
+> `curl` of its `/api/counts` proved in seconds. Both Workers write the first
+> tab, and Queen's Retreat counts any row with a non-empty **column B** as an
+> occupied seat — which is exactly what a feedback row has, the client's name.
+> ✅ Closed by archiving Queen's Retreat, 2026-08-30 — see that session.
+>
+> 🔴 **THE QUEEN'S RETREAT SERVICE ACCOUNT CANNOT BE REUSED, and `SETUP.md`
+> said it could.** A Cloudflare secret is **write-only**: settable,
+> overwritable, never readable. The key is in use and unrecoverable, and no
+> key JSON survives anywhere on the machine. ⚠️ Its `client_email` IS still
+> readable from the Sheet's Share dialog — which makes the path look open until
+> the last step. **A new service account is the only way.**
 >
 > 🔴 **A SATELLITE PAGE COPIED THE SITE'S TOKENS AND INVENTED ITS OWN TYPE
 > SCALE.** Palette, faces and linen were lifted; the scale was not. Body was
@@ -431,6 +445,149 @@ gesture has been invented for it.
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-08-30 — the feedback sheet turned out to be somebody else's, and the retreat becomes a portfolio piece
+
+The agency answered the setup list: the Sheet is the Queen's Retreat
+registration sheet, renamed and emptied; reuse its service account; and
+*"elaborate"* on sharing. Two of those three turned out to be closed doors.
+
+### 1. ✅ The restyle is deployed
+
+Version **`5966511b-dc24-4cc1-b707-cada1d55a6c8`**, `feedback.aliphcreative.com`.
+The deploy summary's trigger list named the custom domain, which is the thing to
+read. Verified live: `style.css` md5-identical to the working tree, body computing
+`0.92rem / 700 / 1.85`, `29LTIdris-FlatBold.woff2` **200**, the dropped
+`29LTIdris-FlatRegular.woff2` **404**, `DoubleAliph-Icon.svg` 200, and
+`/api/status` still honestly `{"ok":true,"ready":false}`.
+
+### 2. 🔴 The feedback sheet was live under another Worker
+
+`queensretreat` was still deployed and still reading the same spreadsheet. One
+`curl` of `https://queensretreat.ceo-6c6.workers.dev/api/counts` settled it —
+`ok:true` is the service account authenticating and reading *that sheet*, and
+`totalRegistered:0, headerPresent:false` is the agency's emptying seen from the
+other side.
+
+⚠️ **Both Workers use UNQUALIFIED ranges, so both land on the first tab.** And
+`getCounts()` counts every row whose **column B** is non-empty as an occupied
+seat. A feedback row's column B is the client's name, a required field. So:
+
+- every submission would have consumed a Queen's Retreat seat, ticking the
+  live hero counter down;
+- 🔴 the header check is the one that does lasting damage — Queen's Retreat
+  writes its header only `if (!counts.headerPresent)`, so once the feedback
+  header sat in row 1 any real registration would be filed under the feedback
+  form's column names, permanently;
+- a registrant's name and phone would land in a sheet the agency reads as
+  feedback.
+
+✅ **Two things were NOT a problem and were checked rather than assumed**: the
+phone-duplicate scan reads column C, strips non-digits from the service name and
+gets nothing; and the slot tally needs a literal `" @ "` plus a known station
+name, so ratings and free text return `null`.
+
+### 3. 🔴 A Cloudflare secret cannot be read back — and `SETUP.md` was wrong
+
+The file recommended reusing the Queen's Retreat service account as the easy
+path, and that advice was repeated to the agency before it was checked. It is a
+dead end. `wrangler secret put` writes; nothing reads. The Worker is *using*
+that private key and nothing can show it. Downloads, Desktop, Documents and the
+whole Projects tree were searched for `"type": "service_account"` — nothing.
+
+⚠️ **The trap is that the email IS recoverable** — the Sheet's Share dialog
+lists it — so the path looks open until the key is needed.
+
+⚠️ **And a second error followed the first**: having established the key could
+not be READ, it was then wrongly said that Queen's Retreat could not be
+repointed at all. A write-only store still accepts **overwrites**. Read,
+overwrite and rotate are three different permissions; "cannot read" does not
+imply "cannot change". `SETUP.md` step 2 now says all of this.
+
+### 4. ✅ Queen's Retreat is archived — the page stays, the registration stops
+
+The agency's call: *"i just want the page to stay up but no need for the
+registration process to be functional, since we're displaying it in our
+portofolio."*
+
+⚠️ **The page was not behaving like a portfolio piece.** Emptying the sheet
+un-hid the seat counter, so it was advertising **100 free seats** on a sold-out
+event that ran on 19 July, with the register button enabled.
+
+`Aliph-Creative-Agency/Queens-Retreat-Landing`, commit `bca2722`, deployed as
+`9b7d5a4a-26be-4515-92b6-24aa84592092`:
+
+- **all three endpoints answer from a constant** and `getCounts()` is never
+  called. `/api/register` is **410** with a message the page already knows how
+  to render through `showFormError`.
+- **`seatsLeft` is pinned at 2** at the agency's request, to show the counter
+  off. ⚠️ 2 is a display decision: the page renders the red «(متبقي فقط!)»
+  urgency at 20 or fewer and a plain number above it, so raising this past 20
+  quietly removes the thing the counter is there to demonstrate.
+- **the page pins the same numbers client-side too**, so it still reads
+  correctly if it is ever served as plain static files with no Worker.
+- ✅ **the three secrets are left in place, unused.** Nothing to rotate, nothing
+  to know, and redeploying needs neither.
+- ✅ It also closes something that was always true: `/api/counts` returned every
+  registrant's phone number in a public JSON response, and `/api/status?phone=`
+  answered whether a guessed number was registered.
+
+**Verified with an EMPTY env**, which is the test — any route still reaching the
+Sheet would throw on the missing secrets. counts 200 / status 200 / register
+410, and the page rendering «2 مقعداً (متبقي فقط!)» with **no `/api` call made
+at all**. Then confirmed on the live custom domain after deploy.
+
+### 5. 🔴 The local clone was eight commits stale, and it was believed
+
+The whole reading of that page — what it renders, what a visitor can click —
+came from a checkout **eight commits behind** its remote, 275 lines adrift in
+`index.html`. Two of the missing commits removed the payment flow, so
+*"the Bit payment link is live"* was reported to the agency and was **false of
+the live site**. It surfaced only at `git push`, long after the conclusions had
+been stated.
+
+⚠️ **`git status` said "clean" throughout, and that is true and irrelevant** —
+clean means no local edits, not up to date. The fix was `git fetch`, a branch to
+hold the work, `reset --hard origin/main`, re-apply, re-verify. **Fetch before
+reading, not before pushing** — and for any claim about what is live, probe the
+deployment rather than the working copy.
+
+### 6. ⚠️ Two deploy facts worth keeping
+
+🔴 **That repo is CRLF; this one is LF.** The patch scripts here normalise to
+`\n` to match anchors and write CRLF back. Getting it wrong rewrites every line
+and buries the change in a whole-file diff.
+
+⚠️ **`SETUP.md` there says a push to `main` auto-deploys. It did not.** Ten
+minutes after `bca2722` no new deployment existed, and every deployment in the
+list reads `Source: Unknown (deployment)` — the shape of a manual
+`wrangler deploy`. It was deployed by hand.
+
+✅ **A `wrangler deploy` with no `routes` key does NOT remove a
+dashboard-managed custom domain** — Cloudflare's own configuration docs name
+exactly that as the way to keep routing under dashboard control. Confirmed after
+the fact: the trigger list printed only the workers.dev host, and
+`queensretreat.aliphcreative.com` still answered 200.
+
+⚠️ **The repo moved orgs** — `AliphCreaitve` → `Aliph-Creative-Agency`. The push
+still worked on a redirect and warned. The local remote is updated.
+
+### What is left on the form, and it is all the agency's
+
+1. 🔴 **A NEW service account.** Own Google Cloud project, Sheets API enabled,
+   JSON key downloaded — **and kept**, because that file is the only copy of the
+   key that will ever exist.
+2. **Share the Sheet with its `client_email`** — Editor, notify off.
+3. **The three secrets**, from `feedback-worker/`. No redeploy: the notice
+   clears itself.
+4. 🔴 **The append has still never run.** The first real submission is the first
+   time that code executes.
+
+⚠️ **The `.xlsx` export is the only copy of the retreat's registrations** and it
+is `*.xlsx`-gitignored in a **public** repo. Real names, phone numbers. Keep it,
+keep it out of git, and ideally move it out of the working tree.
 
 ---
 
