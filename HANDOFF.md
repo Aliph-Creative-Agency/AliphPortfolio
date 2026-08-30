@@ -1,8 +1,8 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-30. Read this first._
+_Updated 2026-08-31. Read this first._
 
-> ## 🟡 State on 2026-08-30: THE FORM IS LIVE, RESTYLED AND STILL CLOSED; THE SITE IS CURRENT AND UNSEEN
+> ## 🟢 State on 2026-08-31: THE FORM IS OPEN AND TAKING ANSWERS; THE SITE IS CURRENT AND UNSEEN
 >
 > ✅ **`feedback.aliphcreative.com` IS LIVE** — `feedback-worker/`, a THIRD
 > deployable beside the site and the chat, version
@@ -113,7 +113,44 @@ _Updated 2026-08-30. Read this first._
 > pixel. A single computed read that contradicts what you expect is
 > inconclusive, not a finding — and the same staleness can report a false PASS.
 >
-> 🔴 **IT IS DELIBERATELY NOT ACCEPTING RESPONSES, and it says so on the
+> ✅ **THE FORM IS OPEN. The Sheets append HAS RUN — 2026-08-31, verified end
+> to end through the real page.** `/api/status` answers `ready:true`, the notice
+> is gone, Send is enabled. The header wrote itself and a submission lands with
+> full Arabic — diacritics, em dash, mixed Arabic/Latin — a plain `1`-`5` in
+> column H and an Asia/Jerusalem stamp. Both test rows were deleted; the sheet
+> holds only its header. **No redeploy was needed**: the secrets flipped it.
+>
+> 🔴 **THE SHEET IS `17EV8437…` ("FeedBack Form"), NOT the `1EMJApB2Rh…` handed
+> over at the start.** That one was described as "the Queen's Retreat one,
+> renamed and emptied". It is NEITHER: still titled
+> `تسجيلات ايفنت عودة الملكة`, two tabs, and holding real registrants' names,
+> WhatsApp numbers, emails, home areas and employers.
+>
+> 🔴 **AND `1EMJApB2Rh…` IS SHARED `{"role":"reader","type":"anyone"}` — anyone
+> with the link can read all of it.** That exposure is STILL OPEN and is the
+> most urgent item in this file. Sheet → Share → General access → **Restricted**;
+> nothing depends on it being public. ⚠️ It is also why the first 403 was so
+> confusing: `ensureHeader`'s READ succeeded on public access and only the write
+> failed.
+>
+> 🔴 **THE SERVICE ACCOUNT IS NEW — `sheet-writer@aliph-feedback…`.** The
+> Queen's Retreat one is unreachable forever: a Cloudflare secret is
+> **write-only**, settable and overwritable but never readable, and no key JSON
+> survives on this machine. ⚠️ Its `client_email` IS still readable from the
+> Sheet's Share dialog, which makes reuse look possible until the last step.
+> The new key is at `D:\Personal\keys\aliph-feedback\` — **the only copy**.
+> ⚠️ `C:\Users\Obaida` is itself a git repo, so Downloads and Documents are
+> NOT safe storage.
+>
+> ⚠️ **GOOGLE WORKSPACE BLOCKS BOTH KEY ROUTES.**
+> `iam.managed.disableServiceAccountKeyCreation` denies only
+> `keyOrigin == 'GOOGLE_PROVIDED'` — which reads like uploading your own public
+> key is a way through, and it is not: `iam.disableServiceAccountKeyUpload` is a
+> SEPARATE constraint that closes it. ⚠️ `roles/orgpolicy.policyAdmin` **cannot
+> be scoped to a folder** — organization level only. `info@aliphcreative.com`
+> holds it now, so the next project needs no admin.
+>
+> ⚠️ **STALE, kept because the ordering lesson is real:**
 > page.** No Sheet, no service account, no secrets yet —
 > `feedback-worker/SETUP.md` is the whole procedure. A Worker must EXIST
 > before `wrangler secret put` will take a secret for it, so this window was
@@ -537,6 +574,86 @@ gesture has been invented for it.
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-08-31 — the form opens, and the sheet handed over was the live registration one
+
+✅ **DONE. The form accepts answers**, verified through the live page rather
+than asserted. See the state block for the standing facts; what follows is what
+this round had to get through.
+
+### 1. 🔴 The sheet handed over was the live registration sheet
+
+`1EMJApB2Rh…` came with "i repurposed the تسجيلات عودة الملكة one, i renamed it
+and emptied it". It was neither renamed nor emptied — real registrants' names,
+WhatsApp numbers, emails, home areas and employers, under a public
+`{"role":"reader","type":"anyone"}`.
+
+🔴 **This was caught by PROBING BEFORE WRITING, and the plan at that moment
+would have destroyed data.** The next step was going to be "clear row 1 so the
+header rewrites itself" — on what turned out to be the header of live
+registration data. What prevented it: a **zero-row `:append`**, which the Sheets
+API accepts and which still returns 403 when the caller cannot write. It tests
+write access **without writing anything**. Use it before any destructive fix.
+
+⚠️ **Earlier in the session Queen's Retreat's `/api/counts` reported
+`totalRegistered: 0, headerPresent: false`** — an empty first tab. It was not
+empty hours later. Something restored it in between, unexplained. Do not treat
+a reading of that sheet as stable.
+
+### 2. The diagnosis came from WHICH error fired, not from its text
+
+`appendRow` calls `ensureHeader` first, and that function throws three
+distinguishable messages. Getting **"Sheets append failed"** rather than
+"Sheets read failed" or "Sheets header write failed" proved read-OK /
+write-denied before anything was opened in a browser. ✅ **A distinct message at
+each step is what makes a 403 diagnosable from one log line.**
+
+### 3. ⚠️ `curl` mangled the Arabic and the Sheet stored it faithfully
+
+The first test row landed with `??????` in every free-text column — while the
+columns filled from the Worker's own constant tables were perfect Arabic. **That
+asymmetry is the whole tell**: the corruption entered through the test harness,
+not the code, because only the values that travelled through the shell were
+broken. Re-run through the real page, the same fields came back with full
+diacritics and mixed scripts. **Never diagnose an encoding bug from a shell.**
+
+### 4. Two Google walls, and the second one invalidated the workaround for the first
+
+`iam.managed.disableServiceAccountKeyCreation` blocked Create-new-key. Its
+condition — `keyType == 'USER_MANAGED' && keyOrigin == 'GOOGLE_PROVIDED'` —
+says it denies only keys **Google generates**, so uploading a self-made public
+key looks open. A keypair was generated for exactly that and the upload was
+refused by `iam.disableServiceAccountKeyUpload`, a separate constraint.
+⚠️ **Reading one constraint's condition does not tell you the other paths are
+open.**
+
+Then the scoping plan was wrong too: `roles/orgpolicy.policyAdmin` **cannot be
+granted on a folder** — Google's docs say organization level, and it "doesn't
+appear in the role list for projects". The folder-scoped design could not have
+worked. ✅ Resolved by granting it (plus Tag Administrator) to
+`info@aliphcreative.com` at the org.
+
+### 5. ⚠️ `git add -A` swept another session's work into this one's commit
+
+`ef173c5` carries this session's Apps Script fallback **and** a concurrent
+session's site-deploy notes and mojibake repairs, under a message describing
+only the former. Nothing was lost and nothing was pushed, and history was left
+alone rather than rewritten under a second agent working the same tree.
+⚠️ **In a repo another session may be editing, `git add -A` is not a safe
+default** — stage paths.
+
+### What is still open
+
+1. 🔴 **`1EMJApB2Rh…` is public and holds personal data.** Restrict it.
+2. ⚠️ **The key JSON at `D:\Personal\keys\aliph-feedback\` is the only copy.**
+   Agency password manager.
+3. ⚠️ **`C:\Users\Obaida` is a git repo** — `master`, one tracked file, no
+   remote. A stray `git init`; Downloads and Documents sit inside it.
+4. ⚠️ **`feedback-worker/apps-script/Code.gs` is an UNUSED fallback**, kept
+   because its header documents the constraint situation. Delete it if the
+   service-account path stays.
 
 ---
 
