@@ -30,11 +30,34 @@ _Updated 2026-09-01. Read this first._
 > that is CORRECT here: the root `wrangler.toml` declares no `routes`, so the
 > custom domain stays dashboard-managed and is not touched.
 >
-> 🔴 **20 COMMITS ARE UNPUSHED**, now 21. `origin/main` is
-> `github.com/Aliph-Creative-Agency/AliphPortfolio` and local `main` is ahead of
-> it by the whole recent history. Deploying does NOT push — wrangler ships the
-> working tree, git is untouched. Nobody has asked for a push; do not assume the
-> remote reflects any of this.
+> ✅ **PUSHED, and `origin/main` is in sync at `2f1d0a3`.** Twenty-two commits
+> went out together — the whole backlog since 2026-08-26, not just this round.
+> ⚠️ **Deploying does NOT push.** wrangler ships the working tree and leaves git
+> completely alone; the two went out minutes apart here only because both were
+> asked for. A deployed site says nothing about the state of the remote.
+>
+> 🔴 **`github.com/Aliph-Creative-Agency/AliphPortfolio` IS A PUBLIC REPOSITORY,
+> AND THIS FILE IS IN IT.** `visibility: public`, confirmed against the GitHub
+> API on 2026-09-01, and public since at least 2026-08-26. **THIS FILE IS THE
+> EXPOSURE.** It is 374 KB of internal operations notes: what broke, what the
+> agency asked for and then reversed, their instructions quoted verbatim,
+> clients named with dates and commentary, and the write-ups of two security
+> incidents — including the one titled *"Refuse to commit a service-account
+> key."*
+>
+> ⚠️ **SO WRITE EVERY ENTRY AS IF IT WERE PUBLISHED, BECAUSE IT IS.** Concretely,
+> the conventions this file already follows are load-bearing rather than stylistic
+> and must be kept: **truncate every identifier** — `1EMJApB2Rh…`, `17EV8437…`,
+> `sheet-writer@aliph-feedback…` — because a truncated id is not a working link
+> and a full one is; **never paste a key, a token or a `.env`**; and **use a
+> placeholder** in setup docs the way `feedback-worker/SETUP.md` writes
+> `THIS_LONG_ID`. ✅ Audited before the 2026-09-01 push: zero full-length
+> sheet-id-shaped tokens in the whole 22-commit range, no key files, and every
+> `PRIVATE_KEY` hit a variable NAME in code or docs. That result is what made the
+> push safe — it is not a guarantee about the next one.
+>
+> ⚠️ **A near-miss on a private repo is a caught mistake; on a public one it is
+> permanent.** History can be rewritten, but not un-cloned and not un-indexed.
 >
 > 🔴 **SOMETHING ELSE WROTE THIS FILE DURING THE 2026-08-30c SESSION, AND IT
 > HAS NOT BEEN RECONCILED. READ THIS BEFORE EDITING.** At that session's start
@@ -1124,9 +1147,30 @@ site was never touched by that work.
    exists for the dark ground at 6.24:1; on the linen there is nothing, which is
    why the kicker is ink. If the accent is ever wanted under small text on paper,
    that token has to be created and measured.
-5. 🔴 **Everything carried forward from before is still carried forward** — the
-   bts-29 edge purge, the public `1EMJApB2Rh…` sheet, the key JSON being the
-   only copy. None of it was touched this round.
+5. 🔴 **THE REPOSITORY SHOULD BE PRIVATE, AND THAT IS A DECISION NOBODY HAS
+   MADE.** Asked directly on 2026-09-01 and the recommendation was **private**,
+   for four reasons that are about this repo rather than about repos in general:
+   this file is an internal ops log and not documentation; the work is CLIENT
+   work and names them with commentary; the history already contains a commit
+   called *"Refuse to commit a service-account key"*, so the failure mode is
+   demonstrated rather than hypothetical; and public buys nothing here, because
+   the thing meant to be public already is — `aliphcreative.com`. Nobody forks a
+   portfolio site.
+   ⚠️ **Going private does NOT retract what is already out.** It has been public
+   since at least 2026-08-26 with roughly 192 KB of this file already on the
+   remote; forks and caches are not recallable. Flipping it stops the
+   accumulation, which is most but not all of the value.
+   ✅ **If a public presence is wanted, the clean shape is a SEPARATE repo** — a
+   README, screenshots and the stack — rather than the working tree with the ops
+   log inside it.
+   ⚠️ Only the agency can change this: it is a GitHub account setting
+   (Settings → General → Change visibility), not something a session can or
+   should do.
+6. 🔴 **Everything carried forward from before is still carried forward** — the
+   bts-29 edge purge, the key JSON being the only copy. None of it was touched
+   this round. ✅ The `1EMJApB2Rh…` sheet is RESTRICTED now — the agency
+   confirmed it on 2026-09-01, closing what this file had called its most urgent
+   item.
 
 ---
 
