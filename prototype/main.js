@@ -66,8 +66,8 @@ const I18N = {
      The ring is nine or three pieces of a 82-item archive, and nothing said
      so — «all work» named the destination without giving a reason to go. */
   svcInvite: {
-    ar: "هذه نماذج فقط — الأرشيف كامل بانتظارك.",
-    en: "A handful of samples — the full archive is one click away."
+    ar: "هذه نماذج فقط، والأرشيف كامل بانتظارك.",
+    en: "A handful of samples; the full archive is one click away."
   },
   btnAbout: { ar: "تعرّف على ألِف", en: "Get to know Aliph" },
 
@@ -105,11 +105,37 @@ const I18N = {
   },
   w1ParaB: {
     ar: "نحن لا نبدأ بالتصميم، بل نبدأ بالسؤال: من أنت؟ وماذا تريد أن تقول؟ من هذه الإجابة، تُبنى الهوية البصرية، وتُصاغ الصورة، ويُكتب النص، ويُصمَّم الموقع، كلٌّ في مكانه، وكلٌّ بخدمة الفكرة الواحدة.",
-    en: "We don't begin with the design. We begin with the question: who are you, and what do you want to say? From that answer the identity is built, the image is shaped, the words are written and the site is designed — each in its place, and each in service of one idea.",
+    en: "We don't begin with the design. We begin with the question: who are you, and what do you want to say? From that answer the identity is built, the image is shaped, the words are written and the site is designed, each in its place and each in service of one idea.",
   },
   w1ParaC: {
     ar: "لا نقدّم حلولاً جاهزة، لأنّ لا علامتين تتشابهان في نقطة بدايتهما. نصغي أولاً، ثم نبني.",
     en: "We don't hand over ready-made solutions, because no two brands share a starting point. We listen first, then we build.",
+  },
+  /* 📱 THE PHONE READS ONE PARAGRAPH, NOT THREE. The agency's own condensation
+     of w1ParaA + w1ParaB + w1ParaC, handed over 2026-08-31 with "i have
+     replacement for these but only apply for phone view". The three-paragraph
+     version keeps the argument's shape — why the point matters, how we reach
+     it, what that rules out — and that shape costs three screens of a 390px
+     column before the reader has seen a single piece of work.
+
+     ⚠️ THIS ONE IS A CSS SWAP, NOT A JS ONE, and it is the only phone variant
+     on the site that is. The ring's three short descriptions have to be chosen
+     in JS because the paragraph they replace is written by paint() into one
+     shared element — there is no second element to hide. Here there are four
+     real <p>s in the markup, so the breakpoint that already governs the layout
+     can govern the copy too, with no listener and nothing to keep in sync.
+     See .wb1-long / .wb1-short in style.css.
+
+     ⚠️ The dash the agency wrote between the last two clauses is a COLON here,
+     under their own instruction from the same message ("remove all the dashes
+     ... and replace them with whatever punctuation fits"). The colon is what
+     fits: the second clause is the reason for the first.
+
+     ⚠️ The English is MINE, like every other English string that came out of
+     an Arabic-only copy doc, and needs the same sign-off the Arabic has had. */
+  w1ParaPhone: {
+    ar: "كل علامةٍ تبدأ من نقطة، وهذه النقطة هي الأصعب في الإيجاد. لا نبدأ بالتصميم، بل بالسؤال: من أنت؟ وماذا تريد أن تقول؟ من الإجابة، تُبنى الهويّة، وتُصاغ الصورة، ويُكتب النص. لا حلول جاهزة: لا علامتين تتشابهان في نقطة بدايتهما.",
+    en: "Every brand begins at a point, and that point is the hardest thing to find. We don't begin with the design, we begin with the question: who are you, and what do you want to say? From the answer the identity is built, the image is shaped, the words are written. No ready-made solutions: no two brands share a starting point.",
   },
   w2Title: { ar: "نقاطٌ بحثنا عنها، وأعمالٌ بنيناها منها.", en: "Points we searched for, and work we built from them." },
 
@@ -121,8 +147,8 @@ const I18N = {
 
   w3Title: { ar: "أن تبدو النتيجة حتميّة.", en: "That the result feels inevitable." },
   whyOutro: {
-    ar: "الحكاية كاملةً — كيف بدأت الوكالة، وكيف نشتغل، وما الذي نقيس عليه عملنا.",
-    en: "The whole story — how the agency started, how we work, and what we measure the work against.",
+    ar: "الحكاية كاملةً: كيف بدأت الوكالة، وكيف نشتغل، وما الذي نقيس عليه عملنا.",
+    en: "The whole story: how the agency started, how we work, and what we measure the work against.",
   },
 
   /* contact */
@@ -131,8 +157,8 @@ const I18N = {
   cLabelPhone: { ar: "هاتف", en: "Phone" },
   cLabelWhats: { ar: "واتساب", en: "WhatsApp" },
   cLabelPlace: { ar: "الوكالة", en: "The agency" },
-  cPlace: { ar: "القدس — جبل الزيتون", en: "Jerusalem — Mount of Olives" },
-  legal: { ar: "ألِف © ٢٠٢٦ — جميع الحقوق محفوظة", en: "Aliph © 2026 — All rights reserved" },
+  cPlace: { ar: "القدس، جبل الزيتون", en: "Jerusalem, Mount of Olives" },
+  legal: { ar: "ألِف © ٢٠٢٦. جميع الحقوق محفوظة", en: "Aliph © 2026. All rights reserved" },
 
   /* library + about */
   libTitle: { ar: "الأرشيف", en: "Archive" },
@@ -159,10 +185,10 @@ const I18N = {
      Written to aria-label by the [data-i18n-label] pass in applyI18n. */
   navMenu: { ar: "القائمة", en: "Menu" },
   navMain: { ar: "التنقّل الرئيسي", en: "Main navigation" },
-  logoHome: { ar: "ألِف — الرئيسية", en: "Aliph — Home" },
+  logoHome: { ar: "ألِف، الرئيسية", en: "Aliph, Home" },
   libView: { ar: "طريقة العرض", en: "View mode" },
   cWrite: { ar: "راسلنا", en: "Write to us" },
-  reelTrack: { ar: "شريط الأعمال — مرّره أفقيًّا", en: "Work carousel — scroll sideways" },
+  reelTrack: { ar: "شريط الأعمال، مرّره أفقيًّا", en: "Work carousel, scroll sideways" },
   /* the overlay's own name. A dialog with no accessible name is announced as
      just "dialog", which tells a screen-reader user nothing about where they
      have landed. */
@@ -179,7 +205,7 @@ const I18N = {
     ar: "«النتيجة يجب أن تبدو حتميّة: راسخة، مدروسة، وذات شخصيّة لا تُخطئها العين.»",
     en: "“The result should feel inevitable: rooted, considered, with a personality the eye can't miss.”",
   },
-  quoteCite: { ar: "— دفتر ألِف", en: "— The Aliph notebook" },
+  quoteCite: { ar: "دفتر ألِف", en: "The Aliph notebook" },
   aboutH: { ar: "صوت واحد، حرفان، ولغتان.", en: "One sound, two letters, two languages." },
   aboutP: {
     ar: "نحن فريق صغير من القدس يصنع الهويّات والمحتوى من حرفها الأوّل. نبدأ من النقطة التي تُبنى منها الأشياء، ونرسم منها نظامًا كاملًا: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم.",
@@ -187,12 +213,12 @@ const I18N = {
   },
   /* about — the long read */
   abLead: {
-    ar: "ألِف وكالة إبداعية من القدس — من جبل الزيتون تحديدًا. بدأت بفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم، بل نظام يُبنى من نقطة أصله. واسمنا نفسه هو أوّل الحروف: النقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف.",
-    en: "Aliph is a creative agency from Jerusalem — from the Mount of Olives, to be exact. It began on a single idea: that a brand is not a logo you draw, but a system you build from its point of origin. Our name is that point — the first letter, the place every word starts, and the measure the rest of the letters are drawn against.",
+    ar: "ألِف وكالة إبداعية من القدس، من جبل الزيتون تحديدًا. بدأت بفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم، بل نظام يُبنى من نقطة أصله. واسمنا نفسه هو أوّل الحروف: النقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف.",
+    en: "Aliph is a creative agency from Jerusalem, from the Mount of Olives, to be exact. It began on a single idea: that a brand is not a logo you draw, but a system you build from its point of origin. Our name is that point: the first letter, the place every word starts, and the measure the rest of the letters are drawn against.",
   },
   abP4: {
-    ar: "من الحرف الأوّل إلى آخر تفصيل: نصمّم الهويّة وما يُطبع منها، ونصوّر ما تحتاجه لتظهر — صورًا وفيديو وريلز — ونبرمج المواقع والأنظمة التي تُشغّلها. ثلاث خدمات على الورق، لكنها في العمل خطّ واحد متّصل — وهذا هو الفرق.",
-    en: "From the first letter to the last detail: we design the identity and everything printed from it, shoot what it needs in order to appear — stills, film and reels — and build the sites and systems that keep it running. Three services on paper — one continuous line in practice, and that is the whole difference.",
+    ar: "من الحرف الأوّل إلى آخر تفصيل: نصمّم الهويّة وما يُطبع منها، ونصوّر ما تحتاجه لتظهر: صورًا وفيديو وريلز، ونبرمج المواقع والأنظمة التي تُشغّلها. ثلاث خدمات على الورق، لكنها في العمل خطّ واحد متّصل، وهذا هو الفرق.",
+    en: "From the first letter to the last detail: we design the identity and everything printed from it, shoot what it needs in order to appear: stills, film and reels; and build the sites and systems that keep it running. Three services on paper, one continuous line in practice, and that is the whole difference.",
   },
 
   svcAboutBanner: { ar: "ماذا نقدّم؟", en: "What we offer" },
@@ -219,8 +245,8 @@ const SERVICES = [
       en: "We build an identity from its origin point, not from its shape. First we look in the name, the story and the place for the point the brand is built from, then we draw the whole system out of it: the mark, the palette, the type, the tone of voice, the stationery, and the rules for showing up every day.",
     },
     why: {
-      ar: "لأننا لا نسلّم شعارًا ونمضي — نسلّم نظامًا يعرف كيف يتصرّف حين لا نكون موجودين: في المطبوع، وعلى الشاشة، وفي الشارع، وبين يديّ من يستعمله كل يوم. ولأنّ العربيّة عندنا ليست ترجمةً لاحقة؛ نصمّم بها من السطر الأوّل، فلا يخرج حرفٌ مكسورٌ لأنّ النظام وُضع لغيره.",
-      en: "Because we don't hand over a logo and walk away — we hand over a system that knows how to behave when we're not in the room: in print, on screen, in the street, in the hands of whoever uses it daily. And because Arabic isn't an afterthought here; we design in it from the first line, so nothing arrives broken because the system was built for another script.",
+      ar: "لأننا لا نسلّم شعارًا ونمضي، بل نسلّم نظامًا يعرف كيف يتصرّف حين لا نكون موجودين: في المطبوع، وعلى الشاشة، وفي الشارع، وبين يديّ من يستعمله كل يوم. ولأنّ العربيّة عندنا ليست ترجمةً لاحقة؛ نصمّم بها من السطر الأوّل، فلا يخرج حرفٌ مكسورٌ لأنّ النظام وُضع لغيره.",
+      en: "Because we don't hand over a logo and walk away; we hand over a system that knows how to behave when we're not in the room: in print, on screen, in the street, in the hands of whoever uses it daily. And because Arabic isn't an afterthought here; we design in it from the first line, so nothing arrives broken because the system was built for another script.",
     },
     does: {
       ar: ["دليل الهويّة", "الشعار ومشتقّاته", "نظام الألوان والخطوط", "القرطاسيّة", "المطبوعات والملصقات", "التغليف واللافتات"],
@@ -230,8 +256,8 @@ const SERVICES = [
   {
     id: "photo", tag: "MEDIA PRODUCTION", seed: "aliph-svc2",
     what: {
-      ar: "نصوّر ما تحتاجه العلامة لتظهر: جلسات ثابتة للمنتج والمكان والوجوه، وفيديو أفقي للحملات والتعريف، وريلز عموديّة للمنصّات. ومعها التوثيق الكامل للفعاليّات — من أوّل ساعة تجهيز إلى آخر ضيف يغادر.",
-      en: "We shoot what a brand needs in order to appear: stills of the product, the place and the faces; horizontal video for campaigns and profiles; vertical reels for the feed. And full coverage of events — from the first hour of setup to the last guest leaving.",
+      ar: "نصوّر ما تحتاجه العلامة لتظهر: جلسات ثابتة للمنتج والمكان والوجوه، وفيديو أفقي للحملات والتعريف، وريلز عموديّة للمنصّات. ومعها التوثيق الكامل للفعاليّات، من أوّل ساعة تجهيز إلى آخر ضيف يغادر.",
+      en: "We shoot what a brand needs in order to appear: stills of the product, the place and the faces; horizontal video for campaigns and profiles; vertical reels for the feed. And full coverage of events, from the first hour of setup to the last guest leaving.",
     },
     why: {
       ar: "لأنّ الصورة التي تُلتقط داخل الهويّة تبدو مختلفة عن الصورة التي تُلصق عليها. نحن نعرف علامتك من الداخل، غالبًا لأننا من بناها، فكل لقطة تخرج من النظام نفسه لا من خارجه. وهذا تحديدًا تاريخنا الأطول: التصوير هو ما كنّا نفعله قبل أن نصير وكالة كاملة.",
@@ -249,8 +275,8 @@ const SERVICES = [
       en: "We build the sites, systems and apps a brand needs to actually run: a portfolio or presence site, a campaign landing page, a store, a registration or booking system, an admin panel its owner can understand, or a mobile app.",
     },
     why: {
-      ar: "لأنّ الفرق بين موقعٍ جميل وموقعٍ يعمل هو أن يبنيه من يفهم الهويّة والبرمجة معًا. نحن نصمّم ونبرمج تحت سقف واحد، فلا يضيع التصميم في الترجمة إلى كود، ولا يُسلَّم نظام لا يشبه صاحبه. ونبني بالعربيّة أوّلًا: الاتّجاه، والخط، وشكل الأرقام، والاستمارات — لا كإصلاحٍ يُضاف في آخر أسبوع.",
-      en: "Because the difference between a site that looks good and a site that works is having it built by people who understand both the identity and the code. We design and engineer under one roof, so nothing is lost translating design into code and no system ships looking unlike its owner. And we build Arabic-first: direction, type, numerals and forms — not as a patch added in the final week.",
+      ar: "لأنّ الفرق بين موقعٍ جميل وموقعٍ يعمل هو أن يبنيه من يفهم الهويّة والبرمجة معًا. نحن نصمّم ونبرمج تحت سقف واحد، فلا يضيع التصميم في الترجمة إلى كود، ولا يُسلَّم نظام لا يشبه صاحبه. ونبني بالعربيّة أوّلًا: الاتّجاه، والخط، وشكل الأرقام، والاستمارات، لا كإصلاحٍ يُضاف في آخر أسبوع.",
+      en: "Because the difference between a site that looks good and a site that works is having it built by people who understand both the identity and the code. We design and engineer under one roof, so nothing is lost translating design into code and no system ships looking unlike its owner. And we build Arabic-first: direction, type, numerals and forms, not as a patch added in the final week.",
     },
     does: {
       ar: ["بورتفوليو ومواقع تعريفيّة", "صفحات هبوط ومتاجر", "أنظمة تسجيل وحجز", "لوحات إدارة", "تطبيقات هاتف", "استضافة ومتابعة"],
@@ -281,7 +307,7 @@ const SUBCATS = {
       id: "print", ar: "مطبوعات", en: "Printables", seed: "aliph-d2",
       desc: {
         ar: "نصنع المطبوع من أوله لآخره، تصميماً وطباعة.",
-        en: "We make printed matter end to end — the design and the printing both."
+        en: "We make printed matter end to end: the design and the printing both."
       }
     },
     {
@@ -302,6 +328,13 @@ const SUBCATS = {
       desc: {
         ar: "نعرف أن انتباه المشاهد ثمين ولا يُمنح بسهولة. لهذا نبدأ كل ريلز بلحظة تستحق التوقّف، ثم نبنيه بإيقاعٍ لا يترك فراغاً يُغري بالتمرير، وتعليقات متحرّكة تصل حتى لمن يشاهد بلا صوت.",
         en: "We know a viewer's attention is expensive and is not given away. So every reel opens on a moment worth stopping for, then runs at a pace that leaves no gap tempting enough to scroll through, with motion captions that reach whoever is watching without sound."
+      },
+      /* 📱 The agency's own shortened version, 2026-08-31, for the phone
+         only. See isPhone() and line(). The English is MINE and needs the
+         same sign-off the Arabic already has. */
+      descShort: {
+        ar: "انتباه المشاهد ثمين ولا يُمنح بسهولة. نبدأ كل ريلز بلحظة تستحق التوقّف، ونبنيه بإيقاعٍ لا يترك فراغاً للتمرير.",
+        en: "A viewer's attention is expensive and is not given away. Every reel opens on a moment worth stopping for, then runs at a pace that leaves no gap to scroll through."
       }
     },
     {
@@ -324,6 +357,13 @@ const SUBCATS = {
            normalised to a colon. */
         ar: "من تصوير المنتجات، إلى التوثيق المؤسسي والفعاليات، إلى التصوير التجاري بمعايير الحملات الإعلانية. نضبط الإضاءة، والزاوية، بما يخدم الاستخدام النهائي للصورة: كتالوج، تقرير سنوي، أو حملة سوشيال ميديا. كل صورة تُصوَّر لغاية محدّدة، لا لتُضاف إلى الأرشيف فقط.",
         en: "From product photography to corporate and event documentation to commercial work shot to campaign standards. We set the light and the angle for what the picture is finally for: a catalogue, an annual report, or a social campaign. Every frame is shot for a specific purpose, not just to be added to the archive."
+      },
+      /* 📱 The agency's own shortened version, 2026-08-31, for the phone
+         only. See isPhone() and line(). The English is MINE and needs the
+         same sign-off the Arabic already has. */
+      descShort: {
+        ar: "من تصوير المنتجات، إلى التوثيق المؤسسي، إلى التصوير التجاري بمعايير الحملات. نضبط الإضاءة والزاوية بما يخدم الاستخدام: كتالوج، تقرير، أو حملة. كل صورة لها غاية، لا مجرّد أرشيف.",
+        en: "From product photography to corporate documentation to commercial work shot to campaign standards. We set the light and the angle for the end use: a catalogue, a report, or a campaign. Every frame has a purpose; it is not just archive."
       }
     },
   ],
@@ -340,13 +380,20 @@ const SUBCATS = {
       desc: {
         ar: "صفحة واحدة لحملة واحدة، مبنيّة حول فعلٍ واحد: التسجيل، أو الشراء، أو الحجز. ومعها الأرقام التي تقول إن كانت تعمل. ونقيس ما يهمّ فقط: كم وصل، وكم بدأ، وكم أكمل، وأين توقّف الباقون. ثلاثة أرقام تُقرأ في دقيقة خير من لوحة فيها أربعون رقمًا لا يفتحها أحد.",
         en: "One page for one campaign, built around a single action: register, buy, or book. And the numbers that say whether it works. And we measure only what matters: how many arrived, how many started, how many finished, and where the rest stopped. Three numbers read in a minute beat a dashboard of forty nobody opens."
+      },
+      /* 📱 The agency's own shortened version, 2026-08-31, for the phone
+         only. See isPhone() and line(). The English is MINE and needs the
+         same sign-off the Arabic already has. */
+      descShort: {
+        ar: "صفحة واحدة لحملة واحدة، حول فعلٍ واحد: التسجيل، أو الشراء، أو الحجز. نقيس ما يهمّ فقط: كم وصل، وكم بدأ، وكم أكمل. ثلاثة أرقام تُقرأ في دقيقة، خيرٌ من لوحة لا يفتحها أحد.",
+        en: "One page for one campaign, around a single action: register, buy, or book. We measure only what matters: how many arrived, how many started, how many finished. Three numbers read in a minute beat a dashboard nobody opens."
       }
     },
     {
       id: "apps", ar: "تطبيقات", en: "Apps", seed: "aliph-t3",
       desc: {
-        ar: "أنظمة تسجيل وحجز، ولوحات إدارة، وتطبيقات هاتف — تُبنى لمن يشغّلها يوميًّا، لا لمن يراها في العرض التقديمي. ونبدأ من أصعب يوم لا من أسهله: ماذا يحدث حين تنقطع الشبكة، وحين يصل مئة شخص معًا، وحين يضغط أحدهم زرًّا مرّتين. النظام الذي يُبنى لليوم الهادئ ينكسر في اليوم الذي بُني لأجله.",
-        en: "Registration and booking systems, admin panels and mobile apps — built for whoever runs them daily, not for whoever sees them in the pitch deck. And we start from the hardest day, not the easiest: what happens when the network drops, when a hundred people arrive at once, and when somebody taps a button twice. A system built for the quiet day breaks on the day it was built for."
+        ar: "أنظمة تسجيل وحجز، ولوحات إدارة، وتطبيقات هاتف، تُبنى لمن يشغّلها يوميًّا، لا لمن يراها في العرض التقديمي. ونبدأ من أصعب يوم لا من أسهله: ماذا يحدث حين تنقطع الشبكة، وحين يصل مئة شخص معًا، وحين يضغط أحدهم زرًّا مرّتين. النظام الذي يُبنى لليوم الهادئ ينكسر في اليوم الذي بُني لأجله.",
+        en: "Registration and booking systems, admin panels and mobile apps, built for whoever runs them daily, not for whoever sees them in the pitch deck. And we start from the hardest day, not the easiest: what happens when the network drops, when a hundred people arrive at once, and when somebody taps a button twice. A system built for the quiet day breaks on the day it was built for."
       }
     },
   ],
@@ -503,7 +550,7 @@ const PROJECTS = [
       tagline: { ar: "موقع · نظام تسجيل · جدولة محطّات", en: "Website · Registration · Station scheduling" },
       body: {
         ar: "رتريت قيادي ليوم واحد بستّ محطّات، كل واحدة باسم مدرّبتها، وكل مشتركة تدور على ثلاث منها في أوقات محدّدة. الصفحة تحكي الرتريت، والاستمارة تفعل الباقي: تتحقّق من المدخلات، وتحسب ما تبقّى من المقاعد في كل محطّة وكل جولة، ثم تكتب الصفّ في جدول المنظّمات مباشرة. والمقاعد المتبقّية معروضة على الصفحة نفسها، لأنّ رتريتًا محدود العدد يجب أن يقول ذلك قبل التسجيل لا بعده.",
-        en: "A one-day leadership retreat with six stations, each named for the woman running it, and every participant rotating through three of them at set times. The page tells the retreat's story; the form does the rest — it validates, works out how many seats are left in each station in each round, then writes the row straight into the organisers' sheet. The remaining seats are shown on the page itself, because a retreat with a hard limit should say so before you register, not after.",
+        en: "A one-day leadership retreat with six stations, each named for the woman running it, and every participant rotating through three of them at set times. The page tells the retreat's story; the form does the rest: it validates, works out how many seats are left in each station in each round, then writes the row straight into the organisers' sheet. The remaining seats are shown on the page itself, because a retreat with a hard limit should say so before you register, not after.",
       },
       shots: ["queens-retreat-1", "queens-retreat-2", "queens-retreat-3",
               "queens-retreat-4", "queens-retreat-5"],
@@ -520,15 +567,15 @@ const PROJECTS = [
       url: "https://albaydaropening.aliphcreative.com",
       tagline: { ar: "دعوة · اختيار ورشة · تأكيد حضور", en: "Invitation · Workshop choice · RSVP" },
       body: {
-        ar: "مساء واحد، وصفحة واحدة تحمله. المكان يُعرَّف قبل أن يُدعى إليه أحد، ثمّ العدّ التنازليّ يجعل الموعد شيئًا يقترب لا سطرًا مكتوبًا. الورشتان — تعبئة العطر مع Méjana، وزراعة الصبّار في الفخّار — معروضتان جنبًا إلى جنب لأنّ الاختيار بينهما هو القرار الوحيد المطلوب من الضيف، والاستمارة تحته لا تسأل إلّا عن الاسم؛ الهاتف وعدد المرافقين اختياريّان. وما إن يُسجَّل الاسم حتى تعرض الصفحة الموعد جاهزًا للإضافة إلى التقويم والمكان جاهزًا على الخريطة، لأنّ الدعوة التي لا تُوصِل إلى الباب لم تكتمل.",
-        en: "One evening, and one page carrying it. The place introduces itself before anyone is invited into it, and the countdown turns the date into something approaching rather than a line of text. The two workshops — perfume-filling with Méjana, and planting a cactus in pottery — sit side by side because choosing between them is the only decision the guest is asked to make, and the form beneath asks for nothing but a name; phone and companions are optional. The moment the name is in, the page hands back the date ready for a calendar and the address ready for a map, because an invitation that does not get you to the door is unfinished.",
+        ar: "مساء واحد، وصفحة واحدة تحمله. المكان يُعرَّف قبل أن يُدعى إليه أحد، ثمّ العدّ التنازليّ يجعل الموعد شيئًا يقترب لا سطرًا مكتوبًا. الورشتان، تعبئة العطر مع Méjana وزراعة الصبّار في الفخّار، معروضتان جنبًا إلى جنب لأنّ الاختيار بينهما هو القرار الوحيد المطلوب من الضيف، والاستمارة تحته لا تسأل إلّا عن الاسم؛ الهاتف وعدد المرافقين اختياريّان. وما إن يُسجَّل الاسم حتى تعرض الصفحة الموعد جاهزًا للإضافة إلى التقويم والمكان جاهزًا على الخريطة، لأنّ الدعوة التي لا تُوصِل إلى الباب لم تكتمل.",
+        en: "One evening, and one page carrying it. The place introduces itself before anyone is invited into it, and the countdown turns the date into something approaching rather than a line of text. The two workshops, perfume-filling with Méjana and planting a cactus in pottery, sit side by side because choosing between them is the only decision the guest is asked to make, and the form beneath asks for nothing but a name; phone and companions are optional. The moment the name is in, the page hands back the date ready for a calendar and the address ready for a map, because an invitation that does not get you to the door is unfinished.",
       },
       shots: ["al-baydar-1", "al-baydar-2", "al-baydar-3",
               "al-baydar-4", "al-baydar-5"],
     }
   },
   {
-    ar: "سيكو سيكو — ليلة سينما", en: "Seeko Seeko — Movie Night", date: "2026-05", cat: "tech",
+    ar: "سيكو سيكو: ليلة سينما", en: "Seeko Seeko: Movie Night", date: "2026-05", cat: "tech",
     desc: {
       ar: "صفحة واحدة لليلة سينمائيّة واحدة، مبنيّة حول فعلٍ واحد: احجز مقعدك.",
       en: "One page for one film night, built around a single action: book your seat."
@@ -538,8 +585,8 @@ const PROJECTS = [
       url: "https://seekoseeko.ceo-6c6.workers.dev",
       tagline: { ar: "صفحة هبوط · حجز مقاعد · ملف واحد", en: "Landing page · Seat booking · One file" },
       body: {
-        ar: "ليلة واحدة، ومكان واحد، وسعر واحد — فالصفحة كلّها فعل واحد. التاريخ والمكان والوقت والتذكرة في صفٍّ واحد أعلى الطيّة، والاستمارة تحتها مباشرةً بأربعة حقول لا أكثر. صُمِّمت للهاتف أوّلًا، لأنّ الرابط يصل عبر واتساب ويُفتح في الشارع.",
-        en: "One night, one venue, one price — so the whole page is one action. Date, venue, time and ticket sit in a single row above the fold, with the form directly beneath it and four fields in it, no more. Built phone-first, because the link arrives over WhatsApp and gets opened in the street.",
+        ar: "ليلة واحدة، ومكان واحد، وسعر واحد، فالصفحة كلّها فعل واحد. التاريخ والمكان والوقت والتذكرة في صفٍّ واحد أعلى الطيّة، والاستمارة تحتها مباشرةً بأربعة حقول لا أكثر. صُمِّمت للهاتف أوّلًا، لأنّ الرابط يصل عبر واتساب ويُفتح في الشارع.",
+        en: "One night, one venue, one price, so the whole page is one action. Date, venue, time and ticket sit in a single row above the fold, with the form directly beneath it and four fields in it, no more. Built phone-first, because the link arrives over WhatsApp and gets opened in the street.",
       },
       shots: ["seeko-seeko-1", "seeko-seeko-2", "seeko-seeko-3", "seeko-seeko-4"],
     }
@@ -563,6 +610,43 @@ function num(n) {
   const s = String(n);
   return lang === "ar" ? s.replace(/[0-9]/g, (d) => AR_DIGITS[+d]) : s;
 }
+
+/* The separator between the two halves of a built-up ACCESSIBLE NAME —
+   "شغّل الفيلم، ٢ من ٨", "ريلز، ٣ / ٩".
+
+   ⚠️ It was " — " at all three call sites until 2026-08-31, when the agency
+   asked for every dash on the site replaced ("remove all the dashes ... and
+   replace them with whatever punctuation fits"). These three are the only
+   ones a visitor never SEES — they are read out — but "all" was the word, and
+   a dash is a poor thing to hand a screen reader anyway: it is announced as
+   "dash" by some, as nothing by others, and as a pause by the rest.
+
+   ⚠️ It is a FUNCTION, not a constant. `lang` is reassigned by the language
+   toggle and every one of these names is rebuilt on that switch, so a
+   constant captured at load would keep handing Arabic names an English comma
+   for the rest of the visit. */
+const SEP = () => (lang === "ar" ? "، " : ", ");
+
+/* ══════════ IS THIS A PHONE ══════════
+   The agency shortened four passages on 2026-08-31 and asked for the short
+   versions to be used ON THE PHONE ONLY: "i have replacement for these but
+   only apply for phone view". A phone is not reading less carefully — it is
+   reading a 54rem paragraph in a 390px column, where the same sentence is
+   three times as many lines and the ring below it is off the screen by the
+   time the paragraph ends.
+
+   ⚠️ 640px is not a new number. `@media (max-width: 640px)` is already this
+   file's phone breakpoint in style.css (two blocks) and in the previews
+   module, so the copy switches on exactly the same line the layout does. A
+   fifth number would put the short copy on a page still in the tablet layout.
+
+   ⚠️ A LIVE MediaQueryList, not a one-shot `.matches` read at load. Rotating a
+   phone crosses this line, and so does every desktop resize a developer makes
+   while looking at it; a boolean captured at startup leaves the long copy on a
+   390px screen for the rest of the visit and reads as the feature not
+   working. Whatever renders phone-variant copy subscribes to `change`. */
+const PHONE_MQ = window.matchMedia("(max-width: 640px)");
+const isPhone = () => PHONE_MQ.matches;
 const dirSign = () => (document.documentElement.dir === "rtl" ? 1 : -1);
 
 /* "2026-05" → "أيّار ٢٠٢٦" / "May 2026" */
@@ -1487,10 +1571,37 @@ const serviceRings = (() => {
      the card, mirrored. That is the agency's choice of 2026-08-23b, made with
      the consequence for Arabic type stated. Do not "fix" it back.
 
-     ⚠️ Ten is a build-time constant because it is DOM. The angle between two
-     slats is not — it falls out of the item's width and the radius, both of
-     which move with the window, so layout() writes it. */
-  const SLATS = 10;
+     🔴 ONE, NOT TEN (2026-08-31) — the faceting is gone, and this is the
+     seam fix that actually holds. Ten flat strips per item is what produced
+     the shredding: Skia batches the strip quads and turns antialiasing off on
+     the interior edges it can prove are shared, and when anything splits that
+     batch every quad is drawn with AA on all four sides, coverage at a
+     junction sums to under 1, and the page leaks through. That is why the
+     fault was intermittent, why software rasterisation never showed it, and
+     why no value of --bleed ever closed it — a bleed cannot fix a coverage
+     shortfall, it can only make it rarer. Nine junctions is nine chances per
+     item, every frame.
+
+     At ONE, an item has NO interior junction, so there is nothing to shred.
+     Not "less likely" — structurally impossible.
+
+     ⚠️ What it costs is the bend, and the bend was 10px across a ~109px item.
+     The ring still reads as a ring because the items are rotated and stand in
+     a circle; each card is simply flat now, which is what the ring was before
+     2026-08-23 and what the agency preferred when they saw both.
+
+     ⚠️ NOTHING ELSE HAD TO CHANGE. The sprite formula degenerates correctly at
+     n = 1 (background-size `--sw * --n` is the item's own width, and the
+     offset `--sw * --k` is zero), and the one face is both :first-child and
+     :last-child so it takes the full border and all four corners from the two
+     end-strip rules. Hit-testing, previews, the --o depth fade and the keyboard
+     all read the slat and are untouched.
+
+     ⚠️ It is still a build-time constant because it is DOM. The angle a face
+     subtends is not — it falls out of the item's width and the radius, both of
+     which move with the window, so layout() writes it. Putting this back to a
+     number above 1 puts the shredding back with it. */
+  const SLATS = 1;
 
   /* Items are sized to a constant AREA, not a constant width or height. A 9:16
      reel beside a 3:2 photograph looks like two different sizes either way —
@@ -1529,9 +1640,12 @@ const serviceRings = (() => {
      rule wanted — which the window fit then shrank back down, taking the items
      with it. What the radius actually has to clear is the thing at the centre,
      so that is what it is measured against. */
-  function radius(dims, n, markW) {
+  /* ⚠️ `spacing` IS A PARAMETER since 2026-09-01, because the phone needs a
+     different one. See PHONE_RING in layout() for why, and for the only two
+     values it is ever called with. */
+  function radius(dims, n, markW, spacing) {
     const widest = dims.reduce((a, d) => Math.max(a, d.w), 0);
-    const chord = (widest * 1.12) / (2 * Math.sin(Math.PI / Math.max(2, n)));
+    const chord = (widest * spacing) / (2 * Math.sin(Math.PI / Math.max(2, n)));
     return Math.max(markW / 2 + widest * 0.55, chord);
   }
 
@@ -1545,7 +1659,7 @@ const serviceRings = (() => {
     }
     const sub = (SUBCATS[id] || []).find((x) => x.id === it.sub);
     const what = sub ? sub[lang] : (CATS.find((c) => c.id === id) || {})[lang] || "";
-    return total > 1 ? what + " — " + num(i + 1) + " / " + num(total) : what;
+    return total > 1 ? what + SEP() + num(i + 1) + " / " + num(total) : what;
   }
 
   function build() {
@@ -1746,6 +1860,48 @@ const serviceRings = (() => {
     const box = win.getBoundingClientRect();
     const h = box.height || 380;
     const W = box.width || 640;
+
+    /* 🔴 THE PHONE BUYS ITS RING SIZE FROM THE SIDES, because it has nothing
+       else to spend (2026-09-01: "the ring in both the phone and pc are
+       small").
+
+       On a desktop the HEIGHT test binds, and `h` sizes the items as well as
+       bounding them — so a taller .ring-window scales the whole composition up
+       and that is the entire desktop fix. On a phone the WIDTH test binds
+       instead, and W is set by the viewport rather than by anything the
+       stylesheet can grow. Both halfW terms scale with the same `k` the items
+       do, so fit lands wherever it must to satisfy `2*halfW <= W*bleed` and the
+       item size that falls out is INDEPENDENT of h. Swept on a 390px phone:
+       310px -> 480px of window height moved the piece by 0.9%. There is no
+       height answer here; only these two numbers move it.
+
+       So both are widened on a phone, and the section's own comments already
+       say this is the currency: "on a 390px phone nine items cannot be both
+       large and entirely inside ... something has to give, and it is the
+       sides." ⚠️ A wider bleed means MORE of the outermost pieces hangs past
+       the frame — which is the reading the bleed exists to give (the orbit
+       carries on past the edge) and is what the agency's own reference shows.
+       The height still gets no bleed at either width: a piece sliced along the
+       bottom is the fault that was complained about.
+
+       ⚠️ IT READS isPhone(), IT DOES NOT RE-DERIVE ONE. That helper is
+       backed by PHONE_MQ, the live `(max-width: 640px)` MediaQueryList this
+       file already keeps for the phone copy, and 640 is the same line the
+       stylesheet breaks the layout on. A `window.innerWidth <= 640` written
+       here would be a FIFTH copy of that number and a boolean where the rest
+       of the file has a live query — and, being inside layout(), it would
+       SHADOW the helper for this whole function, so a later isPhone() call in
+       here would throw rather than answer. layout() re-runs on resize, so the
+       call is as live as the query is. */
+    const PHONE_RING = {
+      /* how far past the window's sides the band may run */
+      bleed: isPhone() ? 1.85 : 1.90,
+      /* neighbour spacing, in widths, fed to radius(). Tighter on a phone: the
+         pieces overlap a little, which is what a nine-piece orbit at that size
+         looks like anyway and what the reference shows. */
+      spacing: isPhone() ? 1.04 : 1.12,
+    };
+
     stages.forEach((s) => {
       if (!s.items.length) return;
       const dims = sizes(s.items, h);
@@ -1753,7 +1909,7 @@ const serviceRings = (() => {
          one, which is not the number the orbit has to clear */
       const markEl = s.ring.querySelector(".ring-mark");
       const markW = markEl ? (parseFloat(getComputedStyle(markEl).width) || 0) : 0;
-      let rad = radius(dims, s.items.length, markW);
+      let rad = radius(dims, s.items.length, markW, PHONE_RING.spacing);
       const tilt = Math.abs(parseFloat(
         getComputedStyle(s.ring).getPropertyValue("--tilt")) || 22) * Math.PI / 180;
       const P = perspectiveOf(s.stage);
@@ -1808,7 +1964,7 @@ const serviceRings = (() => {
         const halfW = (r * (1 + LIFT) + widest * POP * k * 0.5) * mag;
         const halfH = (r * (1 + LIFT) * Math.sin(tilt)
                        + tallest * POP * k * 0.5 * Math.cos(tilt)) * mag;
-        /* ⚠️ ASYMMETRIC ON PURPOSE. The sides get a 1.14 bleed and the top and
+        /* ⚠️ ASYMMETRIC ON PURPOSE. The sides get a bleed and the top and
            bottom get none, because those are two different readings. A poster
            running under the left or right edge of the band says the orbit
            carries on past the frame, which is what the section is for; a
@@ -1817,7 +1973,8 @@ const serviceRings = (() => {
            entirely inside — nine widths of 1.12 spacing need a diameter of
            3.2w before perspective, so something has to give, and it is the
            sides. */
-        return { halfW, halfH, ok: halfW * 2 <= W * 1.14 && halfH * 2 <= h };
+        return { halfW, halfH,
+                 ok: halfW * 2 <= W * PHONE_RING.bleed && halfH * 2 <= h };
       };
       /* The magnification makes this non-linear, so it is solved rather than
          divided: ten halvings of the interval land inside a pixel. */
@@ -1852,7 +2009,8 @@ const serviceRings = (() => {
            ends outside it, and ten of those make a cog rather than a ring.
            rad·cos(dth/2) puts the slat's ENDS on the circle, which is what
            makes two neighbours meet edge to edge. */
-        n.style.setProperty("--apo", (rad * Math.cos(dth / 2)).toFixed(2) + "px");
+        const apo = rad * Math.cos(dth / 2);
+        n.style.setProperty("--apo", apo.toFixed(2) + "px");
       });
     });
   }
@@ -1930,13 +2088,83 @@ const serviceRings = (() => {
     const it = s.items[i];
     if (!it) return "";
     const sub = (SUBCATS[s.id] || []).find((x) => x.id === it.sub);
-    if (sub) return sub.desc[lang];
+    /* 📱 The phone gets the agency's shortened version where one exists
+       (2026-08-31, three of the nine subsections have one). ⚠️ It falls
+       through to the full text rather than to nothing, so the six that were
+       never shortened are unaffected and adding a fourth is one object. */
+    if (sub) {
+      if (isPhone() && sub.descShort && sub.descShort[lang]) return sub.descShort[lang];
+      return sub.desc[lang];
+    }
     if (it.project !== undefined) {
       const p = PROJECTS[it.project];
       return p ? p.desc[lang] : "";
     }
     return "";
   }
+
+  /* ══════ WHAT KIND OF WORK IS AT THE FRONT ══════
+     "for each item in the ring put the type of service above its text (eg when
+     a reel is being viewed type reel on top of its txt)" — the agency,
+     2026-08-31.
+
+     The paragraph under the ring describes the SUBCATEGORY, but it never names
+     it: a visitor reads three sentences about pacing and captions with nothing
+     saying the word ريلز. The name was on screen only as the item's accessible
+     label, which is to say only for people who could not see it.
+
+     ⚠️ It reads the SAME table `line()` reads, in the same branch order, so
+     the kicker and the paragraph can never describe two different things. The
+     subsection wins over the project for the same reason it does there — the
+     three tech sites are one kind of work, صفحات هبوط, and naming the client
+     above a paragraph about landing pages in general would be a mismatch.
+
+     ⚠️ The fallback is the SERVICE name, not blank. An item with neither a sub
+     nor a project is still a piece of تصميم جرافيكي, and a kicker that
+     sometimes vanishes makes the paragraph below it jump. */
+  function kind(s, i) {
+    const it = s.items[i];
+    if (!it) return "";
+    const sub = (SUBCATS[s.id] || []).find((x) => x.id === it.sub);
+    if (sub) return sub[lang];
+    return (CATS.find((c) => c.id === s.id) || {})[lang] || "";
+  }
+
+  /* Two elements, not one string with a newline in it: the kicker is a
+     different size, weight and colour from the sentence, and it has a rule
+     under it. Rebuilt rather than patched because `line()` can return "" and
+     an empty text node left behind from the previous item would keep the
+     paragraph's first line to itself. */
+  function writeDesc(s, i) {
+    if (!descEl) return;
+    descEl.textContent = "";
+    const k = kind(s, i);
+    if (k) {
+      const kEl = document.createElement("span");
+      kEl.className = "ring-kind";
+      kEl.textContent = k;
+      descEl.appendChild(kEl);
+    }
+    const t = line(s, i);
+    if (t) {
+      const tEl = document.createElement("span");
+      tEl.className = "ring-line";
+      tEl.textContent = t;
+      descEl.appendChild(tEl);
+    }
+  }
+
+  /* 📱 Crossing the phone breakpoint changes what `line()` returns, and
+     nothing else would ever ask it again: paint() only rewrites the paragraph
+     when the item at the FRONT changes, which a resize is not. Without this,
+     rotating a phone to landscape and back leaves whichever copy was current
+     at load in place for the rest of the visit.
+     ⚠️ Repainting the CURRENT stage only, because all three share one #ringDesc
+     and only one of them is on screen. */
+  PHONE_MQ.addEventListener("change", () => {
+    const s = stages[at];
+    if (s && s.front >= 0) writeDesc(s, s.front);
+  });
 
   function paint() {
     const s = stages[at];
@@ -1961,7 +2189,7 @@ const serviceRings = (() => {
        different to say. */
     const was = s.front;
     const i = front(s);
-    if (descEl && i !== was) descEl.textContent = line(s, i);
+    if (descEl && i !== was) writeDesc(s, i);
     /* 🔴 The front item stands PROUD of the band, and the amount is eased HERE
        rather than by a CSS transition. A transition on a slat's transform also
        catches the flat frame layout() leaves behind and turns it into a
@@ -2566,7 +2794,7 @@ const mediaKeys = (() => {
   const label = (el, verb, i, n) => {
     if (!verb || named(el)) return null;
     const of = I18N.mOf[lang].replace("%1", num(i + 1)).replace("%2", num(n));
-    return `${I18N[verb][lang]} — ${of}`;
+    return `${I18N[verb][lang]}${SEP()}${of}`;
   };
 
   /* Which item in a field currently holds the field's one tab stop. Reset by
@@ -3116,7 +3344,7 @@ function renderLibrary() {
          the foot of the lightbox module is what activates them; it asks only
          that the node match OPENS, which every tile here does. */
       const label = m.v ? I18N.mPlay[lang] : I18N.mOpen[lang];
-      const named = ` role="button" tabindex="0" aria-label="${label}${m.d ? " — " + fmtDate(m.d) : ""}"`;
+      const named = ` role="button" tabindex="0" aria-label="${label}${m.d ? SEP() + fmtDate(m.d) : ""}"`;
       return `
       <figure class="tile${m.v ? " is-film" : ""}"${m.v ? ` data-film="${m.f}"` : ""}${named}>
         <div class="tile-img" style="aspect-ratio:${m.r}">

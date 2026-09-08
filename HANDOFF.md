@@ -1,8 +1,34 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-08-31. Read this first._
+_Updated 2026-09-01. Read this first._
 
-> ## 🟢 State on 2026-08-31: THE FORM IS OPEN AND TAKING ANSWERS; THE SITE IS CURRENT AND UNSEEN
+> ## 🟡 State on 2026-09-01: TWO ROUNDS ARE NOW UNDEPLOYED; THE FORM'S STATE IS UNVERIFIED
+>
+> 🔴 **THE SITE IS NO LONGER CURRENT. Two rounds sit in the tree and neither
+> is live** — the 2026-09-01 round (dashes, ring kicker, phone copy) and the
+> 2026-09-01b round (hero notes, the language pill's wash, the ring and the marks
+> enlarged). The live site is still `76ec4b38-0a01-4860-9454-14fdcc434f01`.
+> **Nothing from either round is committed**, so `git status` does not tell the
+> two apart: `main.js` and `style.css` carry both, the three HTML files carry
+> only the earlier one.
+>
+> 🔴 **SOMETHING ELSE WROTE THIS FILE DURING THE 2026-08-30c SESSION, AND IT
+> HAS NOT BEEN RECONCILED. READ THIS BEFORE EDITING.** At that session's start
+> the working tree's header read *"🟡 State on 2026-08-30: THE FORM IS LIVE,
+> RESTYLED AND STILL CLOSED; THE SITE IS BEHIND"*, while `HEAD` (`6206362`,
+> *"Record that the form is open"*) already read *"🟢 … THE FORM IS OPEN AND
+> TAKING ANSWERS"*. Part-way through the session the working copy acquired the
+> `HEAD` version of that header on its own. **Nothing was verified lost** — every
+> section written that session is still present — but the file was being written
+> from two places at once and no one has checked the two versions line by line.
+> ⚠️ **So the header's claim that THE FORM IS OPEN AND TAKING ANSWERS is NOT a
+> claim this session verified.** The 2026-08-30c work never touched the form.
+> Probe `/api/status` before repeating it to anyone.
+> ⚠️ **`git status` has shown `M HANDOFF.md` since before that session began**,
+> so the working tree already differed from `HEAD` at the start. **Diff the
+> working copy against `HEAD` and settle it before the next commit**, or one
+> side's edits go in the bin. This is the same lesson as *"the local clone was
+> eight commits stale, and it was believed"* — clean is not up to date.
 >
 > ✅ **`feedback.aliphcreative.com` IS LIVE** — `feedback-worker/`, a THIRD
 > deployable beside the site and the chat, version
@@ -40,9 +66,11 @@ _Updated 2026-08-31. Read this first._
 > BODY** — a cache-buster is a different cache key and proves nothing.
 >
 > ✅ **THE SITE IS CURRENT — version
-> `c3804b1c-0d1e-4940-a9f1-efd646c630be`, the second deploy of 2026-08-30c,
-> which carries the stylesheet comment repair. The first was
-> `950f0645-ae72-4a29-a061-8f80544c1b6d`.** It closes the
+> `76ec4b38-0a01-4860-9454-14fdcc434f01`, the fourth deploy of 2026-08-30c.
+> THE RING IS FLAT NOW — `SLATS = 1`, no facets, no plate — which is the seam
+> fix that holds and the border fix at the same time (see §7). The plate round
+> `d7ba90e8-…` is REVERTED. Before it: `c3804b1c-…` (stylesheet comment
+> repair) and `950f0645-…` (the two-round gap).** It closes the
 > two-round gap: the 2026-08-27b keyboard round and the whole 2026-08-30
 > screenshot round are live. Three files changed — `about.html`,
 > `style.css`, `main.js`. Verified with a browser UA and a cache-buster: CSS
@@ -215,9 +243,12 @@ _Updated 2026-08-31. Read this first._
 > ### Still true from 2026-08-27a — everything below IS deployed
 >
 > ✅ **Superseded 2026-08-30c: the live site is now
-> `950f0645-ae72-4a29-a061-8f80544c1b6d`**, not the
+> `76ec4b38-0a01-4860-9454-14fdcc434f01`**, not the
 > `c5b80d8c-ce63-4c1a-8fe9-1686b2d1a75c` this subsection was written about.
-> Everything below is still deployed — the newer version only adds to it.
+> Everything below is still deployed — the newer versions only add to it.
+> The four deploys of 2026-08-30c, in order: `950f0645-…` (the two-round
+> gap), `c3804b1c-…` (stylesheet comment repair), `d7ba90e8-…` (the ring
+> plate, **since reverted**) and `76ec4b38-…` (the flat ring).
 >
 > ⚠️ **`/index.html`, `/about.html` and `/library.html` now 307 to `/`,
 > `/about` and `/library`.** A `curl` without `-L` returns 0 bytes and reads
@@ -228,15 +259,16 @@ _Updated 2026-08-31. Read this first._
 > gone from the bucket and is recoverable only from the agency's own file on
 > the Desktop. The code and the bucket shipped together.
 >
-> 🔴 **THE RING SEAMS ARE A GPU FAULT, AND THAT IS WHY THREE ROUNDS OF
-> CHECKING MISSED THEM.** Headless Chromium rasterises in SOFTWARE. Driven
-> headed against the real GPU, with every slat flat-filled, the seams appear;
-> the identical headless run does not have them. Both frames are kept in
-> `resources/notes/`. It is intermittent — four further GPU sweeps could not
-> make it come back — and the geometry is provably fine
-> (`resources/notes/slat-seam-bench.html`). The bleed is doubled to 2.2px as a
-> MARGIN, not a proof. **Never again certify a 3D-transformed surface from a
-> headless screenshot.**
+> ⚠️ **STALE ON THE FIX, STILL TRUE ON THE METHOD (2026-08-30c).** There are
+> no ring seams any more — there is no faceting to have them, `SLATS = 1` (§7)
+> — and the bleed is 0, not the 2.2px this entry describes. What survives is
+> the reason three rounds missed them, and it is the reason to keep the entry:
+> 🔴 **HEADLESS CHROMIUM RASTERISES IN SOFTWARE.** Driven headed against the
+> real GPU with every slat flat-filled the seams appeared; the identical
+> headless run did not have them. Both frames are in `resources/notes/`, and
+> `slat-seam-bench.html` isolates the geometry. **Never certify a
+> 3D-transformed surface from a headless screenshot.** The 2026-08-30c round
+> was driven headed on an NVIDIA D3D11 path for exactly this reason.
 >
 > 🔴 **THE FIXED CONTROLS HAD NO BACKGROUND OF THEIR OWN.** `17th.jpeg` was
 > read as an overlap complaint; it is a legibility one. `.lang-switch` is a
@@ -443,8 +475,10 @@ for.
    Playwright's `hover` does not land on a 3D-transformed item, so `pick()`
    was driven with a dispatched event. The pop logic is proven; the hit test
    is not.
-   🔴 **the seams are still unanswered** — headless cannot answer them,
-   and this pass was headless. Unchanged from item 4 below.
+   ✅ **the seams ARE answered, later the same day** — by removing the
+   faceting rather than by anything this pass could measure. See item 4.
+   ⚠️ **This pass was headless, and headless cannot see a seam at all.** The
+   round that closed them was driven headed against the GPU.
 1. ✅ **CLOSED 2026-08-30 — `19th.png` was never an alignment mark.** The red
    line marks where the cream panel's DEAD STOCK begins: reconstructed at
    1920×960, the panel ran 1022..1905 while the lede stopped at 1225, so 143px
@@ -463,28 +497,35 @@ for.
    the trade the agency asked for when they had the page's previews put back to
    masters. One `-c:v libx264 -crf 23` in `resources/replace_bts29.py` is the
    whole change if they want it down.
-4. ⚠️ **The ring seams may not be fixed, and the agency has now said the fix
-   itself looks wrong** — *"the fix u implemented for them doesnt look good
-   either"* (2026-08-30). That is the doubled bleed: the overlap duplicates
-   pixels at every junction, so a wider one is more visible smearing, and it
-   was only ever a margin. ✅ **The bleed is back to 1.1** — the agency said
-   the fix looks bad, so keeping it and writing a note about judging the two
-   changes separately was deferral, not caution. Their own instruction is what
-   replaces it: the piece being looked at is 26% larger (`--pop`) and a flat
-   film plane covers it the moment it plays.
-   ⚠️ **The next lever is still NOT a bigger number** — it is layer promotion
-   on the slats, or FEWER, WIDER FACETS. `SLATS` is 10 and the bend across a
-   whole item is only 10px, so 6 would drop four junctions for very little
-   faceting. That is a visible geometry change and it was not made blind.
-   The original note follows.
-   ⚠️ **The bleed is doubled and the**
-   mechanism is finally identified — GPU compositing, see the state block — but
-   the fault is intermittent and could not be reproduced after the one capture,
-   so the increase is a margin rather than a verified cure. If they come back:
-   the next lever is layer promotion on the slats, or fewer and wider facets,
-   NOT a bigger bleed. `resources/notes/slat-seam-bench.html` isolates the
-   geometry and `resources/notes/seam-2026-08-27-{gpu,software}.png` is the
-   evidence.
+4. ✅ **CLOSED 2026-08-30c — THE FACETING IS GONE, AND THAT IS WHAT CLOSED IT.**
+   `SLATS = 1`: one flat face per item, no interior junction, nothing to shred.
+   Not rarer — **impossible**. The mechanism is worth keeping even though the
+   fix no longer depends on it: Skia batches the strip quads through
+   `drawEdgeAAImageSet` and turns antialiasing OFF on interior edges it can
+   prove are shared, so when anything splits that batch every quad is drawn
+   with AA on all four sides, coverage at a junction sums to under 1, and the
+   page leaks through. That is the whole intermittency, and why software
+   rasterisation never reproduced it. **A bleed cannot fix a coverage
+   shortfall** — it can only make it rarer — which is why no value of it ever
+   held. See _Session 2026-08-30c_ §7.
+   🔴 **THE PLATE OF §6 IS REVERTED.** It did hide the seams — 7 lines at
+   bleed 0 without it, 0 with it — but it was inserted as the item's first
+   child and so stole `:first-child` from the first slat, which is the rule
+   that draws `border-left` and the two left corner radii. Every item shipped
+   with a square unbordered left edge against a rounded bordered right one:
+   *"theres stupid borders for items in the ring"*. §6's measurements still
+   stand and are what proved the bleed was a dead end; none of its code does.
+   ⚠️ **`will-change` and `backface-visibility` on the slats do NOTHING** —
+   both measured under the bleed-0 stress test, both unchanged at 7 seams.
+   This file recommended them twice.
+   ⚠️ **Putting `SLATS` back above 1 puts the shredding back with it**, and
+   `--bleed` has to return at the same time or the strips meet with nothing
+   between them at all.
+   ⚠️ **What it cost is the bend, and the bend was 10px** across a ~109px item.
+   The ring still reads as a ring — the cards are rotated and stand in a circle
+   — they are simply flat. That is what the ring was before 2026-08-23's
+   faceting round (`080853d`), which is the version the agency remembered as
+   better: *"the first ver ever made of it was much better"*.
 5. **The ring's motion has still never been SEEN by a person.** What is unknown
    is the FEEL of the fixed version: whether 42s is slow enough for
    صناعة محتوى, and whether picking the piece you point at is the right
@@ -577,6 +618,492 @@ gesture has been invented for it.
 
 ---
 
+## Session 2026-09-01b — four screenshot notes, rejected twice, a wash that could never have been an ellipse, and a grid row that was holding the section apart
+
+Four instructions. **All four were built, shown, and sent back**, and three of
+the four had been solved the wrong way. What is below is the second pass; the
+first is kept wherever its failure is the thing worth knowing. Nothing is
+deployed, and this round sits on top of the previous one's undeployed tree. Two
+files changed: `style.css` and `main.js`.
+
+> 🔴 **THE FIRST PASS WAS REJECTED ON EVERY POINT AND THE PATTERN IS ONE
+> THING**: each fix answered the measurement rather than the complaint. The pins
+> were levelled while the agency was looking at the type; the wash's box was
+> made proportional while the agency was looking at its outline; the paper was
+> tinted "beige" without ever sampling what beige it had become; the ring was
+> made 30% bigger against a reference that wanted 50%. ⚠️ **Three of the four
+> were caught only because the agency looked again.** The one that was checked
+> against a rendered pixel from the start — the label wrapping — is the one
+> that survived.
+
+### 1. ✅ The hero notes: the alignment was the TYPE, not the sheets
+
+"align the 2 buttons like this for now" (their `1st pic`).
+
+🔴 **THE FIRST READING WAS THE PINS, AND IT WAS WRONG.** `align-items:
+flex-start` levels the sheet TOPS while the pins sit at their own fraction of
+their own sheets, so the pins were 17px apart and the labels 21px. That was
+measured, fixed, and reported — and the answer came back *"u didnt align the
+hero buttons"*. ⚠️ **The pins were never what they were looking at.** In their
+reference BOTH LABELS ARE HORIZONTAL; the build turned the contact note's line
+**−13°** to lie along its own tilted top edge. A tilted line of type beside a
+level one is what reads as unaligned, whatever the sheets do.
+
+The −13° was deliberate and its reasoning is still in the file: a horizontal
+line on a tilted sheet gives away that this is a photograph with words dropped
+on top of it. **That illusion lost to the complaint.** The sheets are still
+tilted; only the type is not.
+
+✅ **The pin-line work was kept** — it is right, it is just not what was being
+asked. Pins now **0.84–1.17px** apart against 17px, labels **2.8–4.1px** against
+21px. The offset is derived from numbers already in the block
+(`0.09 × 523/700` against `0.15 × 633/680` = 0.0724 of the sheet width), so
+re-cropping a note moves it on its own.
+
+⚠️ **`--note-w` IS RESTATED AT THE 640 BREAKPOINT** or that offset is computed
+from a width no sheet has: the phone rule takes the sheets onto `flex: 1 1 0`,
+so it is redefined there as `calc((100% - var(--note-gap)) / 2)`. A percentage
+in a margin resolves against the same containing block the flex is divided from,
+so the two agree by construction. Verified at 390: sheets 167.1 / 167.5px.
+
+✅ Label **+20%**, and **checked the right way**: `Range.getClientRects()` on
+each label, both languages, at 1920/1366/390 — **one line box in all twelve
+cases**, `scrollHeight === clientHeight` throughout. ⚠️ A naive
+`height / line-height` reports the contact label as TWO lines at every width;
+before the rotation was removed that was the −13° inflating its bounding box,
+and it would have sent someone hunting a wrap that was not there.
+
+### 2. ✅ …and the colour: sampled, not reasoned about
+
+"adjust their colors to be less white and more beige" → then, after the first
+pass, *"they are too beige, make the creamy somthing a lil darker than our cream
+color"*.
+
+🔴 **THE FIRST ATTEMPT LED WITH `sepia()` AND NEVER MEASURED THE RESULT.** It
+reached for sepia to add warmth and pushed `saturate()` to 1.42 to protect the
+pin's red — and `saturate()` amplified the source photograph's own cast. Sampled
+afterwards, the lit paper was **#FBFADD**: still at white's brightness and now
+carrying a yellow one. It was custard, and the agency said so.
+
+✅ **`brightness()` LEADS AND DOES THE WORK; the warm pass only stops the result
+going grey.** `brightness(0.8) sepia(0.14) saturate(1.05)`. Sampled off the
+rendered pixel: the lit face measures **#C9C3BD** against `--cream`'s
+**#D9D9CE** — about 7% darker, carrying the same warm bias (R−B of 12 against
+the linen's 11). That is "a lil darker than our cream color", stated as a
+measurement rather than a hope.
+
+⚠️ **`sepia()` ON NEAR-WHITE BARELY MOVES ANYTHING BY ITSELF** — on pure white
+it only drops the blue channel by about 16·s and leaves red and green clipped at
+255. It cannot darken. Anything that reads as "beige" from sepia alone is
+saturation amplifying a cast that was already in the photograph, which is why
+the first pass went somewhere nobody chose. **Re-measure the pixel if these
+numbers are ever touched.**
+
+⚠️ **The pin survives at `saturate(1.05)`** — checked, not assumed: the most
+saturated pixel in the cut is **#BE2A1B**, saturation 163. It is still plainly
+red.
+
+⚠️ **`filter` IS A PIPELINE and the colour work must come before the shadows.**
+A `brightness()` or `sepia()` written after the drop-shadows lightens and tints
+the shadows too, laying two coloured smears on the linen. ⚠️ It is repeated in
+`:hover` and `:active`, because `filter` is one property and restating it for a
+different shadow drops the colour for as long as the pointer is on the note.
+
+### 3. ✅ The language pill: a radial gradient can never be a stadium
+
+"the effect behind the lang button is poorly made, it doesnt match the oval
+shape of the button" — said **twice**, the second time after a fix.
+
+🔴 **TWO ROUNDS WERE SPENT FITTING THE GRADIENT'S BOX AND NEITHER TOUCHED THE
+FAULT.** First the px inset was measured wrong-shaped (a 151.6×51.7 box, ratio
+2.94, around a 127.6×35.7 pill, ratio 3.57) and replaced with a percentage inset
+that made it proportional (241×64.6, ratio 3.73). The proportion was then right
+and the complaint was unchanged, **because the ellipse was never the pill's
+shape to begin with**.
+
+🔴 **THE PILL IS A STADIUM.** `border-radius: 99px` on a wide box draws two
+semicircles joined by STRAIGHT top and bottom edges. `radial-gradient` cannot
+produce that outline at any size or with any stops: an ellipse is curved
+everywhere and pinched at the ends, so its widest point is a single tangent
+where the pill's is a whole straight run. No amount of fitting the *box* fixes a
+mismatch in the *curve*.
+
+✅ **A filled stadium, blurred.** Same `border-radius` on the same box, so every
+edge of the halo is parallel to the edge of the control in front of it, and the
+blur is what makes it a wash rather than a plate:
+`background: rgba(...); filter: blur(11px)`. The shape is now **inherited rather
+than approximated**, so it stays right through `.ls-opt`'s clamp and the 640
+breakpoint with nothing to keep in step.
+
+⚠️ **SMALL INSET, LARGE BLUR, deliberately.** A blur spreads an edge over roughly
+twice its radius, so the solid core stays under the pill where the type has to
+be veiled and all the fading happens outside it. Growing the inset instead puts
+a hard-edged plate back under the words, which is what the 2026-08-30 round
+removed.
+⚠️ **`filter` MAKES THE PSEUDO-ELEMENT A STACKING CONTEXT.** It still lands under
+the ring, the knob and the words — `z-index: -1` resolves inside the pill's
+`isolation: isolate` group as before, and the knob is also −1 and later in paint
+order. Checked on both grounds after the change.
+
+### 4. ✅ The ring and the marks — the solver was cutting them, and then the window was
+
+"the ring in both the phone and pc are small" → after the first pass, *"the ring
+is still small and the marks too"*.
+
+🔴 **THE FIT SOLVER WAS CUTTING THE RING TO 74% BEFORE ANYTHING WAS TOUCHED.**
+`layout()` sizes an item to a constant area and then shrinks the band by a solved
+`fit` until it clears the window in both axes. Measured at 1920 and 1440:
+**design 0.904, صناعة محتوى 0.736, tech 0.950**; on a phone **0.767 / 0.601 /
+0.828**. The eight-piece photo ring was worst, which is the ring the agency
+screenshotted.
+
+🔴 **`h` IS ON BOTH SIDES OF THE HEIGHT TEST, so `fit` is invariant in it.** The
+items are sized from the window's height and the height budget IS that height.
+A taller window does not improve `fit`; it scales the same composition up. Proof:
+`fit` was byte-identical (0.9043 / 0.7356) at 1920 and 1440, whose windows were
+both clamped to 540px.
+
+🔴 **THE BINDING AXIS MOVES WHEN YOU RELIEVE IT, AND ONE VIEWPORT WILL NOT SHOW
+IT.** Raising the cap to 760px gave 1.32× at 1920 and **1.05× at 1440**, because
+the extra height had pushed the constraint onto the WIDTH and `fit` fell from
+0.736 to 0.555 to pay for it. **Re-establish which axis binds after every change**
+rather than assuming it held.
+
+🔴 **ON A PHONE THE HEIGHT BUYS NOTHING — 0.9%.** Swept at 390px, 310→480px of
+window height moved the piece from 78.9 to 79.6. Both `halfW` terms scale with
+the same `k` the items do, so `fit` lands wherever the width test puts it and the
+resulting item size is independent of `h`. **The phone's only levers are the side
+bleed and the neighbour spacing**, and the section's own comments already name
+the currency: *"something has to give, and it is the sides."*
+
+⚠️ **THE SOLVER RESERVES ~1.9× WHAT THE RING PAINTS.** At 1920 it stopped at
+`2·halfW = 1294.7px` while the band painted **684.9px**. The width term applies
+the FRONT item's perspective magnification, plus full `POP` and full `LIFT`, to
+the horizontal extreme — but that extreme sits at z ≈ 0 where magnification is
+≈1, and only one item is ever popped. That slack is what the desktop bleed spends,
+and it is why raising the bleed is safe rather than reckless.
+
+**What is set now:**
+- `.ring-window` height → **`clamp(380px, min(58vw, 80vh), 900px)`**. ⚠️ The
+  VIEWPORT'S HEIGHT is in there and has to be: the ring is height-bound on every
+  desktop once the bleed is opened, so this number IS the ring's size, and a pure
+  `vw` term sets it from the width of a screen it then has to fit inside — 58vw
+  at 1920 is 1114px, taller than a 960px laptop viewport.
+- Side bleed **1.14 → 1.90** desktop, **1.85** phone; neighbour spacing
+  **1.12 → 1.04** on the phone only.
+- `.ring-mark.is-photo` → `clamp(200px, 27vw, 415px)` / `clamp(230px, 29vw, 468px)`,
+  after a SECOND "the marks arent big enough still". Two raises, +35% and
+  +30%, and the second one was only asked for because the first was measured
+  against the agency's screenshot rather than shown to them.
+
+**Painted band, original → now:**
+
+| viewport | window | صناعة محتوى | vs original |
+|---|---|---|---|
+| 1920×1080 | 1136×864 | 762×~590 | **~1.55×** |
+| 1920×960 | 1136×768 | 691×~530 | ~1.40× |
+| 1440×900 | 852×720 | 654×~500 | ~1.32× |
+| 390×844 | 342×380 | 357×282 | ~1.65× |
+
+✅ **NOTHING CLIPS TOP OR BOTTOM ANYWHERE.** Swept at 1920×1080, 1920×960, 1440,
+1280, 1024, 900, 768 and 390, all three rings, **with every item in turn forced
+to the full `--pop: 1.26`**: every clearance negative, tightest **37px**. The
+"poster sliced along the bottom" fault stays fixed.
+
+⚠️ **THE MARK'S HEADROOM IS NOW NARROWER.** `radius()` floors the orbit at
+`markW/2 + widest × 0.55` so the work can never run through the thing it circles.
+At 1920 the floor asks 408px and the chord rule 534px on the photo ring, so
+the chord still wins there and the orbit is unmoved — **crossover around a
+666px mark**.
+
+🔴 **ON THE TECH RING THE FLOOR BINDS, AND IT ALWAYS HAS.** Three items
+are 120° apart, so the chord rule asks for almost nothing (235px at 1920
+against the mark floor's 407px) and the MARK has set that orbit at every width
+since the floor was written — measured back at the original 210px mark and
+540px window it was 230px against 147px, the same story. ⚠️ So a mark raise
+costs the tech ring twice: the orbit widens with it and the fit solver then
+shrinks the band to keep the wider ring inside the window. It still measures
+603px painted at 1440 against the photo ring's 654, so it has not been hurt
+— but the tech ring is the one to look at first after any further raise, and
+it is the ring that will stop responding to them soonest. ⚠️ Both numbers
+move with the window height; re-derive rather than trusting them.
+
+⚠️ **The phone bleeds 2–7px past its window's sides**, which is the reading the
+bleed exists to give and what the agency's reference shows.
+⚠️ **The 768–900 band still carries a lot of dead width** — the ring gets the
+full page there but its height is on the clamp's floor. It was not raised
+further because that floor also governs the phone, where extra height buys
+nothing.
+
+### 5. ✅ The services section aligns in two grid rows, not three
+
+The agency sent a composed target for the "what we do" section: *"heres my goal
+for the alignment ... try to copy it as much as possible"*. What their picture
+has and the build did not is the oval and the sentence under the ring sitting on
+ONE band at the foot of the section, with the three service names centred across
+the ring rather than hung from its top.
+
+🔴 **A GRID ROW WAS HOLDING THE TWO COLUMNS APART, AND THE RING'S HEIGHT SET
+HOW FAR.** The areas were `list/ring`, `foot/ring`, `foot/desc` — the ring
+spanning rows 1–2, the foot spanning 2–3. Row 2 is therefore whatever the ring
+has left after the list, and `align-self: start` pins the foot to the TOP of it.
+Measured at 1440: the oval landed **273px above** the description it reads
+alongside, with nothing in between. That gap is `row2 - footHeight`, so
+⚠️ **every round that made the ring taller pushed the two further apart** —
+which is why this surfaced now and not before.
+
+✅ Two rows — `list/ring` then `foot/desc` — put the columns on the same two
+bands. Measured after, at 1440 and 1920: the oval's top and the kicker's top are
+**identical to the pixel** (5948 / 5948 at 1440, 7639 / 7639 at 1920), and the
+description and the foot begin on the same line. ⚠️ **Nothing in the section's
+alignment depends on the ring's height any more**, which is the real repair: the
+ring can be resized again without dragging the foot out of true.
+
+✅ `.svc-list` takes `align-self: center`, so the three names sit across the
+ring's middle. It reads the row's height — the ring's — so it tracks any later
+change on its own. Verified: list centre 5565 against ring centre 5565 at 1440,
+7181 / 7181 at 1920.
+
+⚠️ **Scoped to `@media (min-width: 901px)`.** Below that the section is
+`display: block` and single-column; confirmed unchanged after.
+⚠️ **The 35/65 column split is untouched** — it came from a line the agency
+drew in 2026-08-23b and this was an alignment note, not a proportion one.
+
+### 6. ⚠️ A second `isPhone` was written, and it shadowed the real one
+
+The phone branch was first written `const isPhone = window.innerWidth <= 640`
+inside `layout()`. It parsed and it measured correctly, and it was wrong twice: a
+**fifth** copy of the 640 breakpoint, and a BOOLEAN shadowing the module-scope
+`isPhone()` — a live `PHONE_MQ` MediaQueryList — for the whole function, so any
+later `isPhone()` call inside `layout()` would have thrown rather than answered.
+Replaced with the existing helper; every number identical after.
+
+⚠️ **`radius()` takes a `spacing` parameter now** rather than a literal 1.12,
+because the phone needs a different one. Called from exactly one place.
+
+### What is still open
+
+1. 🔴 **TWO ROUNDS ARE UNDEPLOYED AND MIXED IN ONE WORKING TREE.** `main.js` and
+   `style.css` carry this round *and* the previous one; the three HTML files
+   carry only the previous one. Nothing is committed, so git draws no boundary
+   between them.
+2. ⚠️ **The ring is now bounded by the window and the window by the viewport
+   height.** If it is still wanted bigger, the remaining levers are the
+   section's 35/65 grid split, or `POP`/`LIFT` — the popped-state reserve, which
+   is what stops the band using the last 30% of its window. Both change
+   something the agency has already approved, so ask before spending them.
+3. ⚠️ **The tech ring is mark-bound and is the first thing a further mark
+   raise will cost** — see §4.
+4. ⚠️ **The −13° on the contact label is gone at the agency's request.** If the
+   sheets ever stop being tilted photographs, that decision should be revisited
+   rather than inherited.
+5. ⚠️ **The ring's motion has still never been SEEN by a person**, and it is now
+   up to 55% bigger, which changes how fast the same angular speed reads.
+6. 🔴 **Everything carried forward is still carried forward** — the bts-29 edge
+   purge, the public `1EMJApB2Rh…` sheet, the key JSON being the only copy. None
+   of it was touched this round.
+
+---
+
+## Session 2026-09-01 — the dashes go, the ring names what it is showing, and the phone gets its own copy
+
+Six instructions. **Four are in the tree; two were built, shown, and then
+killed by the agency the same day** — the about page (§5) and the design
+exploration (§6). Nothing is deployed; the working tree is ahead of the live
+site again.
+
+### 0. 🔴 THE PREVIEW PANE RUNS ZERO FRAMES PER SECOND AND REPORTS ITSELF VISIBLE
+
+The harness's in-app browser pane delivered **0 `requestAnimationFrame`
+callbacks in 900ms** while `document.hidden === false` and
+`document.visibilityState === "visible"`. This site's intro curtain is lifted by
+a GSAP tween, so it never lifted, and every screenshot came back a flat fill of
+linen. Fronting the tab, reloading and waiting all reported success and all
+produced the same blank image.
+
+⚠️ **A blank screenshot from that pane is not evidence about the page.** The
+probe that separates the two cases is one loop counting rAF callbacks against a
+wall clock. ✅ `gsap.ticker.tick()` in a loop drives the timeline by hand and
+makes the pane usable for STATIC layout; ✅ the gstack `browse` daemon has a
+live frame loop and is what the rest of this round was measured on.
+
+### 1. ✅ Every visible dash on the site is gone
+
+The instruction was "remove all the dashes ... and replace them with whatever
+punctuation fits where it gets replaced". **32 code lines in `main.js` and 34
+places across the three HTML files** carried an em or en dash; comments were
+stripped before the scan, so that count is user-visible copy plus metadata only.
+
+Each was replaced with punctuation chosen for that sentence, not by one global
+substitution: a colon where the second clause explains the first
+(«الحكاية كاملةً: كيف بدأت الوكالة»), a comma for an apposition
+(«القدس، جبل الزيتون»), a semicolon in English where a comma would splice, a
+full stop in the legal line, «·» between a page name and the site name in
+`<title>` and the OpenGraph pairs, and nothing at all before the quote's
+attribution («دفتر ألِف», which was «— دفتر ألِف»).
+
+✅ **Verified by rendering, not by grepping the source.** A tree-walk over every
+text node plus `aria-label`, `alt`, `title` and `document.title`, run on all
+three pages in BOTH languages: **six of six CLEAN**. The source scan agrees at
+**0 remaining**.
+
+⚠️ **Three of them were accessible names, not visible text** — the lightbox's
+"%1 of %2", the archive tile's date, the ring item's "n / total". They are
+routed through a new `SEP()` helper. ⚠️ It is a FUNCTION, not a constant:
+`lang` is reassigned by the toggle and these names are rebuilt on it, so a
+constant captured at load would hand Arabic names an English comma for the rest
+of the visit.
+
+### 2. ✅ The oval's label was riding 2.83px high, and `align-items: center` was doing it
+
+The agency's third screenshot, "align the button and its text center middle".
+`align-items: center` centres the LINE BOX, and a line box is the font's ascent
+plus its descent — 0.89em and 0.22em in Idris Sharp, nowhere near symmetric.
+Centring it puts the baseline 0.335em below the middle, and Arabic ink lives
+almost entirely above the baseline.
+
+🔴 **Measured against rendered pixels at 3x, not against computed style**: the
+ink's centre sat **2.83px above** the ellipse's centre on a 77.5px button.
+After: **0.17px**.
+
+The correction centres the band the eye reads, baseline to ascender:
+`ascender/2 − (asc − desc)/2`. Arabic reaches 0.88em → **0.105em down**; Latin
+caps reach 0.68em → 0.005em, i.e. nothing. ⚠️ **So it is scoped to
+`html[lang="ar"]`** — two scripts, two ascender heights, one face, and one
+number cannot serve both. ⚠️ It composes through a custom property, because the
+hover swap sets `transform` and would drop a plain translateY on the floor.
+
+⚠️ **The OTHER reading of that screenshot was checked and was already correct**:
+the invite sentence and the oval beside it are vertically centred on each other
+to within 0.8px at 1366, 1440 and 1920.
+
+### 3. ✅ The ring says what kind of work is at the front
+
+"put the type of service above its text (eg when a reel is being viewed type
+reel on top of its txt)". `#ringDesc` now carries a `.ring-kind` kicker over a
+`.ring-line`, both written by a new `writeDesc()`.
+
+`kind()` reads the SAME table `line()` reads, in the same branch order, so the
+kicker and the paragraph can never describe two different things — the
+subsection wins over the project, and the fallback is the service name rather
+than blank, so the paragraph below never jumps.
+
+🔴 **THE KICKER IS INK, AND THE FIRST DRAFT OF IT WAS AN ACCESSIBILITY
+REGRESSION.** It was written in `--accent`, which measures **3.14:1 on the
+linen** and **3.98:1 on the film ground**; at 0.72em of a 1.45vw paragraph
+(~15px) AA wants 4.5:1. `:root` also states that `--accent` is "nav strike +
+focus only", so it would have been the first text on the site painted in it and
+the only text on the site failing contrast. It is `--ink` (12.6:1) now; the
+accent survives as the 1px rule under the word, which is decoration and carries
+no contrast duty.
+⚠️ **It was caught because a subagent, asked only for design mocks, reported the
+accent's contrast on a DIFFERENT surface.** Read an out-of-scope finding from a
+peer as a test to run against your own diff.
+
+🔴 **NO `letter-spacing` ON THE ARABIC KICKER.** Arabic is joined; letter-spacing
+inserts its value between every pair of glyphs and ريلز sets as four
+disconnected shapes. The tracking is split by language and only `html[lang="en"]`
+gets it.
+
+⚠️ `.ring-desc`'s `min-height` went 3.4em → 6.1em with it, or the shortest
+description let the block collapse under the tallest and the whole foot jumped
+every time a piece came round.
+
+### 4. ✅ The phone gets the agency's own shorter copy — four passages
+
+"i have replacement for these but only apply for phone view". 640px, which is
+already this file's phone line in `style.css` and in the previews module.
+
+**Two different mechanisms, and the reason is structural:**
+
+- **The ring's three shortened descriptions are a JS swap** — `descShort` on
+  `SUBCATS.photo.reels`, `.stills` and `.tech.landing`, chosen in `line()`.
+  There is no second element to hide: `paint()` writes one shared `#ringDesc`.
+- **Block 1 of لماذا ألِف؟ is a CSS swap** — a fourth `<p class="wb1-short">`
+  beside the three `.wb1-long` ones. Four real elements, so the breakpoint that
+  already governs the layout governs the copy too, with no listener to keep in
+  sync.
+
+⚠️ **`PHONE_MQ` is a live MediaQueryList with a `change` listener**, not a
+boolean read at load. Rotating a phone crosses the line; a captured boolean
+leaves long copy on a 390px screen for the rest of the visit and reads as the
+feature not working.
+
+🔴 **HIDING A SIBLING BREAKS `:last-child`, silently.** `display: none` removes
+an element from the RENDER tree, not the DOM tree, so the new fourth paragraph
+became the parent's last child at every width and `w1ParaC` — the last one
+anyone reads on a desktop — quietly got its 0.45rem trailing margin back.
+`.wb1-long:has(+ .wb1-short)` names the relationship instead of counting.
+
+⚠️ The agency's own replacement text contained an em dash. It was set as a colon
+under their own instruction from the same message; that is a copy change made on
+their behalf and is worth confirming.
+⚠️ **The English of all four is MINE** and needs the same sign-off the Arabic
+has had.
+
+### 5. 🔴 The about page's desktop spacing — BUILT, MEASURED, AND REVERTED
+
+The instruction was "the about us page for phone is perfect, but for pc theres
+still a lot of empty unnecessary spaces in between displayed items". A fix was
+built and measured, the agency looked at it and asked for it undone the same day
+("can u also undo what u did for the about us page"). **It is out of the tree.**
+
+⚠️ **REVERTED MEANS REVERTED, and it was checked rather than assumed.** After
+the undo, `.ab-row`, `.ab-card`, `.ab-pair`, `.ab-wide`, its holder and all four
+figures measure **byte-for-byte identical to the pre-session baseline** at both
+1440x900 and 390x844 — document height 4501 / 5896, card type back to 27.84px
+and 26.4px. The four rules removed were a `max-width` on `.ab-row`, an
+`align-self: stretch` on the card, a `display: grid` / `align-content: center`
+on the card, a `min-width: 901px` type block, and `.ab-wide`'s `--abh`.
+⚠️ **Do not re-apply any of it without being asked.** The complaint is not a
+standing task.
+
+**The one thing worth keeping is the diagnosis, because it is a fact about the
+layout and not about the change:** 🔴 **this section allocates WIDTH in `fr`
+while capping its media by HEIGHT in `vh`, and on a wide short window those two
+rules disagree.** A 9:16 clip capped at 450px tall is 253px wide whatever the
+page does, so at 1920x900 the pair comes to 503px of content inside a 755px
+track. The leftover cannot go to the margins, where it would read as a measure,
+because `fr` has already handed it to the tracks — so it opens up BETWEEN the
+pictures and the card. Anyone who looks at empty space on this page again will
+land on that, and it is the thing to think about first.
+
+### 6. ⚠️ `.hero-panel`'s shadow points off the screen in RTL — found, not fixed
+
+`.hero-panel` casts `box-shadow: 24px 0 …`. That is a PHYSICAL offset in a
+mirrored layout, so in Arabic it throws the shadow off the viewport edge instead
+of onto the film strip it is meant to sit above. Nothing was changed — it is
+recorded here so it is not rediscovered a fourth time. It belongs to the same
+family as the three RTL idioms written up above: a logical layout with a
+physical number hard-coded into it.
+
+⚠️ **The testimonials / hero-button design exploration of this round is
+DEAD.** Twelve directions were mocked up and the agency killed the whole line the
+same day: *"entirely forget about those designs"*. **Do not revive them, do not
+cite them, and do not treat "the hero buttons need replacing" as an open task** —
+it is not one until the agency raises it again, and if they do it starts from a
+new brief rather than from that set. The mocks lived in a session scratchpad that
+is cleaned up with the session; nothing in the repo ever referenced them, and the
+site was never touched by that work.
+
+### What is still open
+
+1. 🔴 **NOTHING FROM THIS ROUND IS DEPLOYED.** Five files changed: `main.js`,
+   `style.css`, `index.html`, `about.html`, `library.html`. ⚠️ `about.html`
+   carries DASH EDITS ONLY — the layout work on that page was reverted (§5).
+2. ⚠️ **The English of the four phone passages, and the dash replacements inside
+   the agency's own supplied copy, need sign-off.**
+3. ⚠️ **`.hero-panel`'s RTL shadow is unfixed** — see §6.
+4. ⚠️ **`--accent` has no light-ground variant.** `--accent-lit` `#D9835C`
+   exists for the dark ground at 6.24:1; on the linen there is nothing, which is
+   why the kicker is ink. If the accent is ever wanted under small text on paper,
+   that token has to be created and measured.
+5. 🔴 **Everything carried forward from before is still carried forward** — the
+   bts-29 edge purge, the public `1EMJApB2Rh…` sheet, the key JSON being the
+   only copy. None of it was touched this round.
+
+---
+
 ## Session 2026-08-31 — the form opens, and the sheet handed over was the live registration one
 
 ✅ **DONE. The form accepts answers**, verified through the live page rather
@@ -657,7 +1184,7 @@ default** — stage paths.
 
 ---
 
-## Session 2026-08-30c — the two-round gap is closed, and this file's own headlines had been corrupted
+## Session 2026-08-30c — the two-round gap is closed, this file's own headlines had been corrupted, and the ring stops being faceted
 
 Two instructions: deploy the site, then look at the screenshots. The deploy is
 done and verified; the screenshots are next. Cleaning this file turned up a
@@ -797,7 +1324,7 @@ over the top. It does what the agency asked for.
 is the wash's deliberate trade — it veils rather than deletes — and it is the
 weakest moment of the control.
 
-### 6. ✅ The corruption is repaired everywhere, and the cache is re-measured
+### 5. ✅ The corruption is repaired everywhere, and the cache is re-measured
 
 **47 lines across three files.** The 31 in `style.css` and the 1 in
 `import_bts.py` were repaired with the same token-level method as this
@@ -821,20 +1348,196 @@ the state block: plain GET 1,146,494 bytes on a HIT, `?v=2` 4,273,402 on a
 REVALIDATE. The buster stays until someone purges. **This login cannot** —
 `zone (read)` is not `Zone.Cache Purge`.
 
-### 5. 🔴 The emoji corruption is NOT confined to this file (closed — see 6)
+### 6. ⛔ REVERTED — the plate behind the facets (kept for its measurements)
 
-The same fault is in **31 lines of `prototype/style.css`** and one line of
-`resources/import_bts.py`. All inside comments, so nothing renders wrong and
-nothing behaves wrong — but `style.css` is **deployed**, so the mangled
-documentation is live, and these comments are where this project keeps its
-reasoning.
+> 🔴 **THIS ROUND WAS REVERTED THE SAME DAY — see §7.** The plate worked as a
+> seam fix and broke the border on every item doing it. It is kept in full
+> because the measurements below are what proved a bleed can NEVER close
+> this, which is what justified removing the faceting instead. **No plate
+> code remains. Do not re-add it without reading §7's `:first-child` trap.**
 
-Same signature: `R` and `W`/`U` replaced by 🔴 and ⚠️ inside words, in the
-loud all-caps headline sentences — `THE T⚠️O VE🔴TICALS OVE🔴LAP NO⚠️`,
-`⚠️P F🔴OM 38vh`, `IT G🔴O⚠️S BY PADDING AND TYPE`. Fixing it means editing
-`style.css` and redeploying, so it was left alone rather than folded into a
-visual-QA round. **Scan for it after any scripted write**: an emoji adjacent to
-a letter is never legitimate in this codebase.
+Deployed as `d7ba90e8-bdd3-40cf-a841-7b9001da0cb7`, **now superseded**. Driven
+HEADED against the real GPU (NVIDIA RTX 3050, ANGLE D3D11), which is the only
+path that shows this.
+
+🔴 **THE SEAMS ARE A BATCHING DECISION, AND THAT IS WHY NO NUMBER EVER FIXED
+THEM.** Skia batches the ten slat quads through `drawEdgeAAImageSet`, an API
+that exists to turn antialiasing OFF on interior edges it can prove are shared.
+When anything splits that batch, every quad is drawn with AA on all four sides,
+coverage at a junction sums to less than 1, and what is behind leaks through.
+That is the mechanism behind every word this file already wrote about the fault:
+why it is INTERMITTENT frame to frame, and why software rasterisation — one
+display list, no quad batching — never reproduced it. **A bleed cannot fix a
+coverage shortfall. It can only make it rarer.**
+
+✅ **So the fix stops closing the crack and changes what is behind it.** One
+un-faceted copy of the picture, `.ring-plate`, sits behind each item. A pixel
+the compositor drops now reveals THE WORK, within a pixel of the colour that
+should have been there, instead of the cream page.
+
+**Measured, flat-filling every slat so nothing could hide in picture detail:**
+
+| bleed | plate | seam lines |
+|------:|:-----:|-----------:|
+| 0px   | no    | **7** |
+| 0px   | yes   | **0** |
+| 0.3px | no    | **7** |
+| 0.3px | yes   | **0** |
+
+🔴 **TWO THINGS HAD TO BE RIGHT OR THE PLATE IS WORSE THAN NOTHING**, and both
+were found by measuring, not by reasoning:
+
+1. **It must sit STRICTLY BEHIND the whole arc — hence `--sag`.** At the
+   apothem the plane INTERSECTS the surface the slats stand on, and Chromium's
+   BSP splitter cuts quads at an intersection. That is z-fighting, and it is far
+   worse than the hairline.
+2. **`backface-visibility: hidden` ON THE PLATE ONLY.** It sits nearer the axis,
+   so on the far half the eye reaches it BEFORE the slats and it occludes them,
+   flattening the bend across the whole back of the ring. Flat-filled lime to
+   see it: **27,948 escaping pixels** before that line. The SLATS keep
+   `visible` — the agency's 2026-08-23b choice of the mirrored back stands.
+
+🔴 **`--plate-s` IS MATCHED TO THE ARC'S OUTER CORNER, NOT THE FRONT PLANE.**
+The obvious compensation — pay the depth back at the centre — comes out **2.2%
+too wide**, because the facets curve away toward the edges and their silhouette
+is narrower than a flat plane of the same nominal width. main.js solves the
+projected corner instead. The formula and the reasoning are in the comment.
+
+✅ **THE BLEED STAYS AT 1.1px, and that is a measurement.** The tempting move
+is to drop it to 0.3 now that the plate catches what is dropped, taking the
+duplication smear down with it — the smear is what the agency rejected at 2.2.
+It is the wrong trade. Flat-fill the plate and count what shows THROUGH the
+junctions and you get how much gap is actually open: **1,169px at 1.1, 1,363px
+at 0.6, 2,826px at 0.3.** The plate is a FLAT plane standing in for an ARC, so
+its content is exact at the item's centre and drifts toward the edges; covering
+a hairline hides that drift and covering a 3px gap shows it. **The two are a
+pair** — the bleed closes the geometric gap, the plate catches the compositor's
+miss — and 1.1 adds no smear that was not already on the site.
+
+⚠️ **THE LEVERS THIS FILE RECOMMENDED DO NOTHING, and that is worth recording
+because it recommended them twice.** Under the bleed-0 stress test:
+`will-change: transform` on the slats — **7 seams, unchanged**.
+`backface-visibility: hidden` on the slats — **7 seams, unchanged**. Promotion
+changes when a tile is rasterised, not how a non-axis-aligned quad is
+composited; the coverage ramp is untouched. Fewer facets was not tried, and is
+now unnecessary.
+
+⚠️ **BLEED 0 IS THE INSTRUMENT.** The fault is intermittent at 1.1 — two runs
+in this session disagreed with each other at that value — so it cannot be A/B'd
+there. At bleed 0 the gaps are deterministic on both rasterisation paths, which
+makes it a reliable proxy for "the compositor dropped it". **Test seam work at
+bleed 0 and ship at 1.1.**
+
+⚠️ **A COUNT OF PLATE-COLOURED PIXELS IS NOT A COUNT OF FAULTS.** Flat-filling
+the plate lime and counting lime looked like an escape metric and is not: most
+of those pixels are the plate doing its JOB at the nine junctions. Escape is
+lime OUTSIDE the item's silhouette. Half an hour went into driving that number
+down before the picture showed what it actually was.
+
+⚠️ **Playwright cannot pick a ring item.** `hover` does not land on a
+3D-transformed button — the hit test finds something else — so every test here
+drove `pick()` with a dispatched `pointerenter`. The pop logic and the plate are
+proven; **whether a real pointer can pick a piece is still untested.**
+
+⚠️ **An element screenshot never settles on a turning ring.** Playwright waits
+for stability and times out at ~5s. Pick an item first (that holds the ring), or
+use `screenshot --clip`. `eval` has the same ~5s ceiling — keep the waits in the
+shell, not in the page.
+
+### 7. 🔴 THE PLATE IS GONE, THE FACETING IS GONE, AND THAT IS THE FIX
+
+Deployed **`76ec4b38-0a01-4860-9454-14fdcc434f01`**. `SLATS = 1`, `--bleed: 0`,
+`.ring-plate` deleted. The agency's verdict on the plate round was "the new ring
+edits are the worst ive ever seen, the first ver ever made of it was much
+better" — and they were right on both counts.
+
+🔴 **THE PLATE BROKE THE BORDER ON EVERY ITEM, and that is what "stupid
+borders" was.** It was inserted as the item's FIRST CHILD, which stole
+`:first-child` from the first slat — the rule that draws `border-left` and the
+two left corner radii. Measured on the live build: `border-left: 0px` against
+`border-right: 1px`, and `border-radius: 0 12.96px 12.96px 0`. Every item had a
+square unbordered left edge against a rounded bordered right one. **A
+pseudo-class selector is a position, not a name: adding a sibling silently
+re-points every `:first-child` rule in the file.**
+
+🔴 **AND THE FACETING IS THE SHREDDING — it cannot be fixed while it
+exists.** The mechanism from §6 stands and is worth keeping: Skia batches the
+strip quads and turns AA off on interior edges it can prove are shared; when the
+batch splits, coverage at a junction falls short and the page leaks. Nine
+junctions is nine chances per item, every frame. **A bleed cannot fix a coverage
+shortfall.** The plate could hide it, but hiding it cost a broken border, three
+geometry corrections, and a flat plane standing in for an arc.
+
+✅ **At `SLATS = 1` an item has no interior junction, so there is nothing to
+shred.** Not rarer — impossible. It is also what the ring WAS before
+2026-08-23's faceting round (`080853d`), which is the version the agency
+remembered as better.
+
+✅ **NOTHING ELSE HAD TO CHANGE, and that is why this was one constant.** The
+sprite formula degenerates correctly at n = 1; the single face is both
+`:first-child` and `:last-child` so it takes the full border and all four
+corners from the two end-strip rules — **measured live at 1px/1px/1px/1px** with
+a uniform radius, which is the border complaint answered by the same edit.
+Hit-testing, previews (4 of 20 items carry a film), the `--o` depth fade
+(6 distinct values across the ring) and the keyboard all read the slat and are
+untouched. `--pop` still reaches 1.260.
+
+⚠️ **WHAT IT COSTS is the bend, and the bend was 10px across a ~109px item.**
+The ring still reads as a ring — the cards are rotated and stand in a circle —
+they are simply flat. If the agency ever wants the curve back, `SLATS` is the
+one constant, **and the bleed has to come back with it or the strips meet with
+nothing between them.** The shredding returns with both.
+
+⚠️ **THE WHOLE §6 PLATE ROUND IS REVERTED.** Its measurements are still true and
+still worth reading — they are what proved a bleed can never close this — but no
+plate code remains. Do not re-add it without re-reading the `:first-child` trap
+above.
+
+### 8. ✅ The same process run over the WHOLE site — three pages × three widths
+
+All against the live site on the real GPU: `/`, `/about`, `/library` at
+1920×960, 1440×900 and 390×844. Nine combinations.
+
+✅ **HORIZONTAL OVERFLOW: ZERO on all nine.** `scrollWidth - clientWidth` is 0
+everywhere, which is the check that matters after the RTL round — this file
+records `left: -9999px` making a 390px page 10,389px wide, and nothing like it
+survives.
+✅ **BROKEN IMAGES: ZERO of 170** (70 home, 12 about, 88 library).
+✅ **No console errors and no failed requests** on a clean load.
+✅ **The elements that sit outside the viewport are all supposed to**:
+`.film-scroll` / `.film-group`, `.cb-track` / `.loop-group`, and
+`reel-slide.is-clone` — marquee and carousel tracks, plus their clones.
+
+🔴 **TWO FALSE POSITIVES, AND BOTH ARE THE SAME MISTAKE THIS FILE KEEPS
+RECORDING: measuring the element and not its situation.**
+
+1. **A 401 on every page at every width — from ONE stale entry.** Every
+   reading carried the identical timestamp, which is the tell. **browse's
+   console and network buffers survive navigation**, so page 1's error is
+   reported against pages 2..9 forever. `console --clear` and
+   `network --clear` before each load, or every page inherits the first.
+2. **An H2 and a `.panel-count` measured off the left edge on `/library`** —
+   reported as a heading hanging outside the page. They are inside
+   `.panel-body`, which is `opacity: 0` on a COLLAPSED accordion panel. An
+   audit that skips `opacity: 0` on the element itself, as this one did, still
+   has to walk the ANCESTORS.
+
+⚠️ **`.panel-count` LOOKS like the tnum catastrophe and is not** — worth
+recording because the evidence is genuinely damning until the last step. It is
+`font-variant-numeric: tabular-nums`, and with it on all ten Arabic-Indic
+digits measure **exactly 8.08px**: one uniform advance, which is what this file
+calls proof that every glyph became the same empty box. The arithmetic even
+agrees with the 2026-08-23b measurement — 50.4px at 120px scales to 8.06px at
+19.2px.
+✅ **It is fine, and the file's own rule is what settles it: LOOK AT THE
+GLYPH.** Rendered at 64px, tnum and normal both draw ٠١٢٣٤٥٦٧٨٩ correctly. The
+rule names **Idris Sharp**; `.panel-count` is **"Idris Flat"**, a different
+face that implements the feature properly. The uniform advance here is tnum
+WORKING.
+✅ **Swept the whole site for the real fault: `/` and `/about` have no
+tabular-nums elements at all, and `/library`'s four are all `.panel-count` on
+Idris Flat.** The stylesheet's only other declaration is `.lb-cap`, which sets
+no `font-family` and so inherits the same path `.panel-count` does.
 
 ---
 
