@@ -2,15 +2,39 @@
 
 _Updated 2026-09-01. Read this first._
 
-> ## 🟡 State on 2026-09-01: TWO ROUNDS ARE NOW UNDEPLOYED; THE FORM'S STATE IS UNVERIFIED
+> ## 🟢 State on 2026-09-01: BOTH ROUNDS ARE COMMITTED AND LIVE; THE FORM'S STATE IS UNVERIFIED
 >
-> 🔴 **THE SITE IS NO LONGER CURRENT. Two rounds sit in the tree and neither
-> is live** — the 2026-09-01 round (dashes, ring kicker, phone copy) and the
-> 2026-09-01b round (hero notes, the language pill's wash, the ring and the marks
-> enlarged). The live site is still `76ec4b38-0a01-4860-9454-14fdcc434f01`.
-> **Nothing from either round is committed**, so `git status` does not tell the
-> two apart: `main.js` and `style.css` carry both, the three HTML files carry
-> only the earlier one.
+> ✅ **THE SITE IS CURRENT — version `d3113117-385a-450f-affe-bacd11786869`.**
+> Both 2026-09-01 rounds are live: the dashes / ring kicker / phone copy round
+> and the 2026-09-01b round (hero notes, the language pill's wash, the ring and
+> the marks enlarged). It supersedes `76ec4b38-0a01-4860-9454-14fdcc434f01`,
+> which had been live since 2026-08-30c.
+>
+> ✅ **They are ONE COMMIT, `07050bf`, and that is deliberate.** The two rounds
+> interleave hunk by hunk in `main.js` and `style.css` and cannot be separated;
+> the commit message names both bodies of work rather than describing one and
+> carrying the other silently, which is the `ef173c5` mistake. ⚠️ **The
+> 2026-09-01b round was NOT reviewed by the session that committed it** — it was
+> verified only to the extent that the combined tree parses and renders.
+>
+> ✅ **Verified live the way this file demands** — browser UA, cache-buster,
+> `-L`: `/`, `/about`, `/library` all **200**, `/index.html` 307s to `/`, and
+> `style.css` and `main.js` are **md5-identical** to the working tree. All three
+> HTML files came back byte-identical this time, with no analytics beacon delta.
+> Rendered on the live domain: **zero dashes** on all three pages, the ring
+> kicker painting, and the oval's label **0.67px** off centre against the
+> 2.83px it was.
+> ⚠️ **The deploy uploaded exactly 5 files of 205** — the three pages,
+> `main.js`, `style.css` — which is the right shape for a round of CSS and copy
+> edits. The trigger list names only `aliphcreative.ceo-6c6.workers.dev` and
+> that is CORRECT here: the root `wrangler.toml` declares no `routes`, so the
+> custom domain stays dashboard-managed and is not touched.
+>
+> 🔴 **20 COMMITS ARE UNPUSHED**, now 21. `origin/main` is
+> `github.com/Aliph-Creative-Agency/AliphPortfolio` and local `main` is ahead of
+> it by the whole recent history. Deploying does NOT push — wrangler ships the
+> working tree, git is untouched. Nobody has asked for a push; do not assume the
+> remote reflects any of this.
 >
 > 🔴 **SOMETHING ELSE WROTE THIS FILE DURING THE 2026-08-30c SESSION, AND IT
 > HAS NOT BEEN RECONCILED. READ THIS BEFORE EDITING.** At that session's start
@@ -883,10 +907,10 @@ because the phone needs a different one. Called from exactly one place.
 
 ### What is still open
 
-1. 🔴 **TWO ROUNDS ARE UNDEPLOYED AND MIXED IN ONE WORKING TREE.** `main.js` and
-   `style.css` carry this round *and* the previous one; the three HTML files
-   carry only the previous one. Nothing is committed, so git draws no boundary
-   between them.
+1. ✅ **CLOSED 2026-09-01 — both rounds are committed (`07050bf`) and deployed
+   (`d3113117-385a-450f-affe-bacd11786869`).** They went in together because they could not be
+   separated; the commit message names both. ⚠️ **This round was not reviewed by
+   the session that shipped it**, only verified to parse and render.
 2. ⚠️ **The ring is now bounded by the window and the window by the viewport
    height.** If it is still wanted bigger, the remaining levers are the
    section's 35/65 grid split, or `POP`/`LIFT` — the popped-state reserve, which
@@ -1088,9 +1112,11 @@ site was never touched by that work.
 
 ### What is still open
 
-1. 🔴 **NOTHING FROM THIS ROUND IS DEPLOYED.** Five files changed: `main.js`,
-   `style.css`, `index.html`, `about.html`, `library.html`. ⚠️ `about.html`
-   carries DASH EDITS ONLY — the layout work on that page was reverted (§5).
+1. ✅ **COMMITTED (`07050bf`) AND DEPLOYED (`d3113117-385a-450f-affe-bacd11786869`).**
+   Five files: `main.js`, `style.css`, `index.html`, `about.html`,
+   `library.html`. ⚠️ `about.html` carries DASH EDITS ONLY — the layout work on
+   that page was reverted (§5). ⚠️ The commit also carries the whole
+   2026-09-01b round, which this session did not review.
 2. ⚠️ **The English of the four phone passages, and the dash replacements inside
    the agency's own supplied copy, need sign-off.**
 3. ⚠️ **`.hero-panel`'s RTL shadow is unfixed** — see §6.
