@@ -1,6 +1,6 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-09-14. Read this first._
+_Updated 2026-09-15. Read this first._
 
 > ## 🟢 State on 2026-09-01: BOTH ROUNDS ARE COMMITTED AND LIVE; THE FORM'S STATE IS UNVERIFIED
 >
@@ -689,13 +689,25 @@ gesture has been invented for it.
 
 ---
 
-## Session 2026-09-14 — the testimonials redrawn to the agency's scraps, and the title rule
+## Sessions 2026-09-14 and 15 — the testimonials redrawn to the agency's scraps, the trail, the torn marks, and the title rule
 
 The agency came back on the 2026-09-13 round with four frames of their own
-paper and two drawings, and every note below is theirs, answered. **Built and
-verified; NOT committed and NOT deployed.** Live is still `d3113117-…`. The
-copy is still the placeholder table — see the 2026-09-13 session's red block,
-which is unchanged and is still the reason nothing ships.
+paper and, over two days, nine drawings — and every note below is theirs,
+answered, most within the hour and several reversed the next. Sections 1–5
+are the 14th; 6–9 are the rounds that followed, in order. **Committed
+(`b3b7e6a`), deployed (`bad1d87d-…`), pushed (`5abe3ee`) on the 15th** at
+the agency's "ok commit and deploy this" — with the placeholder table on the
+public site, knowingly. See the 2026-09-13 session's red block on the copy,
+which is unchanged and is still the first open item.
+
+⚠️ **How this round went, for whoever takes the next one:** the agency
+works by drawing on a screenshot and sending it; each drawing was answered
+with a build and a screenshot back; reversals ("bring back the previous
+paths", "lets get back to 80") were frequent and cheap because every knob
+is one number in `TRAILS`, `TESTIMONIALS` or a clamp. Two notes bit: a
+render declared to match a drawing BY EYE did not (§7 — measure ratios),
+and the title's "same as the ones before" meant the WALL's title (§8), not
+the blocks' — when a note names an example, match the example.
 
 ### 1. ✅ The paper is theirs now — four sources, eight files, one cutter
 
@@ -984,18 +996,37 @@ transformed except the lifted sheet, and that was read from computed style.
 
 ### What is still open
 
-1. 🔴 **THE COPY** — unchanged from 2026-09-13, and LIVE now.
-2. ✅ **Committed (`b3b7e6a`) and deployed (`bad1d87d-…`) on 2026-09-15**
-   at the agency's "ok commit and deploy this", and pushed.
-3. ⚠️ The agency has not seen this round. The rotor's hold, the pop's 9%,
-   the cutting's rest tilts and the label sentences are the guesses most
-   likely to come back. «من كلام عملائنا» and «قالوا عنّا.» are mine.
-4. ⚠️ The phone scraps clamp the words to TWO lines now (were three) — the
-   safe boxes of the agency's scraps are ~50% of their height. A longer
-   quote is cut with an ellipsis, not stretched.
-5. ⚠️ `resources/clippings/` adds 5.4 MB of source frames to a tracked
+1. 🔴 **THE COPY — placeholders, and PUBLIC since 2026-09-15.** Five
+   entries in `TESTIMONIALS`, a role and a kind of business each. The
+   feedback sheet (`17EV8437…`) has been taking answers since 2026-08-31
+   and no session has read it; that, or the agency's own words, closes
+   this. Swap the table; nothing else changes.
+2. ✅ Committed, deployed and pushed — see the header block. `origin/main`
+   is at `5abe3ee`.
+3. ⚠️ **Not seen on a real phone.** ~40 motion-path animations (the trail)
+   plus the band's per-frame `--pop` writes and the drag are all verified
+   headless. If a phone stutters, the first knob is `gap` in
+   `TRAILS.phone` (fewer marks), the second is the pop's `scale`.
+4. ⚠️ **Seen by the agency in screenshots only** — desktop 1440 and phone
+   390, Arabic. The English page's collage (name sheet under the title,
+   the trail mirrored with its own start) and everything at 641–1024 have
+   been measured and not looked at by anyone.
+5. ⚠️ The label sentences are mine: «قالوا عنّا.» / "What our clients
+   say." over the cutting, «من كلام عملائنا» / "In our clients' words" on
+   the rotor's scrap. Two strings in `I18N`.
+6. ⚠️ The phone scraps clamp the words to TWO lines — the safe boxes of the
+   agency's scraps are ~50% of their height. A longer quote is cut with an
+   ellipsis, not stretched.
+7. ⚠️ The torn ring marks are derived files: `tear_marks.py` runs AFTER
+   `cut_people_marks.py`, and a re-cut mark needs a re-tear. The originals
+   stand beside them, untouched.
+8. ⚠️ `resources/clippings/` adds 5.4 MB of source frames to a tracked
    folder. That is the folder's policy; it is also 5.4 MB in every clone.
-6. ⚠️ Everything carried forward is still carried forward.
+9. ⚠️ `resources/shoot.py`'s `kill()` still orphans the browser (see the
+   tooling notes); the harness this round used sweeps by command line.
+10. ⚠️ Everything carried forward is still carried forward — the bts-29
+    edge purge, the public repo, the registration sheet still shared to
+    anyone with the link, the key JSON being the only copy.
 
 ---
 
