@@ -181,9 +181,12 @@
      aspects come straight off that overlay; the titles deliberately move
      from block to block (right column → left → full width) rather than all
      hanging off one edge. Deliberately unanimated — it is a printed sheet. -->
-<div class="banner"><h2 data-i18n="storyBanner">لماذا ألِف؟</h2></div>
+<!-- `id="why"` is on the BANNER, not the section: the hero's «ابدأ من هنا»
+     lands on the title «لماذا ألِف؟», not on the first block under it
+     ("take me to the why aliph title not its first subtitle", 2026-09-16). -->
+<div class="banner" id="why"><h2 data-i18n="storyBanner">لماذا ألِف؟</h2></div>
 
-<section class="why" id="why">
+<section class="why">
 
   <!-- block 1 — title + text in a narrow right column, wide film beside it -->
   <article class="why-block wb1">

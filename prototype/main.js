@@ -161,7 +161,7 @@ const I18N = {
      a testimonial; the first draft («وهذا ما قاله عملاؤنا.») explained
      itself and read like a caption. Changed at the agency's "change the
      section title to something better", 2026-09-14. */
-  testiHead: { ar: "قالوا عنّا.", en: "What our clients say." },
+  testiHead: { ar: "قالوا عنّا.", en: "What they said." },
   testiLabel: { ar: "من كلام عملائنا", en: "In our clients' words" },
   testiBand: { ar: "آراء العملاء", en: "Client testimonials" },
   testiRotor: { ar: "آراء العملاء", en: "Client testimonials" },
@@ -565,7 +565,7 @@ const PROJECTS = [
         en: "A one-day leadership retreat with six stations, each named for the woman running it, and every participant rotating through three of them at set times. The page tells the retreat's story; the form does the rest: it validates, works out how many seats are left in each station in each round, then writes the row straight into the organisers' sheet. The remaining seats are shown on the page itself, because a retreat with a hard limit should say so before you register, not after.",
       },
       shots: ["queens-retreat-1", "queens-retreat-2", "queens-retreat-3",
-              "queens-retreat-4", "queens-retreat-5"],
+        "queens-retreat-4", "queens-retreat-5"],
     }
   },
   {
@@ -583,7 +583,7 @@ const PROJECTS = [
         en: "One evening, and one page carrying it. The place introduces itself before anyone is invited into it, and the countdown turns the date into something approaching rather than a line of text. The two workshops, perfume-filling with Méjana and planting a cactus in pottery, sit side by side because choosing between them is the only decision the guest is asked to make, and the form beneath asks for nothing but a name; phone and companions are optional. The moment the name is in, the page hands back the date ready for a calendar and the address ready for a map, because an invitation that does not get you to the door is unfinished.",
       },
       shots: ["al-baydar-1", "al-baydar-2", "al-baydar-3",
-              "al-baydar-4", "al-baydar-5"],
+        "al-baydar-4", "al-baydar-5"],
     }
   },
   {
@@ -910,7 +910,7 @@ const testimonials = (() => {
      no small one. Never the service. */
   function who(e) {
     return e.name ? { big: t(e, "name"), small: t(e, "business") }
-                  : { big: t(e, "business"), small: "" };
+      : { big: t(e, "business"), small: "" };
   }
   function writeWho(root, bigSel, smallSel, e) {
     const w = who(e);
@@ -923,7 +923,7 @@ const testimonials = (() => {
   /* ── the cutting (home page) ── */
   const canHover = window.matchMedia("(hover: hover)").matches;
   let clipWired = false;
-  let settleClip = () => {};
+  let settleClip = () => { };
 
   function renderClip() {
     const root = document.getElementById("testiClip");
@@ -1381,8 +1381,10 @@ const testimonials = (() => {
         writeRotor(e);
         gsap.fromTo(inner,
           { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, duration: 0.7, ease: "power3.out",
-            onComplete: () => { rotorTimer = setTimeout(next, ROTOR_HOLD); } });
+          {
+            opacity: 1, y: 0, duration: 0.7, ease: "power3.out",
+            onComplete: () => { rotorTimer = setTimeout(next, ROTOR_HOLD); }
+          });
       },
     });
   }
@@ -1995,7 +1997,7 @@ function overDark(el) {
   let dark = 0, seen = 0;
   for (const [fx, fy] of GROUND_AT) {
     const stack = document.elementsFromPoint(r.left + r.width * fx,
-                                             r.top + r.height * fy);
+      r.top + r.height * fy);
     for (const node of stack) {
       if (node === el || el.contains(node)) continue;
       seen++;
@@ -2198,7 +2200,7 @@ const serviceRings = (() => {
 
   const srcOf = (item) =>
     item.shot ? "assets/shots/" + item.shot + ".webp"
-              : "assets/media/" + item.f;
+      : "assets/media/" + item.f;
 
   /* ══════ the band is BENT, and every number below exists for that ══════
      Each piece of work is cut into SLATS — vertical strips, each one flat, each
@@ -2405,7 +2407,7 @@ const serviceRings = (() => {
         let html = "";
         for (let k = 0; k < SLATS; k++) {
           html += '<span class="ring-slat" style="--k:' + k +
-                  ';background-image:url(&quot;' + src + '&quot;)"></span>';
+            ';background-image:url(&quot;' + src + '&quot;)"></span>';
         }
         b.innerHTML = html;
 
@@ -2465,9 +2467,11 @@ const serviceRings = (() => {
       /* pop/popNow are the scale twins of lift/liftNow — the target layout()
          solves the ring against, and the value paint() eases toward it. They
          start at 1 rather than 0: this one is a multiplier. */
-      return { id, stage, ring, items, front: -1, picked: -1, lift: 0, liftNow: 0,
-               pop: 1, popNow: 1,
-               nodes: Array.from(ring.querySelectorAll(".ring-item")) };
+      return {
+        id, stage, ring, items, front: -1, picked: -1, lift: 0, liftNow: 0,
+        pop: 1, popNow: 1,
+        nodes: Array.from(ring.querySelectorAll(".ring-item"))
+      };
     });
     buildList();
     layout();
@@ -2608,7 +2612,7 @@ const serviceRings = (() => {
         const mag = P > near + 1 ? P / (P - near) : 8;
         const halfW = (r * (1 + LIFT) + widest * POP * k * 0.5) * mag;
         const halfH = (r * (1 + LIFT) * Math.sin(tilt)
-                       + tallest * POP * k * 0.5 * Math.cos(tilt)) * mag;
+          + tallest * POP * k * 0.5 * Math.cos(tilt)) * mag;
         /* ⚠️ ASYMMETRIC ON PURPOSE. The sides get a bleed and the top and
            bottom get none, because those are two different readings. A poster
            running under the left or right edge of the band says the orbit
@@ -2618,8 +2622,10 @@ const serviceRings = (() => {
            entirely inside — nine widths of 1.12 spacing need a diameter of
            3.2w before perspective, so something has to give, and it is the
            sides. */
-        return { halfW, halfH,
-                 ok: halfW * 2 <= W * PHONE_RING.bleed && halfH * 2 <= h };
+        return {
+          halfW, halfH,
+          ok: halfW * 2 <= W * PHONE_RING.bleed && halfH * 2 <= h
+        };
       };
       /* The magnification makes this non-linear, so it is solved rather than
          divided: ten halvings of the interval land inside a pixel. */
@@ -2843,7 +2849,7 @@ const serviceRings = (() => {
        rAF eases; CSS transitions only touch what layout never sets. */
     const target = (s.lift || 0) * (i === s.picked ? 1 : 0.45);
     s.liftNow = prefersReduced ? target
-              : s.liftNow + (target - s.liftNow) * 0.16;
+      : s.liftNow + (target - s.liftNow) * 0.16;
     if (Math.abs(target - s.liftNow) < 0.2) s.liftNow = target;
     if (s.nodes[i]) s.nodes[i].style.setProperty("--lift", s.liftNow.toFixed(1) + "px");
     /* The same easing, on the scale (2026-08-30). Written on the same node in
@@ -2994,7 +3000,7 @@ const serviceRings = (() => {
        the overlay would hand the front item — and therefore the playing reel —
        on to the next piece while the visitor is looking at this one. */
     if (hover || document.hidden || stages[at].picked >= 0
-        || document.body.classList.contains("lb-open")) return;
+      || document.body.classList.contains("lb-open")) return;
     const d = (dt / (TURNS[stages[at].id] || TURN_DEFAULT)) * 360;
     spin += d;
     turned += d;
@@ -3213,8 +3219,10 @@ const lightbox = (() => {
     const full = (img && (img.dataset.full || img.currentSrc || img.src))
       || (node.dataset && node.dataset.full) || "";
     if (film) {
-      return { video: `${R2}/video/${film}`, poster: full,
-               date: date && date.textContent };
+      return {
+        video: `${R2}/video/${film}`, poster: full,
+        date: date && date.textContent
+      };
     }
     const vid = node.querySelector("video");
     /* A live preview hands over where it had got to, so opening the overlay
@@ -3227,20 +3235,26 @@ const lightbox = (() => {
          because the element was playing a small derivative — went with the
          derivative. Do not reintroduce a second URL unless the page goes back
          to playing something other than the file the overlay opens. */
-      return { video: vid.currentSrc || vid.src,
-               poster: vid.poster, at: vid.currentTime || 0 };
+      return {
+        video: vid.currentSrc || vid.src,
+        poster: vid.poster, at: vid.currentTime || 0
+      };
     }
     /* the preview has been torn down (off screen, or never started), but the
        node still knows its film and how far it got */
     if (node.dataset && node.dataset.preview) {
-      return { video: node.dataset.preview, poster: full || undefined,
-               at: parseFloat(node.dataset.at || "0") || 0,
-               date: (date && date.textContent) || node.dataset.date || "" };
+      return {
+        video: node.dataset.preview, poster: full || undefined,
+        at: parseFloat(node.dataset.at || "0") || 0,
+        date: (date && date.textContent) || node.dataset.date || ""
+      };
     }
     if (!img) {
       /* a ring item: no <img> anywhere in it, but the node names its file */
-      if (full) return { img: full, alt: node.dataset.alt || "",
-                         date: node.dataset.date || "" };
+      if (full) return {
+        img: full, alt: node.dataset.alt || "",
+        date: node.dataset.date || ""
+      };
       return null;
     }
     /* a placeholder holder has nothing worth enlarging */
@@ -3414,14 +3428,18 @@ const mediaKeys = (() => {
        `.film-group` matches six or seven times and every clone holds the same
        four photographs. Only the original is content.
        `reveal` is the strip itself: see uncover() below. */
-    { host: ".film-group", item: ".film-frame", verb: "mOpen", first: true,
-      reveal: ".filmstrip", scroll: false },
+    {
+      host: ".film-group", item: ".film-frame", verb: "mOpen", first: true,
+      reveal: ".filmstrip", scroll: false
+    },
     { host: ".gwall", item: ".gw-tile", verb: "mOpen" },
     /* the clones are `.is-clone` and `aria-hidden`; a focusable node inside an
        aria-hidden subtree is a defect in its own right, so they are excluded
        here rather than merely skipped */
-    { host: ".reelshow-track", item: ".reel-slide:not(.is-clone) > .holder", verb: "mPlay",
-      scroll: "center" },
+    {
+      host: ".reelshow-track", item: ".reel-slide:not(.is-clone) > .holder", verb: "mPlay",
+      scroll: "center"
+    },
     { host: ".clippings", item: ".clip-photo", verb: null },
     { host: ".wb1", item: ".wb1-media", verb: "mOpen" },
   ];
@@ -3534,8 +3552,10 @@ const mediaKeys = (() => {
              the tween. hold() has already centred the frame. */
       items[to].focus({ preventScroll: true });
       if (field.scroll !== false) {
-        items[to].scrollIntoView({ block: "nearest", inline: field.scroll || "nearest",
-                                   behavior: prefersReduced ? "auto" : "smooth" });
+        items[to].scrollIntoView({
+          block: "nearest", inline: field.scroll || "nearest",
+          behavior: prefersReduced ? "auto" : "smooth"
+        });
       }
     });
   }
@@ -3632,7 +3652,7 @@ const previews = (() => {
       if (phone()) return "wall";
       const wr = wall.getBoundingClientRect(), nr = node.getBoundingClientRect();
       const third = Math.min(2, Math.floor(((nr.top + nr.height / 2) - wr.top)
-                                           / (wr.height / 3)));
+        / (wr.height / 3)));
       return "wall-" + third;
     }
     return "loose";
@@ -3921,10 +3941,14 @@ function renderLibrary() {
       { id: "photos", ar: "صور", en: "Photos", of: (r) => !!(r.m && !r.m.v) },
     ],
     tech: [
-      { id: "sites", ar: "مواقع", en: "Websites",
-        of: (r) => !!(r.p && r.p.profile.kind === "site") },
-      { id: "apps", ar: "تطبيقات", en: "Apps",
-        of: (r) => !!(r.p && r.p.profile.kind === "app") },
+      {
+        id: "sites", ar: "مواقع", en: "Websites",
+        of: (r) => !!(r.p && r.p.profile.kind === "site")
+      },
+      {
+        id: "apps", ar: "تطبيقات", en: "Apps",
+        of: (r) => !!(r.p && r.p.profile.kind === "app")
+      },
     ],
   };
 
@@ -3933,8 +3957,10 @@ function renderLibrary() {
       .map((m) => ({ kind: "media", d: m.d, key: m.f, m }));
     const projects = (catId === "all" || catId === "tech")
       ? PROJECTS.filter((p) => p.cat === "tech" && p.profile)
-        .map((p) => ({ kind: "project", d: p.date, key: p.en,
-                       p, at: PROJECTS.indexOf(p) }))
+        .map((p) => ({
+          kind: "project", d: p.date, key: p.en,
+          p, at: PROJECTS.indexOf(p)
+        }))
       : [];
     return [...media, ...projects].sort(byNewest);
   };

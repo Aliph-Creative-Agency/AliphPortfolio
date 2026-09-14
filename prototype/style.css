@@ -1545,12 +1545,15 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   text-align: center;
   max-width: 90%;   /* was 74; the arrow shares the line now */
   pointer-events: none;
-  /* the words, then the arrow, on one line */
+  /* the words over their underline, the arrow under them — stacked, so the
+     pair reads the same on both notes at every width. Side by side (the
+     first pass) "Get in touch →" ran to the curled note's edge on the
+     English page and the down arrow crossed its own underline. */
   display: flex;
-  flex-wrap: wrap;          /* at the floor the English arrow drops under the words */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.15em 0.3em;
+  gap: 0.28em;
 }
 /* ── what makes a note a BUTTON (2026-09-16) ──
    The paper and the pin alone read as a note somebody left, not as a thing
@@ -4392,8 +4395,8 @@ body.lib-index .lib-list { display: block; }
      read --mark-clear, and the phone block below re-states only these three
      tokens rather than four rules. Change the width here and the clearances
      move with it. */
-  --mark-w: clamp(160px, 19vw, 300px);
-  --mark-drop: clamp(-96px, -7vw, -44px);
+  --mark-w: clamp(160px, 16.3vw, 300px);      /* 235px at 1440 — the agency's compacted footer, 2026-09-16 */
+  --mark-drop: clamp(-96px, -4.4vw, -44px);   /* 63px under the edge there */
   --mark-clear: calc(var(--mark-w) + clamp(0.7rem, 2vw, 1.8rem));
 }
 /* the home page's last section already butts against the contact band, so
@@ -4413,6 +4416,38 @@ body[data-page="index"] .footer { margin-top: 0; }
 /* Stops short of the mark rather than crossing it — `8th.png` draws the rule
    running only as far as the socials above it. */
 .footer .rule-cream { margin-inline-end: var(--mark-clear); }
+/* ── THE COMPACTED FOOTER (2026-09-16) ── the agency sent a screenshot of
+   the footer with its air let out — "i compacted the footer a lil, copy
+   this" — and every number in this block and the ones marked 2026-09-16
+   below is read off it at 1440: the contact rows ~146px apart instead of
+   176, the scrap three quarters of its size, the socials level with the
+   last row beside the mark rather than on a row of their own, the legal
+   line tight under the table, NO rule between the table and the legal
+   line, and the whole thing ~700px under the band instead of ~930. The
+   rotor's words and the socials share ONE BOX — "i edited the placement
+   of the testimonials so that it lines up with the socials vertically ...
+   from the left and the right, so from now on these are the boundaries
+   for the end of the line in the quote". So --tr-w is that box: 370px at
+   1440, hugging the mark's clearance; the name, business and words wrap
+   inside it, and the three socials are spread across it edge to edge
+   (space-between) so their two ends ARE its edges. Where the column has
+   less room than that (901–1279, the mark's clearance taken out), the box
+   is what is left. The phone keeps its own block. */
+@media (min-width: 901px) {
+  .footer { --tr-w: 15.4rem; }
+  .footer .rule-cream { display: none; }
+  .testi-rotor .tr-inner {
+    width: min(calc(100% - var(--mark-clear)), var(--tr-w));
+    margin-inline-start: auto;
+    margin-inline-end: var(--mark-clear);
+  }
+  .footer .contact-socials {
+    width: min(100%, var(--tr-w));
+    justify-content: space-between;
+    gap: 0.4rem;
+    font-size: 0.62rem;
+  }
+}
 .footer-legal {
   position: relative;
   z-index: 1;
@@ -4420,7 +4455,7 @@ body[data-page="index"] .footer { margin-top: 0; }
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding: 0.8rem var(--pad) 1rem;
+  padding: 0.4rem var(--pad) 0.6rem;   /* was 0.8 / 1 — compacted 2026-09-16 */
   padding-inline-end: var(--mark-clear);
   font-size: 0.72rem;
   color: rgba(217, 217, 206, 0.6);
@@ -4499,7 +4534,8 @@ body[data-page="index"] .footer { margin-top: 0; }
    type is live, ink multiplied into the paper like the cutting's. */
 .tr-label {
   box-sizing: border-box;
-  width: min(100%, 21rem);      /* ~79% of the 648px cell, the drawing's share */
+  width: min(100%, 15.8rem);    /* 380px at 1440 — three quarters of the 21rem it
+                                   was, off the compacted footer (2026-09-16) */
   /* right under the rule and the name right under the scrap — the
      drawing's spacing (2026-09-14): the scrap's top sits on the rule and
      the name follows it by a line, not a paragraph */
@@ -4555,6 +4591,7 @@ html[lang="en"] .tr-label {
   margin: 1.15rem 0 0;
   font-size: clamp(1.1rem, 1.5vw, 1.3rem);
   line-height: 1.7;
+  text-wrap: pretty;   /* three lines in the 370px box; no lone last word */
   color: rgba(217, 217, 206, 0.9);
 }
 /* the marks the drawing has: big, in the display face, the 99 opening and
@@ -4584,10 +4621,13 @@ html[lang="en"] .tr-quote::after  { content: "\201D"; }
      width up cheaply: its longest value is info@aliphcreative.com at 415px. */
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: clamp(1.5rem, 4vw, 3.5rem);
-  padding: clamp(2.2rem, 6vh, 4rem) var(--pad) clamp(1.4rem, 3vh, 2.2rem);
+  padding: clamp(2.2rem, 6vh, 4rem) var(--pad) 0.75rem;   /* bottom was 3vh — compacted 2026-09-16 */
   align-items: start;
 }
-.contact-lines { display: flex; flex-direction: column; gap: 1.4rem; }
+/* 0.35rem, not the 1.4rem it was (2026-09-16): the row's own padding and
+   the value's line box keep the rule → label → value spacing the mockup
+   has; what it took out is the air UNDER each value, 71px → 44 */
+.contact-lines { display: flex; flex-direction: column; gap: 0.35rem; }
 .contact-row { border-top: 1px solid rgba(217, 217, 206, 0.35); padding-top: 0.7rem; }
 .contact-label {
   display: block;
@@ -4647,6 +4687,25 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
      straight over a cream letterform. --mark-clear is the mark's own width
      plus a gutter, declared once on .footer. */
   padding-inline-end: var(--mark-clear);
+}
+/* 🖥 FROM 1280 UP THE SOCIALS STAND IN THE ROTOR'S COLUMN, at its foot —
+   level with the last contact row, beside the mark — which is where the
+   compacted footer (2026-09-16) has them. The column has to hold the row of
+   three beside the mark's clearance, so the split goes 46 / 54 here (the
+   email needs 415px and gets 597 at 1440) and the links set a size down:
+   measured, the row is ~360px and the column leaves it 439 at 1440 and 379
+   at 1280. Under 1280 they keep the full-width row below the table. */
+@media (min-width: 1280px) {
+  .contact-grid { grid-template-columns: minmax(0, 46fr) minmax(0, 54fr); }
+  /* the rotor is placed by hand too, or the socials take its cell and
+     auto-placement drops it into a second row */
+  .testi-rotor { grid-column: 2; grid-row: 1; }
+  .contact-side {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    padding-bottom: 1.6rem;   /* puts the row level with the last value's middle */
+  }
 }
 
 /* 🔴 THE CLOCK IS GONE (2026-08-24), markup, script, styles and I18N pair.
