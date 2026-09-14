@@ -4395,8 +4395,11 @@ body.lib-index .lib-list { display: block; }
      read --mark-clear, and the phone block below re-states only these three
      tokens rather than four rules. Change the width here and the clearances
      move with it. */
-  --mark-w: clamp(160px, 16.3vw, 300px);      /* 235px at 1440 — the agency's compacted footer, 2026-09-16 */
-  --mark-drop: clamp(-96px, -4.4vw, -44px);   /* 63px under the edge there */
+  --mark-w: clamp(160px, 19vw, 300px);        /* 274px at 1440: the agency shrank it in their
+                                                 compacted footer, then put it back — "made the
+                                                 aliph logo bigger" — once ALIPH CREATIVE moved
+                                                 out from beside it (2026-09-16) */
+  --mark-drop: clamp(-96px, -4.4vw, -44px);   /* 63px under the edge at 1440 (compacted footer) */
   --mark-clear: calc(var(--mark-w) + clamp(0.7rem, 2vw, 1.8rem));
 }
 /* the home page's last section already butts against the contact band, so
@@ -4414,8 +4417,11 @@ body[data-page="index"] .footer { margin-top: 0; }
 }
 .rule-cream { height: 1px; background: rgba(217, 217, 206, 0.5); margin: 0 var(--pad); }
 /* Stops short of the mark rather than crossing it — `8th.png` draws the rule
-   running only as far as the socials above it. */
-.footer .rule-cream { margin-inline-end: var(--mark-clear); }
+   running only as far as the socials above it. ⚠️ --pad AND --mark-clear:
+   the socials' box starts a page padding in from the mark's clearance, and
+   the rule and ALIPH CREATIVE below it start on that same line (the
+   agency's third footer screenshot, 2026-09-16). */
+.footer .rule-cream { margin-inline-end: calc(var(--pad) + var(--mark-clear)); }
 /* ── THE COMPACTED FOOTER (2026-09-16) ── the agency sent a screenshot of
    the footer with its air let out — "i compacted the footer a lil, copy
    this" — and every number in this block and the ones marked 2026-09-16
@@ -4432,10 +4438,10 @@ body[data-page="index"] .footer { margin-top: 0; }
    inside it, and the three socials are spread across it edge to edge
    (space-between) so their two ends ARE its edges. Where the column has
    less room than that (901–1279, the mark's clearance taken out), the box
-   is what is left. The phone keeps its own block. */
+   is what is left. The rule over the legal line STAYS ("bring it back")
+   and runs from the box's edge. The phone keeps its own block. */
 @media (min-width: 901px) {
   .footer { --tr-w: 15.4rem; }
-  .footer .rule-cream { display: none; }
   .testi-rotor .tr-inner {
     width: min(calc(100% - var(--mark-clear)), var(--tr-w));
     margin-inline-start: auto;
@@ -4456,7 +4462,7 @@ body[data-page="index"] .footer { margin-top: 0; }
   align-items: center;
   gap: 1rem;
   padding: 0.4rem var(--pad) 0.6rem;   /* was 0.8 / 1 — compacted 2026-09-16 */
-  padding-inline-end: var(--mark-clear);
+  padding-inline-end: calc(var(--pad) + var(--mark-clear));   /* ALIPH CREATIVE under the socials' edge */
   font-size: 0.72rem;
   color: rgba(217, 217, 206, 0.6);
 }
