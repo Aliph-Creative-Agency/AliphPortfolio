@@ -151,11 +151,25 @@
            absolutely positioned over it and the two would drift apart the
            first time the note was resized. -->
       <div class="hero-cta">
+        <!-- The words are underlined in ink and followed by the site's own
+             arrow (the nav oval's), pointing where the note goes — down the
+             page, or forward to the contact: "make them stand out and seem
+             like they're clickable" (the agency, 2026-09-16). -->
         <a class="note-btn note-start" href="#why">
-          <span class="nb-label" data-i18n="ctaStart">ابدأ من هنا</span>
+          <span class="nb-label">
+            <span class="nb-text" data-i18n="ctaStart">ابدأ من هنا</span>
+            <svg class="nb-arrow nb-arrow-down" viewBox="0 0 60 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12h48"/><path d="M42 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+            </svg>
+          </span>
         </a>
         <a class="note-btn note-contact" href="#contact">
-          <span class="nb-label" data-i18n="ctaContact">تواصل معنا</span>
+          <span class="nb-label">
+            <span class="nb-text" data-i18n="ctaContact">تواصل معنا</span>
+            <svg class="nb-arrow nb-arrow-fwd" viewBox="0 0 90 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12h78"/><path d="M70 3c2 5 6 8 16 9-10 1-14 4-16 9"/>
+            </svg>
+          </span>
         </a>
       </div>
     </div>

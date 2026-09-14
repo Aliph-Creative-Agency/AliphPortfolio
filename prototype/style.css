@@ -1543,8 +1543,53 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   font-size: clamp(1.05rem, min(1.62vw, 2.95cqh), 1.38rem);   /* cqh: see .hero-overlay */
   line-height: 1.3;
   text-align: center;
-  max-width: 74%;
+  max-width: 90%;   /* was 74; the arrow shares the line now */
   pointer-events: none;
+  /* the words, then the arrow, on one line */
+  display: flex;
+  flex-wrap: wrap;          /* at the floor the English arrow drops under the words */
+  align-items: center;
+  justify-content: center;
+  gap: 0.15em 0.3em;
+}
+/* ── what makes a note a BUTTON (2026-09-16) ──
+   The paper and the pin alone read as a note somebody left, not as a thing
+   to press — "these 2 buttons dont seem like ones". Two cues, both in ink
+   and both in the site's own hand: the words are UNDERLINED with a drawn
+   stroke (the mark you make on a note to say "this"), and the site's arrow
+   — the one that swaps into the nav's oval — follows them, pointing where
+   the note goes. On hover the arrow nudges in its own direction on top of
+   the swing the note already does. */
+.nb-text {
+  white-space: nowrap;
+  padding-bottom: 0.3em;
+  /* a stroke of ink, slightly uneven, stretched to the word's width */
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M2 5.2C22 2.6 42 6.4 62 4.2S88 3.4 98 5' fill='none' stroke='%230F1820' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E")
+              no-repeat center bottom / 100% 0.28em;
+}
+.nb-arrow {
+  flex: 0 0 auto;
+  width: 1.35em;
+  height: 0.36em;
+  /* the turn that points it where the note goes, then the hover nudge along
+     that same direction — one transform, two variables, so the nudge is
+     always "forward" whichever way the arrow faces */
+  transform: var(--turn, none) translateX(var(--nudge, 0px));
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: visible;
+}
+/* the stroke is a pen's width whatever the box scales to — at 1.55em the
+   viewBox's 2.2 came out under a pixel */
+.nb-arrow path { vector-effect: non-scaling-stroke; }
+.nb-arrow-down { width: 1.05em; --turn: rotate(90deg); }
+/* forward is the inline end: the arrow is drawn pointing right, so it is
+   flipped for Arabic */
+html[dir="rtl"] .nb-arrow-fwd { --turn: scaleX(-1); }
+@media (hover: hover) {
+  .note-btn:hover .nb-arrow { --nudge: 0.28em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nb-arrow { transition: none; }
 }
 /* 🔴 BOTH LABELS ARE HORIZONTAL (2026-09-01b). The contact note's line used
    to be turned -13deg to lie along its own top edge, on the reasoning that a
@@ -2480,9 +2525,12 @@ html[lang="en"] .tc-body { margin-top: clamp(2rem, 4.5vw, 4rem); }
 .tc-body {
   background-image: url("assets/img/scrap-quote.webp");
   aspect-ratio: 1400 / 591;
-  padding: 11.5% 4.5% 6% 5%;
-  /* the words are centred in the box, so a short quote floats in the
-     middle of the sheet and a long one grows the box — see above */
+  /* equal top and bottom, so the centred words sit in the MIDDLE OF THE
+     PAPER and not in the middle of what is left under the tape ("center
+     and middle this txt inside the scrap", 2026-09-16). The tape's foot is
+     at 31% of the image's height = 13% of its width, so a one- or two-line
+     quote clears it; a third line would not. */
+  padding: 9% 4.5% 9% 5%;
   justify-content: center;
 }
 .tc-name,
@@ -2535,7 +2583,9 @@ html[lang="en"] .tc-biz {
   font-family: var(--font-body);
   font-size: clamp(0.95rem, 2.15vw, 1.65rem);   /* "a lil bigger", 2026-09-14 */
   line-height: 1.72;
-  text-align: start;
+  text-align: center;   /* "center and middle this txt ... inside the scrap"
+                           (2026-09-16); the sheet's justify-content does the
+                           middle */
   text-wrap: balance;   /* a sentence that breaks breaks in two even halves,
                            not a line and a lone word */
   hyphens: auto;
@@ -5166,10 +5216,10 @@ body.sheet-open { overflow: hidden; }
      measured: the English quote's first line ran under the tape's edge.
      17% of the width is the tape's foot at the stretch the placeholders
      produce here; a longer quote stretches more and needs more. */
-  .tc-body { padding-top: 17%; padding-bottom: 7%; }
+  .tc-body { padding-top: 16%; padding-bottom: 16%; }   /* equal, see the desktop rule; 16 keeps two English lines under the tape's foot */
   /* Grenze runs large and the English quote runs long: at the desktop floor
      the column sheet stretched to twice its ratio here. Idris is fine. */
-  html[lang="en"] .tc-quote { font-size: 0.9rem; line-height: 1.45; }
+  html[lang="en"] .tc-quote { font-size: 0.84rem; line-height: 1.45; }   /* two lines of the longest, clear of the tape */
   .testi-band {
     display: block;
     position: relative;
