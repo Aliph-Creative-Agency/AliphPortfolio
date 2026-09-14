@@ -789,7 +789,7 @@ html[lang="en"] .nav-overlay .ls-opt[data-l="en"] { color: var(--ink); }
   /* The lede's type size, named here because TWO rules need it: the lede
      itself, and .hero-panel's width, which hugs 20 of these plus its padding
      (2026-08-30). Declared on the hero so both are inside it. */
-  --lede-fs: clamp(0.95rem, 1.62vw, 1.3rem);
+  --lede-fs: clamp(0.95rem, min(1.62vw, 2.95cqh), 1.3rem);
   position: relative;
   height: var(--hero-h);
   /* no background — the page's own textured cream is what shows through the
@@ -1045,6 +1045,22 @@ video.preview {
   position: relative;
   z-index: 4;
   height: 100%;
+  /* 🔴 THE HERO IS A FIXED HEIGHT AND ITS TYPE WAS SIZED BY WIDTH ALONE, so
+     on a wide, short window (a 16:9 laptop, a zoomed one, anything under
+     ~720px tall) the title, the lede and the two notes added up to more
+     than the panel, the centred stack overflowed both ways and the hero's
+     overflow:hidden cut the contact note's curl off at the bottom edge
+     (the agency's screenshot, 2026-09-16). So the overlay is a SIZE
+     container and every vw in the panel is paired with a cqh — the panel's
+     height, which is the hero's — chosen so that at 1440×900 the vw still
+     wins by a hair and nothing the design was tuned at moves: title 6vw /
+     10.9cqh, English 4.8vw / 8.7cqh, lede 1.62vw / 2.95cqh, notes 12.5vw /
+     22.7cqh. Below that height the cqh takes over and the stack shrinks
+     with the window. ⚠️ The floors still floor: under ~600px of window the
+     panel overflows again, which is the hero's own 460px floor territory.
+     ⚠️ `size` containment on an auto-height box makes it ZERO height — the
+     phone rule, where the overlay is height:auto, turns it off. */
+  container-type: size;
   display: flex;
   align-items: stretch;
   /* ⚠️ The overlay spans the WHOLE hero at z-index 4, so the empty half beside
@@ -1154,11 +1170,11 @@ video.preview {
 .hero-title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(2.4rem, 6vw, 4.6rem);
+  font-size: clamp(2.4rem, min(6vw, 10.9cqh), 4.6rem);   /* cqh: see .hero-overlay */
   line-height: 1.32;
   color: var(--ink);
 }
-html[lang="en"] .hero-title { font-size: clamp(2rem, 4.8vw, 3.5rem); }
+html[lang="en"] .hero-title { font-size: clamp(2rem, min(4.8vw, 8.7cqh), 3.5rem); }
 /* padded on all sides so Arabic hamza/alef tips aren't clipped, with
    matching negative margins so line spacing is unchanged */
 .hero-title .line-mask {
@@ -1385,10 +1401,13 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
    a future re-crop is to read the width rather than restate it. */
 .hero-cta {
   --note-gap: clamp(0.6rem, 1.6vw, 1.6rem);
-  --note-w: clamp(140px, 12.5vw, 232px);
+  --note-w: clamp(120px, min(12.5vw, 22.7cqh), 232px);   /* cqh: see .hero-overlay;
+                                the floor came down from 140 with it */
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
+  justify-content: center;   /* "these arent centered" (2026-09-16): under
+                                the rule, which spans the content box */
   gap: 0.7rem var(--note-gap);
   margin-top: 1.1rem;
   padding-top: 1.2rem;
@@ -1521,7 +1540,7 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
      «تواصل معنا» takes a second line, not the point at which it leaves the
      paper. Measured at the new size it fills 47% of the sheet, so there is
      room left. */
-  font-size: clamp(1.05rem, 1.62vw, 1.38rem);
+  font-size: clamp(1.05rem, min(1.62vw, 2.95cqh), 1.38rem);   /* cqh: see .hero-overlay */
   line-height: 1.3;
   text-align: center;
   max-width: 74%;
@@ -4659,7 +4678,7 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
     flex-direction: column-reverse;   /* DOM order is strip → overlay */
     border-bottom: none;
   }
-  .hero-overlay { height: auto; }
+  .hero-overlay { height: auto; container-type: normal; }   /* see the desktop rule */
   .hero-panel {
     width: 100%;
     height: auto;
