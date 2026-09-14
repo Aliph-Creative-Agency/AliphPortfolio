@@ -30,8 +30,12 @@ _Updated 2026-09-16. Read this first._
 > and a cache-buster on BOTH hosts: both files **md5-identical** to the
 > tree, `/`, `/about`, `/library` all 200, the live `main.js` carrying the
 > first client's name and no `placeholder: true`, the live `style.css`
-> with zero `column-count`. ⚠️ **NOT PUSHED** at the time of writing —
-> `origin/main` is at `d1629db`. See _Session 2026-09-16_.
+> with zero `column-count`. **Then the rotor's hold made uniform and cut
+> to 3s (`f42e135`, `fe60c3e`), deployed as `e72c45d7-…`** — `main.js`
+> alone, md5-identical on both hosts. ✅ **PUSHED — `origin/main` at
+> `fe60c3e` plus this write-up**, after the range was audited: no
+> 40+-character tokens, no key-shaped files, no `PRIVATE_KEY`. See
+> _Session 2026-09-16_.
 > 🔴 ~~**AND IT RENDERS PLACEHOLDER COPY.** The five entries in
 > `TESTIMONIALS` are stand-ins with no client behind them, and they are on
 > the public site now. The agency asked for the deploy knowing this; the
@@ -777,6 +781,20 @@ is paper. Centring it is one line; it was left at start because the drawing
 had the words starting at the sheet's edge, and a one-liner was not what
 the drawing was drawn for.
 
+### 4. ✅ The rotor — one hold, then a shorter one
+
+"i noticed that the footer testimonials have diff up time". The hold was
+`words × 0.24s` clamped to 3.6–7s — right for 40-word placeholders, and
+with one-sentence quotes it put the English 17-word entry at 4.08s
+against the others' 3.6s. It is one constant now, `ROTOR_HOLD` in
+main.js, and `holdFor()` is gone. Set at 4s, measured (23s watches of
+the name line, both languages): every gap 5.02–5.06s. Then "make it
+faster": **3s**, measured 4.02–4.06s per entry including the 0.32s fade
+and 0.7s rise. ⚠️ Below 3s the longer sentences are cut short of a read.
+⚠️ Two other things make an entry LOOK longer and are not timing: the
+rotor pauses while a mouse rests on it (like the band) and while it is
+off screen.
+
 ### Verified
 
 Headless Edge over CDP (the `shoot.py` `Browser`, driven from the scratchpad
@@ -790,11 +808,9 @@ widths were looked at. ⚠️ Headless; the sheets' 3D lift was not exercised.
 
 ### What is still open
 
-1. ✅ Committed and deployed; the real words are on the public site.
-   ⚠️ **Not pushed** — `origin/main` is two commits behind at `d1629db`
-   plus this write-up. Audit the range for id-shaped tokens first: this
-   session handled the sheet's full ID in chat and in the scratchpad, and
-   it must not be in this file or the commit.
+1. ✅ Committed, deployed and pushed; the real words are on the public
+   site and the rotor turns every 4s. The sheet's full ID was handled in
+   chat and the scratchpad only — audited out of the tree and the range.
 2. ⚠️ The order (which sentence leads), the English translations and the
    English spellings of the four names and businesses — all mine; ask.
 3. ⚠️ Alignment of a one-line quote on the wide sheet (§3).
