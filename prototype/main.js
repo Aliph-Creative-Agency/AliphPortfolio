@@ -832,69 +832,58 @@ function rebuildLoops() {
        a taped scrap that says «من كلام عملائنا», and under it one
        testimonial at a time rising the way the section banners do.
 
-   🔴 EVERY ENTRY BELOW IS A PLACEHOLDER. No client has supplied a testimonial
-   yet, and none of these is attributed to a real person or a real business —
-   `name` is a role and `business` a kind of business, so the type can be
-   judged at its real length without a single invented client. Replace the
-   table with the agency's own words before this ships; nothing else needs
-   to change. The English is as unsigned-off as the rest of the site's.
+   ✅ THE FOUR ENTRIES ARE REAL (2026-09-16), read out of the feedback sheet
+   ("FeedBack Form", four answers of 2026-09-12, every one 5/5 and every one
+   for graphic design + content). Each `quote` is ONE sentence lifted from
+   the client's own answer to «أكثر ما أعجبهم» or «ما يمكن تحسينه» — their
+   dialect and their words, spelling normalised (hamzas, one stray
+   diacritic), nothing rephrased: "compact the quotes into one liners" (the
+   agency). The full answers stay in the sheet. The English is a translation
+   of that sentence and is as unsigned-off as the rest of the site's.
 
    ⚠️ THE TITLE RULE, on every surface, from the agency (2026-09-13): "always
    the name of the client in the bigger font, then the name of the business;
    if the name isn't there you use the name of the business only in the
    bigger font, and no name of service". So an entry is `name` + `business`,
    either may be null, the SERVICE IS NOT A FIELD, and who() below is the one
-   place that turns the pair into a big line and a small one.
+   place that turns the pair into a big line and a small one. A job title
+   ("مدير المركز") is not a name and not a business, so it is dropped too.
 
    ⚠️ `name` is set in a blackletter on the English page, so keep it SHORT —
-   three words is the measure at 390. `quote` should sit under ~40 words:
-   the cutting's sheet holds that in two columns and the phone scraps clamp
-   the words to two lines. */
+   three words is the measure at 390. The phone scraps clamp the words to
+   two lines, which a one-sentence quote clears. */
 const TESTIMONIALS = [
   {
-    placeholder: true,
-    name: { ar: "صاحبة مطعم", en: "A restaurant owner" },
-    business: { ar: "مطعم عائليّ", en: "A family restaurant" },
+    name: { ar: "ريما حسين", en: "Rima Hussein" },
+    business: { ar: "مركز شمس – شؤون صور باهر", en: "Shams Centre – Sur Baher Social Affairs" },
     quote: {
-      ar: "لم يسألونا عن الألوان التي نحبّها، بل عن السبب الذي فتحنا المطعم من أجله. الجواب صار هويّتنا، ونحن ما زلنا نتعرّف على أنفسنا فيها كلّ يوم.",
-      en: "They never asked which colours we liked. They asked why we opened the restaurant in the first place. The answer became our identity, and we still recognise ourselves in it every day.",
+      ar: "حتى عدسة الكاميرا عندكم بتلتقط الأشياء بصورة تترجم الحدث نفسه.",
+      en: "Even your camera lens catches things in a way that translates the event itself.",
     },
   },
   {
-    placeholder: true,
-    name: { ar: "منظِّم فعاليّات", en: "An events organiser" },
-    business: null,
+    name: { ar: "صلاح غوشة", en: "Salah Ghosheh" },
+    business: { ar: "المركز الريادي للخدمات – أبو طور", en: "The Pioneer Services Centre – Abu Tor" },
     quote: {
-      ar: "وصلوا قبل الجمهور وغادروا بعده، والمقاطع التي أرسلوها في اليوم التالي كانت الحدث كما عشناه لا كما بدا.",
-      en: "They arrived before the audience and left after it, and the clips they sent the next day were the event as we lived it, not as it looked.",
+      ar: "كنتوا قد المسؤولية من خط البداية لخط النهاية.",
+      en: "You carried the responsibility from the starting line to the finish line.",
     },
   },
   {
     /* no name: the business alone carries the big line */
-    placeholder: true,
     name: null,
-    business: { ar: "شركة ناشئة", en: "A startup" },
+    business: { ar: "شؤون جبل المكبر", en: "Jabal al-Mukabbir Social Affairs" },
     quote: {
-      ar: "كنّا نظنّ أنّنا نحتاج موقعًا. تبيّن أنّنا نحتاج جملةً واحدة تشرح ما نفعله، والموقع جاء من بعدها في أسبوعين.",
-      en: "We thought we needed a website. It turned out we needed one sentence that explained what we do, and the site followed it in two weeks.",
+      ar: "الفيديو الإعلاني طلع رائع وفوق توقعاتنا، وكان واضح إنه في اهتمام بكل التفاصيل.",
+      en: "The ad film came out wonderful, beyond what we expected, and the care for every detail showed.",
     },
   },
   {
-    placeholder: true,
-    name: { ar: "مديرة تسويق", en: "A marketing manager" },
-    business: { ar: "شركة تقنيّة", en: "A tech company" },
+    name: { ar: "حنين أبو اسبيتان", en: "Haneen Abu Sbitan" },
+    business: { ar: "مراكز تحصيل الحقوق – مكاتب الشؤون الاجتماعية", en: "Rights Collection Centres – Social Affairs Offices" },
     quote: {
-      ar: "أوّل مرّة يقرأ فيها فريقنا نصًّا عن شركتنا ويقول: هذا نحن. لم نعدّل كلمة.",
-      en: "The first time our team read a text about our company and said: that is us. We did not change a word.",
-    },
-  },
-  {
-    placeholder: true,
-    name: { ar: "صاحب متجر", en: "A shop owner" },
-    business: null,
-    quote: {
-      ar: "صوّروا المتجر كما أراه أنا في الصباح قبل أن يفتح، وهذا ما لم ينجح فيه أحد قبلهم.",
-      en: "They photographed the shop the way I see it in the morning before it opens, which nobody had managed before.",
+      ar: "تطبيق الرؤية والأهداف المطلوبة على أرض الواقع.",
+      en: "The vision and the goals we asked for, made real on the ground.",
     },
   },
 ];

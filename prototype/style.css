@@ -2508,16 +2508,17 @@ html[lang="en"] .tc-biz {
   text-transform: uppercase;
 }
 
-/* the words: set in two newspaper columns on a desktop, one on a phone */
+/* the words: one run of text across the sheet. They were two newspaper
+   columns until 2026-09-16 ("the text split up, join them") — a one-line
+   quote has nothing to split. */
 .tc-quote {
   margin: 0;
   font-family: var(--font-body);
   font-size: clamp(0.95rem, 2.15vw, 1.65rem);   /* "a lil bigger", 2026-09-14 */
   line-height: 1.72;
-  column-count: 2;
-  column-gap: 2em;                /* no column rule — "the stupid vertical
-                                     splitter line", 2026-09-14 */
   text-align: start;
+  text-wrap: balance;   /* a sentence that breaks breaks in two even halves,
+                           not a line and a lone word */
   hyphens: auto;
 }
 .tc-quote::before { content: "«"; }
@@ -5147,7 +5148,6 @@ body.sheet-open { overflow: hidden; }
      17% of the width is the tape's foot at the stretch the placeholders
      produce here; a longer quote stretches more and needs more. */
   .tc-body { padding-top: 17%; padding-bottom: 7%; }
-  .tc-quote { column-count: 1; }
   /* Grenze runs large and the English quote runs long: at the desktop floor
      the column sheet stretched to twice its ratio here. Idris is fine. */
   html[lang="en"] .tc-quote { font-size: 0.9rem; line-height: 1.45; }

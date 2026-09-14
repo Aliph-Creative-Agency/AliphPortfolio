@@ -1,6 +1,6 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-09-15. Read this first._
+_Updated 2026-09-16. Read this first._
 
 > ## 🟢 State on 2026-09-01: BOTH ROUNDS ARE COMMITTED AND LIVE; THE FORM'S STATE IS UNVERIFIED
 >
@@ -20,10 +20,16 @@ _Updated 2026-09-15. Read this first._
 > three HTML files byte-identical; rendered on the live domain at 1440 and
 > 390 with the trail running, the rotor labelled, the band at 5/20 cards
 > and the torn design mark in the ring, no JS errors.
-> 🔴 **AND IT RENDERS PLACEHOLDER COPY.** The five entries in
+> ✅ **SUPERSEDED IN THE TREE, 2026-09-16: THE TESTIMONIALS ARE REAL.** The
+> four answers in the feedback sheet (`17EV8437…`, all of 2026-09-12) are in
+> `TESTIMONIALS`, each cut to one sentence of the client's own words, and
+> the cutting's quote is one run of text instead of two columns. ⚠️ **NOT
+> COMMITTED, NOT DEPLOYED** as of this write-up — the live site still shows
+> the five placeholders. See _Session 2026-09-16_.
+> 🔴 ~~**AND IT RENDERS PLACEHOLDER COPY.** The five entries in
 > `TESTIMONIALS` are stand-ins with no client behind them, and they are on
 > the public site now. The agency asked for the deploy knowing this; the
-> real words are still the first open item.
+> real words are still the first open item.~~
 > ✅ **PUSHED, `origin/main` in sync at `5abe3ee`** (2026-09-15), after
 > the range was audited for id-shaped tokens and key-shaped files: none.
 > See _Session 2026-09-14_ and _Session 2026-09-13_.
@@ -689,6 +695,104 @@ gesture has been invented for it.
 
 ---
 
+## Session 2026-09-16 — the sheet is read, the testimonials are real, and the quote is one run of text
+
+"read the feedback sheet and swap in the real testimonials, but i want u to
+compact the quotes into one liners and also the one in the section below the
+gallery has the text split up, join them". Three things, all in the tree,
+**not committed and not deployed** at the time of writing.
+
+### 1. ✅ Reading the sheet — the ID had to come from the agency
+
+- 🔴 **Nothing on this machine could name the sheet.** `SHEET_ID` is a
+  Cloudflare secret (write-only), this file records it truncated on
+  purpose, the Drive connector on the studio Google account cannot see it
+  (it is the agency's), and the service account cannot LIST what it has
+  been shared — the Drive API is not enabled on project `aliph-feedback`,
+  only Sheets. The agency pasted the ID in chat. ⚠️ **That is the read
+  path, and it is the intended one**: the ID stays off disk and out of this
+  public file; whoever needs to read the sheet asks for it.
+- ✅ **With the ID, the service account reads it in a dozen lines**: a
+  self-signed RS256 JWT (`pyjwt` + the key JSON at
+  `D:\Personal\keys\aliph-feedback\`) for
+  `spreadsheets.readonly`, then `GET
+  /v4/spreadsheets/{id}/values/A1:Z200`. Ten columns, Arabic header, the
+  Worker's own shape.
+- **Four answers, all 2026-09-12 (13:48–14:08), all «تصميم جرافيكي، صناعة
+  محتوى», all «واضح وسلس» / «نعم، تمامًا» / 5.** The free text is in
+  Palestinian dialect, some of it long (the second is five lines), and the
+  full answers stay in the sheet — nothing was written to it.
+
+### 2. ✅ The table — four entries, one sentence each, the title rule applied
+
+Every `quote` is ONE sentence lifted from the client's answer to «أكثر ما
+أعجبهم» (or, for one, the closing line of «ما يمكن تحسينه»), in their words
+and their dialect; the only edits are hamzas (`الاهداف` → `الأهداف`) and
+punctuation. Nothing was rephrased into fusha — a quote in the agency's
+register is not the client's quote. The `placeholder: true` flags are gone
+(nothing read them) and the red block over the table is rewritten.
+
+| # | big line | small line | the sentence |
+|---|---|---|---|
+| 0 | ريما حسين | مركز شمس – شؤون صور باهر | «حتى عدسة الكاميرا عندكم بتلتقط الأشياء بصورة تترجم الحدث نفسه.» |
+| 1 | صلاح غوشة | المركز الريادي للخدمات – أبو طور | «كنتوا قد المسؤولية من خط البداية لخط النهاية.» |
+| 2 | شؤون جبل المكبر | — | «الفيديو الإعلاني طلع رائع وفوق توقعاتنا، وكان واضح إنه في اهتمام بكل التفاصيل.» |
+| 3 | حنين أبو اسبيتان | مراكز تحصيل الحقوق – مكاتب الشؤون الاجتماعية | «تطبيق الرؤية والأهداف المطلوبة على أرض الواقع.» |
+
+- ⚠️ **Entry 0 is the cutting**, and the choice of which sentence leads is
+  mine — the camera line, because it is the most concrete thing any of the
+  four said. Reorder the array if the agency prefers another; the rotor
+  and the band take all four in order.
+- ⚠️ **Entry 3's business is the sheet's, split at the slash**; entry 2 has
+  no name in the sheet and so takes the business as the big line (the
+  second shape `who()` renders). Entry 1's «مدير المركز» is a job title —
+  neither a name nor a business under the rule — and is dropped.
+- ⚠️ **The English is a translation of each sentence**, mine, unsigned-off
+  like the rest of the site's English. The transliterated names and the
+  business names in English are guesses at the agency's own spellings —
+  «Sur Baher», «Abu Tor», «Jabal al-Mukabbir» — ask them.
+- ⚠️ **Four entries, five band scraps**: the cards take scrap `i % 5`, so
+  the stripe uses scraps 1–4 and the fifth never appears. Cosmetic.
+
+### 3. ✅ The join — the cutting's quote was two newspaper columns
+
+`.tc-quote { column-count: 2 }` (2026-09-13's "two newspaper columns on a
+desktop, one on a phone") is what split the text; it is one run now, the
+phone's `column-count: 1` override that only existed to undo it is gone,
+and `text-wrap: balance` is on so an English sentence that breaks breaks in
+two even halves — measured: without it the 1440 English quote left
+"itself." alone on its second line. The Arabic sentence is one line at
+1440 (30.96px) and two at 390.
+
+⚠️ **Not decided: alignment.** The words are `text-align: start`, so at
+1440 the English sentence sits in the sheet's left half and the right half
+is paper. Centring it is one line; it was left at start because the drawing
+had the words starting at the sheet's edge, and a one-liner was not what
+the drawing was drawn for.
+
+### Verified
+
+Headless Edge over CDP (the `shoot.py` `Browser`, driven from the scratchpad
+with a command-line sweep of `--remote-debugging-port=9366` before and
+after), both languages, 1440 and 390: the cutting's name/business/quote
+read from the DOM, `column-count: auto`, the rotor at 1440 showing entry 0
+under the taped scrap, the band at 390 building four cards with the small
+line at `display: block` and the fourth business fitting one line, **no JS
+errors**. Shots of the collage and the footer in both languages at both
+widths were looked at. ⚠️ Headless; the sheets' 3D lift was not exercised.
+
+### What is still open
+
+1. 🔴 **COMMIT AND DEPLOY.** The live site is still the placeholders. Three
+   files: `prototype/main.js`, `prototype/style.css`, this one.
+2. ⚠️ The order (which sentence leads), the English translations and the
+   English spellings of the four names and businesses — all mine; ask.
+3. ⚠️ Alignment of a one-line quote on the wide sheet (§3).
+4. ⚠️ Everything carried forward from the 14th/15th is still carried
+   forward, minus its item 1.
+
+---
+
 ## Sessions 2026-09-14 and 15 — the testimonials redrawn to the agency's scraps, the trail, the torn marks, and the title rule
 
 The agency came back on the 2026-09-13 round with four frames of their own
@@ -996,11 +1100,8 @@ transformed except the lifted sheet, and that was read from computed style.
 
 ### What is still open
 
-1. 🔴 **THE COPY — placeholders, and PUBLIC since 2026-09-15.** Five
-   entries in `TESTIMONIALS`, a role and a kind of business each. The
-   feedback sheet (`17EV8437…`) has been taking answers since 2026-08-31
-   and no session has read it; that, or the agency's own words, closes
-   this. Swap the table; nothing else changes.
+1. ✅ **CLOSED 2026-09-16 — the sheet was read and the table swapped.**
+   Four real entries; see _Session 2026-09-16_. Still to deploy.
 2. ✅ Committed, deployed and pushed — see the header block. `origin/main`
    is at `5abe3ee`.
 3. ⚠️ **Not seen on a real phone.** ~40 motion-path animations (the trail)
