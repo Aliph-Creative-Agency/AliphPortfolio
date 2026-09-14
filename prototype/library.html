@@ -197,6 +197,19 @@
   <a class="contact-band" href="mailto:info@aliphcreative.com" data-i18n-label="cWrite" aria-label="راسلنا">
     <div class="cb-track" id="contactBandTrack"></div>
   </a>
+  <!-- 📱 ON A PHONE THE STRIPE CARRIES THE TESTIMONIALS (2026-09-13). The
+       contact band above is hidden at ≤640px and this takes its place — same
+       cream stripe, same rules, but one row of cards, each a client's words
+       with a name and no portrait, looping the way the band did and holding
+       still under a finger. Cards are built by testimonials.rebuildBand() in
+       main.js from the same table as the cutting on the home page.
+       ⚠️ It is a sibling, not the band with different contents: the band is a
+       mailto link, and a link wrapping five quotations is a lie to a screen
+       reader. Above 640px this is display:none and measures 0, so makeLoop
+       wires nothing. -->
+  <div class="testi-band" data-i18n-label="testiBand" aria-label="آراء العملاء">
+    <div class="tb-track" id="testiBandTrack"></div>
+  </div>
 
 
   <!-- 🔴 THE MARK IS OVERSIZED, OUT OF THE FLOW, AND BLEEDS OFF THE
@@ -257,6 +270,29 @@
         <span class="contact-value" data-i18n="cPlace">القدس، جبل الزيتون</span>
       </div>
     </div>
+
+    <!-- 🖥 THE ROTOR (2026-09-13): the grid's second column had been empty
+         since the stamp left it on 2026-08-11 — the mark stands at its foot,
+         from outside the grid. The agency redrew it on 2026-09-13: a taped
+         scrap at the head of the column that SAYS what this is («من كلام
+         عملائنا» — `scrap-footer.webp`, the type live on it), and under it
+         one testimonial at a time — the client's name at the contact values'
+         size, the business small under it (or the business alone, big, when
+         there is no name; never the service), a hairline, the words between
+         quotation marks. It rises the way the section banners do, holds for
+         as long as it takes to read, and gives way to the next. Runs only while the footer is on screen
+         and holds under the pointer. Hidden at ≤640px, where the stripe
+         above carries the same words. Filled by testimonials in main.js.
+         ⚠️ No aria-live. It would announce a new paragraph every few seconds
+         to anyone with a screen reader parked on the footer. -->
+    <aside class="testi-rotor" id="testiRotor" data-i18n-label="testiRotor" aria-label="آراء العملاء">
+      <p class="tr-label" data-i18n="testiLabel">من كلام عملائنا</p>
+      <div class="tr-inner">
+        <p class="tr-name"></p>
+        <p class="tr-biz"></p>
+        <blockquote class="tr-quote"></blockquote>
+      </div>
+    </aside>
 
     <div class="contact-side">
       <nav class="contact-socials latin" lang="en" aria-label="Social">

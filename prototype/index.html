@@ -363,6 +363,62 @@
 
   <hr class="splitter">
 
+  <!-- ══ THE TESTIMONIAL — a cutting from the paper (2026-09-13, redrawn
+       2026-09-14) ══
+       One client's words, the best the agency has, on two torn sheets: the
+       name on the masthead sheet, the words on the column sheet. The paper is
+       `scrap-title.webp` / `scrap-quote.webp` — the agency's own frames, cut
+       by resources/cut_scraps.py (the title sheet also cleared of the ghost
+       of its old headline) — and the TYPE IS LIVE: Idris on the Arabic page,
+       Grenze Gotisch + Grenze on the English one, so it reads, selects,
+       translates and reflows like everything else on the page.
+
+       The line over it is the agency's note answered: "write something
+       above it or after it to clarify whats this exactly cuz people cant
+       tell on their own". It is a why-title like the three blocks' own, so
+       the cutting reads as the fourth beat of the section rather than a
+       stray — and it lives INSIDE the figure, because the layout is the
+       agency's collage (2026-09-14, second drawing): the title centred,
+       the name sheet up beside it on the inline-END side, the quote sheet
+       lower on the START side, the two staggered rather than side by side.
+       The splitter under the cutting went at that request on the 14th
+       and came back on the 15th.
+
+       The sheets are background images, not <img>s, and it is deliberate:
+       each card's box is sized by its aspect ratio and PADDED to the paper's
+       safe box (the plain rectangle the cutter prints), so the type can
+       never sit on the tape or run into the torn edge — and if a quote ever
+       runs long the box grows and the paper stretches with it, which a torn
+       sheet can absorb and a cropped one cannot.
+
+       data-tilt is each sheet's resting angle in degrees, read off the
+       agency's drawing (the name sheet ~4°, the quote sheet ~8.5°, both with
+       the inline-start side down); main.js sets it — mirrored on the English
+       page, where the whole collage mirrors — settles the sheets in on
+       scroll, and lifts them toward the pointer. data-tilt-phone
+       overrides it at ≤640px: the quote sheet stands straight there
+       ("straighten the tilted one in phone view"), the name sheet keeps
+       its angle.
+
+       🔴 The words are TESTIMONIALS[0] in main.js, and every entry in that
+       table is a PLACEHOLDER — a role and a kind of business, no real
+       client. See the note above the table. Nothing is written here;
+       render() fills it. -->
+  <article class="why-block wb4">
+    <figure class="testi-clip" id="testiClip">
+      <h3 class="why-title tc-head" data-i18n="testiHead">قالوا عنّا.</h3>
+      <figcaption class="tc-card tc-title" data-tilt="-4">
+        <span class="tc-name"></span>
+        <span class="tc-biz"></span>
+      </figcaption>
+      <blockquote class="tc-card tc-body" data-tilt="-8.5" data-tilt-phone="0">
+        <p class="tc-quote"></p>
+      </blockquote>
+    </figure>
+  </article>
+
+  <hr class="splitter">   <!-- back, 2026-09-15: it went on the 14th and was asked for again -->
+
   <!-- the way out of the section: one line, and the door -->
   <div class="why-outro">
     <p class="why-outro-line" data-i18n="whyOutro">الحكاية كاملةً.</p>
@@ -456,6 +512,19 @@
   <a class="contact-band" href="mailto:info@aliphcreative.com" data-i18n-label="cWrite" aria-label="راسلنا">
     <div class="cb-track" id="contactBandTrack"></div>
   </a>
+  <!-- 📱 ON A PHONE THE STRIPE CARRIES THE TESTIMONIALS (2026-09-13). The
+       contact band above is hidden at ≤640px and this takes its place — same
+       cream stripe, same rules, but one row of cards, each a client's words
+       with a name and no portrait, looping the way the band did and holding
+       still under a finger. Cards are built by testimonials.rebuildBand() in
+       main.js from the same table as the cutting on the home page.
+       ⚠️ It is a sibling, not the band with different contents: the band is a
+       mailto link, and a link wrapping five quotations is a lie to a screen
+       reader. Above 640px this is display:none and measures 0, so makeLoop
+       wires nothing. -->
+  <div class="testi-band" data-i18n-label="testiBand" aria-label="آراء العملاء">
+    <div class="tb-track" id="testiBandTrack"></div>
+  </div>
 
 
   <!-- 🔴 THE MARK IS OVERSIZED, OUT OF THE FLOW, AND BLEEDS OFF THE
@@ -516,6 +585,29 @@
         <span class="contact-value" data-i18n="cPlace">القدس، جبل الزيتون</span>
       </div>
     </div>
+
+    <!-- 🖥 THE ROTOR (2026-09-13): the grid's second column had been empty
+         since the stamp left it on 2026-08-11 — the mark stands at its foot,
+         from outside the grid. The agency redrew it on 2026-09-13: a taped
+         scrap at the head of the column that SAYS what this is («من كلام
+         عملائنا» — `scrap-footer.webp`, the type live on it), and under it
+         one testimonial at a time — the client's name at the contact values'
+         size, the business small under it (or the business alone, big, when
+         there is no name; never the service), a hairline, the words between
+         quotation marks. It rises the way the section banners do, holds for
+         as long as it takes to read, and gives way to the next. Runs only while the footer is on screen
+         and holds under the pointer. Hidden at ≤640px, where the stripe
+         above carries the same words. Filled by testimonials in main.js.
+         ⚠️ No aria-live. It would announce a new paragraph every few seconds
+         to anyone with a screen reader parked on the footer. -->
+    <aside class="testi-rotor" id="testiRotor" data-i18n-label="testiRotor" aria-label="آراء العملاء">
+      <p class="tr-label" data-i18n="testiLabel">من كلام عملائنا</p>
+      <div class="tr-inner">
+        <p class="tr-name"></p>
+        <p class="tr-biz"></p>
+        <blockquote class="tr-quote"></blockquote>
+      </div>
+    </aside>
 
     <div class="contact-side">
       <nav class="contact-socials latin" lang="en" aria-label="Social">

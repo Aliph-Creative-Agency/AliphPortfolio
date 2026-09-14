@@ -1,8 +1,21 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-09-01. Read this first._
+_Updated 2026-09-14. Read this first._
 
 > ## 🟢 State on 2026-09-01: BOTH ROUNDS ARE COMMITTED AND LIVE; THE FORM'S STATE IS UNVERIFIED
+>
+> 🔴 **SUPERSEDED, 2026-09-13/14: THE TREE IS AHEAD OF THE LIVE SITE BY
+> TWO ROUNDS, AND THEY RENDER PLACEHOLDER COPY.** The testimonials were built
+> on 2026-09-13 — a cutting on the home page, a card stripe on the phone, a
+> rotor in the desktop footer — and REDRAWN on 2026-09-14 to the agency's own
+> frames and notes: their scraps, a line that says what the cutting is, the
+> rotor under a taped label, the phone stripe as torn scraps that pop in the
+> middle, and the title rule (name big, business small, never the service).
+> Across all three pages, `main.js`, `style.css`, two fonts and **eight**
+> images. **Neither committed nor deployed**, and the five entries in
+> `TESTIMONIALS` are stand-ins with no client behind them. See _Session
+> 2026-09-14_ and _Session 2026-09-13_. Everything else in this block still
+> holds; live is still `d3113117-…`.
 >
 > ✅ **THE SITE IS CURRENT — version `d3113117-385a-450f-affe-bacd11786869`.**
 > Both 2026-09-01 rounds are live: the dashes / ring kicker / phone copy round
@@ -662,6 +675,532 @@ gesture has been invented for it.
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-09-14 — the testimonials redrawn to the agency's scraps, and the title rule
+
+The agency came back on the 2026-09-13 round with four frames of their own
+paper and two drawings, and every note below is theirs, answered. **Built and
+verified; NOT committed and NOT deployed.** Live is still `d3113117-…`. The
+copy is still the placeholder table — see the 2026-09-13 session's red block,
+which is unchanged and is still the reason nothing ships.
+
+### 1. ✅ The paper is theirs now — four sources, eight files, one cutter
+
+`resources/clippings/` holds the agency's frames — `title-sheet.jpeg`,
+`quote-sheet.png`, `footer-sheet.png`, `band-scraps.png` (five scraps on one
+green ground) — and `resources/cut_scraps.py` turns them into
+`prototype/assets/img/scrap-*.webp`. The 2026-09-13 cutter and its two
+sources are DELETED, and so are `clip-title.webp` / `clip-quote.webp`; none
+of it was ever committed. What the new cutter knows that the old one did not:
+
+- 🔴 **A green ground has a green SHADOW, and a distance tolerance keeps it.**
+  The first cut of the footer sheet shipped with an olive rim: the scrap's
+  shadow on the green is a darker green, within any tolerance loose enough
+  to take the ground's gradient. The green frames are cut by COLOUR (G−B
+  over 26 and luminance under 190 is ground) so the shadow leaves with the
+  ground, and the outer 4px of the mask are DE-FRINGED — the green share is
+  read off G−B, subtracted, and becomes transparency.
+- ⚠️ **The title sheet came over with the ghost of its old headline in it**
+  — a JPEG, ~10 levels under the paper — and it is cleared the 2026-09-13
+  way: a shading field from the pixels that are paper plus the sheet's own
+  grain borrowed from clean pixels an offset away. The other three ship as
+  shot.
+- ✅ **The band scraps are one height (420px) and their own widths** —
+  "imagine a horizontal line above and below and fit them between the 2
+  lines". Each carries its own SAFE box, and those numbers live in
+  `BAND_SCRAPS` in main.js, as fractions.
+- ⚠️ `--debug` writes masks and previews to `resources/clippings/debug/`,
+  which is now gitignored — `resources/` is tracked and 16 debug files were
+  one `git add -A` from the repo.
+
+### 2. ✅ The cutting: a line above, no rule below, shadows, and it moves
+
+- The line is a `why-title` — «وهذا ما قاله عملاؤنا.» / "And this is what
+  our clients said." — so the cutting is the fourth beat of the section,
+  not a stray between two rules. The splitter under it is gone.
+- The sheets cast a `drop-shadow` (it follows the torn edge; a box-shadow
+  would draw a rectangle), rest at a tilt each (`data-tilt`, −1.6° and
+  +0.7°), settle in on scroll (gsap, `top 84%`), and LIFT toward the pointer
+  — a 5° 3D tilt following the cursor, `y −6`, the shadow deepening under
+  `.is-lifted`. On touch a press lifts and a release drops. Verified: the
+  transform goes 3D and the filter changes on enter, both revert on leave.
+  ⚠️ Under `prefers-reduced-motion` the sheets rest at their tilt and
+  nothing moves.
+- 🔴 **The stretch moves the tape.** On a phone the quote sheet stretches
+  from 2.37:1 to ~1.8:1 and the tape (31% of the image's height) comes down
+  in px further than a top inset written as % of WIDTH reaches — the
+  English quote's first line ran under the tape. The phone block gives
+  `.tc-body` 17% top; a longer quote stretches more and needs more.
+
+### 3. ✅ The rotor: the agency's drawing, faster
+
+A taped scrap (`scrap-footer.webp`) at the head of the column, at the
+column's inline END (the far side from the contact table, where the drawing
+puts it), −2.6°, casting on the ink, with «من كلام عملائنا» / "In our
+clients' words" live on it — ⚠️ the English carries a U+00A0 between
+"clients'" and "words" so it breaks as a title, and the label is sized in
+`cqw` off the column (the rotor is a container) because at 641–900 the
+column shrinks with the mark's clearance and a viewport-sized label broke
+three ways. Then the name, the business small, the hairline, the words
+between big 99/66 marks in the display face. Hold 3.6–7s at 0.24s a word
+(was 5–9.5 at 0.33), fade 0.32s, rise 0.7s; measured 5.3s between two
+changes on a 24-word quote.
+
+### 4. ✅ The phone stripe: scraps that pop in the middle
+
+Every card is a scrap — its image on `::before`, its shadow the SAME image
+blackened and blurred on `::after`, the type above both — because a
+negative-z child paints over the card's own background, and a drop-shadow
+that changes every frame is a re-raster every frame while a blurred copy
+rasterises once and only its opacity moves. `--pop` (1 at the centre, 0
+half a stripe away, smoothstepped) is written by the loop tween's own
+`onUpdate` only when it changes by a hundredth, and the stylesheet turns it
+into `scale(1 + 0.09·pop)`, the shadow's opacity and a z-index. The fades
+stay, at z-index 10 so the popped card never climbs over them.
+
+🔴 **A percentage padding on a flex item resolves against the ROW.** The
+safe boxes went in as padding-% and came out as 148px a side — the
+containing block was the ~1800px loop group, not the card — so the words
+stood in a 60px column. Every inset is a FRACTION now and the card computes
+its own width from `--tb-h` and its ratio. ⚠️ And a column flex item in a
+fixed-height box SHRINKS: the clamped quote showed one line until
+`flex: 0 0 auto`.
+
+### 5. ✅ The title rule, everywhere
+
+"always the name of the client in the bigger font, then the name of the
+business, if the name isn't there u use the name of the business only in the
+bigger font, and no name of service". An entry is `name` + `business`, either
+null, `role` is GONE, and `who()` in main.js is the one place that makes a
+big line and a small one; `.tc-biz` / `.tb-biz` / `.tr-biz` take `hidden`
+when there is nothing small — ⚠️ with `display: none` restated for
+`[hidden]`, because the UA rule loses to any author `display` (the
+2026-08-29 form lesson). Two placeholders have no business and one has no
+name, so both shapes render.
+
+### 6. ✅ Round two, same day — the collage, the rotor's spacing, the title
+
+Two more drawings came back on the first pass:
+
+- **The cutting is a collage now, not a table.** The title («قالوا عنّا.» /
+  "What our clients say." — the idiom, in place of «وهذا ما قاله عملاؤنا.»
+  which read as a caption) is centred across the width and lives INSIDE the
+  figure so the grid can place it; the name sheet stands on the inline-END
+  side up at the title's own height (`grid-row: 1 / 3`, a hair under the
+  title's top, z-index over its tail); the quote sheet sits on the START
+  side under the title, at 60fr to the name's 34fr. Logical columns, so the
+  English page mirrors. At ≤640 the explicit rows and columns come off and
+  the three stack in source order. The quote is a size up.
+- **The rotor to the drawing's spacing:** the scrap's top on the rule
+  (`margin-top: -0.2rem`), the name a line under the scrap, **no hairline**
+  between the name and the words, and the words at `clamp(1.1rem, 1.5vw,
+  1.3rem)` — 26px at 1440, up from 21.6.
+
+Re-verified the same way as below after it: all 24 page × width rows clean.
+
+### 7. 🔴 Round three — "i told u to change its placement and u didnt"
+
+The rotor round above was declared a match BY EYE, and it was not one.
+Measured: the rotor had `max-width: 23rem` and stood 552px in a 648px
+cell, hugging the inline start — so the scrap sat 96px in from the page
+edge and the words stopped short of the column, while the drawing has the
+scrap flush with the edge and the words the full column. **The cap is
+gone**; the scrap is `min(100%, 21rem)` (~79% of the cell, the drawing's
+share). ⚠️ Compare a drawing to a render by RATIOS — element to its
+container, gap to its neighbour — not by looking at two screenshots; the
+two looked the same at a glance and differed by a sixth of the column.
+
+Also in this round, all the agency's:
+
+- **The collage's tilts, off the drawing:** the name sheet −4°, the quote
+  sheet −8.5° (inline-start side down), `data-tilt`; mirrored on the
+  English page, re-settled on a language change and on a resize. The lift
+  flattens to 0.7 of the rest angle rather than 0.35 now, so a hover on the
+  8.5° sheet is a nudge and not a swing. The quote sheet is pulled up into
+  the title's row so its raised corner rises beside the centred title, and
+  the collage's bottom padding is deeper because a rotated box overhangs
+  its grid area.
+- **The quote sheet stands STRAIGHT on a phone** — `data-tilt-phone="0"`,
+  read when `isPhone()`; the name sheet keeps its −4°.
+- **No rule over the rotor.** The scrap is the head of the column.
+- **The stripe DRAGS.** Pointer events on the band: press holds the loop,
+  a move scrubs it by `dx / (dir · period)` — makeLoop now hangs `period`
+  and `dir` on its tween for exactly this — and a release resumes it 1.4s
+  later from where it was left; `--pop` follows the scrub. `touch-action:
+  pan-y` keeps vertical swipes with the page. Verified with real CDP touch
+  input at 390: press pauses, a 120px pull shifts progress by 120/period,
+  the loop resumes after the delay, and a vertical swipe still scrolls
+  the page 120px. The old touchstart/touchend hold handlers are gone;
+  pointer events cover both a finger and a mouse.
+
+Round four, same evening: the collage's title takes the BLOCKS' size
+(block 2's `clamp(1.7rem, 6.5vw, 6.2rem)` with block 1's English
+multiplier — 94px at 1440, 40.8 on a phone, like the others); the English
+name sheet starts under the title's baseline because the four-word title's
+tail reaches its column. The footer scrap's words are ONE line at ~58% of
+the sheet (`10.5cqw`, 68px at 1440 — Idris sets narrow, so the number is
+larger than it looks; the English at `6.5cqw`), which runs between the two
+tapes and past the safe box's sides on purpose. The quote sheet's column
+rule is gone.
+
+### 8. ✅ The trail — tiny double aliphs in single file along the drawing's line
+
+"a moving stripe of tiny double aliph icons that follow this path", with a
+red line drawn over the desktop collage and another over the phone's, both
+starting at the section's splitter. The agency sent a React/motion
+"marquee along SVG path" component as a reference and said to take only
+what is useful; **what was useful was one CSS primitive** — `offset-path`
++ an animated `offset-distance` — and nothing else was ported: no
+library, no scaling wrapper, no drag, no scroll velocity.
+
+- **The path is built from the sheets, not drawn once and scaled.** The
+  component fits one path to a box, which holds only while the box's
+  proportions do — this collage's do not (vw title, ratio sheets, and the
+  English page mirrors the lot and stacks its name sheet under the title).
+  So `TRAILS` in main.js stores waypoints as FRACTIONS of a measured box —
+  the article, the name sheet or the quote sheet — with the loop's drops
+  in px scaled to the room actually under the name sheet, mirrored in x
+  on the English page, and run through a Catmull-Rom spline. Rebuilt on
+  resize and on a language change; measured after a frame so the new
+  layout is what is measured.
+- **The marks** are ~40 `<i>` elements (path length / 72px) at 80px tall
+  (50px, /45px on a phone), FULL ink — the SVG's fill is the site's
+  #0F1820 and the 0.72 opacity the first pass had is gone ("feel a lil
+  transparent"). They started at 20/14px on 2026-09-14 and went 26 → 44
+  → 60 → 100 → 80 on the 15th, the agency's call at each step.
+  `DoubleAliph-Icon.svg` (copied from the
+  feedback form's assets) as a background, `offset-rotate: auto` so the
+  glyph stands ACROSS the line and the stripe reads as a picket, one
+  linear keyframe 0→100% with a negative delay per mark.
+- **They run behind the sheets** (`.tc-trail` z-index 0, the figure 1),
+  which is what makes the line disappear under a sheet and come out the
+  other side — the drawing's whole gesture — for free. The clip box is the
+  article widened by the page padding, so the stripe leaves at the
+  viewport's edge, not the article's.
+- Paused off screen (IntersectionObserver → `.is-off`), static at each
+  mark's own `--tc-at` under reduced motion.
+- ⚠️ **The lines were redrawn three times on 2026-09-15.** The second
+  pair (a lower loop to the page's edge, a higher hump, a U under the
+  phone's quote sheet) was built and taken back within the hour. The
+  THIRD is what `TRAILS` holds: on a desktop only the loop changed — a
+  longer straight drop from the name sheet, then one round loop to the
+  left that crosses the drop once on the way out to the quote sheet; the
+  hump and the exit are the first drawing's. The phone path is entirely
+  new: a C down the left into the name sheet's side, out of its top right
+  into a wide arc that LEAVES THE SCREEN ("notice how the right side is
+  out of sight") and comes back at the right edge below the quote sheet
+  into one smooth U under it, edge to edge — the fourth drawing: nothing
+  of it behind the sheet, its ends at the sheet's bottom corners, its
+  middle ~85px lower. The phone article got 3.7rem of bottom padding for
+  that stroke — 50px marks under a sheet that had 38px to the splitter. What also survives: a waypoint may carry a 4th
+  value, its own English fx, for where mirroring alone is wrong — the
+  desktop start uses it so the 80px marks clear the English title's tail.
+- Speed is 46px/s (34 on a phone) — "make it a lil faster" after the
+  "slower" of the morning; it went 52 → 36 → 46.
+- **The splitter under the cutting is BACK** (2026-09-15) — it went on the
+  14th at "remove the separating line underneath this section" and was
+  asked for again with the trail in place.
+- ⚠️ The title is now the WALL's size (`clamp(1.8rem, 9.5vw, 8.6rem)`, no
+  English multiplier, 137px at 1440) — "same as the ones before (ان تبدو
+  النتيجة حتمية etc)" said twice; the first answer matched blocks 1–2
+  instead. At that size the English title spans the width, so the English
+  name sheet takes row 2 and the quote sheet drops below it for the
+  stagger.
+- Verified: marks animate (`playState: running`, offsetDistance
+  advancing) when the section is on screen and pause off it; a language
+  toggle rebuilds the path mirrored (starts at x=1214 of 1354 in English,
+  clear of the title's tail at 1164); the 24-row sweep is clean.
+- ⚠️ Not tested: frame rate with ~100 motion-path animations on a real
+  phone. Chrome composites `offset-distance` animations; if a phone
+  stutters, the first knob is `gap` in `TRAILS.phone` (fewer marks).
+
+### 9. ✅ The name sheet lowered, and the ring marks torn
+
+- **"move the title scrape a bit down for pc", then "a bit more":** the
+  name sheet's top is at `clamp(2rem, 5.6vw, 5.2rem)` under its row on a
+  desktop — about the title's baseline. ⚠️ The first attempt wrote it on
+  `.tc-title` and the computed margin read **0px**: `.tc-card { margin: 0 }`
+  is written LATER in the sheet at the same specificity and won. The rule
+  is `.testi-clip .tc-title` now. The trail followed the sheet down by
+  itself, being measured off it.
+- **The three ring marks have torn edges where the photograph was
+  cropped** — `resources/tear_marks.py`, outputs `assets/marks/mark-*-torn
+  .webp` beside the untouched originals, `RING_MARKS` pointing at the torn
+  set. "only where they have a straight cut edge": the script finds the
+  runs where the cut-out touches the picture's border (the bottom of all
+  three, the developer's chair on the left and his monitor on the right)
+  and tears ONLY those; the people's own silhouettes and the monitor's real
+  top bezel are left alone, and so is the designer's monitor's right edge,
+  by name in `PROFILES` — "dont do the right side of the screen". The
+  depth is 1.7% of the short side, down from the scraps' own 3%: "the
+  effect is over done" at 3, and a mark is not a sheet. The tear is
+  the actual deckle of the scraps — the outline of a shipped scrap's edge,
+  split into waves and fibres, scaled so it LOOKS one size across marks
+  that are 320, 620 and 1291px short but render in one ~400px box — and a
+  lighter fibre rim 1.1% of the short side wide is the one place a paper
+  colour touches the photograph ("only in shape and looks not in color").
+  ⚠️ The first pass aliased the profile into a saw-tooth and painted the
+  rim as static; the profile is interpolated now and the rim's noise is
+  soft. Previews: `python resources/tear_marks.py --debug` →
+  `resources/clippings/debug/`.
+
+### Verified
+
+Three pages × eight widths (390, 430, 641, 768, 900, 1024, 1440, 1920),
+through two language toggles and a resize each: **no JS errors, zero
+intersections between the mark and any footer type** (the scrap, the name,
+the business, the words, the cards), the band rebuilding to 5 cards / 20
+looped, the hidden business lines at `display: none`. Shots at 1440 and 390
+in both languages were sent in chat. ⚠️ Headless — nothing here is 3D-
+transformed except the lifted sheet, and that was read from computed style.
+
+### Two things about the tooling
+
+- 🔴 **Headless Edge re-launches itself.** `proc.terminate()` kills the
+  launcher and the browser that holds the CDP port is its orphan; three of
+  them were running before the symptom — "Edge never came up on CDP", which
+  really meant "the last one never went down" — was understood. Kill by
+  command line (`--remote-debugging-port=9366`) before AND after, never by
+  pid. `resources/shoot.py`'s `kill()` still has the bug; the harness this
+  session used sweeps around it. Also: 18 `edge-cdp-*` profiles had piled
+  up in `resources/` (gitignored, but 18 of them); they are gone.
+- ⚠️ **A moving loop is verified at a chosen phase.** The band's text bug
+  was invisible in shots that landed at random phases; the check that
+  worked pauses the tween, shifts the track so one card is exactly centred,
+  re-runs the update, then captures.
+
+### What is still open
+
+1. 🔴 **THE COPY** — unchanged from 2026-09-13.
+2. 🔴 **NOT COMMITTED AND NOT DEPLOYED** — two rounds now. Fifteen untracked
+   files (two fonts, eight images, four sources, the cutter) and five
+   modified.
+3. ⚠️ The agency has not seen this round. The rotor's hold, the pop's 9%,
+   the cutting's rest tilts and the label sentences are the guesses most
+   likely to come back. «من كلام عملائنا» and «قالوا عنّا.» are mine.
+4. ⚠️ The phone scraps clamp the words to TWO lines now (were three) — the
+   safe boxes of the agency's scraps are ~50% of their height. A longer
+   quote is cut with an ellipsis, not stretched.
+5. ⚠️ `resources/clippings/` adds 5.4 MB of source frames to a tracked
+   folder. That is the folder's policy; it is also 5.4 MB in every clone.
+6. ⚠️ Everything carried forward is still carried forward.
+
+---
+
+## Session 2026-09-13 — the testimonials: a cutting from the paper, a stripe of cards on the phone, and a quiet rotor in the footer
+
+Handed over at night with *"im gonna go sleep"*, so every decision below was
+taken here and is listed for the agency to overturn. Two parts as briefed.
+**Built and verified; NOT committed and NOT deployed.** Seven files touched
+and seven added; the live site is still `d3113117-…`.
+
+🔴 **THERE IS NO TESTIMONIAL COPY, AND EVERYTHING RENDERED IS A PLACEHOLDER.**
+Nothing in the repo, the briefs, the copy docs or this file holds a client's
+words. The brief said *"use our best testimonial"* as if one existed; it may —
+the feedback form at `feedback.aliphcreative.com` has been open since
+2026-08-31 and its sheet (`17EV8437…`) is the obvious source — but no session
+has read it and this one did not touch a production key to find out. The five
+entries in `TESTIMONIALS` (main.js) are **a role and a service each, no name,
+no business, no city** — «صاحبة مطعم / هويّة بصريّة», «منظِّم فعاليّات / تغطية
+فعاليّة» — written so the type can be judged at its real length without a
+single invented client. Each carries `placeholder: true`. ⚠️ **Nothing here
+ships until that table holds the agency's own words.** Swap the table; nothing
+else needs to change.
+
+### Part 1 — the cutting (home page, both widths)
+
+Between the gallery wall and «الحكاية كاملةً», where the red arrows pointed:
+wall → rule → **the cutting** → new rule → the way out. The agency's two
+generated frames from the Desktop `temp` folder — a masthead clipping and a
+column clipping, torn edges and tape — with their dummy print cleared and the
+site's own type set live on them.
+
+✅ **The paper is `clip-title.webp` (1400×711, 88 KB) and `clip-quote.webp`
+(1400×554, 56 KB), cut and cleared by `resources/cut_clippings.py`** from the
+sources now in `resources/clippings/`. Two things in that script are worth
+knowing before touching it:
+
+- 🔴 **birefnet FAILED on these and was thrown out.** It returned 40% of the
+  quote card — the lower-left column of print and the photograph were "not
+  the object". The ground is a flat 239±1 in every channel (measured) and the
+  torn edge is a closed outline, so the cut is a **flood fill from the frame's
+  border**: near-ground pixels connected to the edge are ground, holes
+  filled, largest component. The title card's paper reads 240 against the
+  239 ground — the white-on-white case from `cut_notes.py` — and the flood
+  does not care, because those pixels never reach the border.
+- ⚠️ **"Cleared" is not "painted over".** The print is replaced by a shading
+  field estimated from the clean paper around it (normalised convolution, so
+  ink never leaks into the average) plus the sheet's OWN grain, borrowed
+  from clean pixels a fixed offset away. The first pass used synthetic noise
+  matched in strength and it read as television static.
+  🔴 **The tape is translucent and both frames lay it over a headline**, so a
+  ghost of the letters showed through it on every pass until the tape got
+  the same treatment as the paper — its own field, its own borrowed grain.
+  ⚠️ **170 is the ink threshold under the tape and it must not go higher:**
+  the tape's own creases read down to ~176, and 185 replaced the strip's
+  texture with a smooth field. The script's comments carry all of this.
+
+✅ **The type is live and the paper is a background stretched to the box,
+`100% 100%`, on purpose.** Each card is its aspect ratio PADDED to the
+paper's cleared area — the safe box the cutter prints, converted to
+percentages of width (`13.4% 13.3% 6.1% 13.8%` for the masthead, `10.8% 5.5%
+3.5% 5.5%` for the column). A longer quote makes the box taller than its ratio
+and the sheet stretches with it; a torn edge absorbs that and a crop would
+not. Measured: the English quote at 390 stretches the column sheet 1.75× and it
+still reads as a torn sheet. The type is `mix-blend-mode: multiply`, which is
+the one thing that puts live text IN a photographed sheet instead of on it.
+
+✅ **The faces: Grenze Gotisch + Grenze on the English page, Idris on the
+Arabic one.** The reference (`2nd sc shot`) was a blackletter masthead; Gotisch
+is a blackletter drawn to be read, Grenze is the roman its designers drew to
+sit under it — *"a 2ndery font that is usually used with the font we picked"*,
+literally. Omnibus-Type, SIL OFL, Latin subsets from Google's own build,
+**56 KB for the two**, `unicode-range` so the Arabic page never fetches them
+(verified: `document.fonts` on the Arabic page lists Idris only). ⚠️ **These
+are the first non-Idris faces on the site**, used in exactly one place.
+⚠️ **No blackletter has Arabic**, so the Arabic cutting is Idris Sharp over
+Idris Flat — the masthead pair the site already has. Nobody has said whether
+that is the intent; it is the only possible reading of the brief.
+
+✅ The masthead line carries the reference's rule under it (2px ink); the
+quote sets in **two newspaper columns** on a desktop with a hairline column
+rule, one column at ≤640 where the cards stack — masthead first at 80% width
+on the start edge, the column sheet full width under it.
+
+### Part 2a — the phone: the stripe carries the cards
+
+`.testi-band`, a SIBLING of `.contact-band`, shown at ≤640 where the band is
+hidden. Same cream stripe, same 3px rules, same `makeLoop`, but one row of
+cards — a name, the service, three clamped lines of the quote, no portrait —
+that **holds still under a finger** (pointer and touch, like the reference
+component's `pauseOnHover`) and pauses off-screen like the band. The two edge
+fades are the stripe's own cream. ⚠️ **A sibling, not the band with different
+contents:** the band is a `mailto:` link, and a link wrapping five quotations
+is a lie to a screen reader. Above 640 it is `display: none`, measures 0, and
+`makeLoop` wires nothing.
+
+⚠️ **The shadcn/React component in the brief was a reference, not a
+dependency.** This site is hand-written HTML/CSS/JS with gsap; nothing was
+installed. What was taken from it: one row, cards, pause on hover, edge fades.
+What was dropped as asked: the second row and the portraits.
+
+### Part 2b — the desktop: the rotor in the empty column
+
+`.testi-rotor`, the second grid item of `.contact-grid` — the column that has
+been empty since the stamp left it on 2026-08-11 (measured at 1440: 648×514px
+above the mark's top). One testimonial at a time: the name at the contact
+values' face and size, the service at the labels' size, a hairline, the
+words, capped at a 23rem measure (⚠️ the root is 150%, so 23rem is 552px —
+30rem never bound). It **rises the way the section banners do** — the
+`.banner h2` tween, opacity + a 26px lift, `power3.out` — holds for
+`clamp(5s, words × 0.33s, 9.5s)`, fades out in 0.45s, and the next rises.
+Runs only while the footer is on screen (IntersectionObserver), holds under
+the pointer, and under `prefers-reduced-motion` swaps without moving. ⚠️ **No
+`aria-live`** — it would announce a paragraph every few seconds to a reader
+parked on the footer. At 641–900 the grid is one column and the rotor stacks
+under the contact table with the socials' own `--mark-clear`.
+
+### Verified
+
+✅ **Three pages × eight widths (390, 430, 641, 768, 900, 1024, 1440, 1920),
+zero intersections between the mark and any footer type**, the rotor and the
+band included. ✅ **No JS errors** on any page in either language through two
+language toggles and a resize each; the band rebuilds to exactly 5 cards
+hidden / 20 looped every time — no nesting. ✅ Rotation observed on
+`about.html` (the name changes after the computed hold); reduced-motion swap
+observed on `index.html` with `transform: none`. ✅ The band observed moving
+mid-shot at 390, both languages.
+
+### What is still open
+
+1. 🔴 **THE COPY.** See the top of this section. Until the table holds real
+   words this is a design proof, not a feature.
+2. 🔴 **NOT COMMITTED AND NOT DEPLOYED.** The tree is ahead of live by this
+   whole round — `index/about/library.html`, `main.js`, `style.css`, two
+   fonts, two images, the cutter and its sources.
+3. ⚠️ **The agency has not seen any of it.** Screenshots of all three
+   surfaces in both languages were sent in chat; the rotor's timing and the
+   cutting's type sizes are the two things most likely to come back.
+4. ⚠️ **The quote card is sized for ~25–35 words.** Longer and the sheet
+   stretches; past ~45 it will start to look pulled. Cut or split before
+   changing the CSS.
+5. ⚠️ **Everything carried forward is still carried forward** — the bts-29
+   edge purge, the repository still being public, the key JSON being the only
+   copy. None of it was touched.
+
+---
+
+## Session 2026-09-09 — the footer aliph was lifted, shown, and put back
+
+One instruction: *"can u shift the aliph half logo up just a bit like in the
+pic, for phone and pc"*, with a phone screenshot of the contact footer. It was
+built, verified across three pages and six widths, shown — and **rejected:**
+*"undo it, was better before"*. ✅ **REVERTED. `prototype/style.css` is
+byte-identical to `HEAD` again** (blob `8f5b1e7f…`), and nothing was ever
+committed or deployed. The live site is untouched and still `d3113117-…`.
+
+🔴 **DO NOT TREAT "THE FOOTER ALIPH SITS TOO LOW" AS AN OPEN TASK.** It is not
+one. The agency asked for the lift, saw it, and preferred the original bleed.
+If it is raised again it starts from a new brief, not from this section.
+
+### What the lever is, so nobody has to find it twice
+
+`--mark-drop` is the whole of it. `.contact-mark` is `bottom:
+var(--mark-drop)`, the value is negative, so the mark hangs below `.footer` and
+the footer's own `overflow: hidden` is the cut. It is declared in exactly two
+places — the shared block and the ≤640px block — and it is independent of
+`--mark-clear`, so moving it vertically cannot disturb the horizontal
+clearances that keep cream type off the cream glyph.
+
+**The values that were tried and rejected**, kept only so a future round starts
+from measurements rather than from an eyeball:
+
+| | shipped (kept) | tried, rejected |
+|---|---|---|
+| shared | `clamp(-96px, -7vw, -44px)` | `clamp(-32px, -2.3vw, -15px)` |
+| ≤640px | `clamp(-72px, -14vw, -34px)` | `clamp(-24px, -4.6vw, -11px)` |
+
+At 390 that was -54.6px against -17.9px. ⚠️ **The bleed the agency KEPT is
+21–29% of the mark's own height** (22.3% at 390, 21.2% at 1440); the rejected
+pair was a uniform ~7%. That is the number to reason about if this ever comes
+back — the deep bleed is the thing they like, not an accident of the clamp.
+
+### Two method notes that outlive the round
+
+⚠️ **A REFERENCE PICTURE CAN BE SELF-DISAMBIGUATING.** *"like in the pic"* reads
+both as "this is the current state, move it" and as "this is the target", and
+the two readings invert the fix. It was settled without asking: eight other
+landmarks in the screenshot — the three socials, the rule, both legal lines,
+«الوكالة», «القدس، جبل الزيتون» — were measured against the live build at 390
+and all matched to within 3px, which proved the reference's layout WAS the
+current build and only the mark had moved. The same landmarks gave the image's
+pixel scale. ✅ **That reasoning was sound and the fix it produced was still
+rejected** — the reading of the picture was right, the agency simply changed
+its mind on seeing it rendered. Do not "fix" the method on account of the
+outcome.
+
+🔴 **THE IN-APP BROWSER PANE RETURNED TORN AND STALE FRAMES FOR THIS WHOLE
+SESSION.** `getBoundingClientRect` and `elementFromPoint` both said the footer
+was on screen; the screenshot came back a flat cream field, then a 2×-zoomed
+composite of one panel repeated four times. **A pane screenshot that disagrees
+with the DOM is the pane, not the page** — several rounds were spent reloading,
+re-scrolling and rebuilding the harness before that was believed.
+`resources/shoot.py`'s CDP-driven headless Edge answered first time; import its
+`Browser` class rather than writing another one. ⚠️ Kill stray `msedge`
+processes first — its CDP port is hardcoded and a leftover instance holds it,
+which surfaces only as *"Edge never came up on CDP"*.
+⚠️ **Headless was legitimate HERE and would not have been for a seam.** The
+question was where a flat, absolutely-positioned SVG's box sits against
+`overflow: hidden` — layout, not rasterisation. The 2026-08-27 rule about never
+certifying a 3D-transformed surface from a headless shot is untouched.
+
+⚠️ **`body[data-page="index"] .footer` OUTRANKS `.bench .footer`** — an
+attribute selector plus a class plus an element against two classes. A scratch
+harness that wraps the real footer to crop it will silently lose its
+`margin-top` to the page's own rule and show the TOP of the footer while
+looking like it worked. Set that kind of override inline.
 
 ---
 

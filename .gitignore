@@ -44,6 +44,9 @@ desktop.ini
 .gstack/
 resources/shots/
 resources/edge-cdp*/
+# cut_scraps.py --debug writes masks and previews here; the webp in
+# prototype/assets/img is the product, these are the workings.
+resources/clippings/debug/
 
 # Derivative cache for thumb_media.py — pulled from R2 and re-derived on
 # demand, so nothing here is a source.

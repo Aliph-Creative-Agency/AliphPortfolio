@@ -32,6 +32,32 @@
   font-display: swap;
 }
 
+/* ── the newspaper pair (2026-09-13) ──
+   Grenze Gotisch and Grenze, Omnibus-Type, SIL OFL 1.1 — the only faces on
+   the site that are not Idris, and they are used in ONE place: the
+   testimonial cutting on the English home page. The agency's reference was a
+   blackletter masthead; Gotisch is a blackletter drawn to be READ, and Grenze
+   is the roman its designers drew to sit under it. Latin subsets only, from
+   Google's own build, ~56 KB for the two. ⚠️ No italic: nothing on the
+   site asks for one, and a face nobody references is a file that deploys
+   for nothing (the mark-tech.png lesson, 2026-08-27).
+   ⚠️ unicode-range is load-bearing, not tidiness: the Arabic page never
+   references these faces and must never fetch them. */
+@font-face {
+  font-family: "Grenze Gotisch";
+  src: url("assets/fonts/GrenzeGotisch-Bold-latin.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Grenze";
+  src: url("assets/fonts/Grenze-Regular-latin.woff2") format("woff2");
+  font-weight: 400 500;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   --ink: #0F1820;
   --cream: #D9D9CE;
@@ -2261,6 +2287,249 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
   padding-top: 0.12em;
 }
 
+/* ═══════════ THE TESTIMONIAL CUTTING (index, 2026-09-13; redrawn 2026-09-14) ═══════════
+   Two torn sheets under a line that says what they are, between the gallery
+   wall and the way out: the name on the masthead sheet, the words on the
+   column sheet. The paper is a BACKGROUND stretched to the box (100% 100%),
+   and the box is its aspect ratio PADDED to the paper's safe box — the plain
+   rectangle cut_scraps.py prints, converted to percentages of WIDTH because
+   that is what padding percentages resolve against:
+
+     scrap-title  1400×708   safe L 10.5  T 32.8  R 10.9  B 12.8  (T/B % of h)
+                             → padding 16.6% 10.9% 6.5% 10.5%
+     scrap-quote  1400×591   safe L 4.5   T 31.1  R 2.3   B 15.4
+                             → padding 11.5% 4.5% 6% 5%   (eased out a little:
+                               the type is centred in the box and reaches the
+                               tape only when a quote runs long)
+
+   Re-run the cutter and re-copy if the sources change. The tape is the
+   reason the top inset is a third of the sheet on both: it lies across the
+   top edge and the type has to start below it.
+
+   ⚠️ A stretched background, not <img> + object-fit, and not by accident. A
+   quote a few words longer than planned makes the box taller than its
+   ratio; a torn sheet stretched 8% taller still reads as a torn sheet,
+   while an <img> would either crop the torn edge (cover) or squash the tape
+   (fill). The ratio is a floor, not a cage.
+
+   The type is ink MULTIPLIED onto the paper rather than laid over it, which
+   is the one thing that makes live text sit IN a photographed sheet rather
+   than float on it — the paper's grain shows through the letters the way it
+   would through printed ink.
+
+   The sheets CAST (2026-09-14, "add shadows for the scraps"): a drop-shadow
+   follows the torn outline where a box-shadow would draw a rectangle round
+   it, and it deepens when a sheet is lifted — main.js tilts the sheet toward
+   the pointer and adds .is-lifted. The rest state is the paper on the page;
+   the lifted one is the paper an inch off it. ⚠️ filter isolates the card,
+   so the multiply above blends the type with the sheet only, never with
+   the linen behind a torn edge. */
+.wb4 {
+  position: relative;               /* the trail is laid out against it */
+}
+.wb4 .testi-clip { position: relative; z-index: 1; }   /* over the trail */
+
+/* ── the trail: tiny double aliphs in single file along the drawing's line
+   (2026-09-14; main.js builds the path and the marks) ──
+   The clip box is the article made viewport-wide (−pad each side), so the
+   marks run off the page edges and not the article's; the plane inside it
+   is the article's own box, which the path's px are relative to. Each
+   mark is one <i>: the double aliph as a background, `offset-path` the
+   shared path, `offset-rotate: auto` so its long axis stands across the
+   line and the stripe reads as a picket of marks, and one keyframe from
+   0% to 100% of the path, started at a different negative delay per mark.
+   ⚠️ Under prefers-reduced-motion the animation is off and each mark
+   sits at its own --tc-at: the stripe is still drawn, it just holds. */
+.tc-trail {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: calc(-1 * var(--pad));
+  right: calc(-1 * var(--pad));
+  overflow: clip;
+  pointer-events: none;
+  z-index: 0;
+}
+.tc-trail-plane {
+  position: absolute;
+  top: 0;
+  left: var(--pad);
+}
+.tc-mark {
+  position: absolute;
+  top: 0; left: 0;
+  width: calc(var(--tc-icon, 20px) * 63.44 / 207.79);
+  height: var(--tc-icon, 20px);
+  /* full ink, the site's own --ink baked into the SVG's fill (#0F1820) —
+     the 0.72 opacity this started with read "a lil transparent" */
+  background: url("assets/img/DoubleAliph-Icon.svg") center / contain no-repeat;
+  offset-path: var(--tc-path);
+  offset-rotate: auto;
+  offset-distance: var(--tc-at, 0%);
+  animation: tc-travel var(--tc-dur, 40s) linear infinite;
+  will-change: offset-distance;
+}
+@keyframes tc-travel {
+  from { offset-distance: 0%; }
+  to   { offset-distance: 100%; }
+}
+.tc-trail.is-off .tc-mark { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .tc-mark { animation: none; }
+}
+
+/* The collage, to the agency's drawing (2026-09-14): the title centred
+   across the whole width; the name sheet on the inline-END side, up at the
+   title's own height (it spans both rows and starts a little under the
+   title's top); the quote sheet on the START side, under the title, wider.
+   The two sheets overlap in neither axis but stagger, which is what makes
+   it a pinboard rather than a table. The grid is logical, so the English
+   page mirrors: the reader meets the words on the start side first and the
+   name on the end side, in either direction. */
+.testi-clip {
+  display: grid;
+  grid-template-columns: minmax(0, 60fr) minmax(0, 34fr);
+  grid-template-rows: auto auto;
+  column-gap: 2.5%;
+  row-gap: clamp(0.9rem, 2vw, 1.6rem);
+  align-items: start;
+  margin: 0;
+  /* the sheets are TILTED now (the drawing's angles, data-tilt) and a
+     rotated box overhangs its grid area: the quote sheet's raised corner
+     rises ~7% of its width above its row and the lowered one drops as far
+     below, so the padding under the collage is deeper than the row asks */
+  padding: clamp(0.6rem, 1.6vw, 1.2rem) 0 clamp(2.4rem, 5vw, 4.4rem);
+}
+.tc-head {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  margin: 0;
+  text-align: center;
+  /* the size of the wall's title («أن تبدو النتيجة حتميّة.», .wb3-head's
+     expression, which carries no English multiplier either) — "same as the
+     ones before (ان تبدو النتيجة حتمية etc)", 2026-09-14, twice */
+  font-size: clamp(1.8rem, 9.5vw, 8.6rem);
+}
+.tc-title {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: start;
+  z-index: 1;                   /* over the title's tail if the two touch */
+}
+/* "a bit down" (2026-09-15): the sheet's top about level with the title's
+   baseline. ⚠️ Two classes, not one: `.tc-card { margin: 0 }` is written
+   LATER in this sheet and beat the single-class rule that stood here —
+   the computed margin read 0px while the value looked right. */
+.testi-clip .tc-title { margin-top: clamp(2rem, 5.6vw, 5.2rem); }   /* and "a bit more down" */
+/* the English title is four words to the Arabic's two and at this size it
+   spans the whole width, so nothing can stand beside it: the name sheet
+   takes the second row there and the quote sheet drops below it for the
+   stagger the drawing has */
+html[lang="en"] .tc-title { grid-row: 2; margin-top: 0; }
+html[lang="en"] .tc-body { margin-top: clamp(2rem, 4.5vw, 4rem); }
+.tc-body {
+  grid-column: 1;
+  grid-row: 2;
+  /* pulled up so the raised corner sits beside the title, where the
+     drawing has it, rather than a full row under it */
+  margin-top: clamp(0.2rem, 1.2vw, 1rem);
+}
+.tc-card {
+  position: relative;
+  box-sizing: border-box;
+  margin: 0;
+  min-width: 0;
+  background: center / 100% 100% no-repeat;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  filter: drop-shadow(0 5px 7px rgba(15, 24, 32, 0.22))
+          drop-shadow(0 1px 1.5px rgba(15, 24, 32, 0.2));
+  transition: filter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  cursor: default;
+}
+.tc-card.is-lifted {
+  filter: drop-shadow(0 16px 20px rgba(15, 24, 32, 0.3))
+          drop-shadow(0 2px 3px rgba(15, 24, 32, 0.18));
+}
+.tc-title {
+  background-image: url("assets/img/scrap-title.webp");
+  aspect-ratio: 1400 / 708;
+  padding: 16.6% 10.9% 6.5% 10.5%;
+}
+.tc-body {
+  background-image: url("assets/img/scrap-quote.webp");
+  aspect-ratio: 1400 / 591;
+  padding: 11.5% 4.5% 6% 5%;
+  /* the words are centred in the box, so a short quote floats in the
+     middle of the sheet and a long one grows the box — see above */
+  justify-content: center;
+}
+.tc-name,
+.tc-biz,
+.tc-quote { mix-blend-mode: multiply; }
+
+/* the masthead line: the client's name — or the business, when there is no
+   name — in the site's own display face in Arabic, the blackletter in
+   English, and the reference's rule under it either way; the business
+   small beneath. Never the service (the agency's rule, 2026-09-13). */
+.tc-name {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.3rem, 2.9vw, 2.5rem);
+  line-height: 1.12;
+  padding: 0.12em 0 0.22em;
+  border-bottom: 2px solid var(--ink);
+}
+.tc-biz {
+  display: block;
+  margin-top: 0.5em;
+  font-size: clamp(0.64rem, 0.98vw, 0.8rem);
+  color: var(--ink-mute);
+}
+/* ⚠️ [hidden] is only display:none in the UA sheet, and the display:block
+   above beats it (the 2026-08-29 form lesson) — so it is restated here for
+   every small line that goes away when an entry has no business */
+.tc-biz[hidden], .tb-biz[hidden], .tr-biz[hidden] { display: none; }
+html[lang="en"] .tc-name {
+  font-family: "Grenze Gotisch", var(--font-display), serif;
+  font-weight: 700;
+  font-size: clamp(1.45rem, 3vw, 2.6rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+}
+html[lang="en"] .tc-biz {
+  font-family: "Grenze", var(--font-body), serif;
+  font-weight: 500;
+  font-size: clamp(0.66rem, 1vw, 0.8rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* the words: set in two newspaper columns on a desktop, one on a phone */
+.tc-quote {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 2.15vw, 1.65rem);   /* "a lil bigger", 2026-09-14 */
+  line-height: 1.72;
+  column-count: 2;
+  column-gap: 2em;                /* no column rule — "the stupid vertical
+                                     splitter line", 2026-09-14 */
+  text-align: start;
+  hyphens: auto;
+}
+.tc-quote::before { content: "«"; }
+.tc-quote::after  { content: "»"; }
+html[lang="en"] .tc-quote {
+  font-family: "Grenze", var(--font-body), serif;
+  font-size: clamp(1.05rem, 1.9vw, 1.5rem);
+  line-height: 1.46;
+}
+html[lang="en"] .tc-quote::before { content: "\201C"; }
+html[lang="en"] .tc-quote::after  { content: "\201D"; }
+
 /* ═══════════════════════════════════════════
    WHAT WE DO — the service rings
    Three rings stacked in one window; the stack slides to the chosen service.
@@ -4129,6 +4398,111 @@ body[data-page="index"] .footer { margin-top: 0; }
 .contact-band:hover { background: var(--ink); color: var(--cream); }
 .contact-band { transition: background 0.45s, color 0.45s; }
 
+/* ── the testimonials in the footer (2026-09-13, redrawn 2026-09-14) ──
+   Two surfaces for one table, and they never show together: the ROTOR in
+   the grid's empty second column above 640px, the BAND in place of the
+   contact stripe at 640px and below (its rules are in the phone block). */
+.testi-band { display: none; }
+
+/* The rotor, to the agency's own drawing (2026-09-13): a taped scrap at the
+   head of the column that says what this is, then the client's name at the
+   contact values' size and face, the business small under it, a hairline,
+   the words between quotation marks. It takes the row's own top rule so the
+   two columns start on the same line, and caps its measure so a quote does
+   not run the full 648px column. */
+.testi-rotor {
+  min-width: 0;
+  /* ⚠️ NO max-width, since 2026-09-14b. The 23rem cap that stood here made
+     the rotor 552px in a 648px cell, hugging the inline start — so the
+     scrap stood 96px in from the page edge and the words stopped short of
+     the column. The drawing has the scrap flush with the edge and the
+     words the full column, which is what a cell-wide rotor gives. */
+  /* no rule over it (2026-09-14b, "remove the line above the footer
+     one"): the scrap is the head of the column now */
+  padding-top: 0.2rem;
+  container-type: inline-size;  /* the scrap's type is sized off the column */
+}
+/* The scrap: scrap-footer.webp, 1400×621, safe L 22.8 T 20.4 R 25.7 B 19.2
+   (T/B % of h) → padding 9.1% 25.7% 8.5% 22.8% of width. It sits at the
+   column's inline END — the far side from the contact table, where the
+   drawing puts it — a few degrees off square, and casts on the ink. The
+   type is live, ink multiplied into the paper like the cutting's. */
+.tr-label {
+  box-sizing: border-box;
+  width: min(100%, 21rem);      /* ~79% of the 648px cell, the drawing's share */
+  /* right under the rule and the name right under the scrap — the
+     drawing's spacing (2026-09-14): the scrap's top sits on the rule and
+     the name follows it by a line, not a paragraph */
+  margin: 0 0 0.55rem;
+  margin-inline-start: auto;
+  aspect-ratio: 1400 / 621;
+  /* ⚠️ Narrower sides than the safe box (22.8 / 25.7): the words run in
+     ONE line at a size that wants ~60% of the sheet — the agency's frame
+     of 2026-09-14 — and the line passes BETWEEN the two tapes, under the
+     top-right one's foot and over the bottom-left one's head, which the
+     safe rectangle cannot express. Measured clear of both at 1440. */
+  padding: 9% 18% 8.5% 18%;
+  background: url("assets/img/scrap-footer.webp") center / 100% 100% no-repeat;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  /* off the COLUMN, not the viewport: at 641–900 the column is the page
+     minus the mark's clearance and the scrap shrinks with it, and a
+     viewport-sized label broke «clients' words» across two lines there */
+  /* the frame's words are ~58% of the sheet wide; Idris sets narrow, so
+     this is larger than it looks written down — 68px at 1440 */
+  font-size: clamp(1.6rem, 10.5cqw, 2.9rem);
+  line-height: 1.2;
+  white-space: nowrap;          /* "put the words side by side" */
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-2.6deg);
+  filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.5))
+          drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+html[lang="en"] .tr-label {
+  transform: rotate(2.6deg);
+  font-size: clamp(1.1rem, 6.5cqw, 1.8rem);   /* four words to the Arabic's three, so smaller */
+}
+.tr-inner { will-change: transform, opacity; }
+.tr-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 3.4vw, 2.6rem);
+  line-height: 1.3;
+}
+.tr-biz {
+  margin: 0.1rem 0 0;
+  font-size: 0.7rem;
+  opacity: 0.62;
+}
+.tr-quote {
+  /* no hairline any more: the second drawing runs the words straight
+     under the name, a paragraph apart, and a size up ("a lil bigger") */
+  margin: 1.15rem 0 0;
+  font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+  line-height: 1.7;
+  color: rgba(217, 217, 206, 0.9);
+}
+/* the marks the drawing has: big, in the display face, the 99 opening and
+   the 66 closing in Arabic, the other way round in English */
+.tr-quote::before,
+.tr-quote::after {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.7em;
+  line-height: 0;
+  vertical-align: -0.38em;
+  color: var(--cream);
+}
+.tr-quote::before { content: "\201D"; margin-inline-end: 0.12em; }
+.tr-quote::after  { content: "\201C"; margin-inline-start: 0.12em; }
+html[lang="en"] .tr-quote::before { content: "\201C"; }
+html[lang="en"] .tr-quote::after  { content: "\201D"; }
+
 .contact-grid {
   position: relative;
   z-index: 1;
@@ -4332,6 +4706,9 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
   .contact-grid { grid-template-columns: 1fr; }
   .contact-side { align-items: flex-start; text-align: start; }
   .contact-socials { justify-content: flex-start; }
+  /* stacked under the contact table here; the mark stands at the foot of
+     the same column, so it keeps the same clearance the socials do */
+  .testi-rotor { padding-inline-end: var(--mark-clear); }
 
   /* what we do — the switcher stacks with the example leading, and the names
      stay centred.
@@ -4713,6 +5090,168 @@ body.sheet-open { overflow: hidden; }
     --mark-drop: clamp(-72px, -14vw, -34px);
     --mark-clear: calc(var(--mark-w) + 0.5rem);
   }
+
+  /* ── the stripe carries the testimonials (2026-09-13, scraps 2026-09-14) ──
+     Same cream stripe, same 3px rules, same loop — but every card is a torn
+     SCRAP now, to the agency's concept: five pieces cut from their sheet by
+     cut_scraps.py, all 420px tall so they stand between the two rules at
+     one height and only their widths differ. The contact band and the
+     desktop rotor go; the words are the same table either way. The two
+     fades are the stripe's own cream, so a scrap enters out of the paper
+     rather than appearing at a hard edge. It holds still under a finger.
+
+     The stripe DRAGS (2026-09-14b): a finger or a pointer pulls the row,
+     the loop is scrubbed by the same distance and resumes a beat after the
+     release. `touch-action: pan-y` is what lets that coexist with the
+     page: a vertical swipe still scrolls, a horizontal one is ours.
+
+     The scrap nearest the middle POPS: main.js writes --pop on every card
+     (1 at the centre, 0 half a stripe away) and this turns it into a
+     scale and a shadow. The shadow is the scrap's own silhouette — the same
+     image, blackened and blurred, on ::after — because a box-shadow round a
+     torn edge is a rectangle and a drop-shadow that changes every frame is
+     a re-raster every frame; a blurred copy rasterises once and only its
+     opacity moves. The paper is on ::before for the same reason: a negative
+     z-index child paints OVER the card's own background, so the paper has
+     to be a child too. The type sits above both at z-index 1.
+
+     ⚠️ The insets are FRACTIONS of the card's own height and width, and
+     the card computes both from --tb-h and its ratio — a % padding here
+     would resolve against the loop group's ~1800px, not the card (that is
+     how the first pass put the words in a 60px column). All of it comes
+     from BAND_SCRAPS in main.js. */
+  .contact-band, .testi-rotor { display: none; }
+
+  /* the cutting stacks: masthead first, narrower and at the start edge like
+     a masthead, the column sheet full width under it in one column.
+     ⚠️ The quote is longer than the column sheet's ratio holds at this
+     width, so the sheet STRETCHES — see the note on .tc-card. That is the
+     trade taken deliberately; a torn edge absorbs it, a crop would not. */
+  .testi-clip {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    row-gap: 0.9rem;
+    padding: 1rem 0 1.4rem;
+  }
+  /* one column: the collage's explicit rows and columns come off and the
+     three fall in source order — title, name sheet, words */
+  .tc-head, .tc-title, .tc-body { grid-column: 1; grid-row: auto; }
+  .tc-title { width: 82%; justify-self: start; margin-top: 0; }
+  /* room under the quote sheet for the trail's last stroke (2026-09-15):
+     the marks are 50px tall and run under the sheet's bottom edge */
+  .wb4 { padding-bottom: 3.7rem; }
+  /* ⚠️ The stretch moves the tape. The top inset is a % of WIDTH, and a
+     sheet stretched from 2.37:1 to ~1.8:1 carries its tape (31% of the
+     image's height) further down in px than 11.5% of the width reaches —
+     measured: the English quote's first line ran under the tape's edge.
+     17% of the width is the tape's foot at the stretch the placeholders
+     produce here; a longer quote stretches more and needs more. */
+  .tc-body { padding-top: 17%; padding-bottom: 7%; }
+  .tc-quote { column-count: 1; }
+  /* Grenze runs large and the English quote runs long: at the desktop floor
+     the column sheet stretched to twice its ratio here. Idris is fine. */
+  html[lang="en"] .tc-quote { font-size: 0.9rem; line-height: 1.45; }
+  .testi-band {
+    display: block;
+    position: relative;
+    z-index: 1;
+    background: var(--cream);
+    color: var(--ink);
+    overflow: hidden;
+    touch-action: pan-y;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 1.1rem 0 1.2rem;
+    border-top: 3px solid var(--ink);
+    border-bottom: 3px solid var(--ink);
+  }
+  .testi-band.is-dragging { cursor: grabbing; }
+  .testi-band::before,
+  .testi-band::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 15%;
+    z-index: 10;                /* over the popped card too (it climbs to 5) */
+    pointer-events: none;
+  }
+  .testi-band::before { left: 0;  background: linear-gradient(to right, var(--cream), rgba(217, 217, 206, 0)); }
+  .testi-band::after  { right: 0; background: linear-gradient(to left,  var(--cream), rgba(217, 217, 206, 0)); }
+  .tb-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    column-gap: 0.8rem;
+    will-change: transform;
+  }
+  .tb-card {
+    --tb-h: clamp(150px, 41vw, 200px);   /* the popped card is ~95% of a 390 phone */
+    --pop: 0;
+    position: relative;
+    z-index: calc(1 + var(--pop) * 4);
+    box-sizing: border-box;
+    height: var(--tb-h);
+    width: calc(var(--tb-h) * var(--tb-r, 2));
+    flex: 0 0 auto;
+    margin: 0;
+    padding: calc(var(--tb-h) * var(--tb-pt, 0.25))
+             calc(var(--tb-h) * var(--tb-r, 2) * var(--tb-pr, 0.08))
+             calc(var(--tb-h) * var(--tb-pb, 0.22))
+             calc(var(--tb-h) * var(--tb-r, 2) * var(--tb-pl, 0.1));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transform: scale(calc(1 + 0.09 * var(--pop)));
+    will-change: transform;
+  }
+  .tb-card::before,
+  .tb-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--tb-img) center / 100% 100% no-repeat;
+    pointer-events: none;
+  }
+  .tb-card::before { z-index: 0; }
+  .tb-card::after {
+    z-index: -1;
+    filter: brightness(0) blur(7px);
+    transform: translateY(6px);
+    opacity: calc(0.2 + 0.5 * var(--pop));
+  }
+  .tb-who, .tb-quote {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;             /* a column flex item in a fixed-height box
+                                   shrinks, and a clamped quote shrank to one
+                                   line before this */
+    mix-blend-mode: multiply;
+  }
+  .tb-who {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.18;
+  }
+  .tb-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.84rem;
+  }
+  .tb-biz { font-size: 0.54rem; opacity: 0.62; margin-top: 0.15em; }
+  .tb-quote {
+    margin: 0.28rem 0 0;
+    font-size: 0.6rem;
+    line-height: 1.38;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .tb-quote::before { content: "«"; }
+  .tb-quote::after  { content: "»"; }
+  html[lang="en"] .tb-quote::before { content: "\201C"; }
+  html[lang="en"] .tb-quote::after  { content: "\201D"; }
   /* ⚠️ START, not the centre this block carried on 2026-08-23b, and the
      reason the centre is wrong now is the mark: the two are on the same line
      and a centred column of socials would sit half on top of a cream glyph.

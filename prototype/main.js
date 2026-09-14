@@ -153,6 +153,18 @@ const I18N = {
 
   /* contact */
   cBand: { ar: "لنبدأ من الألِف", en: "Let's start from the Aliph" },
+  /* the testimonials (2026-09-14): the line over the home-page cutting, the
+     sentence on the scrap over the desktop rotor, and the two footer
+     surfaces' read-out-only labels. "people cant tell on their own" — the
+     agency, 2026-09-13 — so every surface now SAYS what it is. */
+  /* «قالوا عنّا» — "they said of us" — is the idiom Arabic sites use over
+     a testimonial; the first draft («وهذا ما قاله عملاؤنا.») explained
+     itself and read like a caption. Changed at the agency's "change the
+     section title to something better", 2026-09-14. */
+  testiHead: { ar: "قالوا عنّا.", en: "What our clients say." },
+  testiLabel: { ar: "من كلام عملائنا", en: "In our clients' words" },
+  testiBand: { ar: "آراء العملاء", en: "Client testimonials" },
+  testiRotor: { ar: "آراء العملاء", en: "Client testimonials" },
   cLabelMail: { ar: "للمشاريع والتعاون", en: "Projects & collaboration" },
   cLabelPhone: { ar: "هاتف", en: "Phone" },
   cLabelWhats: { ar: "واتساب", en: "WhatsApp" },
@@ -688,12 +700,18 @@ function makeLoop(track, speed) {
   const from = -baseLeft - period;
 
   gsap.set(track, { x: from });
-  return gsap.to(track, {
+  const tween = gsap.to(track, {
     x: from + dirSign() * period,
     duration: period / speed,
     ease: "none",
     repeat: -1,
   });
+  /* the geometry, for anything that scrubs the loop by hand: with ease
+     none, x = from + dir·period·progress, so a drag of dx is a progress
+     shift of dx / (dir·period) */
+  tween.period = period;
+  tween.dir = dirSign();
+  return tween;
 }
 
 const BAND_SPEED = 40;
@@ -795,7 +813,641 @@ function rebuildLoops() {
   }
   /* a fresh tween plays on creation — honour where the page actually is */
   if (bandTween && !bandVisible()) bandTween.pause();
+  testimonials.rebuildBand();
+  /* the sheets' rest angles depend on the width (data-tilt-phone) */
+  testimonials.settle();
 }
+
+/* ══════════ testimonials ══════════
+   Three surfaces, one table (2026-09-13, redrawn to the agency's own
+   frames 2026-09-14):
+
+     · the CUTTING on the home page, between the gallery wall and the way out
+       — the best one, TESTIMONIALS[0], set on two torn sheets under a line
+       that says what it is («وهذا ما قاله عملاؤنا.»);
+     · the BAND on a phone — the cream stripe at the top of the footer, one
+       row of torn SCRAPS (five, cut from the agency's sheet, all one height),
+       each carrying a client's words; the one nearest the middle lifts;
+     · the ROTOR on a desktop — the empty second column of the contact grid,
+       a taped scrap that says «من كلام عملائنا», and under it one
+       testimonial at a time rising the way the section banners do.
+
+   🔴 EVERY ENTRY BELOW IS A PLACEHOLDER. No client has supplied a testimonial
+   yet, and none of these is attributed to a real person or a real business —
+   `name` is a role and `business` a kind of business, so the type can be
+   judged at its real length without a single invented client. Replace the
+   table with the agency's own words before this ships; nothing else needs
+   to change. The English is as unsigned-off as the rest of the site's.
+
+   ⚠️ THE TITLE RULE, on every surface, from the agency (2026-09-13): "always
+   the name of the client in the bigger font, then the name of the business;
+   if the name isn't there you use the name of the business only in the
+   bigger font, and no name of service". So an entry is `name` + `business`,
+   either may be null, the SERVICE IS NOT A FIELD, and who() below is the one
+   place that turns the pair into a big line and a small one.
+
+   ⚠️ `name` is set in a blackletter on the English page, so keep it SHORT —
+   three words is the measure at 390. `quote` should sit under ~40 words:
+   the cutting's sheet holds that in two columns and the phone scraps clamp
+   the words to two lines. */
+const TESTIMONIALS = [
+  {
+    placeholder: true,
+    name: { ar: "صاحبة مطعم", en: "A restaurant owner" },
+    business: { ar: "مطعم عائليّ", en: "A family restaurant" },
+    quote: {
+      ar: "لم يسألونا عن الألوان التي نحبّها، بل عن السبب الذي فتحنا المطعم من أجله. الجواب صار هويّتنا، ونحن ما زلنا نتعرّف على أنفسنا فيها كلّ يوم.",
+      en: "They never asked which colours we liked. They asked why we opened the restaurant in the first place. The answer became our identity, and we still recognise ourselves in it every day.",
+    },
+  },
+  {
+    placeholder: true,
+    name: { ar: "منظِّم فعاليّات", en: "An events organiser" },
+    business: null,
+    quote: {
+      ar: "وصلوا قبل الجمهور وغادروا بعده، والمقاطع التي أرسلوها في اليوم التالي كانت الحدث كما عشناه لا كما بدا.",
+      en: "They arrived before the audience and left after it, and the clips they sent the next day were the event as we lived it, not as it looked.",
+    },
+  },
+  {
+    /* no name: the business alone carries the big line */
+    placeholder: true,
+    name: null,
+    business: { ar: "شركة ناشئة", en: "A startup" },
+    quote: {
+      ar: "كنّا نظنّ أنّنا نحتاج موقعًا. تبيّن أنّنا نحتاج جملةً واحدة تشرح ما نفعله، والموقع جاء من بعدها في أسبوعين.",
+      en: "We thought we needed a website. It turned out we needed one sentence that explained what we do, and the site followed it in two weeks.",
+    },
+  },
+  {
+    placeholder: true,
+    name: { ar: "مديرة تسويق", en: "A marketing manager" },
+    business: { ar: "شركة تقنيّة", en: "A tech company" },
+    quote: {
+      ar: "أوّل مرّة يقرأ فيها فريقنا نصًّا عن شركتنا ويقول: هذا نحن. لم نعدّل كلمة.",
+      en: "The first time our team read a text about our company and said: that is us. We did not change a word.",
+    },
+  },
+  {
+    placeholder: true,
+    name: { ar: "صاحب متجر", en: "A shop owner" },
+    business: null,
+    quote: {
+      ar: "صوّروا المتجر كما أراه أنا في الصباح قبل أن يفتح، وهذا ما لم ينجح فيه أحد قبلهم.",
+      en: "They photographed the shop the way I see it in the morning before it opens, which nobody had managed before.",
+    },
+  },
+];
+
+/* The five phone scraps, cut by resources/cut_scraps.py from the agency's
+   sheet, every one 420px tall so the stripe's cards are one height and only
+   their widths differ. `pad` is each scrap's SAFE box — the largest plain
+   rectangle inside its torn edge — as % of its own width and height, top
+   right bottom left, copied from the cutter's output. A card takes the scrap
+   whose index matches its testimonial's, wrapping. */
+const BAND_SCRAPS = [
+  { src: "assets/img/scrap-band-1.webp", w: 918, h: 420, pad: [24.7, 8.2, 26.4, 11.4] },
+  { src: "assets/img/scrap-band-2.webp", w: 954, h: 420, pad: [24.8, 7.3, 17.2, 15.9] },
+  { src: "assets/img/scrap-band-3.webp", w: 862, h: 420, pad: [20.7, 6.3, 19.4, 7.2] },
+  { src: "assets/img/scrap-band-4.webp", w: 625, h: 420, pad: [31.5, 6.1, 21.4, 8.4] },
+  { src: "assets/img/scrap-band-5.webp", w: 856, h: 420, pad: [22.8, 4.2, 11.4, 15.2] },
+];
+
+const testimonials = (() => {
+  const t = (entry, key) => (entry[key] ? entry[key][lang] : "");
+
+  /* the title rule, in one place: the name is the big line and the business
+     the small one; with no name the business is the big line and there is
+     no small one. Never the service. */
+  function who(e) {
+    return e.name ? { big: t(e, "name"), small: t(e, "business") }
+                  : { big: t(e, "business"), small: "" };
+  }
+  function writeWho(root, bigSel, smallSel, e) {
+    const w = who(e);
+    root.querySelector(bigSel).textContent = w.big;
+    const small = root.querySelector(smallSel);
+    small.textContent = w.small;
+    small.hidden = !w.small;
+  }
+
+  /* ── the cutting (home page) ── */
+  const canHover = window.matchMedia("(hover: hover)").matches;
+  let clipWired = false;
+  let settleClip = () => {};
+
+  function renderClip() {
+    const root = document.getElementById("testiClip");
+    if (!root) return;
+    const e = TESTIMONIALS[0];
+    writeWho(root, ".tc-name", ".tc-biz", e);
+    root.querySelector(".tc-quote").textContent = t(e, "quote");
+  }
+
+  /* Two sheets pinned to the page, and they behave like paper: each rests
+     at a slight tilt, settles into place as it scrolls into view, and lifts
+     toward the pointer — a small 3D tilt following the cursor, the shadow
+     deepening with it — or under a finger. "make it more interactive" (the
+     agency, 2026-09-13); the gestures stay small because the type on the
+     sheets has to be READ. Under prefers-reduced-motion the sheets rest at
+     their tilt and nothing moves. */
+  function wireClip() {
+    const root = document.getElementById("testiClip");
+    if (!root || clipWired) return;
+    clipWired = true;
+    const cards = Array.from(root.querySelectorAll(".tc-card"));
+    /* the drawing's angles are for the Arabic collage; the English one is
+       its mirror, so the angles flip with it */
+    const rest = (el) => {
+      const t = isPhone() && el.dataset.tiltPhone != null ? el.dataset.tiltPhone : el.dataset.tilt;
+      return parseFloat(t || 0) * (lang === "en" ? -1 : 1);
+    };
+    settleClip = () => {
+      cards.forEach((el) => gsap.set(el, { rotation: rest(el), transformPerspective: 900 }));
+      /* the trail is measured off the sheets, so it follows them — after
+         the frame that lays the new language or width out */
+      requestAnimationFrame(buildTrail);
+    };
+    settleClip();
+    if (prefersReduced) return;
+
+    /* settle in: from a little further off the page and a little more
+       turned, the second sheet a beat after the first */
+    gsap.from(cards, {
+      opacity: 0, y: 34, rotation: (i, el) => rest(el) * 3.2,
+      duration: 1, stagger: 0.14, ease: "power3.out",
+      scrollTrigger: { trigger: root, start: "top 84%" },
+    });
+
+    cards.forEach((el) => {
+      const lift = (dx, dy) => {
+        el.classList.add("is-lifted");
+        gsap.to(el, {
+          rotation: rest(el) * 0.7, rotationX: -dy * 5, rotationY: dx * 5,
+          y: -6, duration: 0.55, ease: "power3.out", overwrite: "auto",
+        });
+      };
+      const drop = () => {
+        el.classList.remove("is-lifted");
+        gsap.to(el, {
+          rotation: rest(el), rotationX: 0, rotationY: 0, y: 0,
+          duration: 0.7, ease: "power3.out", overwrite: "auto",
+        });
+      };
+      if (canHover) {
+        el.addEventListener("pointerenter", () => lift(0, 0));
+        el.addEventListener("pointermove", (ev) => {
+          const r = el.getBoundingClientRect();
+          lift((ev.clientX - r.left) / r.width * 2 - 1, (ev.clientY - r.top) / r.height * 2 - 1);
+        });
+        el.addEventListener("pointerleave", drop);
+      } else {
+        /* a finger has no hover: pressing lifts the sheet, letting go drops it */
+        el.addEventListener("pointerdown", () => lift(0, 0));
+        el.addEventListener("pointerup", drop);
+        el.addEventListener("pointercancel", drop);
+      }
+    });
+  }
+
+  /* ── the trail (home page, 2026-09-14) ──
+     "a moving stripe of tiny double aliph icons that follow this path" —
+     the agency's two drawings, one for a desktop and one for a phone. A
+     red line from the section's splitter, down behind the name sheet, a
+     loop in the empty ground, behind the quote sheet, a hump over its top
+     edge and under its tape, and off the page.
+
+     What was taken from the React component they sent: the one idea that
+     matters — CSS Motion Path. Every mark is an element with
+     `offset-path` set to the same path and `offset-distance` animated from
+     0% to 100% by a plain CSS keyframe, each mark started a fraction of
+     the period earlier than the last (a negative animation-delay), so the
+     stripe is a stream of marks in single file. No library, no scaling
+     wrapper, no drag, no scroll velocity: none of it is asked for and
+     each would have been code that runs for nothing.
+
+     ⚠️ THE PATH IS NOT A FIXED DRAWING, IT IS BUILT FROM THE SHEETS. The
+     component scales one path to fit a box, which only holds while the
+     box's proportions do — and this collage's do not: the title row is
+     vw-sized, the sheets are ratio boxes, the English page mirrors the
+     lot and stacks its name sheet under the title. So the waypoints are
+     stored as FRACTIONS of a box — the article (A), the name sheet (N) or
+     the quote sheet (Q), each measured at build time — and the loop's
+     drops below the name sheet are in px, scaled down when there is less
+     room under it than the drawing had. In English every x-fraction is
+     mirrored. The waypoints go through a Catmull-Rom spline, so the red
+     line's hand-drawn ease is kept without a single bezier handle being
+     typed.
+
+     Rebuilt on resize and on a language change (settle() → buildTrail),
+     paused while the section is off screen, and static — the marks laid
+     along the path, not moving — under prefers-reduced-motion. */
+  const TRAILS = {
+    /* [anchor, fx, fy, fxEn?] — fractions of that box's width and height
+       (fxEn: the English page's own fx, where mirroring alone is wrong); or
+       ["L", fx, dy] — the loop under the name sheet: fx of N's width, dy
+       in px below N's bottom at the drawing's size (1440), scaled to the
+       room actually under it */
+    desktop: {
+      icon: 80, gap: 72, speed: 46, room: 363,   /* 20 → 26 → 44 → 60 → 100 → 80 over 2026-09-15; 52 → 36 → 46 px/s */
+      pts: [
+        ["A", 0.103, 0, 0.06], /* on the splitter (4th: the English page's
+                                  own fx, further out, so the 80px marks
+                                  clear the title's tail at 1164 of 1354) */
+        ["N", 0.34, 0.15],     /* under the name sheet's top edge */
+        ["N", 0.39, 0.55],
+        ["N", 0.42, 0.97],     /* out of its bottom edge */
+        ["L", 0.49, 77],       /* straight on down (the third drawing,
+                                  2026-09-15: a longer drop, then ONE round
+                                  loop to the left, crossing the drop once
+                                  on the way out) */
+        ["L", 0.53, 147],
+        ["L", 0.522, 231],     /* the loop, enlarged 2026-09-15 ("still not
+                                  big enough"): ~230px across, its foot
+                                  40px above the splitter at 1440 */
+        ["L", 0.411, 311],
+        ["L", 0.219, 316],
+        ["L", 0.067, 256],
+        ["L", 0.067, 171],
+        ["L", 0.209, 121],
+        ["L", 0.40, 124],
+        ["L", 0.53, 141],      /* crossing the drop */
+        ["L", 0.684, 154],
+        ["L", 0.836, 175],
+        ["Q", 0.06, 0.66],     /* behind the quote sheet's left edge */
+        ["Q", 0.19, 0.31],
+        ["Q", 0.284, 0.17],    /* the hump over its top edge… */
+        ["Q", 0.385, 0.02],
+        ["Q", 0.497, 0.045],
+        ["Q", 0.587, 0.09],    /* …and under its tape */
+        ["Q", 0.69, 0.25],
+        ["Q", 0.86, 0.8],      /* out of its bottom edge, near the corner */
+        ["A", 1.04, 0.95],     /* off the page */
+      ],
+    },
+    phone: {
+      icon: 50, gap: 45, speed: 34, room: 250,   /* "on phone 50" */
+      /* the phone's drawing of 2026-09-15 (the second one — the first
+         had a loop at the top left and the agency called it "not good"):
+         a C down the left into the name sheet's side, out of its top
+         right into a wide arc that leaves the screen — "notice how the
+         right side is out of sight" — and comes back behind the quote
+         sheet's lower corner, then under that sheet and off the left */
+      pts: [
+        ["A", 0.24, 0],
+        ["N", -0.15, -0.44],
+        ["N", -0.19, 0.12],
+        ["N", -0.17, 0.52],
+        ["N", 0.02, 0.8],      /* behind the name sheet */
+        ["N", 0.5, 0.5],
+        ["N", 0.73, 0.04],     /* out of its top right */
+        ["N", 1.07, -0.44],
+        ["N", 1.41, -0.36],    /* off the right */
+        ["N", 1.64, 0.44],
+        ["Q", 1.44, -0.21],
+        ["Q", 1.39, 0.5],
+        ["Q", 1.3, 0.7],
+        ["Q", 1.06, 0.98],     /* back in at the right edge, below the
+                                  quote sheet, and one smooth U under it
+                                  from edge to edge (the fourth drawing,
+                                  2026-09-15: nothing of it behind the
+                                  sheet, the middle ~80px below it) */
+        ["Q", 0.78, 1.3],
+        ["Q", 0.5, 1.42],
+        ["Q", 0.22, 1.3],
+        ["Q", -0.06, 0.98],
+        ["Q", -0.2, 0.7],      /* off the left */
+      ],
+    },
+  };
+
+  /* Catmull-Rom through the points, as cubic beziers */
+  function spline(p) {
+    let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+    for (let i = 0; i < p.length - 1; i++) {
+      const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
+      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+      d += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+    }
+    return d;
+  }
+
+  const measurePath = (() => {
+    let el = null;
+    return (d) => {
+      if (!el) {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("aria-hidden", "true");
+        svg.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
+        el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        svg.appendChild(el);
+        document.body.appendChild(svg);
+      }
+      el.setAttribute("d", d);
+      return el.getTotalLength();
+    };
+  })();
+
+  let trailWatched = false;
+  function buildTrail() {
+    const article = document.querySelector(".wb4");
+    const clipEl = document.getElementById("testiClip");
+    if (!article || !clipEl) return;
+    let trail = article.querySelector(".tc-trail");
+    if (!trail) {
+      trail = document.createElement("div");
+      trail.className = "tc-trail";
+      trail.setAttribute("aria-hidden", "true");
+      trail.innerHTML = '<div class="tc-trail-plane"></div>';
+      article.prepend(trail);
+    }
+    const plane = trail.firstElementChild;
+    const spec = isPhone() ? TRAILS.phone : TRAILS.desktop;
+    const A = article.getBoundingClientRect();
+    const box = (el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left - A.left, y: r.top - A.top, w: r.width, h: r.height };
+    };
+    const N = box(clipEl.querySelector(".tc-title"));
+    const Q = box(clipEl.querySelector(".tc-body"));
+    const Ab = { x: 0, y: 0, w: A.width, h: A.height };
+    const mirror = lang === "en";
+    /* the loop's drops, scaled to the room under the name sheet */
+    const k = Math.min(1, Math.max(0.35, (Ab.h - 14 - (N.y + N.h)) / spec.room));
+    const pts = spec.pts.map(([a, fx, fy, fxEn]) => {
+      const b = a === "Q" ? Q : a === "A" ? Ab : N;
+      const x = b.x + (mirror ? 1 - (fxEn == null ? fx : fxEn) : fx) * b.w;
+      const y = a === "L" ? N.y + N.h + fy * k : b.y + fy * b.h;
+      return [x, y];
+    });
+    const d = spline(pts);
+    const len = measurePath(d);
+    const n = Math.max(8, Math.round(len / spec.gap));
+    const dur = len / spec.speed;
+    plane.style.width = Ab.w + "px";
+    plane.style.height = Ab.h + "px";
+    plane.style.setProperty("--tc-path", `path("${d}")`);
+    plane.style.setProperty("--tc-icon", spec.icon + "px");
+    plane.style.setProperty("--tc-dur", dur.toFixed(2) + "s");
+    /* marks: reuse what is there, add or drop to the count */
+    while (plane.children.length > n) plane.lastElementChild.remove();
+    while (plane.children.length < n) {
+      const m = document.createElement("i");
+      m.className = "tc-mark";
+      plane.appendChild(m);
+    }
+    Array.from(plane.children).forEach((m, i) => {
+      m.style.setProperty("--tc-at", (100 * i / n).toFixed(2) + "%");
+      m.style.animationDelay = (-dur * i / n).toFixed(2) + "s";
+    });
+    if (!trailWatched && window.IntersectionObserver) {
+      trailWatched = true;
+      /* a stream nobody can see is a hundred animations for nothing */
+      new IntersectionObserver((entries) => {
+        trail.classList.toggle("is-off", !entries[0].isIntersecting);
+      }, { rootMargin: "120px" }).observe(article);
+    }
+  }
+
+  /* ── the band (phone) ── */
+  const TB_SPEED = 34;   /* px/s; the contact band runs at 40 with far less to read */
+  let bandTween = null;
+  let bandVisible = () => true;
+  let bandWatched = false;
+
+  function card(e, i) {
+    const sc = BAND_SCRAPS[i % BAND_SCRAPS.length];
+    const el = document.createElement("figure");
+    el.className = "tb-card";
+    /* the scrap is the card: its image, its aspect, its safe box as padding.
+       ⚠️ All four insets go over as FRACTIONS, never as %: a percentage
+       padding resolves against the containing block, which here is the
+       loop group — the whole ~1800px row — so 8% came out as 148px a side
+       and the words stood in a 60px column. The card knows its own height
+       (--tb-h) and its ratio, so it rebuilds its own width and takes the
+       fractions of that. */
+    el.style.setProperty("--tb-img", `url("${sc.src}")`);
+    el.style.setProperty("--tb-r", (sc.w / sc.h).toFixed(4));
+    el.style.setProperty("--tb-pt", (sc.pad[0] / 100).toFixed(3));
+    el.style.setProperty("--tb-pr", (sc.pad[1] / 100).toFixed(3));
+    el.style.setProperty("--tb-pb", (sc.pad[2] / 100).toFixed(3));
+    el.style.setProperty("--tb-pl", (sc.pad[3] / 100).toFixed(3));
+    const cap = document.createElement("figcaption");
+    cap.className = "tb-who";
+    const n = document.createElement("span");
+    n.className = "tb-name";
+    const b = document.createElement("span");
+    b.className = "tb-biz";
+    cap.append(n, b);
+    const q = document.createElement("blockquote");
+    q.className = "tb-quote";
+    q.textContent = t(e, "quote");
+    el.append(cap, q);
+    writeWho(el, ".tb-name", ".tb-biz", e);
+    return el;
+  }
+
+  /* The scrap nearest the middle of the stripe lifts — "pop out effect when
+     in the middle" — and it is continuous, not a class that flips: every
+     card carries --pop, 1 at the centre falling to 0 half a stripe away,
+     and the stylesheet turns that into a scale and a shadow. Written on the
+     loop tween's own update, so it costs nothing while the stripe is
+     paused, and only written when it changes by a hundredth. */
+  function popCards(track) {
+    const host = track.parentElement;
+    const hr = host.getBoundingClientRect();
+    const mid = hr.left + hr.width / 2;
+    const reach = hr.width * 0.55;
+    track.querySelectorAll(".tb-card").forEach((el) => {
+      const r = el.getBoundingClientRect();
+      /* off the stripe entirely: park it at 0 once and move on */
+      if (r.right < hr.left - r.width || r.left > hr.right + r.width) {
+        if (el.dataset.pop !== "0") { el.dataset.pop = "0"; el.style.setProperty("--pop", "0"); }
+        return;
+      }
+      const d = Math.abs(r.left + r.width / 2 - mid) / reach;
+      const v = d >= 1 ? 0 : 1 - d * d * (3 - 2 * d);   /* smoothstep, eased */
+      const s = v.toFixed(2);
+      if (el.dataset.pop !== s) { el.dataset.pop = s; el.style.setProperty("--pop", s); }
+    });
+  }
+
+  function rebuildBand() {
+    const track = document.getElementById("testiBandTrack");
+    if (!track) return;
+    if (bandTween) bandTween.kill();
+    bandTween = null;
+    track.innerHTML = "";
+    gsap.set(track, { clearProps: "transform" });
+    /* the band is display:none above 640px and a hidden track measures 0;
+       makeLoop returns null for that and nothing is wired */
+    TESTIMONIALS.forEach((e, i) => track.appendChild(card(e, i)));
+    bandTween = makeLoop(track, TB_SPEED);
+    if (!bandTween) return;
+    bandTween.eventCallback("onUpdate", () => popCards(track));
+    popCards(track);
+
+    const host = track.parentElement;
+    if (!bandWatched) {
+      bandWatched = true;
+      bandVisible = pauseOffscreen(host, () => bandTween);
+      wireBandDrag(host, track);
+    }
+    if (!bandVisible()) bandTween.pause();
+  }
+
+  /* Hold and DRAG (2026-09-14b, "give the ability to drag the stripe").
+     Pointer events only — they cover a finger and a mouse alike, and
+     `touch-action: pan-y` on the stripe leaves vertical swipes to the page
+     while a horizontal one comes here uncancelled. Pressing holds the
+     loop; moving scrubs it by the same distance (the tween is linear, so
+     the shift is dx over the period — see makeLoop); letting go resumes it
+     a beat later, from wherever it was left. The cards' --pop follows the
+     scrub, so the one under the middle still lifts while you pull. */
+  let resumeTimer = null;
+  function wireBandDrag(host, track) {
+    let x0 = 0, p0 = 0, down = false, moved = false;
+    const tw = () => bandTween;
+    const hold = () => { clearTimeout(resumeTimer); if (tw()) tw().pause(); };
+    const release = (delay) => {
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => { if (tw() && bandVisible() && !down) tw().resume(); }, delay);
+    };
+    host.addEventListener("pointerdown", (ev) => {
+      if (!tw() || ev.button) return;
+      down = true; moved = false;
+      x0 = ev.clientX; p0 = tw().progress();
+      hold();
+      host.setPointerCapture(ev.pointerId);
+    });
+    host.addEventListener("pointermove", (ev) => {
+      if (!down || !tw()) return;
+      const dx = ev.clientX - x0;
+      if (!moved && Math.abs(dx) < 4) return;
+      moved = true;
+      host.classList.add("is-dragging");
+      const t = tw();
+      t.progress(gsap.utils.wrap(0, 1, p0 + dx / (t.dir * t.period)));
+      popCards(track);
+    });
+    const up = () => {
+      if (!down) return;
+      down = false;
+      host.classList.remove("is-dragging");
+      release(moved ? 1400 : 800);
+    };
+    host.addEventListener("pointerup", up);
+    host.addEventListener("pointercancel", up);
+    /* a mouse resting on the stripe holds it too, like the rotor */
+    host.addEventListener("pointerenter", (ev) => { if (ev.pointerType === "mouse") hold(); });
+    host.addEventListener("pointerleave", (ev) => { if (ev.pointerType === "mouse" && !down) release(300); });
+  }
+
+  /* ── the rotor (desktop) ──
+     "make it a lil faster" (2026-09-13): the hold was 5–9.5s at 0.33s a
+     word; it is 3.6–7s at 0.24s a word now, and the fade out and rise are
+     shorter with it. */
+  const HOLD_MIN = 3600, HOLD_MAX = 7000, HOLD_PER_WORD = 240;
+  let rotorIdx = 0;
+  let rotorTimer = null;
+  let rotorOn = false;
+  let rotorHeld = false;
+  let rotorWired = false;
+
+  function holdFor(e) {
+    const words = t(e, "quote").split(/\s+/).length;
+    return Math.min(HOLD_MAX, Math.max(HOLD_MIN, words * HOLD_PER_WORD));
+  }
+
+  function writeRotor(e) {
+    const root = document.getElementById("testiRotor");
+    writeWho(root, ".tr-name", ".tr-biz", e);
+    root.querySelector(".tr-quote").textContent = t(e, "quote");
+  }
+
+  function advance() {
+    if (!rotorOn || rotorHeld) return;
+    rotorIdx = (rotorIdx + 1) % TESTIMONIALS.length;
+    showRotor(rotorIdx, true);
+  }
+
+  function showRotor(i, animate) {
+    const root = document.getElementById("testiRotor");
+    if (!root) return;
+    const inner = root.querySelector(".tr-inner");
+    const e = TESTIMONIALS[i];
+    clearTimeout(rotorTimer);
+    const next = advance;
+    if (!animate || prefersReduced) {
+      writeRotor(e);
+      gsap.set(inner, { clearProps: "opacity,transform" });
+      rotorTimer = setTimeout(next, holdFor(e));
+      return;
+    }
+    /* out, swap, in — the in is the banners' rise (main.js, `.banner h2`),
+       a shorter travel because this is a paragraph and not a line */
+    gsap.killTweensOf(inner);
+    gsap.to(inner, {
+      opacity: 0, y: -10, duration: 0.32, ease: "power2.in",
+      onComplete: () => {
+        writeRotor(e);
+        gsap.fromTo(inner,
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.7, ease: "power3.out",
+            onComplete: () => { rotorTimer = setTimeout(next, holdFor(e)); } });
+      },
+    });
+  }
+
+  function startRotor() {
+    const root = document.getElementById("testiRotor");
+    if (!root || rotorOn) return;
+    rotorOn = true;
+    showRotor(rotorIdx, false);
+  }
+  function stopRotor() {
+    rotorOn = false;
+    clearTimeout(rotorTimer);
+  }
+
+  function wireRotor() {
+    const root = document.getElementById("testiRotor");
+    if (!root || rotorWired) return;
+    rotorWired = true;
+    /* runs only while the footer is on screen; a cycle nobody can see is
+       a timer for nothing, and the first testimonial should be the one
+       that is there when the footer comes into view */
+    if (window.IntersectionObserver) {
+      new IntersectionObserver((entries) => {
+        entries[0].isIntersecting ? startRotor() : stopRotor();
+      }, { rootMargin: "60px" }).observe(root);
+    } else {
+      startRotor();
+    }
+    /* the pointer holds the current one, like the band */
+    root.addEventListener("pointerenter", () => { rotorHeld = true; clearTimeout(rotorTimer); });
+    root.addEventListener("pointerleave", () => {
+      rotorHeld = false;
+      if (rotorOn) rotorTimer = setTimeout(advance, 1200);
+    });
+  }
+
+  /* language switch: same index, new words, no animation */
+  function refreshRotor() {
+    const root = document.getElementById("testiRotor");
+    if (!root) return;
+    writeRotor(TESTIMONIALS[rotorIdx]);
+  }
+
+  return {
+    render() { renderClip(); refreshRotor(); settleClip(); },
+    settle() { settleClip(); },
+    rebuildBand,
+    wireClip,
+    wireRotor,
+  };
+})();
 
 /* ══════════ hero film strip ══════════
    One direction, constant speed. One group of four frames is cloned across
@@ -1152,6 +1804,7 @@ function applyI18n() {
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
 
   buildBandSource();
+  testimonials.render();
 
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const entry = I18N[el.dataset.i18n];
@@ -1490,10 +2143,15 @@ const RINGS = {
    because it is behind him; the screens survive at ~60px, where they read as
    texture. Replace either the day the agency photographs their own two people
    — it is one run of the script and no other change. */
+/* ⚠️ The `-torn` set since 2026-09-15: the same three cut-outs with the
+   FRAME's straight edges — wherever the photograph was cropped, not the
+   people's own outlines — torn like the scraps, by resources/tear_marks.py
+   from the cutter's untouched originals beside them. "they all have cut
+   straight edges and its not good lookin". Drop the suffix to undo. */
 const RING_MARKS = {
-  design: { img: "assets/marks/mark-design.webp" },
-  photo: { img: "assets/marks/mark-photo.webp" },
-  tech: { img: "assets/marks/mark-tech.webp" },
+  design: { img: "assets/marks/mark-design-torn.webp" },
+  photo: { img: "assets/marks/mark-photo-torn.webp" },
+  tech: { img: "assets/marks/mark-tech-torn.webp" },
 };
 
 /* Which ring is showing. Read by nothing else today, but it is the one
@@ -4039,6 +4697,8 @@ if (QS.get("flat") === "1") {
 applyI18n();
 initDropCap();
 syncMenuBtn();
+testimonials.wireRotor();
+testimonials.wireClip();
 openFromQuery();
 
 /* widths measured before Idris lands are wrong and leave a gap in the
