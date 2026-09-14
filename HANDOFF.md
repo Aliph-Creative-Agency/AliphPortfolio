@@ -23,9 +23,15 @@ _Updated 2026-09-16. Read this first._
 > ✅ **SUPERSEDED IN THE TREE, 2026-09-16: THE TESTIMONIALS ARE REAL.** The
 > four answers in the feedback sheet (`17EV8437…`, all of 2026-09-12) are in
 > `TESTIMONIALS`, each cut to one sentence of the client's own words, and
-> the cutting's quote is one run of text instead of two columns. ⚠️ **NOT
-> COMMITTED, NOT DEPLOYED** as of this write-up — the live site still shows
-> the five placeholders. See _Session 2026-09-16_.
+> the cutting's quote is one run of text instead of two columns.
+> **Committed (`8112571`) and LIVE — version
+> `a406a411-e7b9-44c5-93a2-c9d5b768778d`**, the same day. The deploy
+> uploaded exactly `style.css` and `main.js`; verified with a browser UA
+> and a cache-buster on BOTH hosts: both files **md5-identical** to the
+> tree, `/`, `/about`, `/library` all 200, the live `main.js` carrying the
+> first client's name and no `placeholder: true`, the live `style.css`
+> with zero `column-count`. ⚠️ **NOT PUSHED** at the time of writing —
+> `origin/main` is at `d1629db`. See _Session 2026-09-16_.
 > 🔴 ~~**AND IT RENDERS PLACEHOLDER COPY.** The five entries in
 > `TESTIMONIALS` are stand-ins with no client behind them, and they are on
 > the public site now. The agency asked for the deploy knowing this; the
@@ -699,8 +705,9 @@ gesture has been invented for it.
 
 "read the feedback sheet and swap in the real testimonials, but i want u to
 compact the quotes into one liners and also the one in the section below the
-gallery has the text split up, join them". Three things, all in the tree,
-**not committed and not deployed** at the time of writing.
+gallery has the text split up, join them". Three things — **committed
+(`8112571`) and deployed (`a406a411-…`) the same day** at "commit and
+deploy"; the verification is in the header block.
 
 ### 1. ✅ Reading the sheet — the ID had to come from the agency
 
@@ -783,8 +790,11 @@ widths were looked at. ⚠️ Headless; the sheets' 3D lift was not exercised.
 
 ### What is still open
 
-1. 🔴 **COMMIT AND DEPLOY.** The live site is still the placeholders. Three
-   files: `prototype/main.js`, `prototype/style.css`, this one.
+1. ✅ Committed and deployed; the real words are on the public site.
+   ⚠️ **Not pushed** — `origin/main` is two commits behind at `d1629db`
+   plus this write-up. Audit the range for id-shaped tokens first: this
+   session handled the sheet's full ID in chat and in the scratchpad, and
+   it must not be in this file or the commit.
 2. ⚠️ The order (which sentence leads), the English translations and the
    English spellings of the four names and businesses — all mine; ask.
 3. ⚠️ Alignment of a one-line quote on the wide sheet (§3).
