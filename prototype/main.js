@@ -1339,7 +1339,7 @@ const testimonials = (() => {
      to 40 words; the real quotes are one sentence each, and a hold that
      still varied with them read as uneven — "the footer testimonials have
      diff up time" (2026-09-16). */
-  const ROTOR_HOLD = 4000;
+  const ROTOR_HOLD = 3000;   /* "make it faster" — was 4000 */
   let rotorIdx = 0;
   let rotorTimer = null;
   let rotorOn = false;
