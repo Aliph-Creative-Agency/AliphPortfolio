@@ -1334,20 +1334,18 @@ const testimonials = (() => {
   }
 
   /* ── the rotor (desktop) ──
-     "make it a lil faster" (2026-09-13): the hold was 5–9.5s at 0.33s a
-     word; it is 3.6–7s at 0.24s a word now, and the fade out and rise are
-     shorter with it. */
-  const HOLD_MIN = 3600, HOLD_MAX = 7000, HOLD_PER_WORD = 240;
+     One hold for every entry. It was scaled per word (3.6–7s at 0.24s a
+     word, "make it a lil faster", 2026-09-13) while the placeholders ran
+     to 40 words; the real quotes are one sentence each, and a hold that
+     still varied with them read as uneven — "the footer testimonials have
+     diff up time" (2026-09-16). */
+  const ROTOR_HOLD = 4000;
   let rotorIdx = 0;
   let rotorTimer = null;
   let rotorOn = false;
   let rotorHeld = false;
   let rotorWired = false;
 
-  function holdFor(e) {
-    const words = t(e, "quote").split(/\s+/).length;
-    return Math.min(HOLD_MAX, Math.max(HOLD_MIN, words * HOLD_PER_WORD));
-  }
 
   function writeRotor(e) {
     const root = document.getElementById("testiRotor");
@@ -1371,7 +1369,7 @@ const testimonials = (() => {
     if (!animate || prefersReduced) {
       writeRotor(e);
       gsap.set(inner, { clearProps: "opacity,transform" });
-      rotorTimer = setTimeout(next, holdFor(e));
+      rotorTimer = setTimeout(next, ROTOR_HOLD);
       return;
     }
     /* out, swap, in — the in is the banners' rise (main.js, `.banner h2`),
@@ -1384,7 +1382,7 @@ const testimonials = (() => {
         gsap.fromTo(inner,
           { opacity: 0, y: 24 },
           { opacity: 1, y: 0, duration: 0.7, ease: "power3.out",
-            onComplete: () => { rotorTimer = setTimeout(next, holdFor(e)); } });
+            onComplete: () => { rotorTimer = setTimeout(next, ROTOR_HOLD); } });
       },
     });
   }
