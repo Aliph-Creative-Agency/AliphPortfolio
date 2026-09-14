@@ -24,9 +24,9 @@ _Updated 2026-09-14. Read this first._
 > `TESTIMONIALS` are stand-ins with no client behind them, and they are on
 > the public site now. The agency asked for the deploy knowing this; the
 > real words are still the first open item.
-> ⚠️ **NOT PUSHED.** `origin/main` is at `2f1d0a3`, two commits behind
-> (`2531a74` and `b3b7e6a`). Deploying does not push. See _Session
-> 2026-09-14_ and _Session 2026-09-13_.
+> ✅ **PUSHED, `origin/main` in sync at `5abe3ee`** (2026-09-15), after
+> the range was audited for id-shaped tokens and key-shaped files: none.
+> See _Session 2026-09-14_ and _Session 2026-09-13_.
 >
 > ✅ **THE SITE IS CURRENT — version `d3113117-385a-450f-affe-bacd11786869`.**
 > Both 2026-09-01 rounds are live: the dashes / ring kicker / phone copy round
@@ -986,7 +986,7 @@ transformed except the lifted sheet, and that was read from computed style.
 
 1. 🔴 **THE COPY** — unchanged from 2026-09-13, and LIVE now.
 2. ✅ **Committed (`b3b7e6a`) and deployed (`bad1d87d-…`) on 2026-09-15**
-   at the agency's "ok commit and deploy this". ⚠️ Not pushed.
+   at the agency's "ok commit and deploy this", and pushed.
 3. ⚠️ The agency has not seen this round. The rotor's hold, the pop's 9%,
    the cutting's rest tilts and the label sentences are the guesses most
    likely to come back. «من كلام عملائنا» and «قالوا عنّا.» are mine.
