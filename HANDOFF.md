@@ -4,18 +4,29 @@ _Updated 2026-09-14. Read this first._
 
 > ## 🟢 State on 2026-09-01: BOTH ROUNDS ARE COMMITTED AND LIVE; THE FORM'S STATE IS UNVERIFIED
 >
-> 🔴 **SUPERSEDED, 2026-09-13/14: THE TREE IS AHEAD OF THE LIVE SITE BY
-> TWO ROUNDS, AND THEY RENDER PLACEHOLDER COPY.** The testimonials were built
-> on 2026-09-13 — a cutting on the home page, a card stripe on the phone, a
-> rotor in the desktop footer — and REDRAWN on 2026-09-14 to the agency's own
-> frames and notes: their scraps, a line that says what the cutting is, the
-> rotor under a taped label, the phone stripe as torn scraps that pop in the
-> middle, and the title rule (name big, business small, never the service).
-> Across all three pages, `main.js`, `style.css`, two fonts and **eight**
-> images. **Neither committed nor deployed**, and the five entries in
-> `TESTIMONIALS` are stand-ins with no client behind them. See _Session
-> 2026-09-14_ and _Session 2026-09-13_. Everything else in this block still
-> holds; live is still `d3113117-…`.
+> ✅ **SUPERSEDED, 2026-09-15: THE TESTIMONIALS ROUND IS COMMITTED
+> (`b3b7e6a`) AND LIVE — version `bad1d87d-2e1e-43a5-8c6b-fb245792a76c`.**
+> The testimonials of 2026-09-13, redrawn on the 14th and 15th to the
+> agency's own frames and notes — their scraps, the collage under «قالوا
+> عنّا.», the rotor under a taped label, the phone stripe of scraps that
+> pop and drag, the trail of double aliphs through the collage, the ring
+> marks torn where the photo was cropped, and the title rule (name big,
+> business small, never the service). One commit, 27 files. The deploy
+> uploaded exactly the 19 files that changed; the trigger list named only
+> the workers.dev host, which is correct (no `routes` in wrangler.toml).
+> **Verified live** — browser UA, cache-buster, `-L`: `/`, `/about`,
+> `/library` all 200, `/index.html` 307; `style.css`, `main.js`, a scrap,
+> a torn mark and the aliph icon all **md5-identical** to the tree; all
+> three HTML files byte-identical; rendered on the live domain at 1440 and
+> 390 with the trail running, the rotor labelled, the band at 5/20 cards
+> and the torn design mark in the ring, no JS errors.
+> 🔴 **AND IT RENDERS PLACEHOLDER COPY.** The five entries in
+> `TESTIMONIALS` are stand-ins with no client behind them, and they are on
+> the public site now. The agency asked for the deploy knowing this; the
+> real words are still the first open item.
+> ⚠️ **NOT PUSHED.** `origin/main` is at `2f1d0a3`, two commits behind
+> (`2531a74` and `b3b7e6a`). Deploying does not push. See _Session
+> 2026-09-14_ and _Session 2026-09-13_.
 >
 > ✅ **THE SITE IS CURRENT — version `d3113117-385a-450f-affe-bacd11786869`.**
 > Both 2026-09-01 rounds are live: the dashes / ring kicker / phone copy round
@@ -973,10 +984,9 @@ transformed except the lifted sheet, and that was read from computed style.
 
 ### What is still open
 
-1. 🔴 **THE COPY** — unchanged from 2026-09-13.
-2. 🔴 **NOT COMMITTED AND NOT DEPLOYED** — two rounds now. Fifteen untracked
-   files (two fonts, eight images, four sources, the cutter) and five
-   modified.
+1. 🔴 **THE COPY** — unchanged from 2026-09-13, and LIVE now.
+2. ✅ **Committed (`b3b7e6a`) and deployed (`bad1d87d-…`) on 2026-09-15**
+   at the agency's "ok commit and deploy this". ⚠️ Not pushed.
 3. ⚠️ The agency has not seen this round. The rotor's hold, the pop's 9%,
    the cutting's rest tilts and the label sentences are the guesses most
    likely to come back. «من كلام عملائنا» and «قالوا عنّا.» are mine.
