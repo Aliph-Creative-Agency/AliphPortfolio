@@ -1577,7 +1577,7 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
   /* the turn that points it where the note goes, then the hover nudge along
      that same direction — one transform, two variables, so the nudge is
      always "forward" whichever way the arrow faces */
-  transform: var(--turn, none) translateX(var(--nudge, 0px));
+  transform: var(--turn, none) translate(var(--nudge, 0px), var(--rise, 0px));
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: visible;
 }
@@ -1585,11 +1585,12 @@ html[lang="en"] .dc-sheet { background-image: url("assets/img/crumple-en.webp");
    viewBox's 2.2 came out under a pixel */
 .nb-arrow path { vector-effect: non-scaling-stroke; }
 .nb-arrow-down { width: 1.05em; --turn: rotate(90deg); }
-/* forward is the inline end: the arrow is drawn pointing right, so it is
-   flipped for Arabic */
-html[dir="rtl"] .nb-arrow-fwd { --turn: scaleX(-1); }
+/* the envelope on «تواصل معنا»: the same pen, and it lifts on hover where
+   the arrow nudges along */
+.nb-icon-mail { width: 1.15em; height: 0.8em; }
 @media (hover: hover) {
   .note-btn:hover .nb-arrow { --nudge: 0.28em; }
+  .note-btn:hover .nb-icon-mail { --nudge: 0px; --rise: -0.14em; }
 }
 @media (prefers-reduced-motion: reduce) {
   .nb-arrow { transition: none; }
