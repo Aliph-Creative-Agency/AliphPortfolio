@@ -36,6 +36,15 @@ _Updated 2026-09-16. Read this first._
 > `fe60c3e` plus this write-up**, after the range was audited: no
 > 40+-character tokens, no key-shaped files, no `PRIVATE_KEY`. See
 > _Session 2026-09-16_.
+> ⚠️ **THEN A SECOND ROUND THE SAME DAY, COMMITTED AND NOT DEPLOYED, NOT
+> PUSHED** — `a42bbba` … `041f2f2`, six commits: the hero panel sized by
+> the hero's height too and its notes centred; the notes' labels
+> underlined, an arrow under one and an envelope under the other; the
+> cutting's quote centred on its sheet; the footer compacted to the
+> agency's own screenshot with the rotor's words boxed to the socials'
+> edges; «ابدأ من هنا» landing on the title. The live site is at
+> `e72c45d7-…` (the rotor round) and does not have any of it. See
+> _Session 2026-09-16, afternoon_.
 > 🔴 ~~**AND IT RENDERS PLACEHOLDER COPY.** The five entries in
 > `TESTIMONIALS` are stand-ins with no client behind them, and they are on
 > the public site now. The agency asked for the deploy knowing this; the
@@ -795,6 +804,141 @@ and 0.7s rise. ⚠️ Below 3s the longer sentences are cut short of a read.
 rotor pauses while a mouse rests on it (like the band) and while it is
 off screen.
 
+### Afternoon — the hero's notes, the cutting's quote, the footer, all off the agency's screenshots
+
+Six commits, `a42bbba` … `041f2f2`, **not deployed and not pushed** at
+the time of writing. Every one answers a screenshot or a sentence from
+the agency in chat; the sentences are quoted at the rules they produced.
+
+#### 5. ✅ The hero panel clipped its contact note — sized by height now
+
+"the contact us one is clipping under that line. these arent centered".
+The hero is a fixed height (`100svh − masthead`, for the film strip) and
+everything in the cream panel was sized by WIDTH alone, so on a wide,
+short window the title + lede + notes outgrew the panel, the centred
+stack overflowed both ways and the hero's `overflow: hidden` cut the
+contact note's curl at the bottom rule. Headless, at 1280×720 the note's
+bottom was 2px from the edge; anything shorter clipped.
+
+`.hero-overlay` is a **size container** and every `vw` in the panel is
+paired with a `cqh`, tuned so at 1440×900 the vw still wins and nothing
+the design was tuned at moves: title `6vw / 10.9cqh` (English `4.8vw /
+8.7cqh`), lede `1.62vw / 2.95cqh`, notes `12.5vw / 22.7cqh`, the label
+likewise; the note floor 140 → 120px. Measured, contact note's bottom
+against the panel's edge (negative = inside): 1440×900 −60 → −59;
+1366×768 −13 → −39; 1280×720 −2 → −29; 1280×650 clipped → −14; 1024×600
+still +21 — the floors floor, and that is the hero's own 460px floor
+territory. ⚠️ `container-type: size` on an auto-height box makes it ZERO
+height; the phone block sets it back to `normal`. The notes are
+`justify-content: center` under their rule (pair centre 1165 vs rule
+centre 1164).
+
+#### 6. ✅ The notes read as buttons now
+
+"these 2 buttons dont seem like ones ... make them stand out and seem
+like they're clickable". Each label is now `.nb-text` (the i18n target
+moved onto it) with a drawn ink UNDERLINE (an SVG stroke as its
+background, stretched to the word), and under it an icon in the same
+pen: the site's own arrow — the nav oval's — turned to point DOWN on
+«ابدأ من هنا», and on «تواصل معنا» an ENVELOPE ("something other than
+the horizontal arrow ... a fitting icon for its purpose"; it was the
+arrow pointing forward first, flipped for Arabic). On hover the arrow
+nudges along its direction and the envelope lifts, on top of the swing.
+Strokes are `vector-effect: non-scaling-stroke` — the first pass came
+out under a pixel at 1440. ⚠️ The label is STACKED (words / underline /
+icon), not side by side: side by side, "Get in touch →" ran to the
+curled note's edge on the English page and the ↓ crossed its own
+underline ("fix this"), and the stack reads the same on both notes at
+every width. Labels measured inside the paper at 1440, 1280×650 and 390
+in both languages. Also: **`id="why"` is on the BANNER now, not the
+section** — "take me to the why aliph title not its first subtitle".
+
+#### 7. ✅ The cutting's quote is centred on its sheet
+
+"center and middle this txt for phone and pc inside the scrap". `text-
+align: center`, and the sheet's padding is EQUAL top and bottom (9 / 9 on
+a desktop, 16 / 16 on a phone; it was 11.5 / 6 and 17 / 7 for the tape),
+so the centred words sit in the middle of the paper and not in the
+middle of what is left under the tape. Ink centre within 3px of the
+paper's centre at 1440 and 390, both languages. ⚠️ The tape's foot is at
+31% of the sheet's height; the ink starts at 32–46% everywhere, and the
+English phone quote needed one size down (0.9 → 0.84rem) to stay at two
+lines and clear it. A third line would run under the tape.
+
+#### 8. ✅ The footer, compacted to the agency's screenshot
+
+"i compacted the footer a lil, i want u to copy this" — a 1010px-wide
+screenshot, read at ×1.46 (the email's 414px against its 277). Then two
+more with the rotor moved and the mark enlarged. What it is now, at
+1440, in the `2026-09-16` blocks of style.css:
+
+- the contact rows **151px apart** (were 176; the mockup's ≈146): the
+  lines' gap 1.4rem → 0.35rem, the row's own padding and the value's
+  line box unchanged, so the air taken out is under each value (71 → 44);
+- the scrap **380px** (`min(100%, 15.8rem)`, was 21rem / 514);
+- the grid's bottom padding 0.75rem, the legal line `0.4rem / 0.6rem`;
+- **from 1280 up the socials stand in the rotor's column** at its foot,
+  level with the last row's value (centres 698 / 699), with the grid
+  split 46 / 54 so the row of three fits beside the mark's clearance;
+  under 1280 they keep the full-width row of 2026-08-24. ⚠️ The rotor is
+  placed by hand in that block too (`grid-column: 2; grid-row: 1`) —
+  without it the socials took its cell and auto-placement dropped it
+  into a second row, 1295px of footer;
+- 🔴 **THE ROTOR'S WORDS AND THE SOCIALS SHARE ONE BOX** — "i edited the
+  placement of the testimonials so that it lines up with the socials
+  vertically ... from the left and the right, so from now on these are
+  the boundaries for the end of the line in the quote". `--tr-w` is
+  15.4rem (370px), hugging the mark's clearance; `.tr-inner` is that
+  wide and the name, business and words wrap inside it; the three
+  socials are spread across the same width with `space-between` so
+  their two ends ARE its edges. Measured: both 307…676 at 1440 (346…715
+  once the mark went back up). Where the column has less than 370 after
+  the clearance (901–1279) the box is what is left. `text-wrap: pretty`
+  on the words;
+- the rule over the legal line was taken OUT (the first screenshot had
+  none) and put BACK ("bring it back"): it runs from the box's edge, and
+  ALIPH CREATIVE starts on that same line — both `calc(var(--pad) +
+  var(--mark-clear))`, since the socials' box sits a page padding in from
+  the clearance;
+- the mark went 19vw → 16.3vw (the first screenshot) → **19vw again**
+  ("made the aliph logo bigger" once ALIPH CREATIVE moved out from beside
+  it); the drop is 4.4vw (63px under the edge at 1440, was 7vw / 96);
+- footer height **827px** (was 1030; the mockup's ≈806).
+
+⚠️ On a phone the legal line and the rule now start at `pad + clear` as
+well — 184px, against the socials' 205 — which is nearer than the 160
+they were at, and not in the agency's brief. Nothing else on the phone
+was touched.
+
+⚠️ The English title over the cutting is "What they say." — **the
+agency's own edit**, made in the tree between turns and carried in
+`38c5b9d`.
+
+#### Two things about the tooling, again
+
+- 🔴 **Two sessions on one CDP port kill each other's browser.** The
+  harness lost its socket at random — `ConnectionResetError` on the
+  first `Runtime.evaluate` after a navigate — about one run in two,
+  until it dawned that another chat's session was driving `shoot.py`'s
+  port 9366 (its dev server was on 8323 too) and every sweep-by-command-
+  line was killing the OTHER session's Edge, and theirs mine. The
+  scratchpad harness runs on **9377** with a fresh profile dir per run.
+  `shoot.py` itself still hard-codes 9366.
+- ⚠️ A `min-width` media block placed BEFORE the base rule it means to
+  override loses at equal specificity — the socials' size was set in one
+  and the base `.contact-socials` later in the sheet won, so the row
+  wrapped to three lines. `.footer .contact-socials` in the block.
+
+#### Open from the afternoon
+
+1. 🔴 **DEPLOY AND PUSH.** Six commits in the tree; the live site is the
+   morning's `e72c45d7-…`.
+2. ⚠️ The phone footer's legal line moved 24px (see above) — look at it
+   or pin it back to `var(--mark-clear)` in the ≤640 block.
+3. ⚠️ The hero at windows under ~600px tall still overflows (item 5).
+4. ⚠️ All of it is headless; the notes' hover, the envelope's lift and
+   the rotor's new box have not been seen by a person.
+
 ### Verified
 
 Headless Edge over CDP (the `shoot.py` `Browser`, driven from the scratchpad
@@ -811,6 +955,8 @@ widths were looked at. ⚠️ Headless; the sheets' 3D lift was not exercised.
 1. ✅ Committed, deployed and pushed; the real words are on the public
    site and the rotor turns every 4s. The sheet's full ID was handled in
    chat and the scratchpad only — audited out of the tree and the range.
+   ⚠️ **The afternoon's six commits are NOT deployed** — see _Open from
+   the afternoon_ above.
 2. ⚠️ The order (which sentence leads), the English translations and the
    English spellings of the four names and businesses — all mine; ask.
 3. ⚠️ Alignment of a one-line quote on the wide sheet (§3).
