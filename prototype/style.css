@@ -4396,9 +4396,10 @@ body.lib-index .lib-list { display: block; }
      read --mark-clear, and the phone block below re-states only these three
      tokens rather than four rules. Change the width here and the clearances
      move with it. */
-  --mark-w: clamp(160px, 22vw, 330px);        /* 317px at 1440 — "the aliph logo is still not
-                                                 as big as i asked" (2026-09-16); it was 19vw /
-                                                 274 for a month */
+  --mark-w: clamp(160px, 19vw, 300px);        /* 274px at 1440. Went to 22vw / 317 for one
+                                                 round ("not as big as i asked") and came back
+                                                 ("just bring back the previous size"),
+                                                 2026-09-16 */
   --mark-drop: clamp(-96px, -4.4vw, -44px);   /* 63px under the edge at 1440. It went to -11.5vw
                                                  for one round and came straight back: "u moved
                                                  the aliph logo down didnt u? move it up" */
