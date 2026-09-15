@@ -36,15 +36,25 @@ _Updated 2026-09-16. Read this first._
 > `fe60c3e` plus this write-up**, after the range was audited: no
 > 40+-character tokens, no key-shaped files, no `PRIVATE_KEY`. See
 > _Session 2026-09-16_.
-> ⚠️ **THEN A SECOND ROUND THE SAME DAY, COMMITTED AND NOT DEPLOYED, NOT
-> PUSHED** — `a42bbba` … `HEAD`, eight commits: the hero panel sized by
-> the hero's height too and its notes centred; the notes' labels
-> underlined, an arrow under one and an envelope under the other; the
-> cutting's quote centred on its sheet; the footer compacted to the
-> agency's own screenshot with the rotor's words boxed to the socials'
-> edges; «ابدأ من هنا» landing on the title. The live site is at
-> `e72c45d7-…` (the rotor round) and does not have any of it. See
-> _Session 2026-09-16, afternoon_.
+> ✅ **THEN A SECOND ROUND THE SAME DAY — DEPLOYED, version
+> `4c501abc-d00f-40d5-b5c8-3d83ba5bde7c`, AND PUSHED** — `a42bbba` …
+> `5177ca7` plus the write-ups: the hero panel sized by the hero's height
+> too and its notes centred; the notes' labels underlined, an arrow under
+> one and an envelope under the other; the cutting's quote centred on its
+> sheet; the footer compacted to the agency's own screenshots, redone
+> once against their side-by-side, with the rotor's words boxed to the
+> socials' edges; «ابدأ من هنا» landing on the title. The deploy uploaded
+> exactly the three files that changed; **verified** with a browser UA
+> and a cache-buster: `style.css` and `main.js` md5-identical to the tree
+> on both hosts, `index.html` identical on workers.dev and +367 bytes on
+> the custom domain (the analytics beacon, as before), `/about` and
+> `/library` 200. Range audited before the push: no long tokens, no key
+> files. See _Session 2026-09-16, afternoon_.
+> 🔴 **AND ONE THING IS UNRESOLVED: the agency sent two crops showing
+> the trail's marks running OVER the title «قالوا عنّا.»** ("when and why
+> did u do this? it was perfectly fine before"). It could not be
+> reproduced — see _The trail report_ in the afternoon section — and the
+> question of which device and width they were on is with them.
 > 🔴 ~~**AND IT RENDERS PLACEHOLDER COPY.** The five entries in
 > `TESTIMONIALS` are stand-ins with no client behind them, and they are on
 > the public site now. The agency asked for the deploy knowing this; the
@@ -946,10 +956,46 @@ agency's own edit**, made in the tree between turns and carried in
   and the base `.contact-socials` later in the sheet won, so the row
   wrapped to three lines. `.footer .contact-socials` in the block.
 
+#### The trail report — not reproduced, question with the agency
+
+Two crops arrived late in the day: the trail's aliphs over the letters
+of «قالوا عنّا.», and a second with the marks arcing from the title's
+foot toward a sheet's tape with no name sheet between. "it was perfectly
+fine before." Everything measurable says the trail has not moved:
+
+- `TRAILS` and `buildTrail` are byte-identical to the 09-15 deploy apart
+  from a formatter re-indenting main.js (the agency's editor; swept into
+  `38c5b9d` with their `testiHead` edit);
+- the offset-path string is IDENTICAL — same waypoints, same 37 marks at
+  1440 — in the current tree, the current tree with the deployed CSS
+  swapped in over CDP, the live site, and the 09-15 commit served from a
+  scratch worktree;
+- marks over the title's INK (a Range over the text, not the element's
+  full-width box): 0–1 at every one of fifteen widths from 390 to 1920,
+  at load, after the sheets settle, after a rebuild, after two language
+  toggles, and after resizing 390→1440 and 1440→390 (the icon goes
+  50↔80px and the plane rebuilds both ways).
+
+⚠️ Two things in the crops match nothing here: the marks are PHONE-sized
+(~50px) against a DESKTOP-sized title (~137px), and the second crop has
+a taped sheet straight under the title. A phone holding an older
+`main.js` is the first guess; a full-screen shot and the device/width
+were asked for. ⚠️ Do not "fix" the trail on the strength of the crops
+until it reproduces — every previous trail change was measured against
+the agency's own drawings, and the path is what they approved on the
+15th.
+
+⚠️ **The phone title, same report:** "this section's title on phone is
+still not the same font size as the ones before it". Measured at 390:
+«قالوا عنّا.» 43.2px, «أن تبدو النتيجة حتميّة.» 43.2px, the first two
+wall titles 40.8px — the same `clamp(1.8rem, 9.5vw, 8.6rem)` on both.
+Asked which title they are comparing against.
+
 #### Open from the afternoon
 
-1. 🔴 **DEPLOY AND PUSH.** Eight commits in the tree; the live site is
-   the morning's `e72c45d7-…`.
+1. ✅ Deployed (`4c501abc-…`) and pushed.
+   🔴 **The trail crops and the phone title — see the report above;
+   both are waiting on the agency's answer.**
 2. ⚠️ The phone footer's legal line moved 24px (see above) — look at it
    or pin it back to `var(--mark-clear)` in the ≤640 block.
 3. ⚠️ The hero at windows under ~600px tall still overflows (item 5).
