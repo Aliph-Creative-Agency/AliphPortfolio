@@ -903,10 +903,12 @@ more with the rotor moved and the mark enlarged. What it is now, at
   var(--mark-clear))`, since the socials' box sits a page padding in from
   the clearance;
 - the mark went 19vw → 16.3vw (the first screenshot) → 19vw → **22vw,
-  317px at 1440, with 166px (a third of the glyph) under the edge**
-  (`-11.5vw`): "made the aliph logo bigger", then "the aliph logo is
+  317px at 1440**: "made the aliph logo bigger", then "the aliph logo is
   still not as big as i asked" against a side-by-side of my footer and
-  theirs; every screenshot of theirs cuts the glyph's bottom third;
+  theirs. ⚠️ The drop is **4.4vw (63px under the edge)** and NOT more:
+  one round put it at -11.5vw because their screenshots seemed to cut
+  the glyph's bottom third, and the answer was "u moved the aliph logo
+  down didnt u? move it up". Its top is at 366, level with the words;
 - 🔴 **"ur testimonials are so low" — and the cause was the scrap's
   label, not the spacing.** `.tr-label`'s type was `10.5cqw` OF THE
   COLUMN (69.6px at 1440), which fitted the 504px scrap and not the

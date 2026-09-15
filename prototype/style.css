@@ -4399,8 +4399,9 @@ body.lib-index .lib-list { display: block; }
   --mark-w: clamp(160px, 22vw, 330px);        /* 317px at 1440 — "the aliph logo is still not
                                                  as big as i asked" (2026-09-16); it was 19vw /
                                                  274 for a month */
-  --mark-drop: clamp(-170px, -11.5vw, -44px); /* 166px under the edge at 1440 — the screenshots
-                                                 cut the bottom third of the glyph (2026-09-16) */
+  --mark-drop: clamp(-96px, -4.4vw, -44px);   /* 63px under the edge at 1440. It went to -11.5vw
+                                                 for one round and came straight back: "u moved
+                                                 the aliph logo down didnt u? move it up" */
   --mark-clear: calc(var(--mark-w) + clamp(0.7rem, 2vw, 1.8rem));
 }
 /* the home page's last section already butts against the contact band, so
