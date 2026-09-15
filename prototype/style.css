@@ -4396,11 +4396,11 @@ body.lib-index .lib-list { display: block; }
      read --mark-clear, and the phone block below re-states only these three
      tokens rather than four rules. Change the width here and the clearances
      move with it. */
-  --mark-w: clamp(160px, 19vw, 300px);        /* 274px at 1440: the agency shrank it in their
-                                                 compacted footer, then put it back — "made the
-                                                 aliph logo bigger" — once ALIPH CREATIVE moved
-                                                 out from beside it (2026-09-16) */
-  --mark-drop: clamp(-96px, -4.4vw, -44px);   /* 63px under the edge at 1440 (compacted footer) */
+  --mark-w: clamp(160px, 22vw, 330px);        /* 317px at 1440 — "the aliph logo is still not
+                                                 as big as i asked" (2026-09-16); it was 19vw /
+                                                 274 for a month */
+  --mark-drop: clamp(-170px, -11.5vw, -44px); /* 166px under the edge at 1440 — the screenshots
+                                                 cut the bottom third of the glyph (2026-09-16) */
   --mark-clear: calc(var(--mark-w) + clamp(0.7rem, 2vw, 1.8rem));
 }
 /* the home page's last section already butts against the contact band, so
@@ -4451,8 +4451,8 @@ body[data-page="index"] .footer { margin-top: 0; }
   .footer .contact-socials {
     width: min(100%, var(--tr-w));
     justify-content: space-between;
-    gap: 0.4rem;
-    font-size: 0.62rem;
+    gap: 0;               /* space-between spaces them; a gap is only a floor */
+    font-size: 0.58rem;   /* the row is 320px: beside the 317px mark the box is 357 at 1440 */
   }
 }
 .footer-legal {
@@ -4531,7 +4531,7 @@ body[data-page="index"] .footer { margin-top: 0; }
      words the full column, which is what a cell-wide rotor gives. */
   /* no rule over it (2026-09-14b, "remove the line above the footer
      one"): the scrap is the head of the column now */
-  padding-top: 0.2rem;
+  padding-top: 0;
   container-type: inline-size;  /* the scrap's type is sized off the column */
 }
 /* The scrap: scrap-footer.webp, 1400×621, safe L 22.8 T 20.4 R 25.7 B 19.2
@@ -4545,8 +4545,12 @@ body[data-page="index"] .footer { margin-top: 0; }
                                    was, off the compacted footer (2026-09-16) */
   /* right under the rule and the name right under the scrap — the
      drawing's spacing (2026-09-14): the scrap's top sits on the rule and
-     the name follows it by a line, not a paragraph */
-  margin: 0 0 0.55rem;
+     the name follows it by a line, not a paragraph. At 1440 that puts
+     the name 29px under the PHONE row's rule and the words on the
+     WHATSAPP row's — "i lined the testimonials with the phone and whats
+     up lines" (2026-09-16) — PROVIDED the label below stays one line.
+     Measured: name 335 / phone row 309, words 450 / WhatsApp row 459. */
+  margin: 0 0 0.1rem;
   margin-inline-start: auto;
   aspect-ratio: 1400 / 621;
   /* ⚠️ Narrower sides than the safe box (22.8 / 25.7): the words run in
@@ -4563,8 +4567,14 @@ body[data-page="index"] .footer { margin-top: 0; }
      minus the mark's clearance and the scrap shrinks with it, and a
      viewport-sized label broke «clients' words» across two lines there */
   /* the frame's words are ~58% of the sheet wide; Idris sets narrow, so
-     this is larger than it looks written down — 68px at 1440 */
-  font-size: clamp(1.6rem, 10.5cqw, 2.9rem);
+     this is larger than it looks written down — 50px on the 380px scrap.
+     🔴 SIZED TO THE SCRAP, NOT THE COLUMN. It was 10.5cqw of the column
+     (69.6px at 1440), which fitted the 504px scrap and NOT the 380px one:
+     the line broke in two behind nowrap, the scrap grew to 206px tall,
+     and everything under it — name, business, words — sat 60px too low
+     ("ur testimonials are so low", 2026-09-16). The cqw term only bites
+     where the column is narrower than the scrap. */
+  font-size: min(2.1rem, 13.4cqw);
   line-height: 1.2;
   white-space: nowrap;          /* "put the words side by side" */
   text-align: center;
@@ -4577,7 +4587,7 @@ body[data-page="index"] .footer { margin-top: 0; }
 }
 html[lang="en"] .tr-label {
   transform: rotate(2.6deg);
-  font-size: clamp(1.1rem, 6.5cqw, 1.8rem);   /* four words to the Arabic's three, so smaller */
+  font-size: min(1.3rem, 8.3cqw);   /* four words to the Arabic's three, so smaller */
 }
 .tr-inner { will-change: transform, opacity; }
 .tr-name {
@@ -4595,10 +4605,10 @@ html[lang="en"] .tr-label {
 .tr-quote {
   /* no hairline any more: the second drawing runs the words straight
      under the name, a paragraph apart, and a size up ("a lil bigger") */
-  margin: 1.15rem 0 0;
+  margin: 0.75rem 0 0;   /* was 1.15rem; puts the first line on the WhatsApp row's rule (2026-09-16) */
   font-size: clamp(1.1rem, 1.5vw, 1.3rem);
   line-height: 1.7;
-  text-wrap: pretty;   /* three lines in the 370px box; no lone last word */
+  text-wrap: pretty;   /* three lines in the box; no lone last word */
   color: rgba(217, 217, 206, 0.9);
 }
 /* the marks the drawing has: big, in the display face, the 99 opening and
@@ -4700,9 +4710,10 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
    compacted footer (2026-09-16) has them. The column has to hold the row of
    three beside the mark's clearance, so the split goes 46 / 54 here (the
    email needs 415px and gets 597 at 1440) and the links set a size down:
-   measured, the row is ~360px and the column leaves it 439 at 1440 and 379
-   at 1280. Under 1280 they keep the full-width row below the table. */
-@media (min-width: 1280px) {
+   measured, the row is 320px and the box beside the mark is 357 at 1440
+   and 332 at 1360. Under 1360 they keep the full-width row below the
+   table. */
+@media (min-width: 1360px) {
   .contact-grid { grid-template-columns: minmax(0, 46fr) minmax(0, 54fr); }
   /* the rotor is placed by hand too, or the socials take its cell and
      auto-placement drops it into a second row */
@@ -4711,7 +4722,10 @@ a.contact-value:hover .cv-ghost { transform: translateY(0); }
     grid-column: 2;
     grid-row: 1;
     align-self: end;
-    padding-bottom: 1.6rem;   /* puts the row level with the last value's middle */
+    padding-bottom: 0.3rem;   /* just over the rule — "the socials somehow
+                                 elevated": 1.6rem put them level with the
+                                 last value, and the screenshot has them
+                                 ~30px lower (2026-09-16) */
   }
 }
 
