@@ -37,7 +37,7 @@ _Updated 2026-09-16. Read this first._
 > 40+-character tokens, no key-shaped files, no `PRIVATE_KEY`. See
 > _Session 2026-09-16_.
 > ⚠️ **THEN A SECOND ROUND THE SAME DAY, COMMITTED AND NOT DEPLOYED, NOT
-> PUSHED** — `a42bbba` … `041f2f2`, six commits: the hero panel sized by
+> PUSHED** — `a42bbba` … `HEAD`, eight commits: the hero panel sized by
 > the hero's height too and its notes centred; the notes' labels
 > underlined, an arrow under one and an envelope under the other; the
 > cutting's quote centred on its sheet; the footer compacted to the
@@ -877,10 +877,12 @@ more with the rotor moved and the mark enlarged. What it is now, at
   line box unchanged, so the air taken out is under each value (71 → 44);
 - the scrap **380px** (`min(100%, 15.8rem)`, was 21rem / 514);
 - the grid's bottom padding 0.75rem, the legal line `0.4rem / 0.6rem`;
-- **from 1280 up the socials stand in the rotor's column** at its foot,
-  level with the last row's value (centres 698 / 699), with the grid
-  split 46 / 54 so the row of three fits beside the mark's clearance;
-  under 1280 they keep the full-width row of 2026-08-24. ⚠️ The rotor is
+- **from 1360 up the socials stand in the rotor's column** at its foot,
+  just over the rule (716–745, rule at 770 — "the socials somehow
+  elevated" when they were level with the last value), with the grid
+  split 46 / 54 so the row of three (320px at 0.58rem) fits beside the
+  mark's clearance; under 1360 they keep the full-width row of
+  2026-08-24. ⚠️ The rotor is
   placed by hand in that block too (`grid-column: 2; grid-row: 1`) —
   without it the socials took its cell and auto-placement dropped it
   into a second row, 1295px of footer;
@@ -900,9 +902,22 @@ more with the rotor moved and the mark enlarged. What it is now, at
   ALIPH CREATIVE starts on that same line — both `calc(var(--pad) +
   var(--mark-clear))`, since the socials' box sits a page padding in from
   the clearance;
-- the mark went 19vw → 16.3vw (the first screenshot) → **19vw again**
-  ("made the aliph logo bigger" once ALIPH CREATIVE moved out from beside
-  it); the drop is 4.4vw (63px under the edge at 1440, was 7vw / 96);
+- the mark went 19vw → 16.3vw (the first screenshot) → 19vw → **22vw,
+  317px at 1440, with 166px (a third of the glyph) under the edge**
+  (`-11.5vw`): "made the aliph logo bigger", then "the aliph logo is
+  still not as big as i asked" against a side-by-side of my footer and
+  theirs; every screenshot of theirs cuts the glyph's bottom third;
+- 🔴 **"ur testimonials are so low" — and the cause was the scrap's
+  label, not the spacing.** `.tr-label`'s type was `10.5cqw` OF THE
+  COLUMN (69.6px at 1440), which fitted the 504px scrap and not the
+  380px one: the line broke in two behind `white-space: nowrap`, the
+  scrap grew from 169 to 206px, and the name, business and words under
+  it went 60px down. It is `min(2.1rem, 13.4cqw)` now (English
+  `min(1.3rem, 8.3cqw)`), one line at 50px. With the rotor's top padding
+  and the scrap's bottom margin closed up, the name starts at 344 under
+  the phone row's rule at 309 (that row's label is at 327) and the words
+  at 459 ON the WhatsApp row's rule at 459 — "i lined the testimonials
+  with the phone and whats up lines";
 - footer height **827px** (was 1030; the mockup's ≈806).
 
 ⚠️ On a phone the legal line and the rule now start at `pad + clear` as
@@ -931,8 +946,8 @@ agency's own edit**, made in the tree between turns and carried in
 
 #### Open from the afternoon
 
-1. 🔴 **DEPLOY AND PUSH.** Six commits in the tree; the live site is the
-   morning's `e72c45d7-…`.
+1. 🔴 **DEPLOY AND PUSH.** Eight commits in the tree; the live site is
+   the morning's `e72c45d7-…`.
 2. ⚠️ The phone footer's legal line moved 24px (see above) — look at it
    or pin it back to `var(--mark-clear)` in the ≤640 block.
 3. ⚠️ The hero at windows under ~600px tall still overflows (item 5).
