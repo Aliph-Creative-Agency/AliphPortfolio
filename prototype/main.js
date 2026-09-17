@@ -2311,6 +2311,13 @@ const serviceRings = (() => {
 
   function build() {
     reel.innerHTML = "";
+    /* The words this section carries BEFORE a script runs — the nine service
+       lines and the three projects, written into #svcStatic by
+       resources/build_static.mjs for the crawlers that never execute this
+       file. The rings are that content, moving; the moment they exist the
+       static copy goes, so nothing is shown twice. */
+    const stat = document.getElementById("svcStatic");
+    if (stat) stat.remove();
     stages = ORDER.map((id) => {
       const items = RINGS[id] || [];
       const stage = document.createElement("div");
