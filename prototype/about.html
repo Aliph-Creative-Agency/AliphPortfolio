@@ -37,6 +37,149 @@
 <meta name="twitter:title" content="من نحن · ألِف">
 <meta name="twitter:description" content="نحن فريق صغير من القدس يصنع الهويّات والمحتوى من حرفها الأوّل. نبدأ من النقطة التي تُبنى منها الأشياء، ونرسم منها نظامًا كاملًا.">
 <meta name="twitter:image" content="https://aliphcreative.com/assets/img/og-card.jpg">
+<!-- ══════ what the entity IS, for machines (2026-09-17) ══════
+     JSON-LD: the one place Google, Bing and the AI crawlers read who this is,
+     where, and what it sells without parsing the page. One @graph: the agency
+     (#org — the same node on every page, so the three pages describe one
+     entity, not three), the site, and this page. Facts are the footer's:
+     address, phone, WhatsApp, e-mail, the three socials, the three services
+     by their CATS names. ⚠️ No foundingDate — the founding year is open
+     question 20 and stated nowhere on the site. ⚠️ No addressCountry — that
+     is the agency's call, not a default. ⚠️ The description is written for
+     this block (the meta description is the hero's copy, which does not name
+     the services); it needs the agency's read like every other line here.
+     The reviews and the project list are appended by resources/build_static.mjs
+     in a second block, from the tables in main.js. -->
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "ProfessionalService",
+   "@id": "https://aliphcreative.com/#org",
+   "name": "ألِف",
+   "alternateName": [
+    "Aliph Creative",
+    "Aliph Creative Agency",
+    "ألف وكالة إبداعية"
+   ],
+   "url": "https://aliphcreative.com/",
+   "logo": "https://aliphcreative.com/assets/img/Aliph-Logo-Main.svg",
+   "image": "https://aliphcreative.com/assets/img/og-card.jpg",
+   "description": "ألِف وكالة إبداعية من القدس تبدأ من الحرف الأوّل: هويّات بصريّة وتصميم جرافيكي، وتصوير وإنتاج محتوى، ومواقع وأنظمة برمجيّة، بالعربيّة أوّلًا.",
+   "slogan": "نبدأ من حيث تبدأ الأشياء.",
+   "email": "info@aliphcreative.com",
+   "telephone": "+972-52-874-5090",
+   "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "القدس",
+    "streetAddress": "جبل الزيتون"
+   },
+   "areaServed": [
+    {
+     "@type": "City",
+     "name": "القدس"
+    },
+    {
+     "@type": "City",
+     "name": "Jerusalem"
+    }
+   ],
+   "knowsLanguage": [
+    "ar",
+    "en"
+   ],
+   "contactPoint": [
+    {
+     "@type": "ContactPoint",
+     "contactType": "sales",
+     "telephone": "+972-52-874-5090",
+     "email": "info@aliphcreative.com",
+     "availableLanguage": [
+      "ar",
+      "en"
+     ]
+    },
+    {
+     "@type": "ContactPoint",
+     "contactType": "sales",
+     "telephone": "+972-59-409-7725",
+     "url": "https://wa.me/972594097725",
+     "name": "WhatsApp",
+     "availableLanguage": [
+      "ar",
+      "en"
+     ]
+    }
+   ],
+   "sameAs": [
+    "https://www.instagram.com/aliph.creative",
+    "https://www.facebook.com/share/19F5j4XM6g/",
+    "https://www.linkedin.com/company/aliph-creative/"
+   ],
+   "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "الخدمات",
+    "itemListElement": [
+     {
+      "@type": "Offer",
+      "itemOffered": {
+       "@type": "Service",
+       "name": "تصميم جرافيكي",
+       "alternateName": "Graphic Design",
+       "serviceType": "Brand identity and graphic design"
+      }
+     },
+     {
+      "@type": "Offer",
+      "itemOffered": {
+       "@type": "Service",
+       "name": "صناعة محتوى",
+       "alternateName": "Media Production",
+       "serviceType": "Photography, video and reels"
+      }
+     },
+     {
+      "@type": "Offer",
+      "itemOffered": {
+       "@type": "Service",
+       "name": "حلول تقنية وبرمجية",
+       "alternateName": "Tech & Software Solutions",
+       "serviceType": "Websites, registration systems and apps"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://aliphcreative.com/#site",
+   "url": "https://aliphcreative.com/",
+   "name": "ألِف · ALIPH",
+   "inLanguage": "ar",
+   "publisher": {
+    "@id": "https://aliphcreative.com/#org"
+   }
+  },
+  {
+   "@type": "AboutPage",
+   "@id": "https://aliphcreative.com/about#page",
+   "url": "https://aliphcreative.com/about",
+   "name": "من نحن · ألِف",
+   "isPartOf": {
+    "@id": "https://aliphcreative.com/#site"
+   },
+   "about": {
+    "@id": "https://aliphcreative.com/#org"
+   },
+   "mainEntity": {
+    "@id": "https://aliphcreative.com/#org"
+   },
+   "inLanguage": "ar"
+  }
+ ]
+}
+</script>
 <link rel="icon" href="assets/img/HalfAliph-Icon.svg">
 <link rel="stylesheet" href="style.css">
 <!-- chat widget hidden 2026-08-10 at the agency's request until it is finished.
