@@ -1,6 +1,6 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-09-16. Read this first._
+_Updated 2026-09-17. Read this first._
 
 > ## 🟢 State on 2026-09-01: BOTH ROUNDS ARE COMMITTED AND LIVE; THE FORM'S STATE IS UNVERIFIED
 >
@@ -36,6 +36,14 @@ _Updated 2026-09-16. Read this first._
 > `fe60c3e` plus this write-up**, after the range was audited: no
 > 40+-character tokens, no key-shaped files, no `PRIVATE_KEY`. See
 > _Session 2026-09-16_.
+> 🟡 **2026-09-17: THE SEO ROUND IS ON BRANCH `seo`, THREE COMMITS, NOT
+> MERGED, NOT DEPLOYED, NOT PUSHED** — `241a8d5` (canonicals and the sitemap
+> on the clean paths), `eb6f109` (JSON-LD on all three pages), `83f61f9`
+> (`resources/build_static.mjs`, which writes main.js's tables into the
+> HTML). ⚠️ **FROM NOW ON, RUN `node resources/build_static.mjs` BEFORE
+> ANY DEPLOY THAT TOUCHED main.js's tables** — SUBCATS, PROJECTS,
+> TESTIMONIALS, MEDIA, CATS — or the served HTML says something older than
+> the page. `--check` exits 1 when it is stale. See _Session 2026-09-17_.
 > ✅ **THEN A SECOND ROUND THE SAME DAY — DEPLOYED, version
 > `4c501abc-d00f-40d5-b5c8-3d83ba5bde7c`, AND PUSHED** — `a42bbba` …
 > `5177ca7` plus the write-ups: the hero panel sized by the hero's height
@@ -721,6 +729,153 @@ gesture has been invented for it.
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-09-17 — SEO: the words go into the HTML, the entity gets a name, and the canonicals stop redirecting
+
+"Time to work on seo for the website, whats are next moves, also how do we
+improve ai recommendations" — then "do this on a new branch, start with 1
+and 3 then do 2". Branch `seo`, three commits, **not merged, not deployed,
+not pushed.**
+
+### 0. What was found, before anything was changed
+
+The 2026-08-26 pass (description, OG, canonical, robots, sitemap, h1s) was
+the only SEO work on record, and nothing about Search Console, Bing or a
+Business Profile anywhere in this file. Against it:
+
+- **The served HTML carried nothing the agency does.** Comments, scripts and
+  tags stripped: `/` 230 words, `/about` 194, `/library` 59 — and the 59
+  were the nav and the footer. The nine service lines, the three projects,
+  the four testimonials and the whole English site live in `main.js`
+  (246 KB) and are written into the page by JavaScript. Googlebot renders
+  that, late and on a budget; **the AI crawlers — GPTBot, ClaudeBot,
+  PerplexityBot, the fetcher behind ChatGPT search — mostly do not.** A
+  model asked "creative agency in Jerusalem" and fetching this site got a
+  title, a description and a headline. That is the whole of "why don't the
+  AIs recommend us".
+  ⚠️ A first, quick count said 35/32/18 and was quoted before it was
+  checked; the figures above are the real ones. Same conclusion, wrong
+  numbers — print what you measured before you quote it.
+- **Canonicals pointed at redirects.** `about.html` and `library.html`
+  declared `…/about.html` and `…/library.html` as canonical, and the sitemap
+  listed the same — but the Worker 307s both to `/about` and `/library`
+  (this file's own warning of 2026-08-27). A canonical that answers with a
+  redirect is one Google discounts.
+- **No structured data at all.** Nothing told a machine who this is, where,
+  or what it sells.
+- **The English site is invisible everywhere.** `localStorage` toggle
+  (`main.js` `let lang = …`), no URL, no `hreflang`. Nobody searching in
+  English can land on an English page. NOT fixed this session — see below.
+- `robots.txt` is `Allow: /` with no per-bot rules: **correct, leave it.**
+  A `Disallow` on GPTBot or ClaudeBot removes the site from that model's
+  citations.
+
+### 1. ✅ Canonicals, `og:url` and the sitemap on the clean paths — `241a8d5`
+
+`…/about` and `…/library`, with a comment beside each canonical saying why.
+`lastmod` bumped from 2026-08-26. ⚠️ **Internal links still say
+`about.html` / `library.html`** — deliberately: the three `launch.json`
+previews are `python -m http.server`, which cannot serve `/about`, and
+every preview note in this file depends on them. The crawler follows the
+307 once; the canonical is what counts. Switching the hrefs is one
+`devserve.py` change away if anyone wants it.
+
+### 2. ✅ JSON-LD on all three pages — `eb6f109`
+
+One `@graph` per page: the agency as **one `ProfessionalService` node with
+the same `@id` (`https://aliphcreative.com/#org`) on every page**, so the
+three pages describe one entity rather than three; the `WebSite`; and the
+page (`WebPage` / `AboutPage` / `CollectionPage`). Facts are the footer's:
+`القدس` + `جبل الزيتون`, the phone, WhatsApp as a second `ContactPoint`,
+the e-mail, the three socials as `sameAs`, the three services by their
+CATS names in a `hasOfferCatalog`.
+⚠️ **Three things were left OUT on purpose and are the agency's:**
+- **no `foundingDate`** — open question 20, the year is stated nowhere;
+- **no `addressCountry`** — not a default anyone here should pick;
+- the `description` in the block names the three services, because the
+  meta description is the hero's copy and does not. It is the one line
+  written this session and not by the agency. **Needs their read.**
+
+### 3. ✅ The words in the HTML — `resources/build_static.mjs`, `83f61f9`
+
+The mechanism, because it has to be run again:
+
+- The script **extracts** `I18N`, `CATS`, `SUBCATS`, `MEDIA`, `PROJECTS`,
+  `TESTIMONIALS`, `AR_DIGITS` from `main.js` by bracket-matching each
+  `const NAME = ` to its `;` (strings, template literals and both comment
+  kinds skipped), evaluates them, and renders their **Arabic** into marked
+  regions of the pages:
+  `<!-- @static:NAME --> … <!-- @/static:NAME -->`. Idempotent; a missing
+  or doubled marker throws. `--check` exits 1 if any region is stale.
+- **Every region is content the JavaScript already replaces or removes:**
+  - `#svcStatic` in the services section — the nine SUBCATS lines under
+    their three services, and the three projects under `حلول تقنية`.
+    **One line added to `serviceRings.build()` removes it** the moment the
+    rings exist. ⚠️ **`SERVICES[].what/why/does` is NOT rendered** — the
+    comment above `renderServiceSections` says that copy is
+    prototype-invented and never approved. The SUBCATS lines are what the
+    ring shows and what the agency shortened by hand on 2026-08-31.
+  - `#accRoot` on the archive — one `acc-panel` per service with its runs
+    and counts (`إعلانات رقمية ١٢`, `فيديوهات ١٣`, `صور ٥٤`, `مواقع ٣`), the
+    same LIBSUBS filing `renderLibrary` uses (copied, not extracted —
+    LIBSUBS is inside a function), and the three software projects in full:
+    name, tagline, line, body, `زيارة الموقع` linking the live site.
+    `renderLibrary()` starts with `accRoot.innerHTML = ""`.
+  - the cutting's `.tc-name/.tc-biz/.tc-quote` and the rotor's
+    `.tr-name/.tr-biz/.tr-quote` — `TESTIMONIALS[0]` under the title rule;
+    `writeWho` overwrites them.
+  - `#testiBandTrack` — the four cards in `card()`'s markup minus the scrap
+    variables; `rebuildBand()` empties the track at load.
+- A **second JSON-LD block per page**, in its own `@static:ld` region: the
+  four testimonials as `Review` on `#org` (home), the projects as an
+  `ItemList` of `WebSite` (archive). No `aggregateRating` — there are no
+  ratings, and inventing one is the thing Google penalises.
+- **`sitemap.xml` is regenerated** with each page's `lastmod` from
+  `git log -1`, or today if the file is dirty.
+- **Counted after:** `/` 694 words, `/library` 335. `/about` unchanged at
+  194 — it was already static.
+
+**Verified** in headless Chromium (gstack browse — ⚠️ the preview pane ran
+**zero rAF frames** again, the curtain never lifted, exactly §0 of
+2026-09-01; Playwright MCP has no Chrome installed): at 1440 the static
+block is gone once the rings build, 3 stages, the cutting and rotor read
+`ريما حسين`; the archive has 4 panels and 82 tiles as before; at 390 the
+band has its 4 cards on their scraps and `display: block`; with
+`aliph-lang=en` the cutting reads `Rima Hussein` and the rotor is English —
+the static Arabic never shows through. No console errors anywhere. `curl`
+of the served HTML carries the service lines, the project articles and the
+cards.
+
+### What is still open, in the order it is worth doing
+
+1. **Review the branch, merge, run the build, deploy, push.** The deploy
+   will upload the three pages, `main.js` and `sitemap.xml`; verify the way
+   this file demands.
+2. **Three sign-ups only the agency can do, and none of them is code:**
+   **Google Search Console** (submit the sitemap — there is zero visibility
+   into what is indexed today), **Bing Webmaster Tools** (ChatGPT search
+   runs on Bing's index; this is not optional for AI visibility), and a
+   **Google Business Profile** for the Jerusalem address ("agency near me"
+   in Google and Gemini goes through Maps). And the three social profiles
+   should say the same name, city and services and link back.
+3. **An English URL.** `/en/` (or the three pages under it) with
+   `hreflang` pairs. The build takes a `LANG`; an English page is the same
+   generator run over an English shell, not a rewrite — but the shell (the
+   `data-i18n` text in the HTML) is Arabic, so the shell has to be rendered
+   from I18N too. That is the next real piece of work.
+4. **Two lines for the agency to sign off:** the JSON-LD description (§2)
+   and the archive's meta description from 2026-08-26, still unsigned.
+5. `llms.txt` — five minutes, after 3, not instead of it; no vendor has
+   confirmed reading it.
+6. 🔴 **The public repo is an AI-visibility problem, not only a security
+   one.** Models crawl GitHub. A model summarising "Aliph Creative" from
+   this file — client complaints quoted verbatim — gives that as its
+   recommendation. Raise it with the agency again.
+7. 20 empty `alt`s on the home page are decorative and fine; the ring's
+   work images could name their client, but MEDIA carries no client field
+   (open question 9's shape).
 
 ---
 
