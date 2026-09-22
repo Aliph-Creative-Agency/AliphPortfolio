@@ -1,6 +1,6 @@
 # Aliph Portfolio — Handoff
 
-_Updated 2026-09-17. Read this first._
+_Updated 2026-09-22. Read this first._
 
 > ## 🟢 State on 2026-09-01: BOTH ROUNDS ARE COMMITTED AND LIVE; THE FORM'S STATE IS UNVERIFIED
 >
@@ -36,6 +36,13 @@ _Updated 2026-09-17. Read this first._
 > `fe60c3e` plus this write-up**, after the range was audited: no
 > 40+-character tokens, no key-shaped files, no `PRIVATE_KEY`. See
 > _Session 2026-09-16_.
+> 🟡 **2026-09-22: BRANCH `seo` NOW CARRIES A SECOND ROUND TOO — `9f5c8f9`,
+> STILL NOT MERGED, NOT DEPLOYED, NOT PUSHED.** «قالوا عنّا» is removed from
+> the home page at both widths, and the footer's testimonials lost the
+> hold/drag and gained controls: a tap centres a scrap on a phone, two
+> chevrons and the scrap itself step the desktop rotor, and a tab at the
+> page's edge slides out to the feedback form. See _Session 2026-09-22_.
+>
 > 🟡 **2026-09-17: THE SEO ROUND IS ON BRANCH `seo`, THREE COMMITS, NOT
 > MERGED, NOT DEPLOYED, NOT PUSHED** — `241a8d5` (canonicals and the sitemap
 > on the clean paths), `eb6f109` (JSON-LD on all three pages), `83f61f9`
@@ -729,6 +736,177 @@ gesture has been invented for it.
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-09-22 — the cutting is removed, and the footer's testimonials get controls instead of a hold
+
+Three instructions: "remove the new section (what they said) from both pc and
+phone"; the footer's drag "freezes until i press a diff area … remove this
+useless feature", plus a list of desktop additions off two screenshots; and
+"is there anything else u recommend we do for the whole seo thing".
+One commit, `9f5c8f9`, on `seo`. **Not merged, not deployed, not pushed.**
+
+### 1. ✅ «قالوا عنّا» is gone — markup, module, trail, stylesheet
+
+What went: `.wb4` and its `#testiClip` from `index.html`; `renderClip`,
+`wireClip`, `settleClip` and **the whole trail module** — `TRAILS`, the
+Catmull-Rom `spline`, `measurePath`, `buildTrail`, ~12.6 KB of main.js;
+`I18N.testiHead`; the stylesheet's entire cutting block and its share of the
+phone block, ~12 KB; and the two build-step regions that filled it.
+`testimonials` now returns two surfaces instead of three, and
+`rebuildLoops()` no longer calls `settle()`.
+
+🔴 **IT IS WHOLE IN GIT AT `3fde694`** — markup, module and stylesheet, all
+three. If the agency wants it back, restore from there; do not rewrite it.
+The trail alone was four drawings and three rounds of "still not big enough".
+
+⚠️ The scrap art it used — `scrap-title.webp`, `scrap-quote.webp` — is still
+in `assets/img/` and is now referenced by nothing. Left in place: the cutter
+(`resources/cut_scraps.py`) still produces it and the round may come back.
+
+The seam closes cleanly: the gallery wall, one splitter, the way out. Checked
+at 1440 — no gap where the collage was.
+
+### 2. ✅ The freeze, and what caused it
+
+**The report was right and the cause was the release timer.** `wireBandDrag`
+held the loop on `pointerdown` and resumed it on a timer guarded by `!down`;
+`down` was only ever cleared by `pointerup`/`pointercancel` **on the stripe**.
+A finger that leaves the element while still down — or a cancel the browser
+swallows under a scroll gesture — left `down` true forever, so the guard
+never passed and the stripe stood still until the next press reset it.
+"until i press a diff area then it moves again" is exactly that.
+
+It is **deleted, not fixed**: the gesture was never asked for beyond "give the
+ability to drag", and a stripe that cannot be accidentally stopped is the
+safer surface. The desktop rotor's `pointerenter` hold went with it — the same
+complaint, the other half of the footer.
+
+### 3. ✅ A tap brings a scrap to the middle (phone)
+
+`wireBandTap` → `centreCard`. The geometry is `makeLoop`'s own: the tween is
+linear, so `x = from + dir·period·progress` and a shift of `dx` px is
+`dx / (dir·period)` of progress. It eases there over 0.55s through a proxy
+object (`progress` is a method, not a tweenable property), repaints `--pop` on
+every frame, holds 2.4s and runs on.
+⚠️ **Measured off the NODE that was tapped, never off the testimonial's
+index** — `makeLoop` clones the group across the track, so every entry exists
+several times and the nearest copy is the one under the finger.
+Verified at 390: a tapped card lands at offset **0** with `--pop` **1.00**,
+and the stripe is moving again 3.5s later.
+
+### 4. ✅ The desktop rotor: centred, bigger, and three ways to step it
+
+Off the agency's first screenshot. The scrap is a **`<button>`** that cycles
+forward; two bare chevrons flank the words (`#testiPrev` / `#testiNext`),
+following reading order and mirrored under RTL by the shared `.reel-arrow`
+rule; **the auto cycle is untouched** — every control calls the same `step()`,
+and because `showRotor` clears and re-sets the hold, a click always buys a
+full read rather than suspending anything.
+
+Sizes: the scrap 380 → **456px**, the name to `clamp(1.5rem, 3.8vw, 2.9rem)`,
+the words to `clamp(1.2rem, 1.7vw, 1.45rem)`.
+
+⚠️ **THE 2026-09-16 ALIGNMENT IS DELIBERATELY BROKEN.** The name used to land
+on the PHONE row's rule and the words on the WHATSAPP row's, with the scrap
+pushed to the column's inline end. A centred scrap and a rule-aligned one are
+different positions and the newer drawing wins. What replaced it: the
+`--tr-w` box moved **off `.tr-inner` and onto `.testi-rotor` as padding**, so
+the scrap, the words and both chevrons centre in the one box the socials below
+are spread across — the content box is `--tr-w` plus one arrow either side, so
+the steppers hang outside the words instead of eating into them. Both paddings
+clamp at 0, so a narrow column degrades instead of going negative.
+
+### 5. ✅ The feedback tab — and the first attempt was wrong
+
+The agency drew it twice: a cream cap at the page's edge with a chevron, and
+the same cap slid out into a long stadium with the chevron still at its far
+end. It links to **`feedback.aliphcreative.com`** — the repo's third
+deployable, verified 200 — which is the same form the four testimonials came
+out of.
+
+🔴 **THE RED LINE IN BOTH DRAWINGS IS AN ANNOTATION, NOT A DESIGN ELEMENT.**
+The first build read it as one and shipped a terracotta rule with the question
+set on it — "the redline was an indicator not a design element, besides u
+completely ignoring the sliding shape i made". **When a screenshot has a mark
+on it, decide whether it is the drawing or a pointer AT the drawing before
+building anything.**
+
+How it works: the tab's own **width** is the animation and its
+`overflow: hidden` is the clip. The words and the chevron are pinned a fixed
+distance from the pill's FAR end (`inset-inline-start`), so they ride out with
+it instead of standing still inside a growing box; at rest everything but the
+chevron is past the edge and cut. Logical properties throughout, so it mirrors
+to the right-hand edge in English with no second rule — checked.
+
+Three measurements that cost time and are worth keeping:
+
+⚠️ **`container-type: inline-size` does NOT make an element a containing block
+for abspos children in Chromium**, whatever `contain: layout` says on paper.
+The tab's `offsetParent` came back `.contact-grid` and it hung 38px off the
+page. `.testi-rotor` carries an explicit `position: relative` now.
+
+⚠️ **THE ROOT FONT-SIZE IS 150% — 1rem IS 24px ON THIS SITE.** Every number in
+the tab was written at 16 first and came out half again too big; the pill
+opened to 408px instead of 264. Check `html { font-size: 150% }` before
+writing a rem.
+
+⚠️ **A direction rule outranks a bare hover rule.** `html[dir="rtl"] .rate-tab
+.rt-slab` is an attribute plus two classes and beat `.rate-tab:hover .rt-slab`,
+so the tab stayed shut under the pointer while its contents faded — it showed
+nothing at all. The hover rules carry `html[dir]` to match.
+
+⚠️ **Not `cqw` for the open width.** `.testi-rotor` is the query container and
+its content box is the words' box now (~320px), so `48cqw` was 175 and cut
+both lines off. It is `min(8rem, 58vw)` — 192px, which holds the English
+words (120px) plus the chevron's offset.
+
+### 6. ✅ The SEO work re-checked, and what is left
+
+Re-audited after the footer round — all three pages: exactly one `<title>`,
+one `<meta description>`, one canonical, one `<h1>`; every JSON-LD block
+parses; the sitemap's three `<loc>`s are byte-equal to the three canonicals;
+`robots.txt` is `Allow: /` with no per-bot rules, which is correct (a
+`Disallow` on GPTBot or ClaudeBot removes the site from that model's
+citations). Served words after the round: **/ 681, /about 201, /library 342**.
+
+**Two honest caveats on what was built on the 17th:**
+🔴 **The `Review` markup will never produce stars in Google.** Reviews about a
+business, collected and shown on that business's own site, are *self-serving*
+under Google's policy and ineligible for review rich results — and they carry
+no `reviewRating`, which those results require anyway. They are there for the
+entity graph and for the models, which is what they were for; nobody should
+wait for stars.
+⚠️ **The home page has two JSON-LD blocks sharing one `@id`** (the hand-written
+graph and the generated reviews). Google merges nodes by `@id` within a page,
+so this is fine — but merging the reviews into the one graph would remove the
+question. One change in `build_static.mjs` if anyone wants it airtight.
+
+**What is still open, in the order it is worth doing:**
+1. **Review, merge, run `node resources/build_static.mjs`, deploy, push.**
+   Both rounds are on `seo` and neither has been seen on the live site.
+2. **The three sign-ups, still nobody's done them, still the highest leverage
+   thing left and none of it is code:** Search Console (there is *zero*
+   visibility into what is indexed), Bing Webmaster Tools (ChatGPT search runs
+   on Bing's index), a Google Business Profile for the Jerusalem address.
+3. 🔴 **NOBODY HAS EVER MEASURED THIS SITE'S CORE WEB VITALS**, and it is the
+   one ranking factor we have never looked at while shipping 246 KB of JS,
+   250 KB of CSS, two CDN scripts and a 4.27 MB clip that autoplays on
+   `/about`. Run PageSpeed Insights against the live domain before adding
+   anything else.
+4. **An English URL** — `/en/`, `hreflang` pairs. Still the largest structural
+   gap: the toggle is `localStorage` only, so no English search can land
+   anywhere.
+5. **Per-project URLs.** All 82 pieces and all three software projects live on
+   one `/library`, reachable only by clicking. A page per project is the
+   classic way an agency ranks for the work itself, and the data (name,
+   tagline, body, shots) is already in `PROJECTS`.
+6. **Backlinks — ~25% of ranking and we have done nothing.** The three social
+   profiles should state the same name, city and services and link back; local
+   directories next.
+7. Two lines still want the agency's sign-off: the JSON-LD description and the
+   archive's meta description from 2026-08-26.
 
 ---
 
