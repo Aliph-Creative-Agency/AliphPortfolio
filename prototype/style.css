@@ -4211,8 +4211,12 @@ body[data-page="index"] .footer { margin-top: 0; }
      less room than that degrades to whatever is left instead of going
      negative. */
   .testi-rotor {
+    /* named, because .rate-tab has to undo it: the tab hangs off the rotor's
+       CONTENT box and has to reach the page's edge, so it backs out this
+       padding and the grid's own --pad together */
+    --tr-pad-end: max(0px, calc(var(--mark-clear) - var(--tr-arrow)));
     padding-inline-start: max(0px, calc(100% - var(--mark-clear) - var(--tr-w) - var(--tr-arrow)));
-    padding-inline-end: max(0px, calc(var(--mark-clear) - var(--tr-arrow)));
+    padding-inline-end: var(--tr-pad-end);
   }
   .footer .contact-socials {
     width: min(100%, var(--tr-w));
@@ -4472,103 +4476,140 @@ html[lang="en"] .tr-quote::before { content: "\201C"; }
 html[lang="en"] .tr-quote::after  { content: "\201D"; }
 
 /* ══ THE FEEDBACK TAB (2026-09-22) ══
-   The agency's two drawings are one shape in two states: a cream cap at the
-   page's edge with a chevron in it, and the same cap slid out into a long
-   stadium with the chevron still at its far end.
+   THE QUESTION IS ON THE INK AND THE PILL SLIDES OVER IT. That is the whole
+   idea, and it took three goes to read the agency's two screenshots right:
 
-   ⚠️ THE RED LINE IN BOTH DRAWINGS IS AN ANNOTATION pointing at the control,
-   not a rule to draw. The first build read it as a design element — a red
-   underline with the question on it — and that is not what was asked for.
+     · at rest, a cream cap at the page's edge with a chevron in it, and
+       «هل عملت معنا من قبل؟» beside it on the dark;
+     · on hover, the cap slides out into a full stadium that COVERS those
+       words with the call to action, underlined.
 
-   HOW THE SLIDE WORKS. The tab's own WIDTH is the animation and its
-   `overflow: hidden` is the clip. The words and the chevron are pinned a
-   fixed distance from the pill's FAR end (inset-inline-start), so they ride
-   out with it; at rest everything but the chevron is past the edge and cut.
-   Width is a layout property, but this is one small absolutely positioned
-   element with nothing flowing after it, so the cost is its own box.
+   🔴 THE RED LINE IN BOTH DRAWINGS IS AN ANNOTATION. It marks where the
+   question runs — it is not a rule to draw. Build number one drew it as a
+   terracotta underline; build number two dropped the question onto the pill
+   and had nothing on the ink at all. Neither is what is drawn.
 
-   GEOMETRY. It hangs off the rotor — which is `position: relative` for
-   exactly this — and reaches the page's own edge with a negative inline-end
-   inset. Logical properties throughout, so the whole thing mirrors to the
-   right-hand edge on the English page with no second rule. The chevron is
-   the site's shared bare chevron, drawn for LTR and mirrored under RTL by
-   the rule at .reel-arrow, so it always points AWAY from the edge — the way
-   the pill travels.
+   Nothing fades: the slab is opaque and simply arrives over the question.
+   The footer's own `overflow: hidden` is what hides its tucked half — the
+   tab itself does not clip, or it would cut the slab as it left.
 
-   Keyboard reaches it: :focus-visible opens the pill exactly as :hover does,
-   because a control that only answers a mouse is a link nobody can follow. */
+   ⚠️ THE TUCK IS DIRECTIONAL and cannot be written logically (there is no
+   logical `translate`), so the sign is per-direction, the way `.reel-arrow
+   svg` already is. ⚠️ `html[dir]` on the hover rules is LOAD-BEARING: the
+   two tuck rules are an attribute plus two classes and outrank a bare
+   `.rate-tab:hover .rt-slab`, which left the pill shut under the pointer.
+
+   ⚠️ THE ROOT IS 150% — 1rem is 24px here, not 16. Every number below was
+   written at 16 first and came out half again too big.
+
+   VERTICALLY it is centred on the SCRAP, not on the column, which is what
+   .tr-head is for: that wrapper is exactly as tall as the scrap, so
+   `top: 50%` lands on the scrap's middle at every width. Writing the
+   scrap's height as a constant instead does NOT work — it is
+   `min(19rem, 100%)` wide and the column is under 19rem below ~1360, so the
+   tab drifted 20px low there. */
 .rate-tab {
-  /* ⚠️ THE ROOT IS 150% — 1rem is 24px on this site, not 16. Every number
-     here was written at 16 first and came out half again too big (the pill
-     opened to 408px). 2.2rem is 53px, which is the cap the agency drew.
-     ⚠️ NOT cqw for the open width: .testi-rotor is the query container and
-     its content box is the words' box now, ~320px, so 48cqw was 175 and cut
-     both lines off. */
-  --rt-rest: 2.2rem;            /* the cap: a half-stadium, as tall as wide */
-  --rt-open: min(8rem, 58vw);   /* the words measure 96px in Arabic and 120
-                                   in English; 192 holds the longer of the two
-                                   plus the chevron's offset */
-  --rt-far: 2.1rem;             /* how far the words sit from the far end */
+  --rt-cap: 2.9rem;             /* the cap: a half-stadium, 70px */
+  --rt-h: 3.4rem;
+  --rt-open: min(12rem, 58vw);  /* the question is ~120px in Arabic and ~150
+                                   in English; 288 holds the longer of the
+                                   two beside the cap. ⚠️ NOT cqw — the rotor
+                                   is the query container and its content box
+                                   is only the words' box. */
   position: absolute;
-  inset-inline-end: calc(var(--pad) * -1);   /* out to the page's own edge */
-  top: 0.9rem;
+  /* out to the page's own edge: back out the grid's padding AND whatever the
+     rotor inset its own content by (--tr-pad-end, 0 below 901px where that
+     rule does not apply). Measured before it: the tab sat 212px in. */
+  inset-inline-end: calc(-1 * (var(--pad) + var(--tr-pad-end, 0px)));
+  /* level with the SCRAP's middle. .tr-head is exactly as tall as the scrap,
+     so this is the one honest way to say it: the scrap's width is
+     `min(19rem, 100%)` and its height follows its aspect ratio, which is not
+     a constant any `top` could carry (a percentage there resolves against
+     height, not width). */
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 3;
-  display: block;
-  width: var(--rt-rest);
-  height: 2.6rem;
-  overflow: hidden;
-  background: var(--cream);
-  color: var(--ink);
+  width: var(--rt-open);
+  height: var(--rt-h);
   text-decoration: none;
-  border-start-end-radius: 999px;
-  border-end-end-radius: 999px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
-  transition: width 0.55s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
-.rate-tab:hover,
-.rate-tab:focus-visible,
-.rate-tab:focus-within { width: var(--rt-open); }
 .rate-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* the scrap's own row, and the tab's containing block. No padding or border,
+   so the scrap's bottom margin collapses through it and the row measures the
+   scrap exactly. */
+.tr-head { position: relative; }
 
-/* pinned to the pill's far end, so they travel with it instead of standing
-   still while a box grows around them. `max-content` keeps the two lines from
-   reflowing as the width animates. */
-.rt-words {
+/* the question, on the ink, beside the cap — what the slab comes to cover */
+.rt-ask {
   position: absolute;
   inset-block: 0;
-  inset-inline-start: var(--rt-far);
-  width: max-content;
+  inset-inline-end: calc(var(--rt-cap) + 0.6rem);
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.1rem;
-  opacity: 0;
-  transition: opacity 0.3s ease 0.12s;
-}
-.rate-tab:hover .rt-words,
-.rate-tab:focus-visible .rt-words,
-.rate-tab:focus-within .rt-words { opacity: 1; }
-.rt-ask {
-  font-size: 0.6rem;
+  align-items: center;
+  color: var(--cream);
+  font-size: 0.75rem;
   letter-spacing: 0.02em;
-  color: var(--ink-mute);
   white-space: nowrap;
+  opacity: 0.8;
 }
+
+.rt-slab {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline-start: 1.9rem;   /* clear of the chevron */
+  box-sizing: border-box;
+  background: var(--cream);
+  color: var(--ink);
+  border-start-start-radius: 999px;
+  border-end-start-radius: 999px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+html[dir="rtl"] .rt-slab { transform: translateX(calc(-1 * (100% - var(--rt-cap)))); }
+html[dir="ltr"] .rt-slab { transform: translateX(calc(100% - var(--rt-cap))); }
+html[dir] .rate-tab:hover .rt-slab,
+html[dir] .rate-tab:focus-visible .rt-slab,
+html[dir] .rate-tab:focus-within .rt-slab { transform: translateX(0); }
+
+/* pinned to the slab's ROUNDED end, which is the part still showing at rest */
+.rt-chev {
+  position: absolute;
+  inset-inline-start: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  opacity: 0.75;
+  transition: opacity 0.3s ease;
+}
+.rt-chev svg { width: 0.5rem; height: auto; display: block; }
+html[dir="rtl"] .rt-chev svg { transform: scaleX(-1); }
+.rate-tab:hover .rt-chev { opacity: 1; }
+
 .rt-go {
   position: relative;
-  align-self: flex-start;       /* the underline is the words' width, not the box's */
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 1.25rem;
   line-height: 1.2;
   white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.25s ease 0.2s;   /* after the slab has covered the question */
 }
+.rate-tab:hover .rt-go,
+.rate-tab:focus-visible .rt-go,
+.rate-tab:focus-within .rt-go { opacity: 1; }
 /* the underline draws itself once the pill has arrived */
 .rt-go::after {
   content: "";
   position: absolute;
   inset-inline-start: 0;
-  bottom: -0.1em;
+  bottom: -0.12em;
   width: 100%;
   height: 2px;
   background: currentColor;
@@ -4577,30 +4618,15 @@ html[lang="en"] .tr-quote::after  { content: "\201D"; }
      per direction — it has to grow FROM the first letter, the right one in
      Arabic. */
   transform-origin: left;
-  transition: transform 0.45s ease 0.3s;
+  transition: transform 0.45s ease 0.35s;
 }
 html[dir="rtl"] .rt-go::after { transform-origin: right; }
 .rate-tab:hover .rt-go::after,
 .rate-tab:focus-visible .rt-go::after,
 .rate-tab:focus-within .rt-go::after { transform: scaleX(1); }
 
-.rt-chev {
-  position: absolute;
-  inset-inline-start: 0.78rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: grid;
-  place-items: center;
-  opacity: 0.75;
-  transition: opacity 0.3s ease;
-}
-.rt-chev svg { width: 0.42rem; height: auto; display: block; }
-html[dir="rtl"] .rt-chev svg { transform: scaleX(-1); }
-.rate-tab:hover .rt-chev { opacity: 1; }
-
 @media (prefers-reduced-motion: reduce) {
-  .rate-tab { transition-duration: 0.01ms; }
-  .rt-words, .rt-go::after { transition-duration: 0.01ms; transition-delay: 0s; }
+  .rt-slab, .rt-go, .rt-go::after { transition-duration: 0.01ms; transition-delay: 0s; }
 }
 
 .contact-grid {
