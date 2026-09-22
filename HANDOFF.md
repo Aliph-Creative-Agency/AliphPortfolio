@@ -826,21 +826,49 @@ end. It links to **`feedback.aliphcreative.com`** — the repo's third
 deployable, verified 200 — which is the same form the four testimonials came
 out of.
 
-🔴 **THE RED LINE IN BOTH DRAWINGS IS AN ANNOTATION, NOT A DESIGN ELEMENT.**
-The first build read it as one and shipped a terracotta rule with the question
-set on it — "the redline was an indicator not a design element, besides u
-completely ignoring the sliding shape i made". **When a screenshot has a mark
-on it, decide whether it is the drawing or a pointer AT the drawing before
-building anything.**
+🔴 **THE TAB TOOK THREE BUILDS, AND ALL THREE MISSES WERE READING FAILURES.**
+Written out because the lesson is the expensive part:
 
-How it works: the tab's own **width** is the animation and its
-`overflow: hidden` is the clip. The words and the chevron are pinned a fixed
-distance from the pill's FAR end (`inset-inline-start`), so they ride out with
-it instead of standing still inside a growing box; at rest everything but the
-chevron is past the edge and cut. Logical properties throughout, so it mirrors
-to the right-hand edge in English with no second rule — checked.
+1. **The red line was read as a design element.** It is an ANNOTATION marking
+   where the question runs. Build one shipped a terracotta rule with the
+   question set on it — "the redline was an indicator not a design element,
+   besides u completely ignoring the sliding shape i made".
+2. **The question was put ON the pill.** It belongs on the INK, beside the
+   cap; the pill slides out and COVERS it — "the idea was to have a text that
+   the fully slid button would cover". Build two had the question inside the
+   pill and nothing on the footer at all.
+3. **The cap was mirrored, small, and not level with the scrap.** Round
+   against the page edge instead of round facing in — `border-*-end-radius`
+   where RTL's end is the LEFT corners — "????, its inverted vertically";
+   then "its small and its not aligned with the scrape from the middle".
 
-Three measurements that cost time and are worth keeping:
+**When a screenshot has a mark on it, decide whether the mark is the drawing
+or a pointer AT the drawing before building anything** — and check which
+things in it sit on the page and which sit on the control.
+
+How it works, finally: the tab's box is always the full slid-out width.
+`.rt-ask` sits on the ink beside the cap; `.rt-slab` is the opaque cream pill,
+`translateX`-ed so only its rounded cap shows at rest and `translateX(0)` on
+hover or focus, which puts it over the question. Nothing fades — it simply
+arrives. The FOOTER's `overflow: hidden` hides the tucked half; the tab itself
+must not clip or it would cut the slab as it leaves. Logical properties
+throughout, so the whole thing mirrors to the right-hand edge in English with
+no second rule — checked.
+
+⚠️ **`.tr-head` exists only so the tab has something the SCRAP's height to
+centre against.** The scrap is `min(19rem, 100%)` wide with a fixed aspect
+ratio, and the column is under 19rem below ~1360, so writing its height down
+as a constant put the tab 20px low there. The wrapper has no padding or
+border, so the scrap's bottom margin collapses through it and the row measures
+the scrap exactly. `top: 50%` then lands on the scrap's middle at every width
+— measured equal to the pixel on all three pages.
+
+⚠️ **The tab backs out TWO insets to reach the page edge**, the grid's `--pad`
+and `--tr-pad-end` (the padding the rotor uses to build its own box). With
+only the first it sat 212px in. `--tr-pad-end` is named on `.testi-rotor` for
+exactly this and is undefined below 901px, where the fallback `0px` is right.
+
+Four measurements that cost time and are worth keeping:
 
 ⚠️ **`container-type: inline-size` does NOT make an element a containing block
 for abspos children in Chromium**, whatever `contain: layout` says on paper.
@@ -856,6 +884,11 @@ writing a rem.
 .rt-slab` is an attribute plus two classes and beat `.rate-tab:hover .rt-slab`,
 so the tab stayed shut under the pointer while its contents faded — it showed
 nothing at all. The hover rules carry `html[dir]` to match.
+
+⚠️ **`border-start-end-radius` IS THE LEFT CORNERS IN ARABIC.** The cap came
+out round against the page's edge and square facing into it — the shape
+mirrored. It is `border-start-start-radius` / `border-end-start-radius`: flat
+where it meets the edge, round where it juts in.
 
 ⚠️ **Not `cqw` for the open width.** `.testi-rotor` is the query container and
 its content box is the words' box now (~320px), so `48cqw` was 175 and cut
