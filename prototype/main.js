@@ -797,6 +797,66 @@ function buildBandSource() {
    Paused, not killed, so x survives and nothing jumps on return. Returns a
    getter because rebuilds make new tweens, and a new tween plays whether or
    not anyone can see it. */
+/* ══════════ FIT THE TYPE TO THE TEXT ══════════
+   🔴 A STANDING RULE, NOT A PATCH FOR ONE BUG.
+
+   Every surface on this site renders strings out of a TABLE into a box whose
+   size was chosen by hand, and the strings differ wildly: «ريما حسين» is nine
+   characters and «Jabal al-Mukabbir Social Affairs» is thirty-one; the
+   shortest quote is five words and the longest seventeen. A size picked
+   against the short ones OVERFLOWS on the long ones, and it does not show up
+   until the long one comes round — which is why this keeps being found by the
+   agency rather than by the session that wrote it. On 2026-09-22 the footer's
+   name set three lines deep and its quote ran out of the footer and over the
+   socials, at a width nobody had looked at.
+
+   THE RULE, in three parts:
+
+     1. **The stylesheet sets the CEILING; the script shrinks to fit.** Clear
+        the inline size, read what the stylesheet wants, then binary-search
+        DOWN — never up. A short entry is untouched and renders exactly as the
+        CSS says; a long one is only ever smaller.
+     2. **The limit is the room that actually exists, measured**, not a line
+        count guessed at one width. `fitLines` is for a limit that is a design
+        rule ("a name is at most two lines"); `fitHeight` is for a limit that
+        is a neighbour ("the words stop before the socials").
+     3. **Check the LONGEST entry in the table, in both languages, at the
+        narrowest width the surface is shown at** — never the first entry.
+
+   ⚠️ ANY NEW SURFACE THAT RENDERS TABLE COPY INTO A FIXED BOX SHOULD CALL
+   ONE OF THESE.
+
+   Seven steps on one small element, run only when the text, the language or
+   the width changes. `offsetParent` is the display:none guard: a hidden
+   element measures zero and would "fit" at any size. */
+function shrinkToFit(el, floorRatio, fits) {
+  if (!el || !el.offsetParent) return;
+  el.style.fontSize = "";
+  const max = parseFloat(getComputedStyle(el).fontSize);
+  if (!max || fits(max)) return;
+  let lo = max * floorRatio, hi = max, best = lo;
+  for (let i = 0; i < 7; i++) {
+    const mid = (lo + hi) / 2;
+    el.style.fontSize = mid.toFixed(2) + "px";
+    if (fits(mid)) { best = mid; lo = mid; } else hi = mid;
+  }
+  el.style.fontSize = best.toFixed(2) + "px";
+}
+
+/* at most `lines` line boxes — a design rule about shape */
+function fitLines(el, lines, floorRatio) {
+  shrinkToFit(el, floorRatio, (size) => {
+    const lh = parseFloat(getComputedStyle(el).lineHeight) || size * 1.3;
+    return el.scrollHeight <= lines * lh + 1;
+  });
+}
+
+/* at most `maxH` pixels tall — a limit set by whatever is underneath */
+function fitHeight(el, maxH, floorRatio) {
+  if (!(maxH > 0)) return;
+  shrinkToFit(el, floorRatio, () => el.scrollHeight <= maxH);
+}
+
 function pauseOffscreen(el, getTween) {
   if (!el || !window.IntersectionObserver) return () => true;
   let visible = true;
@@ -1092,6 +1152,38 @@ const testimonials = (() => {
     const root = document.getElementById("testiRotor");
     writeWho(root, ".tr-name", ".tr-biz", e);
     root.querySelector(".tr-quote").textContent = t(e, "quote");
+    fitRotor();
+  }
+
+  /* See the fit rule above. The name is a SHAPE limit — a name over two lines
+     stops reading as a name. The words are a SPACE limit, and the space is
+     the contact table beside them:
+
+     🔴 FROM 1360 UP THE SOCIALS SHARE THE ROTOR'S GRID CELL and hang off its
+     bottom (`.contact-side { grid-column: 2; grid-row: 1; align-self: end }`).
+     So a rotor taller than the contact table grows the cell, and the socials
+     come DOWN over the rotor's own last lines — which is exactly what the
+     agency photographed. The stable target is therefore the TABLE's bottom,
+     never the socials' current top: the table's height does not depend on the
+     rotor, so measuring against it cannot chase itself. Below 1360 the
+     socials are a full-width row underneath and only the table's bottom
+     applies. */
+  function fitRotor() {
+    const root = document.getElementById("testiRotor");
+    if (!root || !root.offsetParent) return;
+    fitLines(root.querySelector(".tr-name"), 2, 0.5);
+    const q = root.querySelector(".tr-quote");
+    if (!q) return;
+    const table = document.querySelector(".footer .contact-lines");
+    if (!table) { fitLines(q, 5, 0.6); return; }
+    const bottom = table.getBoundingClientRect().bottom;
+    const side = document.querySelector(".footer .contact-side");
+    const sr = side ? side.getBoundingClientRect() : null;
+    /* in the same row, or a row of its own below the table? measured, so no
+       breakpoint is written down twice */
+    const sameCell = sr && sr.top < bottom - 1;
+    const room = bottom - q.getBoundingClientRect().top - (sameCell ? sr.height + 14 : 0);
+    fitHeight(q, room, 0.5);
   }
 
   function advance() {
@@ -1188,6 +1280,7 @@ const testimonials = (() => {
 
   return {
     render() { refreshRotor(); },
+    refit: fitRotor,
     rebuildBand,
     wireRotor,
   };
@@ -1579,12 +1672,44 @@ function applyI18n() {
      whatever built the DOM, and this is that place — it also runs on every
      language switch, which re-renders the library from scratch. */
   previews.refresh();
+  sizeRateTab();
   rebuildLoops();
   filmLoop.rebuild();
   /* last, and after filmLoop.rebuild(): the strip it wires is torn down and
      re-cloned in there, so anything wired before this is wired to nodes that
      no longer exist. */
   mediaKeys.refresh();
+}
+
+/* ══════════ the feedback tab's length ══════════
+   The slid-out pill has to be exactly long enough to COVER the question and
+   not a pixel longer — "this extends a bit too much ... keep the older length
+   while covering the new sized up text" (2026-09-22). Its length is therefore
+   the QUESTION's length, and that changes with the language (the English line
+   is a third wider) and with the width (the question's own size is clamped
+   against vw). So it is measured, not typed — the same rule as fitLines: a
+   box that holds table copy is sized FROM the copy.
+
+   The geometry: the question is pinned `--rt-cap + 0.6rem` from the tab's
+   inline-END edge, which is the page's edge, so the pill must reach from that
+   edge to the question's far side. Changing the tab's width moves only its
+   inline-START edge, so the question never moves and there is no feedback
+   loop between the measurement and the value it sets.
+
+   The stylesheet's `--rt-open` stays as the fallback for the frame before
+   this runs, and for the case where the tab is hidden and measures nothing. */
+const SIZE_TAB_SLACK = 16;   /* px of paper past the last letter */
+function sizeRateTab() {
+  document.querySelectorAll(".rate-tab").forEach((tab) => {
+    const ask = tab.querySelector(".rt-ask");
+    if (!ask || !tab.offsetParent) return;
+    tab.style.removeProperty("--rt-open");
+    const t = tab.getBoundingClientRect();
+    const a = ask.getBoundingClientRect();
+    const rtl = getComputedStyle(tab).direction === "rtl";
+    const need = (rtl ? a.right - t.left : t.right - a.left) + SIZE_TAB_SLACK;
+    if (need > 0) tab.style.setProperty("--rt-open", need.toFixed(1) + "px");
+  });
 }
 
 /* language switch (pill) — click or keyboard */
@@ -4482,6 +4607,12 @@ if (document.fonts && document.fonts.ready) {
     rebuildLoops();
     filmLoop.rebuild();
     mediaKeys.refresh();
+    /* ⚠️ BOTH OF THESE MEASURE TEXT, so both are wrong until Idris and
+       Grenze have landed — the fallback face is wider and the tab came out
+       300px where the real line wanted 256. Anything that sizes itself off
+       rendered text belongs in this block as well as at boot. */
+    testimonials.refit();
+    sizeRateTab();
     queueMenuSync();
     syncSubOffset();
   });
@@ -4524,6 +4655,11 @@ window.addEventListener("resize", () => {
     rebuildLoops();
     filmLoop.rebuild();
     mediaKeys.refresh();
+    /* both of these were measured against the OLD width — see fitLines; a
+       wider window must be allowed to give the type back, and the tab's
+       length follows the question's, which is clamped against vw */
+    testimonials.refit();
+    sizeRateTab();
     /* The ring's item sizes and radius are pixels off the window's measured
        height, so they are stale the moment the window changes. */
     serviceRings.resize();

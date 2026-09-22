@@ -4511,11 +4511,11 @@ html[lang="en"] .tr-quote::after  { content: "\201D"; }
 .rate-tab {
   --rt-cap: 2.9rem;             /* the cap: a half-stadium, 70px */
   --rt-h: 3.4rem;
-  --rt-open: min(12rem, 58vw);  /* the question is ~120px in Arabic and ~150
-                                   in English; 288 holds the longer of the
-                                   two beside the cap. ⚠️ NOT cqw — the rotor
-                                   is the query container and its content box
-                                   is only the words' box. */
+  --rt-open: min(15.5rem, 58vw); /* the question sets this: ~185px in Arabic
+                                   and ~230 in English at 1.15rem, plus the
+                                   70px cap and its gap. ⚠️ NOT cqw — the rotor is
+                                   the query container and its content box is
+                                   only the words' box. */
   position: absolute;
   /* out to the page's own edge: back out the grid's padding AND whatever the
      rotor inset its own content by (--tr-pad-end, 0 below 901px where that
@@ -4547,11 +4547,24 @@ html[lang="en"] .tr-quote::after  { content: "\201D"; }
   display: flex;
   align-items: center;
   color: var(--cream);
-  font-size: 0.75rem;
+  /* "make the هل عملت معنا من قبل bigger" (2026-09-22) — it is the
+     invitation, not a caption. ⚠️ CLAMPED, not a flat 1.15rem: the question
+     and the scrap share a row, and at a flat 28px the Arabic ran 22px INTO
+     the scrap's box at 1280. The vw term gives it the full size wherever
+     there is room and backs it off where there is not. Measured clearance
+     after: +6 at 1280, +80 at 1920. */
+  font-size: clamp(0.9rem, 1.85vw, 1.15rem);
   letter-spacing: 0.02em;
   white-space: nowrap;
-  opacity: 0.8;
+  opacity: 0.9;
 }
+/* ⚠️ SMALLER IN ENGLISH, the same trade `.tr-label` already makes. "Worked
+   with us before?" sets 231px against the Arabic's 185 at one size, and the
+   question and the scrap share a row: measured at 1280 the English line ran
+   68px INTO the scrap's box while the Arabic cleared it by 16. The room
+   between the page's edge and the scrap is 163px there, so this is what
+   fits. */
+html[lang="en"] .rt-ask { font-size: clamp(0.72rem, 1.3vw, 0.95rem); }
 
 .rt-slab {
   position: absolute;
