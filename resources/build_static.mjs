@@ -290,9 +290,8 @@ const w0 = who(first);
 const PAGES = {
   "index.html": {
     services: servicesBlock(),
-    tcName: esc(w0.big),
-    tcBiz: esc(w0.small),
-    tcQuote: esc(t(first, "quote")),
+    /* the cutting's three regions went with the section itself on
+       2026-09-22 — see HANDOFF, _Session 2026-09-22_ */
     trName: esc(w0.big),
     trBiz: esc(w0.small),
     trQuote: esc(t(first, "quote")),

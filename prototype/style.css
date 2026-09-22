@@ -2355,254 +2355,10 @@ html[dir="rtl"] .svc-arrow svg { transform: scaleX(-1); }
   padding-top: 0.12em;
 }
 
-/* ═══════════ THE TESTIMONIAL CUTTING (index, 2026-09-13; redrawn 2026-09-14) ═══════════
-   Two torn sheets under a line that says what they are, between the gallery
-   wall and the way out: the name on the masthead sheet, the words on the
-   column sheet. The paper is a BACKGROUND stretched to the box (100% 100%),
-   and the box is its aspect ratio PADDED to the paper's safe box — the plain
-   rectangle cut_scraps.py prints, converted to percentages of WIDTH because
-   that is what padding percentages resolve against:
-
-     scrap-title  1400×708   safe L 10.5  T 32.8  R 10.9  B 12.8  (T/B % of h)
-                             → padding 16.6% 10.9% 6.5% 10.5%
-     scrap-quote  1400×591   safe L 4.5   T 31.1  R 2.3   B 15.4
-                             → padding 11.5% 4.5% 6% 5%   (eased out a little:
-                               the type is centred in the box and reaches the
-                               tape only when a quote runs long)
-
-   Re-run the cutter and re-copy if the sources change. The tape is the
-   reason the top inset is a third of the sheet on both: it lies across the
-   top edge and the type has to start below it.
-
-   ⚠️ A stretched background, not <img> + object-fit, and not by accident. A
-   quote a few words longer than planned makes the box taller than its
-   ratio; a torn sheet stretched 8% taller still reads as a torn sheet,
-   while an <img> would either crop the torn edge (cover) or squash the tape
-   (fill). The ratio is a floor, not a cage.
-
-   The type is ink MULTIPLIED onto the paper rather than laid over it, which
-   is the one thing that makes live text sit IN a photographed sheet rather
-   than float on it — the paper's grain shows through the letters the way it
-   would through printed ink.
-
-   The sheets CAST (2026-09-14, "add shadows for the scraps"): a drop-shadow
-   follows the torn outline where a box-shadow would draw a rectangle round
-   it, and it deepens when a sheet is lifted — main.js tilts the sheet toward
-   the pointer and adds .is-lifted. The rest state is the paper on the page;
-   the lifted one is the paper an inch off it. ⚠️ filter isolates the card,
-   so the multiply above blends the type with the sheet only, never with
-   the linen behind a torn edge. */
-.wb4 {
-  position: relative;               /* the trail is laid out against it */
-}
-.wb4 .testi-clip { position: relative; z-index: 1; }   /* over the trail */
-
-/* ── the trail: tiny double aliphs in single file along the drawing's line
-   (2026-09-14; main.js builds the path and the marks) ──
-   The clip box is the article made viewport-wide (−pad each side), so the
-   marks run off the page edges and not the article's; the plane inside it
-   is the article's own box, which the path's px are relative to. Each
-   mark is one <i>: the double aliph as a background, `offset-path` the
-   shared path, `offset-rotate: auto` so its long axis stands across the
-   line and the stripe reads as a picket of marks, and one keyframe from
-   0% to 100% of the path, started at a different negative delay per mark.
-   ⚠️ Under prefers-reduced-motion the animation is off and each mark
-   sits at its own --tc-at: the stripe is still drawn, it just holds. */
-.tc-trail {
-  position: absolute;
-  top: 0; bottom: 0;
-  left: calc(-1 * var(--pad));
-  right: calc(-1 * var(--pad));
-  overflow: clip;
-  pointer-events: none;
-  z-index: 0;
-}
-.tc-trail-plane {
-  position: absolute;
-  top: 0;
-  left: var(--pad);
-}
-.tc-mark {
-  position: absolute;
-  top: 0; left: 0;
-  width: calc(var(--tc-icon, 20px) * 63.44 / 207.79);
-  height: var(--tc-icon, 20px);
-  /* full ink, the site's own --ink baked into the SVG's fill (#0F1820) —
-     the 0.72 opacity this started with read "a lil transparent" */
-  background: url("assets/img/DoubleAliph-Icon.svg") center / contain no-repeat;
-  offset-path: var(--tc-path);
-  offset-rotate: auto;
-  offset-distance: var(--tc-at, 0%);
-  animation: tc-travel var(--tc-dur, 40s) linear infinite;
-  will-change: offset-distance;
-}
-@keyframes tc-travel {
-  from { offset-distance: 0%; }
-  to   { offset-distance: 100%; }
-}
-.tc-trail.is-off .tc-mark { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) {
-  .tc-mark { animation: none; }
-}
-
-/* The collage, to the agency's drawing (2026-09-14): the title centred
-   across the whole width; the name sheet on the inline-END side, up at the
-   title's own height (it spans both rows and starts a little under the
-   title's top); the quote sheet on the START side, under the title, wider.
-   The two sheets overlap in neither axis but stagger, which is what makes
-   it a pinboard rather than a table. The grid is logical, so the English
-   page mirrors: the reader meets the words on the start side first and the
-   name on the end side, in either direction. */
-.testi-clip {
-  display: grid;
-  grid-template-columns: minmax(0, 60fr) minmax(0, 34fr);
-  grid-template-rows: auto auto;
-  column-gap: 2.5%;
-  row-gap: clamp(0.9rem, 2vw, 1.6rem);
-  align-items: start;
-  margin: 0;
-  /* the sheets are TILTED now (the drawing's angles, data-tilt) and a
-     rotated box overhangs its grid area: the quote sheet's raised corner
-     rises ~7% of its width above its row and the lowered one drops as far
-     below, so the padding under the collage is deeper than the row asks */
-  padding: clamp(0.6rem, 1.6vw, 1.2rem) 0 clamp(2.4rem, 5vw, 4.4rem);
-}
-.tc-head {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  margin: 0;
-  text-align: center;
-  /* the size of the wall's title («أن تبدو النتيجة حتميّة.», .wb3-head's
-     expression, which carries no English multiplier either) — "same as the
-     ones before (ان تبدو النتيجة حتمية etc)", 2026-09-14, twice */
-  font-size: clamp(1.8rem, 9.5vw, 8.6rem);
-}
-.tc-title {
-  grid-column: 2;
-  grid-row: 1 / 3;
-  align-self: start;
-  z-index: 1;                   /* over the title's tail if the two touch */
-}
-/* "a bit down" (2026-09-15): the sheet's top about level with the title's
-   baseline. ⚠️ Two classes, not one: `.tc-card { margin: 0 }` is written
-   LATER in this sheet and beat the single-class rule that stood here —
-   the computed margin read 0px while the value looked right. */
-.testi-clip .tc-title { margin-top: clamp(2rem, 5.6vw, 5.2rem); }   /* and "a bit more down" */
-/* the English title is four words to the Arabic's two and at this size it
-   spans the whole width, so nothing can stand beside it: the name sheet
-   takes the second row there and the quote sheet drops below it for the
-   stagger the drawing has */
-html[lang="en"] .tc-title { grid-row: 2; margin-top: 0; }
-html[lang="en"] .tc-body { margin-top: clamp(2rem, 4.5vw, 4rem); }
-.tc-body {
-  grid-column: 1;
-  grid-row: 2;
-  /* pulled up so the raised corner sits beside the title, where the
-     drawing has it, rather than a full row under it */
-  margin-top: clamp(0.2rem, 1.2vw, 1rem);
-}
-.tc-card {
-  position: relative;
-  box-sizing: border-box;
-  margin: 0;
-  min-width: 0;
-  background: center / 100% 100% no-repeat;
-  color: var(--ink);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  filter: drop-shadow(0 5px 7px rgba(15, 24, 32, 0.22))
-          drop-shadow(0 1px 1.5px rgba(15, 24, 32, 0.2));
-  transition: filter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
-  cursor: default;
-}
-.tc-card.is-lifted {
-  filter: drop-shadow(0 16px 20px rgba(15, 24, 32, 0.3))
-          drop-shadow(0 2px 3px rgba(15, 24, 32, 0.18));
-}
-.tc-title {
-  background-image: url("assets/img/scrap-title.webp");
-  aspect-ratio: 1400 / 708;
-  padding: 16.6% 10.9% 6.5% 10.5%;
-}
-.tc-body {
-  background-image: url("assets/img/scrap-quote.webp");
-  aspect-ratio: 1400 / 591;
-  /* equal top and bottom, so the centred words sit in the MIDDLE OF THE
-     PAPER and not in the middle of what is left under the tape ("center
-     and middle this txt inside the scrap", 2026-09-16). The tape's foot is
-     at 31% of the image's height = 13% of its width, so a one- or two-line
-     quote clears it; a third line would not. */
-  padding: 9% 4.5% 9% 5%;
-  justify-content: center;
-}
-.tc-name,
-.tc-biz,
-.tc-quote { mix-blend-mode: multiply; }
-
-/* the masthead line: the client's name — or the business, when there is no
-   name — in the site's own display face in Arabic, the blackletter in
-   English, and the reference's rule under it either way; the business
-   small beneath. Never the service (the agency's rule, 2026-09-13). */
-.tc-name {
-  display: block;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(1.3rem, 2.9vw, 2.5rem);
-  line-height: 1.12;
-  padding: 0.12em 0 0.22em;
-  border-bottom: 2px solid var(--ink);
-}
-.tc-biz {
-  display: block;
-  margin-top: 0.5em;
-  font-size: clamp(0.64rem, 0.98vw, 0.8rem);
-  color: var(--ink-mute);
-}
-/* ⚠️ [hidden] is only display:none in the UA sheet, and the display:block
-   above beats it (the 2026-08-29 form lesson) — so it is restated here for
-   every small line that goes away when an entry has no business */
-.tc-biz[hidden], .tb-biz[hidden], .tr-biz[hidden] { display: none; }
-html[lang="en"] .tc-name {
-  font-family: "Grenze Gotisch", var(--font-display), serif;
-  font-weight: 700;
-  font-size: clamp(1.45rem, 3vw, 2.6rem);
-  line-height: 1.02;
-  letter-spacing: 0.01em;
-}
-html[lang="en"] .tc-biz {
-  font-family: "Grenze", var(--font-body), serif;
-  font-weight: 500;
-  font-size: clamp(0.66rem, 1vw, 0.8rem);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-/* the words: one run of text across the sheet. They were two newspaper
-   columns until 2026-09-16 ("the text split up, join them") — a one-line
-   quote has nothing to split. */
-.tc-quote {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: clamp(0.95rem, 2.15vw, 1.65rem);   /* "a lil bigger", 2026-09-14 */
-  line-height: 1.72;
-  text-align: center;   /* "center and middle this txt ... inside the scrap"
-                           (2026-09-16); the sheet's justify-content does the
-                           middle */
-  text-wrap: balance;   /* a sentence that breaks breaks in two even halves,
-                           not a line and a lone word */
-  hyphens: auto;
-}
-.tc-quote::before { content: "«"; }
-.tc-quote::after  { content: "»"; }
-html[lang="en"] .tc-quote {
-  font-family: "Grenze", var(--font-body), serif;
-  font-size: clamp(1.05rem, 1.9vw, 1.5rem);
-  line-height: 1.46;
-}
-html[lang="en"] .tc-quote::before { content: "\201C"; }
-html[lang="en"] .tc-quote::after  { content: "\201D"; }
+/* ⚠️ [hidden] is only display:none in the UA sheet, and .tb-biz/.tr-biz are
+   display:block above it (the 2026-08-29 form lesson) — so it is restated
+   here for the small line that goes away when an entry has no business */
+.tb-biz[hidden], .tr-biz[hidden] { display: none; }
 
 /* ═══════════════════════════════════════════
    WHAT WE DO — the service rings
@@ -4445,10 +4201,18 @@ body[data-page="index"] .footer { margin-top: 0; }
    and runs from the box's edge. The phone keeps its own block. */
 @media (min-width: 901px) {
   .footer { --tr-w: 15.4rem; }
-  .testi-rotor .tr-inner {
-    width: min(calc(100% - var(--mark-clear)), var(--tr-w));
-    margin-inline-start: auto;
-    margin-inline-end: var(--mark-clear);
+  /* 🔴 THE BOX MOVED FROM THE WORDS TO THE ROTOR (2026-09-22). It used to
+     size .tr-inner and push it to the inline start, clear of the mark; now
+     it is PADDING on the rotor, so the scrap, the words and the two arrows
+     all centre inside the one box the socials below are spread across.
+     The content box is --tr-w plus an arrow on each side, so the steppers
+     hang OUTSIDE the words rather than eating into them, and the words keep
+     exactly the measure they had. Both sides clamp at 0, so a column with
+     less room than that degrades to whatever is left instead of going
+     negative. */
+  .testi-rotor {
+    padding-inline-start: max(0px, calc(100% - var(--mark-clear) - var(--tr-w) - var(--tr-arrow)));
+    padding-inline-end: max(0px, calc(var(--mark-clear) - var(--tr-arrow)));
   }
   .footer .contact-socials {
     width: min(100%, var(--tr-w));
@@ -4526,6 +4290,25 @@ body[data-page="index"] .footer { margin-top: 0; }
    not run the full 648px column. */
 .testi-rotor {
   min-width: 0;
+  /* ⚠️ EXPLICIT, for .rate-tab below. `container-type: inline-size` applies
+     `contain: layout`, which the spec says makes an element a containing
+     block for absolutely positioned descendants — Chromium does NOT (measured
+     2026-09-22: the tab's offsetParent came back .contact-grid, and it hung
+     38px off the page). One declaration removes the whole question.
+     ⚠️ Padding below does not move this: an abspos child resolves against the
+     PADDING box, which is the border box here. */
+  position: relative;
+  /* one arrow's own width plus the stage's gap — what a stepper needs to
+     hang outside the box the words keep */
+  --tr-arrow: 2.35rem;
+  /* 🔴 CENTRED, since 2026-09-22 (the agency's screenshot): the scrap stands
+     over the middle of the column with the testimonial under it, instead of
+     the scrap at the column's inline END and the words ranged along the
+     start. What that costs is the 2026-09-16 alignment — the name no longer
+     lands on the PHONE row's rule, nor the words on the WHATSAPP row's,
+     because a centred scrap and a rule-aligned one are different positions.
+     The drawing is the newer instruction. */
+  text-align: center;
   /* ⚠️ NO max-width, since 2026-09-14b. The 23rem cap that stood here made
      the rotor 552px in a 648px cell, hugging the inline start — so the
      scrap stood 96px in from the page edge and the words stopped short of
@@ -4541,10 +4324,16 @@ body[data-page="index"] .footer { margin-top: 0; }
    column's inline END — the far side from the contact table, where the
    drawing puts it — a few degrees off square, and casts on the ink. The
    type is live, ink multiplied into the paper like the cutting's. */
+/* ⚠️ A <button> since 2026-09-22 ("make it a button when pressed cycles to
+   the next testimonial"), so the appearance, border, and the UA's own font
+   have to be reset here — a button does not inherit the page's face. */
 .tr-label {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
   box-sizing: border-box;
-  width: min(100%, 15.8rem);    /* 380px at 1440 — three quarters of the 21rem it
-                                   was, off the compacted footer (2026-09-16) */
+  width: min(100%, 19rem);      /* 380 → 456px at 1440: "i made both a lil
+                                   bigger" (2026-09-22) */
   /* right under the rule and the name right under the scrap — the
      drawing's spacing (2026-09-14): the scrap's top sits on the rule and
      the name follows it by a line, not a paragraph. At 1440 that puts
@@ -4552,8 +4341,8 @@ body[data-page="index"] .footer { margin-top: 0; }
      WHATSAPP row's — "i lined the testimonials with the phone and whats
      up lines" (2026-09-16) — PROVIDED the label below stays one line.
      Measured: name 335 / phone row 309, words 450 / WhatsApp row 459. */
-  margin: 0 0 0.1rem;
-  margin-inline-start: auto;
+  margin: 0 auto 0.35rem;       /* centred in the rotor's box, was pushed to
+                                   the column's inline end */
   aspect-ratio: 1400 / 621;
   /* ⚠️ Narrower sides than the safe box (22.8 / 25.7): the words run in
      ONE line at a size that wants ~60% of the sheet — the agency's frame
@@ -4591,24 +4380,77 @@ html[lang="en"] .tr-label {
   transform: rotate(2.6deg);
   font-size: min(1.3rem, 8.3cqw);   /* four words to the Arabic's three, so smaller */
 }
-.tr-inner { will-change: transform, opacity; }
+/* The effects the agency asked for: the paper lifts and straightens under
+   the pointer, and presses back down. Its own resting tilt is part of the
+   transform, so both have to be written together or the rotation is lost. */
+.tr-label {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.3, 1), filter 0.4s;
+}
+.tr-label:hover,
+.tr-label:focus-visible {
+  transform: rotate(-1.1deg) scale(1.035) translateY(-3px);
+  filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.55))
+          drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+.tr-label:active { transform: rotate(-2.6deg) scale(0.985) translateY(1px); }
+.tr-label:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+html[lang="en"] .tr-label:hover,
+html[lang="en"] .tr-label:focus-visible { transform: rotate(1.1deg) scale(1.035) translateY(-3px); }
+html[lang="en"] .tr-label:active { transform: rotate(2.6deg) scale(0.985) translateY(1px); }
+@media (prefers-reduced-motion: reduce) {
+  .tr-label, .tr-label:hover, .tr-label:focus-visible, .tr-label:active { transform: rotate(-2.6deg); }
+  html[lang="en"] .tr-label,
+  html[lang="en"] .tr-label:hover,
+  html[lang="en"] .tr-label:focus-visible,
+  html[lang="en"] .tr-label:active { transform: rotate(2.6deg); }
+}
+
+/* the words between two chevrons (2026-09-22). The stage is the row; the
+   words take what is left, and `min-width: 0` is what stops a long quote
+   from pushing the arrows off the column. */
+.tr-stage {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.2rem, 1vw, 0.8rem);
+}
+.tr-inner { flex: 1 1 auto; min-width: 0; will-change: transform, opacity; }
+/* the same bare chevron as the carousel's and the ring's — no box, drawn for
+   LTR, mirrored under RTL by the shared rule up at .reel-arrow */
+.tr-step {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--cream);
+  cursor: pointer;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 0.6rem 0.4rem;
+  opacity: 0.45;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.tr-step svg { width: 0.72rem; height: auto; }
+.tr-step:hover { opacity: 1; }
+.tr-step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }
+html[dir="rtl"] .tr-step svg { transform: scaleX(-1); }
+
 .tr-name {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.4rem, 3.4vw, 2.6rem);
+  font-size: clamp(1.5rem, 3.8vw, 2.9rem);   /* "a lil bigger", 2026-09-22 */
   line-height: 1.3;
 }
 .tr-biz {
   margin: 0.1rem 0 0;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   opacity: 0.62;
 }
 .tr-quote {
   /* no hairline any more: the second drawing runs the words straight
      under the name, a paragraph apart, and a size up ("a lil bigger") */
-  margin: 0.75rem 0 0;   /* was 1.15rem; puts the first line on the WhatsApp row's rule (2026-09-16) */
-  font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+  margin: 0.75rem 0 0;
+  font-size: clamp(1.2rem, 1.7vw, 1.45rem);   /* "a lil bigger", 2026-09-22 */
   line-height: 1.7;
   text-wrap: pretty;   /* three lines in the box; no lone last word */
   color: rgba(217, 217, 206, 0.9);
@@ -4628,6 +4470,138 @@ html[lang="en"] .tr-label {
 .tr-quote::after  { content: "\201C"; margin-inline-start: 0.12em; }
 html[lang="en"] .tr-quote::before { content: "\201C"; }
 html[lang="en"] .tr-quote::after  { content: "\201D"; }
+
+/* ══ THE FEEDBACK TAB (2026-09-22) ══
+   The agency's two drawings are one shape in two states: a cream cap at the
+   page's edge with a chevron in it, and the same cap slid out into a long
+   stadium with the chevron still at its far end.
+
+   ⚠️ THE RED LINE IN BOTH DRAWINGS IS AN ANNOTATION pointing at the control,
+   not a rule to draw. The first build read it as a design element — a red
+   underline with the question on it — and that is not what was asked for.
+
+   HOW THE SLIDE WORKS. The tab's own WIDTH is the animation and its
+   `overflow: hidden` is the clip. The words and the chevron are pinned a
+   fixed distance from the pill's FAR end (inset-inline-start), so they ride
+   out with it; at rest everything but the chevron is past the edge and cut.
+   Width is a layout property, but this is one small absolutely positioned
+   element with nothing flowing after it, so the cost is its own box.
+
+   GEOMETRY. It hangs off the rotor — which is `position: relative` for
+   exactly this — and reaches the page's own edge with a negative inline-end
+   inset. Logical properties throughout, so the whole thing mirrors to the
+   right-hand edge on the English page with no second rule. The chevron is
+   the site's shared bare chevron, drawn for LTR and mirrored under RTL by
+   the rule at .reel-arrow, so it always points AWAY from the edge — the way
+   the pill travels.
+
+   Keyboard reaches it: :focus-visible opens the pill exactly as :hover does,
+   because a control that only answers a mouse is a link nobody can follow. */
+.rate-tab {
+  /* ⚠️ THE ROOT IS 150% — 1rem is 24px on this site, not 16. Every number
+     here was written at 16 first and came out half again too big (the pill
+     opened to 408px). 2.2rem is 53px, which is the cap the agency drew.
+     ⚠️ NOT cqw for the open width: .testi-rotor is the query container and
+     its content box is the words' box now, ~320px, so 48cqw was 175 and cut
+     both lines off. */
+  --rt-rest: 2.2rem;            /* the cap: a half-stadium, as tall as wide */
+  --rt-open: min(8rem, 58vw);   /* the words measure 96px in Arabic and 120
+                                   in English; 192 holds the longer of the two
+                                   plus the chevron's offset */
+  --rt-far: 2.1rem;             /* how far the words sit from the far end */
+  position: absolute;
+  inset-inline-end: calc(var(--pad) * -1);   /* out to the page's own edge */
+  top: 0.9rem;
+  z-index: 3;
+  display: block;
+  width: var(--rt-rest);
+  height: 2.6rem;
+  overflow: hidden;
+  background: var(--cream);
+  color: var(--ink);
+  text-decoration: none;
+  border-start-end-radius: 999px;
+  border-end-end-radius: 999px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  transition: width 0.55s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.rate-tab:hover,
+.rate-tab:focus-visible,
+.rate-tab:focus-within { width: var(--rt-open); }
+.rate-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* pinned to the pill's far end, so they travel with it instead of standing
+   still while a box grows around them. `max-content` keeps the two lines from
+   reflowing as the width animates. */
+.rt-words {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--rt-far);
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.1rem;
+  opacity: 0;
+  transition: opacity 0.3s ease 0.12s;
+}
+.rate-tab:hover .rt-words,
+.rate-tab:focus-visible .rt-words,
+.rate-tab:focus-within .rt-words { opacity: 1; }
+.rt-ask {
+  font-size: 0.6rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+.rt-go {
+  position: relative;
+  align-self: flex-start;       /* the underline is the words' width, not the box's */
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+/* the underline draws itself once the pill has arrived */
+.rt-go::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -0.1em;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  /* ⚠️ transform-origin has no logical keywords, so the side is written out
+     per direction — it has to grow FROM the first letter, the right one in
+     Arabic. */
+  transform-origin: left;
+  transition: transform 0.45s ease 0.3s;
+}
+html[dir="rtl"] .rt-go::after { transform-origin: right; }
+.rate-tab:hover .rt-go::after,
+.rate-tab:focus-visible .rt-go::after,
+.rate-tab:focus-within .rt-go::after { transform: scaleX(1); }
+
+.rt-chev {
+  position: absolute;
+  inset-inline-start: 0.78rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  opacity: 0.75;
+  transition: opacity 0.3s ease;
+}
+.rt-chev svg { width: 0.42rem; height: auto; display: block; }
+html[dir="rtl"] .rt-chev svg { transform: scaleX(-1); }
+.rate-tab:hover .rt-chev { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rate-tab { transition-duration: 0.01ms; }
+  .rt-words, .rt-go::after { transition-duration: 0.01ms; transition-delay: 0s; }
+}
 
 .contact-grid {
   position: relative;
@@ -5274,34 +5248,6 @@ body.sheet-open { overflow: hidden; }
      from BAND_SCRAPS in main.js. */
   .contact-band, .testi-rotor { display: none; }
 
-  /* the cutting stacks: masthead first, narrower and at the start edge like
-     a masthead, the column sheet full width under it in one column.
-     ⚠️ The quote is longer than the column sheet's ratio holds at this
-     width, so the sheet STRETCHES — see the note on .tc-card. That is the
-     trade taken deliberately; a torn edge absorbs it, a crop would not. */
-  .testi-clip {
-    grid-template-columns: 1fr;
-    grid-template-rows: none;
-    row-gap: 0.9rem;
-    padding: 1rem 0 1.4rem;
-  }
-  /* one column: the collage's explicit rows and columns come off and the
-     three fall in source order — title, name sheet, words */
-  .tc-head, .tc-title, .tc-body { grid-column: 1; grid-row: auto; }
-  .tc-title { width: 82%; justify-self: start; margin-top: 0; }
-  /* room under the quote sheet for the trail's last stroke (2026-09-15):
-     the marks are 50px tall and run under the sheet's bottom edge */
-  .wb4 { padding-bottom: 3.7rem; }
-  /* ⚠️ The stretch moves the tape. The top inset is a % of WIDTH, and a
-     sheet stretched from 2.37:1 to ~1.8:1 carries its tape (31% of the
-     image's height) further down in px than 11.5% of the width reaches —
-     measured: the English quote's first line ran under the tape's edge.
-     17% of the width is the tape's foot at the stretch the placeholders
-     produce here; a longer quote stretches more and needs more. */
-  .tc-body { padding-top: 16%; padding-bottom: 16%; }   /* equal, see the desktop rule; 16 keeps two English lines under the tape's foot */
-  /* Grenze runs large and the English quote runs long: at the desktop floor
-     the column sheet stretched to twice its ratio here. Idris is fine. */
-  html[lang="en"] .tc-quote { font-size: 0.84rem; line-height: 1.45; }   /* two lines of the longest, clear of the tape */
   .testi-band {
     display: block;
     position: relative;

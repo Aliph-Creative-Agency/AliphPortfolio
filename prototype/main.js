@@ -161,8 +161,17 @@ const I18N = {
      a testimonial; the first draft («وهذا ما قاله عملاؤنا.») explained
      itself and read like a caption. Changed at the agency's "change the
      section title to something better", 2026-09-14. */
-  testiHead: { ar: "قالوا عنّا.", en: "What they said." },
   testiLabel: { ar: "من كلام عملائنا", en: "In our clients' words" },
+  /* ⚠️ The scrap button's accessible name CONTAINS its visible words —
+     a name that replaces the label makes the control unspeakable (WCAG
+     2.5.3, "label in name"). */
+  testiLabelNext: { ar: "من كلام عملائنا · التالي", en: "In our clients' words · Next" },
+  testiPrev: { ar: "التعليق السابق", en: "Previous testimonial" },
+  testiNext: { ar: "التعليق التالي", en: "Next testimonial" },
+  /* the feedback tab at the footer's edge — the question at rest, the
+     call to action on the slab that swipes out over it */
+  rateAsk: { ar: "هل عملت معنا من قبل؟", en: "Worked with us before?" },
+  rateGo: { ar: "قيّم ألِف!", en: "Rate Aliph!" },
   testiBand: { ar: "آراء العملاء", en: "Client testimonials" },
   testiRotor: { ar: "آراء العملاء", en: "Client testimonials" },
   cLabelMail: { ar: "للمشاريع والتعاون", en: "Projects & collaboration" },
@@ -814,17 +823,16 @@ function rebuildLoops() {
   /* a fresh tween plays on creation — honour where the page actually is */
   if (bandTween && !bandVisible()) bandTween.pause();
   testimonials.rebuildBand();
-  /* the sheets' rest angles depend on the width (data-tilt-phone) */
-  testimonials.settle();
 }
 
 /* ══════════ testimonials ══════════
-   Three surfaces, one table (2026-09-13, redrawn to the agency's own
-   frames 2026-09-14):
+   TWO surfaces, one table (2026-09-13, redrawn to the agency's own frames
+   2026-09-14; the home page's CUTTING — two torn sheets and the trail of
+   double aliphs under them — was REMOVED on 2026-09-22 at the agency's
+   instruction, "remove the new section (what they said) from both pc and
+   phone". It is whole in git at `3fde694`, markup, module and stylesheet:
+   restore from there rather than rewriting it):
 
-     · the CUTTING on the home page, between the gallery wall and the way out
-       — the best one, TESTIMONIALS[0], set on two torn sheets under a line
-       that says what it is («وهذا ما قاله عملاؤنا.»);
      · the BAND on a phone — the cream stripe at the top of the footer, one
        row of torn SCRAPS (five, cut from the agency's sheet, all one height),
        each carrying a client's words; the one nearest the middle lifts;
@@ -920,285 +928,6 @@ const testimonials = (() => {
     small.hidden = !w.small;
   }
 
-  /* ── the cutting (home page) ── */
-  const canHover = window.matchMedia("(hover: hover)").matches;
-  let clipWired = false;
-  let settleClip = () => { };
-
-  function renderClip() {
-    const root = document.getElementById("testiClip");
-    if (!root) return;
-    const e = TESTIMONIALS[0];
-    writeWho(root, ".tc-name", ".tc-biz", e);
-    root.querySelector(".tc-quote").textContent = t(e, "quote");
-  }
-
-  /* Two sheets pinned to the page, and they behave like paper: each rests
-     at a slight tilt, settles into place as it scrolls into view, and lifts
-     toward the pointer — a small 3D tilt following the cursor, the shadow
-     deepening with it — or under a finger. "make it more interactive" (the
-     agency, 2026-09-13); the gestures stay small because the type on the
-     sheets has to be READ. Under prefers-reduced-motion the sheets rest at
-     their tilt and nothing moves. */
-  function wireClip() {
-    const root = document.getElementById("testiClip");
-    if (!root || clipWired) return;
-    clipWired = true;
-    const cards = Array.from(root.querySelectorAll(".tc-card"));
-    /* the drawing's angles are for the Arabic collage; the English one is
-       its mirror, so the angles flip with it */
-    const rest = (el) => {
-      const t = isPhone() && el.dataset.tiltPhone != null ? el.dataset.tiltPhone : el.dataset.tilt;
-      return parseFloat(t || 0) * (lang === "en" ? -1 : 1);
-    };
-    settleClip = () => {
-      cards.forEach((el) => gsap.set(el, { rotation: rest(el), transformPerspective: 900 }));
-      /* the trail is measured off the sheets, so it follows them — after
-         the frame that lays the new language or width out */
-      requestAnimationFrame(buildTrail);
-    };
-    settleClip();
-    if (prefersReduced) return;
-
-    /* settle in: from a little further off the page and a little more
-       turned, the second sheet a beat after the first */
-    gsap.from(cards, {
-      opacity: 0, y: 34, rotation: (i, el) => rest(el) * 3.2,
-      duration: 1, stagger: 0.14, ease: "power3.out",
-      scrollTrigger: { trigger: root, start: "top 84%" },
-    });
-
-    cards.forEach((el) => {
-      const lift = (dx, dy) => {
-        el.classList.add("is-lifted");
-        gsap.to(el, {
-          rotation: rest(el) * 0.7, rotationX: -dy * 5, rotationY: dx * 5,
-          y: -6, duration: 0.55, ease: "power3.out", overwrite: "auto",
-        });
-      };
-      const drop = () => {
-        el.classList.remove("is-lifted");
-        gsap.to(el, {
-          rotation: rest(el), rotationX: 0, rotationY: 0, y: 0,
-          duration: 0.7, ease: "power3.out", overwrite: "auto",
-        });
-      };
-      if (canHover) {
-        el.addEventListener("pointerenter", () => lift(0, 0));
-        el.addEventListener("pointermove", (ev) => {
-          const r = el.getBoundingClientRect();
-          lift((ev.clientX - r.left) / r.width * 2 - 1, (ev.clientY - r.top) / r.height * 2 - 1);
-        });
-        el.addEventListener("pointerleave", drop);
-      } else {
-        /* a finger has no hover: pressing lifts the sheet, letting go drops it */
-        el.addEventListener("pointerdown", () => lift(0, 0));
-        el.addEventListener("pointerup", drop);
-        el.addEventListener("pointercancel", drop);
-      }
-    });
-  }
-
-  /* ── the trail (home page, 2026-09-14) ──
-     "a moving stripe of tiny double aliph icons that follow this path" —
-     the agency's two drawings, one for a desktop and one for a phone. A
-     red line from the section's splitter, down behind the name sheet, a
-     loop in the empty ground, behind the quote sheet, a hump over its top
-     edge and under its tape, and off the page.
-
-     What was taken from the React component they sent: the one idea that
-     matters — CSS Motion Path. Every mark is an element with
-     `offset-path` set to the same path and `offset-distance` animated from
-     0% to 100% by a plain CSS keyframe, each mark started a fraction of
-     the period earlier than the last (a negative animation-delay), so the
-     stripe is a stream of marks in single file. No library, no scaling
-     wrapper, no drag, no scroll velocity: none of it is asked for and
-     each would have been code that runs for nothing.
-
-     ⚠️ THE PATH IS NOT A FIXED DRAWING, IT IS BUILT FROM THE SHEETS. The
-     component scales one path to fit a box, which only holds while the
-     box's proportions do — and this collage's do not: the title row is
-     vw-sized, the sheets are ratio boxes, the English page mirrors the
-     lot and stacks its name sheet under the title. So the waypoints are
-     stored as FRACTIONS of a box — the article (A), the name sheet (N) or
-     the quote sheet (Q), each measured at build time — and the loop's
-     drops below the name sheet are in px, scaled down when there is less
-     room under it than the drawing had. In English every x-fraction is
-     mirrored. The waypoints go through a Catmull-Rom spline, so the red
-     line's hand-drawn ease is kept without a single bezier handle being
-     typed.
-
-     Rebuilt on resize and on a language change (settle() → buildTrail),
-     paused while the section is off screen, and static — the marks laid
-     along the path, not moving — under prefers-reduced-motion. */
-  const TRAILS = {
-    /* [anchor, fx, fy, fxEn?] — fractions of that box's width and height
-       (fxEn: the English page's own fx, where mirroring alone is wrong); or
-       ["L", fx, dy] — the loop under the name sheet: fx of N's width, dy
-       in px below N's bottom at the drawing's size (1440), scaled to the
-       room actually under it */
-    desktop: {
-      icon: 80, gap: 72, speed: 46, room: 363,   /* 20 → 26 → 44 → 60 → 100 → 80 over 2026-09-15; 52 → 36 → 46 px/s */
-      pts: [
-        ["A", 0.103, 0, 0.06], /* on the splitter (4th: the English page's
-                                  own fx, further out, so the 80px marks
-                                  clear the title's tail at 1164 of 1354) */
-        ["N", 0.34, 0.15],     /* under the name sheet's top edge */
-        ["N", 0.39, 0.55],
-        ["N", 0.42, 0.97],     /* out of its bottom edge */
-        ["L", 0.49, 77],       /* straight on down (the third drawing,
-                                  2026-09-15: a longer drop, then ONE round
-                                  loop to the left, crossing the drop once
-                                  on the way out) */
-        ["L", 0.53, 147],
-        ["L", 0.522, 231],     /* the loop, enlarged 2026-09-15 ("still not
-                                  big enough"): ~230px across, its foot
-                                  40px above the splitter at 1440 */
-        ["L", 0.411, 311],
-        ["L", 0.219, 316],
-        ["L", 0.067, 256],
-        ["L", 0.067, 171],
-        ["L", 0.209, 121],
-        ["L", 0.40, 124],
-        ["L", 0.53, 141],      /* crossing the drop */
-        ["L", 0.684, 154],
-        ["L", 0.836, 175],
-        ["Q", 0.06, 0.66],     /* behind the quote sheet's left edge */
-        ["Q", 0.19, 0.31],
-        ["Q", 0.284, 0.17],    /* the hump over its top edge… */
-        ["Q", 0.385, 0.02],
-        ["Q", 0.497, 0.045],
-        ["Q", 0.587, 0.09],    /* …and under its tape */
-        ["Q", 0.69, 0.25],
-        ["Q", 0.86, 0.8],      /* out of its bottom edge, near the corner */
-        ["A", 1.04, 0.95],     /* off the page */
-      ],
-    },
-    phone: {
-      icon: 50, gap: 45, speed: 34, room: 250,   /* "on phone 50" */
-      /* the phone's drawing of 2026-09-15 (the second one — the first
-         had a loop at the top left and the agency called it "not good"):
-         a C down the left into the name sheet's side, out of its top
-         right into a wide arc that leaves the screen — "notice how the
-         right side is out of sight" — and comes back behind the quote
-         sheet's lower corner, then under that sheet and off the left */
-      pts: [
-        ["A", 0.24, 0],
-        ["N", -0.15, -0.44],
-        ["N", -0.19, 0.12],
-        ["N", -0.17, 0.52],
-        ["N", 0.02, 0.8],      /* behind the name sheet */
-        ["N", 0.5, 0.5],
-        ["N", 0.73, 0.04],     /* out of its top right */
-        ["N", 1.07, -0.44],
-        ["N", 1.41, -0.36],    /* off the right */
-        ["N", 1.64, 0.44],
-        ["Q", 1.44, -0.21],
-        ["Q", 1.39, 0.5],
-        ["Q", 1.3, 0.7],
-        ["Q", 1.06, 0.98],     /* back in at the right edge, below the
-                                  quote sheet, and one smooth U under it
-                                  from edge to edge (the fourth drawing,
-                                  2026-09-15: nothing of it behind the
-                                  sheet, the middle ~80px below it) */
-        ["Q", 0.78, 1.3],
-        ["Q", 0.5, 1.42],
-        ["Q", 0.22, 1.3],
-        ["Q", -0.06, 0.98],
-        ["Q", -0.2, 0.7],      /* off the left */
-      ],
-    },
-  };
-
-  /* Catmull-Rom through the points, as cubic beziers */
-  function spline(p) {
-    let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
-    for (let i = 0; i < p.length - 1; i++) {
-      const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
-      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
-      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-      d += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
-    }
-    return d;
-  }
-
-  const measurePath = (() => {
-    let el = null;
-    return (d) => {
-      if (!el) {
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("aria-hidden", "true");
-        svg.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
-        el = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        svg.appendChild(el);
-        document.body.appendChild(svg);
-      }
-      el.setAttribute("d", d);
-      return el.getTotalLength();
-    };
-  })();
-
-  let trailWatched = false;
-  function buildTrail() {
-    const article = document.querySelector(".wb4");
-    const clipEl = document.getElementById("testiClip");
-    if (!article || !clipEl) return;
-    let trail = article.querySelector(".tc-trail");
-    if (!trail) {
-      trail = document.createElement("div");
-      trail.className = "tc-trail";
-      trail.setAttribute("aria-hidden", "true");
-      trail.innerHTML = '<div class="tc-trail-plane"></div>';
-      article.prepend(trail);
-    }
-    const plane = trail.firstElementChild;
-    const spec = isPhone() ? TRAILS.phone : TRAILS.desktop;
-    const A = article.getBoundingClientRect();
-    const box = (el) => {
-      const r = el.getBoundingClientRect();
-      return { x: r.left - A.left, y: r.top - A.top, w: r.width, h: r.height };
-    };
-    const N = box(clipEl.querySelector(".tc-title"));
-    const Q = box(clipEl.querySelector(".tc-body"));
-    const Ab = { x: 0, y: 0, w: A.width, h: A.height };
-    const mirror = lang === "en";
-    /* the loop's drops, scaled to the room under the name sheet */
-    const k = Math.min(1, Math.max(0.35, (Ab.h - 14 - (N.y + N.h)) / spec.room));
-    const pts = spec.pts.map(([a, fx, fy, fxEn]) => {
-      const b = a === "Q" ? Q : a === "A" ? Ab : N;
-      const x = b.x + (mirror ? 1 - (fxEn == null ? fx : fxEn) : fx) * b.w;
-      const y = a === "L" ? N.y + N.h + fy * k : b.y + fy * b.h;
-      return [x, y];
-    });
-    const d = spline(pts);
-    const len = measurePath(d);
-    const n = Math.max(8, Math.round(len / spec.gap));
-    const dur = len / spec.speed;
-    plane.style.width = Ab.w + "px";
-    plane.style.height = Ab.h + "px";
-    plane.style.setProperty("--tc-path", `path("${d}")`);
-    plane.style.setProperty("--tc-icon", spec.icon + "px");
-    plane.style.setProperty("--tc-dur", dur.toFixed(2) + "s");
-    /* marks: reuse what is there, add or drop to the count */
-    while (plane.children.length > n) plane.lastElementChild.remove();
-    while (plane.children.length < n) {
-      const m = document.createElement("i");
-      m.className = "tc-mark";
-      plane.appendChild(m);
-    }
-    Array.from(plane.children).forEach((m, i) => {
-      m.style.setProperty("--tc-at", (100 * i / n).toFixed(2) + "%");
-      m.style.animationDelay = (-dur * i / n).toFixed(2) + "s";
-    });
-    if (!trailWatched && window.IntersectionObserver) {
-      trailWatched = true;
-      /* a stream nobody can see is a hundred animations for nothing */
-      new IntersectionObserver((entries) => {
-        trail.classList.toggle("is-off", !entries[0].isIntersecting);
-      }, { rootMargin: "120px" }).observe(article);
-    }
-  }
-
   /* ── the band (phone) ── */
   const TB_SPEED = 34;   /* px/s; the contact band runs at 40 with far less to read */
   let bandTween = null;
@@ -1281,56 +1010,69 @@ const testimonials = (() => {
     if (!bandWatched) {
       bandWatched = true;
       bandVisible = pauseOffscreen(host, () => bandTween);
-      wireBandDrag(host, track);
+      wireBandTap(host, track);
     }
     if (!bandVisible()) bandTween.pause();
   }
 
-  /* Hold and DRAG (2026-09-14b, "give the ability to drag the stripe").
-     Pointer events only — they cover a finger and a mouse alike, and
-     `touch-action: pan-y` on the stripe leaves vertical swipes to the page
-     while a horizontal one comes here uncancelled. Pressing holds the
-     loop; moving scrubs it by the same distance (the tween is linear, so
-     the shift is dx over the period — see makeLoop); letting go resumes it
-     a beat later, from wherever it was left. The cards' --pop follows the
-     scrub, so the one under the middle still lifts while you pull. */
-  let resumeTimer = null;
-  function wireBandDrag(host, track) {
-    let x0 = 0, p0 = 0, down = false, moved = false;
-    const tw = () => bandTween;
-    const hold = () => { clearTimeout(resumeTimer); if (tw()) tw().pause(); };
-    const release = (delay) => {
-      clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(() => { if (tw() && bandVisible() && !down) tw().resume(); }, delay);
-    };
-    host.addEventListener("pointerdown", (ev) => {
-      if (!tw() || ev.button) return;
-      down = true; moved = false;
-      x0 = ev.clientX; p0 = tw().progress();
-      hold();
-      host.setPointerCapture(ev.pointerId);
+  /* TAP A SCRAP AND IT COMES TO THE MIDDLE (2026-09-22).
+
+     🔴 What this REPLACED, and why: hold-and-drag, plus a mouse resting on
+     the stripe holding it. "when u drag the testimonials stripe it freezes
+     until i press a diff area then it moves again ... remove this useless
+     feature" (the agency). The freeze was real and it was the release
+     timer: a pointerup that never arrived — a finger that leaves the
+     element while still down, or a pointercancel the browser swallows
+     under the scroll gesture — left `down` true, so the timer's
+     `!down` guard never let the loop resume and the stripe stood until the
+     next press reset it. It is deleted rather than fixed: the gesture was
+     never asked for beyond "give the ability to drag", and a stripe you
+     cannot accidentally stop is the safer surface.
+
+     What a tap does instead: the loop eases to the progress that puts THAT
+     card's centre on the stripe's, then holds a beat and runs on. The
+     geometry is makeLoop's own — x = from + dir·period·progress with a
+     linear ease — so a shift of dx px is dx / (dir·period) of progress.
+     ⚠️ The card that was tapped is one of several copies of that
+     testimonial (makeLoop clones the group across the track), so the
+     distance is measured off the NODE that was pressed, never off the
+     testimonial's index: the nearest copy is the one the finger is on. */
+  let bandSettle = null;
+  function wireBandTap(host, track) {
+    host.addEventListener("click", (ev) => {
+      const card = ev.target.closest(".tb-card");
+      if (!card || !bandTween) return;
+      centreCard(card, host, track);
     });
-    host.addEventListener("pointermove", (ev) => {
-      if (!down || !tw()) return;
-      const dx = ev.clientX - x0;
-      if (!moved && Math.abs(dx) < 4) return;
-      moved = true;
-      host.classList.add("is-dragging");
-      const t = tw();
-      t.progress(gsap.utils.wrap(0, 1, p0 + dx / (t.dir * t.period)));
-      popCards(track);
+  }
+
+  function centreCard(card, host, track) {
+    const t = bandTween;
+    if (!t) return;
+    const hr = host.getBoundingClientRect();
+    const r = card.getBoundingClientRect();
+    const dx = (hr.left + hr.width / 2) - (r.left + r.width / 2);
+    if (bandSettle) bandSettle.kill();
+    t.pause();
+    /* a proxy, because `progress` is a method on the tween and not a
+       property gsap can tween in place */
+    const p = { at: t.progress() };
+    bandSettle = gsap.to(p, {
+      at: p.at + dx / (t.dir * t.period),
+      duration: 0.55,
+      ease: "power3.out",
+      onUpdate() {
+        t.progress(gsap.utils.wrap(0, 1, p.at));
+        popCards(track);
+      },
+      onComplete() {
+        bandSettle = null;
+        /* a beat to read it, then on — unless the stripe has scrolled off */
+        gsap.delayedCall(2.4, () => {
+          if (bandTween === t && bandVisible() && !bandSettle) t.resume();
+        });
+      },
     });
-    const up = () => {
-      if (!down) return;
-      down = false;
-      host.classList.remove("is-dragging");
-      release(moved ? 1400 : 800);
-    };
-    host.addEventListener("pointerup", up);
-    host.addEventListener("pointercancel", up);
-    /* a mouse resting on the stripe holds it too, like the rotor */
-    host.addEventListener("pointerenter", (ev) => { if (ev.pointerType === "mouse") hold(); });
-    host.addEventListener("pointerleave", (ev) => { if (ev.pointerType === "mouse" && !down) release(300); });
   }
 
   /* ── the rotor (desktop) ──
@@ -1343,7 +1085,6 @@ const testimonials = (() => {
   let rotorIdx = 0;
   let rotorTimer = null;
   let rotorOn = false;
-  let rotorHeld = false;
   let rotorWired = false;
 
 
@@ -1354,8 +1095,17 @@ const testimonials = (() => {
   }
 
   function advance() {
-    if (!rotorOn || rotorHeld) return;
-    rotorIdx = (rotorIdx + 1) % TESTIMONIALS.length;
+    if (!rotorOn) return;
+    step(1);
+  }
+
+  /* The three controls — the two chevrons and the scrap — all land here, and
+     each RESTARTS the hold rather than suspending it: showRotor clears the
+     pending timer and sets a fresh one, so a click always buys a full read of
+     what it just brought up. The auto cycle is untouched ("keep the auto
+     cycle"). */
+  function step(by) {
+    rotorIdx = (rotorIdx + TESTIMONIALS.length + by) % TESTIMONIALS.length;
     showRotor(rotorIdx, true);
   }
 
@@ -1414,12 +1164,19 @@ const testimonials = (() => {
     } else {
       startRotor();
     }
-    /* the pointer holds the current one, like the band */
-    root.addEventListener("pointerenter", () => { rotorHeld = true; clearTimeout(rotorTimer); });
-    root.addEventListener("pointerleave", () => {
-      rotorHeld = false;
-      if (rotorOn) rotorTimer = setTimeout(advance, 1200);
-    });
+    /* 🔴 NO pointer hold, since 2026-09-22. Resting a mouse on the rotor
+       used to freeze it until the pointer left — the desktop half of "remove
+       this useless feature". The arrows and the scrap are the controls now,
+       and each of them restarts the hold rather than suspending it. */
+    const on = (id, by) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("click", () => step(by));
+    };
+    on("testiPrev", -1);
+    on("testiNext", 1);
+    /* the scrap cycles forward, the same as the next chevron: it is a second
+       way to the same place, which is what the agency asked for */
+    on("testiLabel", 1);
   }
 
   /* language switch: same index, new words, no animation */
@@ -1430,10 +1187,8 @@ const testimonials = (() => {
   }
 
   return {
-    render() { renderClip(); refreshRotor(); settleClip(); },
-    settle() { settleClip(); },
+    render() { refreshRotor(); },
     rebuildBand,
-    wireClip,
     wireRotor,
   };
 })();
@@ -4718,7 +4473,6 @@ applyI18n();
 initDropCap();
 syncMenuBtn();
 testimonials.wireRotor();
-testimonials.wireClip();
 openFromQuery();
 
 /* widths measured before Idris lands are wrong and leave a gap in the
