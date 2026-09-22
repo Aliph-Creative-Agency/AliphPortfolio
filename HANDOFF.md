@@ -735,6 +735,30 @@ gesture has been invented for it.
 
 ---
 
+**Standing rule: FIT THE TYPE TO THE TEXT.** Every surface here renders
+strings out of a TABLE into a box whose size was chosen by hand, and the
+strings differ wildly — «ريما حسين» is nine characters and «Jabal
+al-Mukabbir Social Affairs» is thirty-one. A size picked against the short
+entries overflows on the long ones and is not seen until the long one comes
+round, which is why the agency keeps finding it. `fitLines` / `fitHeight` in
+`main.js` are the mechanism and the rule is written over them:
+
+1. **The stylesheet sets the CEILING; the script only ever shrinks.** A short
+   entry is untouched and renders exactly as the CSS says.
+2. **The limit is the room that actually EXISTS, measured** — a line count
+   when the limit is a shape rule ("a name is at most two lines"), a
+   neighbour's edge when it is a space rule ("the words stop before the
+   socials"). Never a line count guessed at one width.
+3. **Check the LONGEST entry in the table, in BOTH languages, at the
+   NARROWEST width the surface is shown at.** Never the first entry.
+
+⚠️ Anything that measures rendered text — a fit, a box sized off a string —
+belongs in the `document.fonts.ready` block as well as at boot. The fallback
+face is wider than Idris and Grenze, and a measurement taken before they land
+is wrong: the feedback pill came out 300px where the real line wanted 256.
+
+---
+
 **Standing rule: update this file at the end of every session.**
 
 ---
