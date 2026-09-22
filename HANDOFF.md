@@ -842,9 +842,23 @@ more: **`advance()` RE-ARMS instead of returning** while held. A held cycle
 that simply stops must be restarted by an event that may never arrive; one
 check every 600ms cannot deadlock, and that is the cheaper guarantee.
 
+🔴 **AND THE PAUSE AFTER LETTING GO IS NOW A BEAT, NOT A STALL** — "it still
+freezes for a brief amount of time", then "lets keep this brief pause but with
+centering the current testimonial". The restored gesture had inherited the
+original's **1400ms settle after a drag** (800 after a press), and a stripe
+that simply stands still for a second and a half reads as broken however
+deliberate the number is. **A drag and a tap end the same way now:** the card
+lands in the middle, holds 1.6s, then the loop runs on — a tap centres the one
+you pressed, a drag centres whichever one you left nearest the middle
+(`nearestCard`, the same measure `popCards` uses, so the scrap that snaps is
+the one already lifted). The bare resume is only the fallback for a gesture
+that ended over no card at all. The four numbers are named at the head of the
+module: `BAND_RESUME_DRAG` 120ms, `BAND_RESUME_PRESS` 250, `BAND_RESUME_HOVER`
+300, `BAND_HOLD_TAP` 1.6s.
+
 **Verified by driving the failing gesture itself**, not the happy path: press
-on the stripe, move, then lift the pointer on `document.body` — the loop
-resumes. A clean tap still centres (offset ≤2px, `--pop` 1.00). The rotor
+on the stripe, move, then lift the pointer on `document.body` — the nearest
+scrap snaps to offset 0 and the loop resumes after the hold. A clean tap still centres (offset ≤2px, `--pop` 1.00). The rotor
 holds 5.2s under a mouse against a 3s cycle, and resumes after a bare
 `window.blur` with no `pointerleave` ever fired. The arrows step while held
 and hand the cycle back.

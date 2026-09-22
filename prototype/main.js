@@ -1051,6 +1051,23 @@ const testimonials = (() => {
     });
   }
 
+  /* whichever scrap the drag left nearest the middle of the stripe. The same
+     measure popCards uses, so the card that snaps is the one already lifted.
+     ⚠️ Only cards actually on the stripe are candidates: makeLoop clones the
+     group across the track and the copies off screen are nearer nothing. */
+  function nearestCard(host, track) {
+    const hr = host.getBoundingClientRect();
+    const mid = hr.left + hr.width / 2;
+    let best = null, bestD = Infinity;
+    track.querySelectorAll(".tb-card").forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.right < hr.left || r.left > hr.right) return;
+      const d = Math.abs(r.left + r.width / 2 - mid);
+      if (d < bestD) { bestD = d; best = el; }
+    });
+    return best;
+  }
+
   function rebuildBand() {
     const track = document.getElementById("testiBandTrack");
     if (!track) return;
@@ -1098,6 +1115,19 @@ const testimonials = (() => {
      the one under the middle still lifts while you pull. Letting go without
      having moved is a TAP, and a tap brings that scrap to the middle.
      Letting go after a drag resumes from wherever it was left, a beat later. */
+  /* ⚠️ HOW LONG THE STRIPE STAYS STILL AFTER YOU LET GO, and these numbers
+     are the "it still freezes for a brief amount of time" of 2026-09-22.
+     The restored gesture inherited the original's 1400ms settle after a drag
+     and 800 after a press, which is long enough to read as a stall rather
+     than as a beat. A drag now hands the loop straight back — the 120ms is
+     only there so the last pointermove is not fighting the tween as it
+     resumes. The TAP's hold is the one pause that is meant to be felt: it is
+     what gives you time to read the scrap you just brought to the middle. */
+  const BAND_RESUME_DRAG = 120;    /* ms after a drag — was 1400 */
+  const BAND_RESUME_PRESS = 250;   /* ms after a press that centred nothing — was 800 */
+  const BAND_RESUME_HOVER = 300;   /* ms after a mouse leaves */
+  const BAND_HOLD_TAP = 1.6;       /* s to read a tapped scrap — was 2.4 */
+
   let resumeTimer = null;
   let bandSettle = null;        /* the tap's centring tween, if one is running */
   function wireBandDrag(host, track) {
@@ -1134,17 +1164,26 @@ const testimonials = (() => {
       popCards(track);
     });
 
-    /* ⚠️ EVERY WAY THE GESTURE CAN END COMES HERE, and it is idempotent. */
+    /* ⚠️ EVERY WAY THE GESTURE CAN END COMES HERE, and it is idempotent.
+
+       🔴 A DRAG AND A TAP END THE SAME WAY: the card lands in the middle,
+       holds long enough to be read, then the loop runs on. "lets keep this
+       brief pause but with centering the current testimonial" (2026-09-22) —
+       the pause after letting go was already there and read as a stall
+       because nothing happened in it. Snapping to the nearest scrap is what
+       makes it a beat instead: a tap centres the one you pressed, a drag
+       centres whichever one you left nearest the middle. The bare `release`
+       below is only the fallback for a gesture that ended over no card at
+       all. */
     const up = (ev) => {
       if (!down) return;
       down = false;
       host.classList.remove("is-dragging");
-      if (!moved) {
-        const card = ev && ev.target && ev.target.closest
-          ? ev.target.closest(".tb-card") : null;
-        if (card) { centreCard(card, host, track); return; }
-      }
-      release(moved ? 1400 : 800);
+      const pressed = !moved && ev && ev.target && ev.target.closest
+        ? ev.target.closest(".tb-card") : null;
+      const card = pressed || (moved ? nearestCard(host, track) : null);
+      if (card) { centreCard(card, host, track); return; }
+      release(moved ? BAND_RESUME_DRAG : BAND_RESUME_PRESS);
     };
     host.addEventListener("pointerup", up);
     host.addEventListener("pointercancel", up);
@@ -1155,11 +1194,11 @@ const testimonials = (() => {
 
     /* a mouse resting on the stripe holds it, like the rotor */
     host.addEventListener("pointerenter", (ev) => { if (ev.pointerType === "mouse") hold(); });
-    host.addEventListener("pointerleave", (ev) => { if (ev.pointerType === "mouse" && !down) release(300); });
+    host.addEventListener("pointerleave", (ev) => { if (ev.pointerType === "mouse" && !down) release(BAND_RESUME_HOVER); });
     /* …and a pointer that leaves by any other route than pointerleave — the
        page scrolling out from under it, the window blurring — must not leave
        the stripe held */
-    window.addEventListener("blur", () => release(300));
+    window.addEventListener("blur", () => release(BAND_RESUME_HOVER));
   }
 
   /* ease the loop until the card that was pressed sits on the stripe's
@@ -1189,7 +1228,7 @@ const testimonials = (() => {
       onComplete() {
         bandSettle = null;
         /* a beat to read it, then on — unless the stripe has scrolled off */
-        gsap.delayedCall(2.4, () => {
+        gsap.delayedCall(BAND_HOLD_TAP, () => {
           if (bandTween === t && bandVisible() && !bandSettle) t.resume();
         });
       },
