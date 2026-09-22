@@ -792,6 +792,17 @@ in `assets/img/` and is now referenced by nothing. Left in place: the cutter
 The seam closes cleanly: the gallery wall, one splitter, the way out. Checked
 at 1440 — no gap where the collage was.
 
+### 2. ✅ The freeze, and what caused it — ⚠️ READ THE CORRECTION BELOW
+
+🔴 **CORRECTED THE SAME DAY: THE DRAG IS BACK.** "i meant by useless the
+freeze not the drag". This session deleted a working gesture on the strength
+of one ambiguous sentence, and then had to put it back. Both the stripe's
+drag and the desktop rotor's hover-hold are restored, with the release fixed
+rather than the feature removed. **When an instruction to remove something
+comes attached to a description of a BUG in it, ask which one is meant — the
+bug is the cheaper thing to fix and the feature is the expensive thing to
+rebuild.** See _The freeze, properly fixed_ at the end of this session.
+
 ### 2. ✅ The freeze, and what caused it
 
 **The report was right and the cause was the release timer.** `wireBandDrag`
@@ -806,6 +817,37 @@ It is **deleted, not fixed**: the gesture was never asked for beyond "give the
 ability to drag", and a stripe that cannot be accidentally stopped is the
 safer surface. The desktop rotor's `pointerenter` hold went with it — the same
 complaint, the other half of the footer.
+
+### 2b. ✅ The freeze, properly fixed — the release, not the feature
+
+Restored on 2026-09-22 after the correction above. The gesture is what it
+was: press holds the loop, a move over 4px scrubs it, a press with no move is
+a TAP and centres that scrap, letting go resumes a beat later.
+
+**What actually changed is the RELEASE, and it is the rule worth keeping:**
+
+🔴 **A FLAG THAT SUSPENDS MOTION MUST BE CLEARED BY EVERY WAY THE GESTURE CAN
+END, NOT JUST THE TIDY ONE.** `down` was cleared only by a `pointerup` or
+`pointercancel` **on the stripe**. A finger lifted outside the element, a
+cancel the browser swallows under a scroll, or a window that loses focus
+mid-gesture all left it set, the resume timer's `!down` guard never passed,
+and the loop stood until the next press reset it. Now the release is bound on
+the **window** as well as the host, on **`lostpointercapture`** (which fires
+whenever capture ends, for any reason), and on **`blur`**. Any one of them is
+enough; `up()` is idempotent.
+
+The desktop rotor had the same shape of bug — a hold released only by
+`pointerleave`, which is not guaranteed — and the same treatment, plus one
+more: **`advance()` RE-ARMS instead of returning** while held. A held cycle
+that simply stops must be restarted by an event that may never arrive; one
+check every 600ms cannot deadlock, and that is the cheaper guarantee.
+
+**Verified by driving the failing gesture itself**, not the happy path: press
+on the stripe, move, then lift the pointer on `document.body` — the loop
+resumes. A clean tap still centres (offset ≤2px, `--pop` 1.00). The rotor
+holds 5.2s under a mouse against a 3s cycle, and resumes after a bare
+`window.blur` with no `pointerleave` ever fired. The arrows step while held
+and hand the cycle back.
 
 ### 3. ✅ A tap brings a scrap to the middle (phone)
 

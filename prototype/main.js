@@ -1070,42 +1070,103 @@ const testimonials = (() => {
     if (!bandWatched) {
       bandWatched = true;
       bandVisible = pauseOffscreen(host, () => bandTween);
-      wireBandTap(host, track);
+      wireBandDrag(host, track);
     }
     if (!bandVisible()) bandTween.pause();
   }
 
-  /* TAP A SCRAP AND IT COMES TO THE MIDDLE (2026-09-22).
+  /* HOLD, DRAG, AND TAP TO CENTRE (2026-09-14b, restored 2026-09-22).
 
-     🔴 What this REPLACED, and why: hold-and-drag, plus a mouse resting on
-     the stripe holding it. "when u drag the testimonials stripe it freezes
-     until i press a diff area then it moves again ... remove this useless
-     feature" (the agency). The freeze was real and it was the release
-     timer: a pointerup that never arrived — a finger that leaves the
-     element while still down, or a pointercancel the browser swallows
-     under the scroll gesture — left `down` true, so the timer's
-     `!down` guard never let the loop resume and the stripe stood until the
-     next press reset it. It is deleted rather than fixed: the gesture was
-     never asked for beyond "give the ability to drag", and a stripe you
-     cannot accidentally stop is the safer surface.
+     🔴 THE FREEZE WAS NEVER THE DRAG, IT WAS THE RELEASE — and the drag was
+     briefly deleted over that misreading. "when u drag the testimonials
+     stripe it freezes until i press a diff area then it moves again" was a
+     real bug with a small cause: `down` was cleared ONLY by a pointerup or
+     pointercancel ON THE STRIPE, so a finger lifted outside the element, a
+     cancel the browser swallowed under a scroll, or a window that lost focus
+     mid-gesture all left the flag set. The resume timer's `!down` guard then
+     never passed and the loop stood still until the next press reset it.
 
-     What a tap does instead: the loop eases to the progress that puts THAT
-     card's centre on the stripe's, then holds a beat and runs on. The
-     geometry is makeLoop's own — x = from + dir·period·progress with a
-     linear ease — so a shift of dx px is dx / (dir·period) of progress.
-     ⚠️ The card that was tapped is one of several copies of that
-     testimonial (makeLoop clones the group across the track), so the
-     distance is measured off the NODE that was pressed, never off the
-     testimonial's index: the nearest copy is the one the finger is on. */
-  let bandSettle = null;
-  function wireBandTap(host, track) {
-    host.addEventListener("click", (ev) => {
-      const card = ev.target.closest(".tb-card");
-      if (!card || !bandTween) return;
-      centreCard(card, host, track);
+     THE RULE THIS LEAVES: a flag that suspends motion must be cleared by
+     every way the gesture can end, not just the tidy one. So the release is
+     bound on the WINDOW as well as the host, on `lostpointercapture` (which
+     fires whenever capture ends, for any reason), and on `blur`. Any of them
+     is enough; `up()` is idempotent.
+
+     WHAT THE GESTURE DOES. Pressing holds the loop. Moving more than 4px
+     scrubs it — the tween is linear, so a drag of dx px is dx/(dir·period)
+     of progress (see makeLoop) — and the cards' --pop follows the scrub, so
+     the one under the middle still lifts while you pull. Letting go without
+     having moved is a TAP, and a tap brings that scrap to the middle.
+     Letting go after a drag resumes from wherever it was left, a beat later. */
+  let resumeTimer = null;
+  let bandSettle = null;        /* the tap's centring tween, if one is running */
+  function wireBandDrag(host, track) {
+    let x0 = 0, p0 = 0, down = false, moved = false;
+    const tw = () => bandTween;
+    const hold = () => { clearTimeout(resumeTimer); if (tw()) tw().pause(); };
+    const release = (delay) => {
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => {
+        if (tw() && bandVisible() && !down && !bandSettle) tw().resume();
+      }, delay);
+    };
+
+    host.addEventListener("pointerdown", (ev) => {
+      if (!tw() || ev.button) return;
+      down = true;
+      moved = false;
+      x0 = ev.clientX;
+      p0 = tw().progress();
+      hold();
+      /* capture so the scrub survives the pointer leaving the stripe — and
+         so `lostpointercapture` can act as one of the release paths */
+      try { host.setPointerCapture(ev.pointerId); } catch (e) { /* not fatal */ }
     });
+
+    host.addEventListener("pointermove", (ev) => {
+      if (!down || !tw()) return;
+      const dx = ev.clientX - x0;
+      if (!moved && Math.abs(dx) < 4) return;   /* a press is not a drag */
+      moved = true;
+      host.classList.add("is-dragging");
+      const t = tw();
+      t.progress(gsap.utils.wrap(0, 1, p0 + dx / (t.dir * t.period)));
+      popCards(track);
+    });
+
+    /* ⚠️ EVERY WAY THE GESTURE CAN END COMES HERE, and it is idempotent. */
+    const up = (ev) => {
+      if (!down) return;
+      down = false;
+      host.classList.remove("is-dragging");
+      if (!moved) {
+        const card = ev && ev.target && ev.target.closest
+          ? ev.target.closest(".tb-card") : null;
+        if (card) { centreCard(card, host, track); return; }
+      }
+      release(moved ? 1400 : 800);
+    };
+    host.addEventListener("pointerup", up);
+    host.addEventListener("pointercancel", up);
+    host.addEventListener("lostpointercapture", up);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    window.addEventListener("blur", () => up(null));
+
+    /* a mouse resting on the stripe holds it, like the rotor */
+    host.addEventListener("pointerenter", (ev) => { if (ev.pointerType === "mouse") hold(); });
+    host.addEventListener("pointerleave", (ev) => { if (ev.pointerType === "mouse" && !down) release(300); });
+    /* …and a pointer that leaves by any other route than pointerleave — the
+       page scrolling out from under it, the window blurring — must not leave
+       the stripe held */
+    window.addEventListener("blur", () => release(300));
   }
 
+  /* ease the loop until the card that was pressed sits on the stripe's
+     middle, hold a beat to read it, then run on. ⚠️ Measured off the NODE
+     that was pressed, never off the testimonial's index — makeLoop clones the
+     group across the track, so every entry exists several times and the
+     nearest copy is the one under the finger. */
   function centreCard(card, host, track) {
     const t = bandTween;
     if (!t) return;
@@ -1145,6 +1206,7 @@ const testimonials = (() => {
   let rotorIdx = 0;
   let rotorTimer = null;
   let rotorOn = false;
+  let rotorHeld = false;
   let rotorWired = false;
 
 
@@ -1188,6 +1250,12 @@ const testimonials = (() => {
 
   function advance() {
     if (!rotorOn) return;
+    /* ⚠️ RE-ARM rather than return, and that is the whole lesson of the
+       freeze: a held cycle that simply stops has to be restarted by an event
+       that may never arrive. Checking again shortly is self-healing — the
+       worst case is one timer every 600ms while a pointer rests on it, and
+       the rotor cannot end up stopped for good. */
+    if (rotorHeld) { rotorTimer = setTimeout(advance, 600); return; }
     step(1);
   }
 
@@ -1256,16 +1324,42 @@ const testimonials = (() => {
     } else {
       startRotor();
     }
-    /* 🔴 NO pointer hold, since 2026-09-22. Resting a mouse on the rotor
-       used to freeze it until the pointer left — the desktop half of "remove
-       this useless feature". The arrows and the scrap are the controls now,
-       and each of them restarts the hold rather than suspending it. */
+    /* The pointer holds the current one, like the stripe — restored
+       2026-09-22 with the same release discipline: `pointerleave` is NOT
+       guaranteed (the page can scroll out from under the pointer, the window
+       can blur, the tab can be hidden), and a hold released only by it is
+       the desktop half of the freeze. Every one of those routes frees it,
+       and `advance` re-arms anyway. */
+    const holdRotor = () => { rotorHeld = true; clearTimeout(rotorTimer); };
+    const freeRotor = () => {
+      if (!rotorHeld) return;
+      rotorHeld = false;
+      clearTimeout(rotorTimer);
+      if (rotorOn) rotorTimer = setTimeout(advance, 1200);
+    };
+    root.addEventListener("pointerenter", (ev) => {
+      if (ev.pointerType === "mouse") holdRotor();
+    });
+    root.addEventListener("pointerleave", freeRotor);
+    root.addEventListener("pointercancel", freeRotor);
+    window.addEventListener("blur", freeRotor);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) freeRotor(); });
+
+    /* the three controls work whether or not it is held, and each buys a
+       full read of what it just brought up */
     const on = (id, by) => {
       const el = document.getElementById(id);
       if (el) el.addEventListener("click", () => step(by));
     };
     on("testiPrev", -1);
     on("testiNext", 1);
+    /* ⚠️ clicking a control while the pointer rests on the rotor would
+       otherwise hand straight back to the hold; the click frees it, so a
+       deliberate step always restarts the cycle */
+    [document.getElementById("testiPrev"), document.getElementById("testiNext"),
+     document.getElementById("testiLabel")].forEach((el) => {
+      if (el) el.addEventListener("click", () => { rotorHeld = false; });
+    });
     /* the scrap cycles forward, the same as the next chevron: it is a second
        way to the same place, which is what the agency asked for */
     on("testiLabel", 1);
