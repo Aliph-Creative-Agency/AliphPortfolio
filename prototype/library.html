@@ -527,6 +527,28 @@
       <div class="contact-row">
         <span class="contact-label" data-i18n="cLabelPlace">الوكالة</span>
         <span class="contact-value" data-i18n="cPlace">القدس، جبل الزيتون</span>
+        <!-- 📱 THE FEEDBACK TAB, PHONE (2026-09-23). The desktop one hangs off
+             the rotor, which is hidden at ≤640px, so the phone has its own —
+             drawn by the agency level with this row, the question in two
+             lines on the ink and the pill sliding over it, exactly the
+             desktop idea. Same classes, same i18n keys; `.rate-tab--phone`
+             only places and sizes it. The ARROW opens and closes it and only
+             «قيّم ألِف!» opens the form (main.js, wireRateTabs). -->
+        <div class="rate-tab rate-tab--phone">
+          <span class="rt-ask" data-i18n="rateAskPhone">هل عملت
+معنا من قبل؟</span>
+          <span class="rt-slab">
+            <button class="rt-chev" type="button" aria-expanded="false"
+                    data-i18n-label="rateToggle" aria-label="لوحة التقييم">
+              <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 1 2 11l7 10"/>
+              </svg>
+            </button>
+            <a class="rt-go" href="https://feedback.aliphcreative.com"
+               target="_blank" rel="noopener noreferrer" data-i18n="rateGo">قيّم ألِف!</a>
+          </span>
+        </div>
       </div>
     </div>
 
@@ -591,21 +613,23 @@
            ⚠️ A real link to a real form — feedback.aliphcreative.com, the
            third deployable in this repo (verified 200 on 2026-09-22). It is
            the same form the four testimonials on this page came out of.
-           The two lines ARE the link's accessible name; no aria-label, which
-           would replace them. -->
-      <a class="rate-tab" href="https://feedback.aliphcreative.com"
-         target="_blank" rel="noopener noreferrer">
+           Since 2026-09-23 it is NOT one link: the arrow is a <button> that
+           slides the pill in and out, and only «قيّم ألِف!» goes to the form
+           ("the form only opens if the text is clicked"). See wireRateTabs. -->
+      <div class="rate-tab">
         <span class="rt-ask" data-i18n="rateAsk">هل عملت معنا من قبل؟</span>
         <span class="rt-slab">
-          <span class="rt-chev" aria-hidden="true">
+          <button class="rt-chev" type="button" aria-expanded="false"
+                  data-i18n-label="rateToggle" aria-label="لوحة التقييم">
             <svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="2"
                  stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 1 2 11l7 10"/>
             </svg>
-          </span>
-          <span class="rt-go" data-i18n="rateGo">قيّم ألِف!</span>
+          </button>
+          <a class="rt-go" href="https://feedback.aliphcreative.com"
+             target="_blank" rel="noopener noreferrer" data-i18n="rateGo">قيّم ألِف!</a>
         </span>
-      </a>
+      </div>
       </div>
       <!-- The pair follows READING order and flips with the language, the
            rule every arrow pair on this site uses: inline-start is "the one

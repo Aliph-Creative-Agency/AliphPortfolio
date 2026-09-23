@@ -3,6 +3,41 @@
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 gsap.registerPlugin(ScrollTrigger);
 
+/* ══════════ MEDIA HOLD ══════════
+   index.html sets `media-hold` on <html> before the stylesheet, and the
+   stylesheet keeps every below-the-fold picture from being requested while it
+   is there (see MEDIA HOLD in style.css). This lifts it once the first screen
+   is really in — `load` has fired AND the curtain has lifted off the hero —
+   or at the visitor's first scroll, touch or key, whichever is sooner, so
+   nobody who moves fast reaches an empty frame.
+   ⚠️ Not `load` alone: on a fast line `load` lands in ~300ms, while the
+   curtain is still down, and everything released then competed with the
+   hero's own paint exactly as before.
+   The ring marks are eager <img>s, which CSS cannot stop, so the builder
+   writes them through heldSrc() and they get their src here. */
+const mediaHeld = () => document.documentElement.classList.contains("media-hold");
+const heldSrc = (url) => (mediaHeld() ? 'data-held-src="' : 'src="') + url + '"';
+let holdGates = 2;   /* `load`, and the curtain — see mediaGate() */
+const holdQueue = [];
+/* for fetches made in code rather than by markup: run now, or at release */
+const afterHold = (fn) => (mediaHeld() ? holdQueue.push(fn) : fn());
+function mediaGate() { if (--holdGates <= 0) releaseMedia(); }
+function releaseMedia() {
+  if (!mediaHeld()) return;
+  document.documentElement.classList.remove("media-hold");
+  holdQueue.splice(0).forEach((fn) => fn());
+  document.querySelectorAll("img[data-held-src]").forEach((img) => {
+    img.src = img.dataset.heldSrc;
+    img.removeAttribute("data-held-src");
+  });
+}
+if (mediaHeld()) {
+  if (document.readyState === "complete") mediaGate();
+  else window.addEventListener("load", mediaGate, { once: true });
+  ["scroll", "wheel", "touchstart", "pointerdown", "keydown"].forEach((t) =>
+    window.addEventListener(t, releaseMedia, { once: true, passive: true }));
+}
+
 /* ══════════ media holders ══════════
    Stand-in until the agency's photographs land.
 
@@ -172,6 +207,11 @@ const I18N = {
      call to action on the slab that swipes out over it */
   rateAsk: { ar: "هل عملت معنا من قبل؟", en: "Worked with us before?" },
   rateGo: { ar: "قيّم ألِف!", en: "Rate Aliph!" },
+  /* the phone tab's question, broken where the agency's drawing breaks it —
+     the line break is rendered by `white-space: pre-line` on .rate-tab--phone */
+  rateAskPhone: { ar: "هل عملت\nمعنا من قبل؟", en: "Worked with\nus before?" },
+  /* the arrow's name; aria-expanded says whether the pill is out */
+  rateToggle: { ar: "لوحة التقييم", en: "Rating panel" },
   testiBand: { ar: "آراء العملاء", en: "Client testimonials" },
   testiRotor: { ar: "آراء العملاء", en: "Client testimonials" },
   cLabelMail: { ar: "للمشاريع والتعاون", en: "Projects & collaboration" },
@@ -1661,12 +1701,13 @@ function liftRansom(line, ring) {
     /* a small pool of angles, so a repeated scrap still lands differently */
     chip._tilt = [-5.5, 3.5, -2, 5, -4];
 
-    /* Warm the rest of the ring now: a swap that has to fetch first shows a gap
-       where the letter was. */
-    ring.slice(1).forEach((v) => {
+    /* Warm the rest of the ring: a swap that has to fetch first shows a gap
+       where the letter was. After MEDIA HOLD, not now — the scraps on screen
+       come first, the spares only matter once the headline starts swapping. */
+    afterHold(() => ring.slice(1).forEach((v) => {
       const pre = new Image();
       pre.src = "assets/img/ransom/" + lang + "-" + pad2(v) + ".webp";
-    });
+    }));
 
     /* rebuilt from text nodes, not innerHTML — a stray tag would be most
        visible here of all places */
@@ -1832,10 +1873,38 @@ function applyI18n() {
    The stylesheet's `--rt-open` stays as the fallback for the frame before
    this runs, and for the case where the tab is hidden and measures nothing. */
 const SIZE_TAB_SLACK = 16;   /* px of paper past the last letter */
+/* 📱 The phone tab's question shares a row with the address, so its limit is
+   a NEIGHBOUR: the stylesheet's size is the ceiling and it shrinks until it
+   stops RT_ASK_GAP short of «القدس، جبل الزيتون». Where even the floor does not
+   fit — a 360px phone has ~70px there — the tab gives up the row and hangs
+   under the address instead (`.rt-below`), rather than print over it. */
+const RT_ASK_GAP = 12;
+function fitPhoneAsk(tab, ask) {
+  const row = tab.parentElement;
+  const val = row && row.querySelector(".contact-value");
+  if (!val) return;
+  row.classList.remove("rt-below");
+  /* ⚠️ Out to the PAGE's edge, measured, not `-var(--pad)`: at 320px the
+     e-mail line is wider than the column and the rows overflow past the
+     padding, so the stylesheet's inset left the cap 23px off the screen. */
+  const r = row.getBoundingClientRect();
+  const edge = getComputedStyle(tab).direction === "rtl"
+    ? r.left : document.documentElement.clientWidth - r.right;
+  tab.style.insetInlineEnd = (-edge).toFixed(1) + "px";
+  const clear = () => {
+    const a = ask.getBoundingClientRect(), v = val.getBoundingClientRect();
+    return getComputedStyle(tab).direction === "rtl"
+      ? a.right <= v.left - RT_ASK_GAP
+      : a.left >= v.right + RT_ASK_GAP;
+  };
+  shrinkToFit(ask, 0.75, clear);
+  if (!clear()) { ask.style.fontSize = ""; row.classList.add("rt-below"); }
+}
 function sizeRateTab() {
   document.querySelectorAll(".rate-tab").forEach((tab) => {
     const ask = tab.querySelector(".rt-ask");
     if (!ask || !tab.offsetParent) return;
+    if (tab.classList.contains("rate-tab--phone")) fitPhoneAsk(tab, ask);
     tab.style.removeProperty("--rt-open");
     const t = tab.getBoundingClientRect();
     const a = ask.getBoundingClientRect();
@@ -1844,6 +1913,55 @@ function sizeRateTab() {
     if (need > 0) tab.style.setProperty("--rt-open", need.toFixed(1) + "px");
   });
 }
+
+/* ══════ THE FEEDBACK TAB — WHO OPENS IT ══════
+   "u should be able to close the form button by clicking on the arrow ...
+   and the form only opens if the text is clicked" (2026-09-23). So the tab
+   is no longer one big link: the ARROW (.rt-chev, a <button>) toggles the
+   pill, «قيّم ألِف!» (.rt-go) is the only link, and `.is-open` is the one
+   state the stylesheet reads. What sets it:
+     · the arrow — toggles, on every device;
+     · a MOUSE entering the tab opens it and leaving closes it, as the hover
+       always did. Closing with the arrow while the pointer is still inside
+       sticks until it leaves — nothing re-opens it under the pointer. Touch
+       "enters" are ignored, so a phone is arrow-only;
+     · the link taking focus from the keyboard, so Tab can reach it;
+     · the question itself — tapping the words the pill comes to cover opens
+       it (never the form);
+     · a click anywhere outside, or Escape, closes it. */
+(function wireRateTabs() {
+  const setOpen = (tab, on) => {
+    tab.classList.toggle("is-open", on);
+    const b = tab.querySelector(".rt-chev");
+    if (b) b.setAttribute("aria-expanded", String(on));
+  };
+  document.querySelectorAll(".rate-tab").forEach((tab) => {
+    tab.addEventListener("pointerenter", (e) => {
+      if (e.pointerType === "mouse") setOpen(tab, true);
+    });
+    tab.addEventListener("pointerleave", (e) => {
+      if (e.pointerType === "mouse") setOpen(tab, false);
+    });
+    tab.addEventListener("focusin", (e) => {
+      if (e.target.matches(".rt-go")) setOpen(tab, true);
+    });
+    tab.addEventListener("focusout", (e) => {
+      if (!tab.contains(e.relatedTarget) && !tab.matches(":hover")) setOpen(tab, false);
+    });
+  });
+  document.addEventListener("click", (e) => {
+    const tab = e.target.closest(".rate-tab");
+    document.querySelectorAll(".rate-tab.is-open").forEach((t) => {
+      if (t !== tab) setOpen(t, false);
+    });
+    if (!tab) return;
+    if (e.target.closest(".rt-chev")) setOpen(tab, !tab.classList.contains("is-open"));
+    else if (e.target.closest(".rt-ask")) setOpen(tab, true);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") document.querySelectorAll(".rate-tab.is-open").forEach((t) => setOpen(t, false));
+  });
+})();
 
 /* language switch (pill) — click or keyboard */
 function toggleLang() {
@@ -1872,10 +1990,12 @@ if (curtain && !prefersReduced) {
     onComplete: () => {
       curtain.style.display = "none";
       queueMenuSync();
+      mediaGate();
     },
   });
-} else if (curtain) {
-  curtain.style.display = "none";
+} else {
+  if (curtain) curtain.style.display = "none";
+  mediaGate();
 }
 window.addEventListener("pageshow", (e) => {
   if (e.persisted && curtain) curtain.style.display = "none";
@@ -2354,7 +2474,7 @@ const serviceRings = (() => {
          "" forever, so the ring turned around a hole. The mark is the fixed
          point the whole section is built on; it does not get deferred. */
       mark.innerHTML = m.img
-        ? '<img src="' + m.img + '" alt="" decoding="async">'
+        ? '<img ' + heldSrc(m.img) + ' alt="" decoding="async">'
         : (m.svg || "");
       ring.appendChild(mark);
 
@@ -4432,6 +4552,15 @@ const reelShow = (() => {
       c.setAttribute("aria-hidden", "true");   // the same eight pictures, thrice
       return c;
     });
+    /* ⚠️ Chrome FETCHES a lazy <img> the moment it is cloned, MEDIA HOLD or
+       not — measured: all eight reels came down before the curtain lifted,
+       and stripping the copy's src afterwards was already too late. So the
+       originals give up their src BEFORE they are copied, and every copy of
+       every reel gets it back together in releaseMedia(). */
+    if (mediaHeld()) real.forEach((s) => s.querySelectorAll("img[src]").forEach((img) => {
+      img.dataset.heldSrc = img.getAttribute("src");
+      img.removeAttribute("src");
+    }));
     track.prepend(...copy());
     track.append(...copy());
   }

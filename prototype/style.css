@@ -261,6 +261,19 @@ svg,
    different platform */
 body { -webkit-tap-highlight-color: transparent; }
 
+/* ── MEDIA HOLD — the first screen downloads alone ─────────────
+   Until the page has loaded (or the visitor scrolls), nothing below the fold
+   is fetched: ~2 MB of gallery, ring and band pictures used to start in the
+   same 100ms as the hero and share its bandwidth. Measured 2026-09-23 as the
+   cause of a 15.6s mobile LCP. main.js lifts the class — see MEDIA HOLD.
+   ⚠️ display:none is what stops a LAZY <img> — Chrome does not fetch one it
+   does not render. Safe because every holder here sizes itself (aspect-ratio
+   or a grid area), never from its picture.
+   ⚠️ !important because both backgrounds are set INLINE by main.js. */
+.media-hold img[loading="lazy"] { display: none; }
+.media-hold .ring-slat { background-image: none !important; }
+.media-hold .tb-card { --tb-img: none !important; }
+
 /* ── page transition curtain ─────────────── */
 .curtain {
   position: fixed;
@@ -4533,7 +4546,6 @@ html[lang="en"] .tr-quote::after  { content: "\201D"; }
   height: var(--rt-h);
   text-decoration: none;
 }
-.rate-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 /* the scrap's own row, and the tab's containing block. No padding or border,
    so the scrap's bottom margin collapses through it and the row measures the
    scrap exactly. */
@@ -4585,24 +4597,52 @@ html[lang="en"] .rt-ask { font-size: clamp(0.72rem, 1.3vw, 0.95rem); }
 }
 html[dir="rtl"] .rt-slab { transform: translateX(calc(-1 * (100% - var(--rt-cap)))); }
 html[dir="ltr"] .rt-slab { transform: translateX(calc(100% - var(--rt-cap))); }
-html[dir] .rate-tab:hover .rt-slab,
-html[dir] .rate-tab:focus-visible .rt-slab,
-html[dir] .rate-tab:focus-within .rt-slab { transform: translateX(0); }
+/* ⚠️ ONE open state, `.is-open`, and main.js is the only thing that sets it —
+   on a mouse entering, on the arrow, on the link taking keyboard focus. It
+   used to be :hover / :focus-within here, and neither can be switched OFF by
+   a click: "u should be able to close the form button by clicking on the
+   arrow" (2026-09-23) needs a state the arrow owns. */
+html[dir] .rate-tab.is-open .rt-slab { transform: translateX(0); }
 
-/* pinned to the slab's ROUNDED end, which is the part still showing at rest */
+/* THE ARROW IS THE TOGGLE, a <button> covering the whole cap — the part that
+   still shows at rest. It points INTO the page at rest (">" in Arabic) and
+   flips over to point back at the edge once the pill is out ("<"), on the
+   desktop and the phone alike. Only «قيّم ألِف!» is the link. */
 .rt-chev {
   position: absolute;
-  inset-inline-start: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: grid;
-  place-items: center;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: var(--rt-cap);
+  padding: 0;
+  padding-inline-start: 1rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   opacity: 0.75;
   transition: opacity 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
 }
-.rt-chev svg { width: 0.5rem; height: auto; display: block; }
+.rt-chev:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: 999px; }
+.rt-chev svg {
+  width: 0.5rem;
+  height: auto;
+  display: block;
+  /* the flip: the same scaleX that mirrors it per direction, then a half
+     turn about its vertical axis — the lists share their first function, so
+     it interpolates as a turn rather than a jump */
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
 html[dir="rtl"] .rt-chev svg { transform: scaleX(-1); }
-.rate-tab:hover .rt-chev { opacity: 1; }
+html[dir="ltr"] .rt-chev svg { transform: scaleX(1); }
+html[dir="rtl"] .rate-tab.is-open .rt-chev svg { transform: scaleX(-1) rotateY(180deg); }
+html[dir="ltr"] .rate-tab.is-open .rt-chev svg { transform: scaleX(1) rotateY(180deg); }
+.rt-chev:hover,
+.rate-tab.is-open .rt-chev { opacity: 1; }
 
 .rt-go {
   position: relative;
@@ -4611,12 +4651,18 @@ html[dir="rtl"] .rt-chev svg { transform: scaleX(-1); }
   font-size: 1.25rem;
   line-height: 1.2;
   white-space: nowrap;
+  /* "add shadow to the قيّم ألف text in both pc and phone" (2026-09-23) —
+     ink on cream, so a soft dark drop under the letters, not a glow */
+  text-shadow: 0 2px 5px rgba(17, 24, 32, 0.35);
+  color: inherit;
+  text-decoration: none;
   opacity: 0;
+  /* not clickable while it is tucked away and invisible */
+  pointer-events: none;
   transition: opacity 0.25s ease 0.2s;   /* after the slab has covered the question */
 }
-.rate-tab:hover .rt-go,
-.rate-tab:focus-visible .rt-go,
-.rate-tab:focus-within .rt-go { opacity: 1; }
+.rate-tab.is-open .rt-go { opacity: 1; pointer-events: auto; }
+.rt-go:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 /* the underline draws itself once the pill has arrived */
 .rt-go::after {
   content: "";
@@ -4634,12 +4680,52 @@ html[dir="rtl"] .rt-chev svg { transform: scaleX(-1); }
   transition: transform 0.45s ease 0.35s;
 }
 html[dir="rtl"] .rt-go::after { transform-origin: right; }
-.rate-tab:hover .rt-go::after,
-.rate-tab:focus-visible .rt-go::after,
-.rate-tab:focus-within .rt-go::after { transform: scaleX(1); }
+.rate-tab.is-open .rt-go::after { transform: scaleX(1); }
 
 @media (prefers-reduced-motion: reduce) {
-  .rt-slab, .rt-go, .rt-go::after { transition-duration: 0.01ms; transition-delay: 0s; }
+  .rt-slab, .rt-go, .rt-go::after, .rt-chev svg { transition-duration: 0.01ms; transition-delay: 0s; }
+}
+
+/* ── the feedback tab, PHONE (2026-09-23) ──────────────────────
+   Off the agency's two phone drawings: level with the «الوكالة» row, the cap
+   at the page's edge, «هل عملت / معنا من قبل؟» on the ink in TWO lines, and
+   the pill sliding over it. Everything above applies; this only places it on
+   the row instead of the rotor and sizes it for a thumb. The arrow behaves
+   exactly as the desktop's: ">" at rest, flipping to "<" when out. */
+.rate-tab--phone { display: none; }
+@media (max-width: 640px) {
+  .contact-row:has(> .rate-tab--phone) { position: relative; }
+  .rate-tab--phone {
+    display: block;
+    --rt-cap: 2.1rem;            /* 50px — 1rem is 24px on this site */
+    --rt-h: 3.3rem;              /* 79px, as tall as the drawing's cap */
+    --rt-open: 9rem;             /* fallback; sizeRateTab() measures the question */
+    /* the grid's padding is the only inset between the row and the page */
+    inset-inline-end: calc(-1 * var(--pad));
+    /* centred on the address line itself, not the whole row with its label */
+    top: auto;
+    bottom: 0;
+    transform: none;
+  }
+  .rate-tab--phone .rt-ask {
+    inset-inline-end: calc(var(--rt-cap) + 0.5rem);
+    font-family: var(--font-display);
+    font-weight: 800;
+    /* the CEILING — fitPhoneAsk() shrinks it to the room left of the
+       address, which is what the drawing's size is at 390 */
+    font-size: 0.95rem;
+    line-height: 1.15;
+    /* the break is IN the string (rateAskPhone), where the drawing has it */
+    white-space: pre-line;
+    text-align: center;
+    opacity: 1;
+  }
+  html[lang="en"] .rate-tab--phone .rt-ask { font-size: 0.85rem; }
+  /* too narrow for both on one row: the tab hangs under the address */
+  .contact-row.rt-below { padding-bottom: calc(3.3rem + 0.6rem); }
+  .rate-tab--phone .rt-slab { padding-inline-start: 1.4rem; }
+  .rate-tab--phone .rt-chev { padding-inline-start: 0.75rem; }
+  .rate-tab--phone .rt-go { font-size: 1.05rem; }
 }
 
 .contact-grid {
@@ -5410,6 +5496,23 @@ body.sheet-open { overflow: hidden; }
     gap: 0.45rem;
     font-size: 0.8rem;
   }
+  /* 📱 ROOM FOR THE FIXED BUTTONS (2026-09-23). Scrolled to the very bottom
+     the footer ends on the screen's edge, and the language pill and the
+     burger (fixed, 26–70px from the top) sat on the first row's rule and
+     label. "squish spaces ... just enough", then "a bit more", phone only:
+     62px out of the contact block — each row's air above its label 16.8 →
+     10px, label → value 7.2 → 4.8, between rows 8.4 → 3.6, rows → socials
+     36 → 24 — which drops the first rule from 59px to 122 at 390×844 and to
+     90 at 375×812, clear of the buttons on both, while the bottom stays where
+     it was. The type is untouched.
+     ⚠️ And the ink above the first rule grows to match (52.8 → 122px):
+     with the rows lower, the band's cream came down behind the buttons at
+     full scroll. The rule now lands where the ink begins at ~0, so the
+     buttons sit on dark exactly as they did. */
+  .contact-row { padding-top: 0.42rem; }
+  .contact-row .contact-label { margin-bottom: 0.2rem; }
+  .contact-lines { gap: 0.15rem; }
+  .contact-grid { row-gap: 1rem; padding-top: 5.1rem; }
 
   /* ⚠️ Stacked, because side by side does not fit and never did quite fit:
      measured at 375px the two halves need 310px of a 327px line, so each one
