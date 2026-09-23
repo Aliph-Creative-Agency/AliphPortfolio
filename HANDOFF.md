@@ -36,6 +36,12 @@ _Updated 2026-09-22. Read this first._
 > `fe60c3e` plus this write-up**, after the range was audited: no
 > 40+-character tokens, no key-shaped files, no `PRIVATE_KEY`. See
 > _Session 2026-09-16_.
+> ✅ **2026-09-23: THE TWO 🟡 NOTES BELOW ARE STALE.** `seo` is merged into
+> `main`, pushed (`origin/main` = `0aaf2ce`), and LIVE: all three pages serve
+> their clean canonicals and JSON-LD, the sitemap is dated 2026-09-22, and
+> the live `main.js` is md5-identical to the tree. `build_static --check` is
+> current. See _Session 2026-09-23_.
+>
 > 🟡 **2026-09-22: BRANCH `seo` NOW CARRIES A SECOND ROUND TOO — `9f5c8f9`,
 > STILL NOT MERGED, NOT DEPLOYED, NOT PUSHED.** «قالوا عنّا» is removed from
 > the home page at both widths, and the footer's testimonials lost the
@@ -760,6 +766,177 @@ is wrong: the feedback pill came out 300px where the real line wanted 256.
 ---
 
 **Standing rule: update this file at the end of every session.**
+
+---
+
+## Session 2026-09-23 — the SEO list re-read, and Core Web Vitals measured for the first time
+
+"read the handoff and lets focus on our list of seo tasks". Then "give me the
+tasks that i need to do in a short and clear steps form with necessary links".
+
+- ✅ **Open item 1 (merge, build, deploy, push) was already done** — see the
+  header note. The 09-22 write-up just never recorded it.
+- ✅ **Core Web Vitals, first measurement ever.** The keyless PageSpeed API
+  answers 429 (quota 0), so Lighthouse 12 ran locally, headless Edge, mobile
+  profile, against the live domain:
+
+  | page | perf | a11y | BP | SEO | LCP | CLS | TBT |
+  |---|---|---|---|---|---|---|---|
+  | `/` | 61 | 100 | 100 | 100 | **15.6 s** | 0.002 | 150 ms |
+  | `/about` | 61 | 98 | 100 | 100 | 6.3 s | **0.142** | 50 ms |
+  | `/library` | 65 | 99 | 100 | 100 | 8.6 s | 0 | 80 ms |
+
+  🔴 **LCP is the problem on every page and the home page is the worst: 15.6s
+  against a 2.5s target.** `/about` also fails CLS (0.142 > 0.1). This is the
+  next code task: find what the LCP element is on `/` and why it arrives so
+  late (the curtain? the ring's images? the CDN scripts?). Lab numbers on a
+  throttled mobile profile, not field data; Search Console will give field
+  data once it is set up.
+- The agency's own non-code tasks were handed over as a checklist: Search
+  Console, Bing Webmaster Tools, Google Business Profile, the socials, the
+  two sign-offs, the repo's visibility. Asked whether `info@` can own them:
+  yes — sign up as `info@`, then add `ceo@` as Owner in each, so no tool
+  hangs off one login. The DNS TXT step needs whoever has Cloudflare access.
+
+### Then: "fix the LCP on the home page, add the form button to the phone, shadow on قيّم ألف"
+
+✅ **COMMITTED (`d557491`) AND LIVE — version
+`f49cf201-aec0-4990-bba7-fabadac1fcf5`**, with everything in §1–§5 below.
+**NOT PUSHED** — `origin/main` is behind; audit the range before pushing,
+as always. The deploy uploaded exactly the six changed files (three pages,
+`main.js`, `style.css`, `sitemap.xml`). **Verified** with a browser UA and a
+cache-buster on BOTH hosts: `main.js`, `style.css`, `sitemap.xml`
+md5-identical to the tree; `/`, `/about`, `/library` 200, `/index.html` 307;
+the phone tab and the hold present in the served HTML.
+**Live LCP re-measured** (Lighthouse 12 mobile, 3 runs): **15.6s → 11.0 /
+13.5 / 10.9s**. The performance score read 57 / 51 / 62 against 61 before —
+the swing is TBT (140–440ms run to run on this machine), not the change;
+FCP 4.4–5.2s and SI ~5s are as they were.
+
+#### 1. ✅ LCP — what it actually was, and MEDIA HOLD
+
+- **The LCP element is the CURTAIN.** Its `::after` lays `fabric.webp`
+  (372 KB) over the whole viewport, and a full-viewport background image is
+  the largest paint Chrome sees. Removing it just moves the LCP to
+  `.hero-panel`, which carries the same texture — **so it was NOT the cost**
+  and it is left as it was.
+- **The cost was bandwidth.** Every below-the-fold picture — the gallery
+  wall and reels (already `loading="lazy"`, but inside Chrome's 1250px lazy
+  margin because the why section is directly under the hero), the three
+  rings' slats and torn marks, the band's scraps, the headline's spare
+  ransom letters — started in the same 100ms as the hero: ~2 MB sharing the
+  line with the hero's own texture, fonts and film frames.
+- **The fix, `MEDIA HOLD`:** `index.html` puts `media-hold` on `<html>` from
+  an inline script before the stylesheet; while it is there the stylesheet
+  gives lazy `<img>`s `display:none` (Chrome does not fetch a lazy image it
+  does not render) and forces the slat and scrap backgrounds to `none`
+  (`!important`, they are inline). The marks use `heldSrc()`, the ransom
+  spares `afterHold()`. `releaseMedia()` lifts it when **`load` has fired AND
+  the curtain has lifted**, or at the first scroll/wheel/touch/key.
+  ⚠️ **Not `load` alone** — on a fast line `load` lands at ~300ms with the
+  curtain still down, and releasing then measured the same as no hold.
+  🔴 **Chrome FETCHES a lazy `<img>` the moment it is `cloneNode`d, hold or
+  not.** The reel carousel clones its eight slides twice; all eight reels
+  came down early until the originals gave up their `src` BEFORE cloning.
+  Stripping the clone's `src` afterwards is already too late.
+- **Measured** (Lighthouse 12, mobile, local server — uncompressed, so worse
+  than live): LCP **18.9s → 14.0s**, three runs each, CLS unchanged
+  (≤0.003). Verified in headless Edge at 390 and 1440: nothing below the fold
+  requested at `load`, the hold lifts after the curtain, 0 held left, all
+  three marks decode, 9/9 gallery tiles and the band's scraps render, no
+  errors.
+- **What is left is the first screen itself**: three Idris weights ~500 KB
+  (subsetting tried — only ~15% off, and it is a licensed font; not done),
+  the fabric texture 372 KB (q50 recompression only saves ~100 KB of noise),
+  the four film frames ~450 KB, the crumple sprite 153 KB. Further LCP gains
+  are design decisions, not plumbing. Re-measure LIVE after deploying.
+  The keyless PageSpeed API is quota 0 — run Lighthouse locally:
+  `CHROME_PATH=<msedge.exe> npx lighthouse@12 <url> --chrome-flags=--headless=new`.
+
+#### 2. ✅ The feedback tab on the phone — `.rate-tab--phone`
+
+Off two agency drawings: the cap at the page's edge level with «الوكالة»,
+«هل عملت / معنا من قبل؟» in two lines on the ink, the pill sliding over it.
+A second `<a class="rate-tab rate-tab--phone">` inside the address row (the
+desktop one lives in the rotor, hidden ≤640px). Everything shared with the
+desktop tab; the phone block only places and sizes it.
+- **The break is in the string**, `I18N.rateAskPhone` with a `\n`, rendered
+  by `white-space: pre-line` — a `max-inline-size` broke it as «هل عملت معنا
+  من / قبل؟».
+- **Touch: first tap opens (`.is-open`, styled exactly like `:hover`), second
+  follows the link, a tap elsewhere tucks it.** Gated on `(hover: none)`.
+- **`fitPhoneAsk()`** (called from `sizeRateTab`, so on resize and language
+  change too): shrinks the question to stop 12px short of the address, per
+  the FIT THE TYPE rule; if even 75% does not fit, the row gets `.rt-below`
+  and the tab hangs under the address. Measured: Arabic sits beside the
+  address at **390–640**; Arabic **≤360** and **all English widths** (the
+  address wraps to two lines) fall to below. No horizontal scroll anywhere.
+- ⚠️ **The chevron is NOT mirrored on the phone** — both drawings show it
+  pointing at the page's edge; the desktop's points inward. Deliberate.
+- ⚠️ **The tab measures the page's edge, it does not trust `--pad`.** At
+  320px the e-mail line is wider than the column, the rows overflow past the
+  padding, and `-var(--pad)` put the cap 23px off screen.
+
+#### 3. ✅ Shadow on «قيّم ألِف!» — both
+
+`.rt-go { text-shadow: 0 2px 5px rgba(17,24,32,.35) }` — one rule, desktop
+and phone. Subtle on purpose; raise the alpha if they want it heavier.
+
+#### 4. ✅ Round two: "the footer isnt unified", and the arrow owns the tab
+
+- **Unified.** Diffed the three footers: about and library are identical;
+  home differs only by its build-step regions (filled by
+  `build_static.mjs`, replaced by JS) and by the phone tab, which had been
+  added to `index.html` alone. The phone tab is now on all three pages.
+  ⚠️ **Any footer change is three edits** — the footer is copied, not
+  included. Diff the `<footer>` blocks after touching one.
+- **The tab is no longer one `<a>`.** "u should be able to close the form
+  button by clicking on the arrow, it should be > then when the button
+  expands it should animate to flip to < on both phone and pc, and the form
+  only opens if the text is clicked." Now: `<div class="rate-tab">` →
+  `.rt-chev` is a `<button aria-expanded>` covering the cap (named by
+  `I18N.rateToggle`), `.rt-go` is the only `<a>`, and `pointer-events: none`
+  while it is tucked.
+- **One state, `.is-open`, set only by `wireRateTabs()`** — the arrow
+  toggles it on every device; a MOUSE entering opens and leaving closes (the
+  old hover, kept); closing with the arrow under the pointer stays closed
+  until it leaves; tapping the question opens the pill; keyboard focus on the
+  link opens it; outside click / Escape closes. `:hover` and `:focus-within`
+  are gone from the stylesheet on purpose — neither can be switched off by a
+  click. The old `wireRateTabTouch` (first tap opens, second follows) is
+  replaced.
+- **The flip:** `scaleX(±1)` at rest, `scaleX(±1) rotateY(180deg)` open —
+  the shared first function makes it interpolate as a turn (sampled: scaleX
+  −1 → −0.1 → 0.82 → 1 over ~0.4s). ">" at rest in Arabic on BOTH phone and
+  desktop — **this reverses §2's unmirrored phone chevron**, per the agency.
+- **Verified** in headless Edge on all three pages × phone (touch) and
+  desktop (mouse): arrow opens/closes, a tap on the pill away from the words
+  opens nothing, only the words open the form (a popup counted), the desktop
+  hover and the stay-closed-under-the-pointer case, `aria-expanded` in step.
+  No errors.
+
+#### 5. ✅ Phone footer: room for the fixed buttons at full scroll
+
+"squish spaces … just enough so that the nav and the lang buttons fit on top
+without overlapping the email line *when fully scrolled down* … only on
+phone". At the bottom of the page the footer ends on the screen's edge and
+the pill/burger (fixed, 26–70px) sat on the first row. Then "a bit more".
+In the ≤640 block: row air above the label 16.8 → 10px, label → value 7.2 →
+4.8, between rows 8.4 → 3.6, rows → socials 36 → 24 (−62px in all); and the
+grid's top padding 52.8 → 122 so the ink still starts at ~0 behind the
+buttons (without it the band's cream showed there).
+**Measured at full scroll, all three pages:** first rule 59 → **122px** at
+390×844, **90 at 375×812**, 193 at 412×915; footer bottom unchanged.
+⚠️ **Still overlapping:** 360×800 (−15 — the tab's `.rt-below` fallback
+adds 93px there) and **English at 390 (28)**, where the address wraps to two
+lines and the tab also falls below. Options put to the agency: fit the
+English address to one line, or move the tab beside the socials.
+
+#### ⚠️ Line endings
+
+Python's text-mode write on Windows turned three LF files into CRLF — a
+10,000-line diff per file. Fixed with `sed -i 's/\r$//'`. **Edit these files
+with the Edit tool, or open them with `newline=""` in Python.**
 
 ---
 
