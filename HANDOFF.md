@@ -802,8 +802,8 @@ tasks that i need to do in a short and clear steps form with necessary links".
 
 ✅ **COMMITTED (`d557491`) AND LIVE — version
 `f49cf201-aec0-4990-bba7-fabadac1fcf5`**, with everything in §1–§5 below.
-**NOT PUSHED** — `origin/main` is behind; audit the range before pushing,
-as always. The deploy uploaded exactly the six changed files (three pages,
+✅ **PUSHED** — `origin/main` at `d598d0b` plus this line, after the range
+was audited: no 40+-character tokens, no key patterns, no key-shaped files. The deploy uploaded exactly the six changed files (three pages,
 `main.js`, `style.css`, `sitemap.xml`). **Verified** with a browser UA and a
 cache-buster on BOTH hosts: `main.js`, `style.css`, `sitemap.xml`
 md5-identical to the tree; `/`, `/about`, `/library` 200, `/index.html` 307;
