@@ -13,6 +13,7 @@
 import { isAdminPath, verifyAccess, type AccessEnv } from "./auth";
 import { contentRoute, draftContent } from "./api/content";
 import { etagMatches, pageEtag, pageOf, renderText, type Page } from "./render/text";
+import { onSlots } from "./render/slots";
 import { isEmpty, readSnapshot, type Snapshot } from "./store";
 
 export interface Env extends AccessEnv {
@@ -61,8 +62,8 @@ export default {
   },
 } satisfies ExportedHandler<Env>;
 
-/** One of the three pages, with the published text rendered in (render/
- *  text.ts). An empty store, or any store failure, serves the assets response
+/** One of the three pages, with the published text and media slots rendered
+ *  in, in one streaming pass (render/text.ts, render/slots.ts). An empty store, or any store failure, serves the assets response
  *  untouched: the site never depends on D1 being up. */
 async function servePage(request: Request, env: Env, page: Page): Promise<Response> {
   let snap: Snapshot;
@@ -91,7 +92,7 @@ async function servePage(request: Request, env: Env, page: Page): Promise<Respon
     headers.delete("content-type");
     return new Response(null, { status: 304, headers });
   }
-  return renderText(new Response(res.body, { status: 200, headers }), snap, page);
+  return renderText(new Response(res.body, { status: 200, headers }), snap, page, (rw) => onSlots(rw, snap, page));
 }
 
 async function admin(request: Request, env: Env, url: URL, ctx: AdminCtx): Promise<Response> {

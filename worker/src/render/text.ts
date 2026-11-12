@@ -86,11 +86,13 @@ export function etagMatches(ifNoneMatch: string | null, etag: string): boolean {
 }
 
 /** Rewrite a 200 text/html asset response with the published snapshot. The
- *  caller has checked that the snapshot is non-empty. */
-export function renderText(res: Response, s: Snapshot, page: Page): Response {
+ *  caller has checked that the snapshot is non-empty. `more` adds further
+ *  handlers to the same single pass (render/slots.ts). */
+export function renderText(res: Response, s: Snapshot, page: Page, more?: (rw: HTMLRewriter) => void): Response {
   const arOf = (key: string | null) => (key && I18N_KEYS.has(key) ? s.text[key]?.ar : undefined);
   const head = headOf(s, page);
   const rw = new HTMLRewriter();
+  more?.(rw);
 
   /* element text / aria-label, only for keys that have an Arabic override */
   const hasAr = Object.keys(s.text).some((k) => I18N_KEYS.has(k) && s.text[k].ar !== undefined);

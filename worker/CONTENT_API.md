@@ -182,3 +182,8 @@ published snapshot is not empty. An empty store, or a D1 read that fails, serves
   `\u`-escaped, so a value can never close the script.
 - A rewritten page carries `ETag: W/"<asset etag>-r<publish_rev>"` and answers `If-None-Match` itself. The asset's
   own 304 is never passed on for a rewritten page.
+- Published media slots (render/slots.ts, P-06b) go into the same pass. `<page>.media.N` is the Nth
+  `<img src="assets/media/…">`, counted the way gen-defaults counts. Its `src` becomes `poster` on a slot that has a
+  preview, and `src` otherwise. `alt` becomes `alt.ar`, and the enclosing `<figure data-preview>` gets `preview`.
+  Each element is checked against its registry default first; one that no longer matches is skipped with a
+  `console.warn`. `home.film.N` has no markup and is left to the main.js merge.
