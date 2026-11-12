@@ -12,7 +12,15 @@
  *       blob really is. `ratio` = source width / height, 3 decimals. `date` =
  *       EXIF DateTimeOriginal as "YYYY-MM-DD", else the file's lastModified
  *       month "YYYY-MM". opts.webp === false forces the JPEG path (tests).
- *   (preparePoster, kindOf, upload: later tasks, same file.)
+ *   preparePoster(videoFile, opts?) -> { blob, type, width, height, ratio, duration }
+ *       Grabs a frame at min(1 s, duration/2) from an off-screen muted <video>
+ *       and encodes it like prepareImage (WebP, JPEG fallback). Poster size is
+ *       the video's own, capped at 1280 px on the long side. Gives up after
+ *       15 s with MediaError("unreadable") (a codec the browser cannot play
+ *       never fires an event; the timeout is what ends the wait).
+ *   kindOf(file) -> "image" | "video" | null  (by MIME type, else extension;
+ *       HEIC and anything else is null).
+ *   (upload: a later task, same file.)
  *   MediaError — code "unreadable" | "unsupported" | "toolarge" | "network" | "aborted".
  *
  * Browser support / fallbacks
@@ -165,5 +173,68 @@ export async function prepareImage(file, opts = {}) {
     };
   } finally {
     bmp.close?.();
+  }
+}
+
+export const POSTER_MAX_SIDE = 1280;
+const POSTER_TIMEOUT_MS = 15000;
+
+/**
+ * @param {File} file
+ * @returns {"image"|"video"|null}
+ */
+export function kindOf(file) {
+  const t = (file.type || "").toLowerCase();
+  const ext = ((file.name || "").match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase() || "";
+  if (/^image\/(jpeg|png|webp|avif)$/.test(t) || (!t && /^(jpe?g|png|webp|avif)$/.test(ext))) return "image";
+  if (/^video\/(mp4|webm)$/.test(t) || (!t && /^(mp4|m4v|webm)$/.test(ext))) return "video";
+  // A wrong or generic type: trust the extension.
+  if (/^(jpe?g|png|webp|avif)$/.test(ext) && !t.startsWith("video/")) return "image";
+  if (/^(mp4|m4v|webm)$/.test(ext) && !t.startsWith("image/")) return "video";
+  return null;
+}
+
+/**
+ * @param {File} file a video
+ * @param {{webp?: boolean}} [opts]
+ * @returns {Promise<{blob: Blob, type: string, width: number, height: number, ratio: number, duration: number}>}
+ */
+export async function preparePoster(file, opts = {}) {
+  const url = URL.createObjectURL(file);
+  const v = document.createElement("video");
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = "auto";
+  const unreadable = (cause) =>
+    new MediaError("unreadable", `${file.name || "this video"} could not be read as a video`, cause);
+  let timer;
+  try {
+    const when = (type) =>
+      new Promise((resolve, reject) => {
+        v.addEventListener(type, resolve, { once: true });
+        v.addEventListener("error", () => reject(unreadable(v.error)), { once: true });
+      });
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(unreadable(new Error("timeout"))), POSTER_TIMEOUT_MS);
+    });
+    const work = (async () => {
+      v.src = url;
+      await when("loadedmetadata");
+      const duration = Number.isFinite(v.duration) ? v.duration : 0;
+      const seeked = when("seeked");
+      v.currentTime = duration ? Math.min(1, duration / 2) : 0;
+      await seeked;
+      if (!v.videoWidth || !v.videoHeight) throw unreadable(new Error("no picture"));
+      const { width, height } = fit(v.videoWidth, v.videoHeight, POSTER_MAX_SIDE);
+      const blob = await encode(v, width, height, opts);
+      return { blob, type: blob.type, width, height, ratio: roundRatio(v.videoWidth, v.videoHeight), duration: Math.round(duration * 100) / 100 };
+    })();
+    work.catch(() => {}); // a late failure after the timeout is not unhandled
+    return await Promise.race([work, timeout]);
+  } finally {
+    clearTimeout(timer);
+    v.removeAttribute("src");
+    v.load();
+    URL.revokeObjectURL(url);
   }
 }
