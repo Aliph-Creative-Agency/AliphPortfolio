@@ -1,6 +1,7 @@
 // The Worker in front of the static site. Public pages pass straight through
 // to the assets binding, unchanged, so the site is byte-identical to the
-// assets-only deployment (later tasks add the published-content rewrite).
+// assets-only deployment — until something is published: then the three
+// pages get the published text rendered in (render/text.ts).
 // /admin* and /api/admin* need a verified Cloudflare Access identity
 // (worker/src/auth.ts); without one they are a 403 before any handler or
 // asset is reached.
@@ -11,6 +12,8 @@
 
 import { isAdminPath, verifyAccess, type AccessEnv } from "./auth";
 import { contentRoute, draftContent } from "./api/content";
+import { etagMatches, pageEtag, pageOf, renderText, type Page } from "./render/text";
+import { isEmpty, readSnapshot, type Snapshot } from "./store";
 
 export interface Env extends AccessEnv {
   ASSETS: Fetcher;
@@ -51,9 +54,45 @@ export default {
     // ?state=draft read checks Access itself, since this is not an admin path.
     if (url.pathname === "/api/content") return contentRoute(request, env, url);
 
+    const page = request.method === "GET" ? pageOf(url.pathname) : null;
+    if (page) return servePage(request, env, page);
+
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;
+
+/** One of the three pages, with the published text rendered in (render/
+ *  text.ts). An empty store, or any store failure, serves the assets response
+ *  untouched: the site never depends on D1 being up. */
+async function servePage(request: Request, env: Env, page: Page): Promise<Response> {
+  let snap: Snapshot;
+  try {
+    snap = await readSnapshot(env.DB, "published");
+  } catch (err) {
+    console.error("published snapshot unreadable, serving assets as-is", err);
+    return env.ASSETS.fetch(request);
+  }
+  if (isEmpty(snap)) return env.ASSETS.fetch(request);
+
+  // The asset's own validators would 304 a page whose rewrite changed: ask
+  // for the full asset and answer the conditional against our own ETag.
+  const plain = new Request(request);
+  plain.headers.delete("if-none-match");
+  plain.headers.delete("if-modified-since");
+  const res = await env.ASSETS.fetch(plain);
+  if (res.status !== 200 || !(res.headers.get("content-type") ?? "").startsWith("text/html")) return res;
+
+  const etag = pageEtag(res.headers.get("etag"), snap.rev);
+  const headers = new Headers(res.headers);
+  headers.set("etag", etag);
+  headers.delete("last-modified");
+  headers.delete("content-length");
+  if (etagMatches(request.headers.get("if-none-match"), etag)) {
+    headers.delete("content-type");
+    return new Response(null, { status: 304, headers });
+  }
+  return renderText(new Response(res.body, { status: 200, headers }), snap, page);
+}
 
 async function admin(request: Request, env: Env, url: URL, ctx: AdminCtx): Promise<Response> {
   if (url.pathname.startsWith("/api/")) {

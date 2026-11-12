@@ -165,3 +165,20 @@ that is both deleted and unpublished.
 3. Text and slot drafts reset with `draft = NULL` / `draft_json = NULL`. Gallery items, rings and clients reset or
    remove with `state = 'deleted'`.
 4. Append an `audit` row (`actor` = the Access email, `action` e.g. `text.save`, and `target` = the key, slot or id).
+
+## Served HTML (render/text.ts, P-06)
+
+`/`, `/index.html`, `/about*`, `/library*` (GET, 200, `text/html`) are rewritten while streaming, and only when the
+published snapshot is not empty. An empty store, or a D1 read that fails, serves the assets response untouched.
+
+- `[data-i18n="k"]` gets the **Arabic** published value of an I18N key `k` as its content, and
+  `[data-i18n-label="k"]` gets it as `aria-label`. An EN-only override changes no HTML; main.js applies it from the
+  blob. `meta.*` and table fields never reach these elements.
+- `meta.<page>.title` sets `<title>`. `og:title` and `twitter:title` take `meta.<page>.ogTitle`, or the title
+  override when there is no ogTitle override. The defaults are equal, so a title edit carries to the share card.
+  `description` / `ogDescription` work the same way.
+- `<script type="application/json" id="aliph-content">` holds the published snapshot (`/api/content`'s body, no
+  `locks`). It sits immediately before `<script src="main.js">`, once per page. `<`, `>`, `&`, U+2028 and U+2029 are
+  `\u`-escaped, so a value can never close the script.
+- A rewritten page carries `ETag: W/"<asset etag>-r<publish_rev>"` and answers `If-None-Match` itself. The asset's
+  own 304 is never passed on for a rewritten page.
