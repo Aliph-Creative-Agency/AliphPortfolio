@@ -17,6 +17,7 @@ import { onSlots } from "./render/slots";
 import { onRegions } from "./render/regions";
 import { getPublished, matchPage, pageKey, putPage, type CacheEnv, type Published } from "./cache";
 import { isEmpty } from "./store";
+import { galleryRoute } from "./gallery/routes";
 
 export interface Env extends AccessEnv, CacheEnv {
   ASSETS: Fetcher;
@@ -125,6 +126,8 @@ async function admin(request: Request, env: Env, url: URL, ctx: AdminCtx): Promi
     if (url.pathname === "/api/admin/whoami" && request.method === "GET") return json({ email: ctx.adminEmail });
     // The draft snapshot the editor and gallery screens start from.
     if (url.pathname === "/api/admin/content" && request.method === "GET") return draftContent(env);
+    const g = await galleryRoute(request, env, url, ctx); // uploads, gallery, rings (worker/src/gallery)
+    if (g) return g;
     return json({ error: "not found" }, 404);
   }
   // /admin pages and their files (prototype/admin/**), only once verified.
