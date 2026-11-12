@@ -4721,7 +4721,13 @@ html[dir="rtl"] .rt-go::after { transform-origin: right; }
     opacity: 1;
   }
   html[lang="en"] .rate-tab--phone .rt-ask { font-size: 0.85rem; }
-  /* too narrow for both on one row: the tab hangs under the address */
+  /* no room beside a one-line address: it breaks after its comma (the \n is
+     written by fitPhoneAsk) and the tab centres on the two lines */
+  .contact-row.rt-split .contact-value { white-space: pre-line; }
+  /* centred on the two lines: the value's inline-block sits ~18px above the
+     row's bottom (its baseline strut), which a bare bottom offset missed */
+  .contact-row.rt-split .rate-tab--phone { bottom: 1.05rem; }
+  /* no room even then: the tab hangs under the address */
   .contact-row.rt-below { padding-bottom: calc(3.3rem + 0.6rem); }
   .rate-tab--phone .rt-slab { padding-inline-start: 1.4rem; }
   .rate-tab--phone .rt-chev { padding-inline-start: 0.75rem; }
@@ -5510,9 +5516,28 @@ body.sheet-open { overflow: hidden; }
      full scroll. The rule now lands where the ink begins at ~0, so the
      buttons sit on dark exactly as they did. */
   .contact-row { padding-top: 0.42rem; }
-  .contact-row .contact-label { margin-bottom: 0.2rem; }
+  .contact-row .contact-label { margin-bottom: 0.2rem; line-height: 1.45; }
+  /* and the two leading-heavy runs, still at the size they were set: the
+     labels had 1.85 of leading, the socials 1.85 — the English address's
+     second line (see fitPhoneAsk) is paid for here, ~55px */
+  .contact-socials a { line-height: 1.5; }
   .contact-lines { gap: 0.15rem; }
-  .contact-grid { row-gap: 1rem; padding-top: 5.1rem; }
+  /* ⚠️ At least a SCREEN of ink, rows packed to its bottom, instead of a
+     fixed top padding: how much room is left above the first rule at full
+     scroll depends on the phone's height and on the language (English breaks
+     its address — fitPhoneAsk), so any one padding either let the band's
+     cream down behind the buttons on a tall phone or opened a gulf on a short
+     one. 3.5rem is the rule + .footer-legal under the grid (85px measured, less a hair);
+     lvh so a collapsing browser toolbar cannot uncover the band either.
+     The padding is the floor for when the rows are taller than the screen. */
+  .contact-grid {
+    row-gap: 1rem;
+    padding-top: 3.7rem;
+    min-height: calc(100vh - 3.5rem);
+    min-height: calc(100lvh - 3.5rem);
+    box-sizing: border-box;
+    align-content: end;
+  }
 
   /* ⚠️ Stacked, because side by side does not fit and never did quite fit:
      measured at 375px the two halves need 310px of a 327px line, so each one

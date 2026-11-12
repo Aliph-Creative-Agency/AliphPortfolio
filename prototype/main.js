@@ -1876,13 +1876,27 @@ const SIZE_TAB_SLACK = 16;   /* px of paper past the last letter */
 /* 📱 The phone tab's question shares a row with the address, so its limit is
    a NEIGHBOUR: the stylesheet's size is the ceiling and it shrinks until it
    stops RT_ASK_GAP short of «القدس، جبل الزيتون». Where even the floor does not
-   fit — a 360px phone has ~70px there — the tab gives up the row and hangs
-   under the address instead (`.rt-below`), rather than print over it. */
+   fit — a 360px phone has ~70px there, and English never has room — the
+   ADDRESS BREAKS after its comma («القدس،» / «جبل الزيتون», "Jerusalem," /
+   "Mount of Olives" — "u can break the address into 2 lines", 2026-09-23)
+   and it fits again against the narrower block. Only if even that fails does
+   the tab give up the row and hang under it (`.rt-below`), which costs a
+   whole line of footer and put the e-mail under the fixed buttons.
+   The break is written into the text (I18N.cPlace stays one line) and
+   undone first on every pass, and by unsplitPlace() whenever the phone tab
+   is hidden, so the desktop never inherits it. */
 const RT_ASK_GAP = 12;
+function unsplitPlace(row) {
+  const val = row && row.querySelector(".contact-value");
+  if (!val || !row.classList.contains("rt-split")) return;
+  row.classList.remove("rt-split");
+  val.textContent = val.textContent.replace(/\n/, " ");
+}
 function fitPhoneAsk(tab, ask) {
   const row = tab.parentElement;
   const val = row && row.querySelector(".contact-value");
   if (!val) return;
+  unsplitPlace(row);
   row.classList.remove("rt-below");
   /* ⚠️ Out to the PAGE's edge, measured, not `-var(--pad)`: at 320px the
      e-mail line is wider than the column and the rows overflow past the
@@ -1898,11 +1912,27 @@ function fitPhoneAsk(tab, ask) {
       : a.left >= v.right + RT_ASK_GAP;
   };
   shrinkToFit(ask, 0.75, clear);
-  if (!clear()) { ask.style.fontSize = ""; row.classList.add("rt-below"); }
+  if (clear()) return;
+  /* two lines, broken after the first comma (Arabic «،» or Latin ",") */
+  const one = val.textContent;
+  const two = one.replace(/([،,])\s+/, "$1\n");
+  if (two !== one) {
+    val.textContent = two;
+    row.classList.add("rt-split");
+    shrinkToFit(ask, 0.75, clear);
+    if (clear()) return;
+    unsplitPlace(row);
+  }
+  ask.style.fontSize = "";
+  row.classList.add("rt-below");
 }
 function sizeRateTab() {
   document.querySelectorAll(".rate-tab").forEach((tab) => {
     const ask = tab.querySelector(".rt-ask");
+    if (ask && !tab.offsetParent && tab.classList.contains("rate-tab--phone")) {
+      unsplitPlace(tab.parentElement);
+      return;
+    }
     if (!ask || !tab.offsetParent) return;
     if (tab.classList.contains("rate-tab--phone")) fitPhoneAsk(tab, ask);
     tab.style.removeProperty("--rt-open");

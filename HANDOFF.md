@@ -932,6 +932,33 @@ adds 93px there) and **English at 390 (28)**, where the address wraps to two
 lines and the tab also falls below. Options put to the agency: fit the
 English address to one line, or move the tab beside the socials.
 
+#### 6. ✅ After the push: the English footer — "u can break the address into 2 lines"
+
+**Uncommitted, undeployed** (`main.js`, `style.css`). The agency sent the
+English footer at ~383×820: the tab had fallen to `.rt-below`, a whole extra
+line, and the e-mail was under the buttons again.
+- **`fitPhoneAsk` now tries three things in order:** the one-line address;
+  then the address **broken after its first comma** (`\n` written into the
+  text, `.rt-split` → `white-space: pre-line`) with the question refitted
+  beside it; only then `.rt-below`. `unsplitPlace()` undoes the break at the
+  start of every pass and whenever the phone tab is hidden — verified: a
+  383 page resized to 1440 reads "Jerusalem, Mount of Olives" on one line.
+  English splits at every phone width; Arabic splits at ≤360.
+- `.rt-split .rate-tab--phone { bottom: 1.05rem }` centres the tab on the
+  two lines (the value's inline-block sits ~18px above the row's bottom);
+  measured centre-to-centre within 1px.
+- **The second line is paid for in leading, not type size:** labels 1.85 →
+  1.45, socials 1.85 → 1.5 (~55px).
+- **The fixed top padding is replaced by a floor:** on phones `.contact-grid`
+  is `min-height: calc(100lvh - 3.5rem)` with `align-content: end` (3.5rem ≈
+  the rule + `.footer-legal`), padding-top 3.7rem. At full scroll the ink
+  now reaches the top on every phone (grid top −2px at 383, 390, 412), so the
+  band's cream never shows behind the buttons, whatever the height or
+  language.
+- **First rule at full scroll:** EN 383×820 **97px** (was 51), EN/AR 360×800
+  77, AR 390×844 168, EN 412×915 192. Only 320×640 still cannot fit.
+  Same on all three pages.
+
 #### ⚠️ Line endings
 
 Python's text-mode write on Windows turned three LF files into CRLF — a
