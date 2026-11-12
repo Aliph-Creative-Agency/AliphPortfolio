@@ -10,12 +10,14 @@ site is unchanged. The editable surface is `worker/src/generated/registry.json` 
 | `worker/src/store.ts` | `readSnapshot(db, "published" \| "draft")`, `galleryItemFromRow`, `isEmpty` |
 | `worker/src/api/content.ts` | the GET routes below |
 | `worker/src/validate.ts` | `validateText / validateSlot / validateRing / validateGalleryItem / validateClient`, `badRequest` |
+| `worker/src/publish.ts` | `publish(db, by)`, `PublishConflictError` (see "Publish") |
+| `worker/src/cache.ts` | the published snapshot + rendered pages, cached per publish (see "Publish") |
 
 ## Routes
 
 | route | who | answers |
 |---|---|---|
-| `GET /api/content` (= `?state=published`) | public | the published snapshot. `ETag: "<publish_rev>"`, `Cache-Control: public, max-age=60`. `If-None-Match` with the current tag (weak, a list, or `*`) gets a `304` after one meta read. |
+| `GET /api/content` (= `?state=published`) | public | the published snapshot. `ETag: "<publish_rev>"`, `Cache-Control: public, max-age=60`. `If-None-Match` with the current tag (weak, a list, or `*`) gets a `304` (from the cache in a warm isolate, without D1). |
 | `GET /api/admin/content` | Access | the **draft** snapshot plus `locks`, with `Cache-Control: private, no-store`. **Editor and gallery screens use this one.** |
 | `GET /api/content?state=draft` | Access | the same as above. The route is not under `/api/admin`, so the handler calls `verifyAccess` itself. |
 | `?state=` anything else | | `400 {"error"}` |
@@ -187,3 +189,32 @@ published snapshot is not empty. An empty store, or a D1 read that fails, serves
   preview, and `src` otherwise. `alt` becomes `alt.ar`, and the enclosing `<figure data-preview>` gets `preview`.
   Each element is checked against its registry default first; one that no longer matches is skipped with a
   `console.warn`. `home.film.N` has no markup and is left to the main.js merge.
+
+## Publish (publish.ts, cache.ts, P-09)
+
+`publish(db, by)` (`by` = the Access email) makes the whole draft live and returns `{rev, publishedAt, snapshot}`.
+The editor team's `POST /api/admin/publish` calls it. It writes everything in ONE D1 batch:
+
+- `text_values.published = draft` and `slot_values.published_json = draft_json`, for every row.
+- `gallery_items` and `clients`: `published_json` = `JSON.stringify(galleryItemFromRow(row))` /
+  `JSON.stringify(clientFromRow(row))` for an active row, and `NULL` for a `deleted` one. The rows stay, so a
+  deleted row is invisible in both states, and saving it with `state = 'active'` brings it back.
+- `ring_picks.published_json` = `item_ids_json` when active, `NULL` when deleted.
+- `meta.publish_rev` + 1, a fresh `meta.publish_id` (random), a `revisions` row (`id` = the new rev,
+  `snapshot_json` = the published snapshot, equal to `/api/content`'s body), and an `audit` row
+  (`action = 'publish'`, `target = 'rev:<n>'`).
+
+The batch rolls back, and publish starts over from a fresh read, when a draft row changed after publish read it, or
+when another publish took the rev. Two concurrent publishes therefore both land, as revs n+1 and n+2. After 4 lost
+races it throws `PublishConflictError`; answer 409. A draft save must bump `rev` (see Validation), because that
+is how publish notices it.
+
+**Cache.** A publish is identified by `publish_rev` + `publish_id`, and everything is cached under that version, so
+nothing is ever purged:
+
+- In-isolate memo: the published snapshot, trusted for `CONTENT_CACHE_TTL_MS` (unset = 5000 ms) without asking D1.
+  After that, one row read re-validates it. The isolate that ran `publish()` switches at once; other isolates switch
+  within the TTL. If D1 fails after a snapshot was cached, the cached one keeps being served.
+- Cache API (per colo; stores nothing on `*.workers.dev`): the snapshot per version, and each rewritten page per
+  version + asset ETag, under `<origin>/__aliph-cache/`.
+- `CONTENT_CACHE_TTL_MS = "0"` turns all caching off, so every request reads D1. The test config uses it.

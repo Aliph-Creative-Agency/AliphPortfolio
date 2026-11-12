@@ -1,8 +1,7 @@
 // GET /api/content — the store as one JSON snapshot (worker/CONTENT_API.md).
 //
 //   /api/content                    published (the default state). Public.
-//   /api/content?state=published    ETag "<publish_rev>"; If-None-Match → 304
-//                                   after reading ONE meta row, no snapshot.
+//   /api/content?state=published    ETag "<publish_rev>"; If-None-Match → 304.
 //   /api/content?state=draft        Access only. /api/content is NOT under
 //                                   /api/admin, so the router's admin check
 //                                   never runs for it: this handler calls
@@ -13,10 +12,12 @@
 //
 // The published body changes only when publish_rev does (published columns
 // are written by publish() alone, which bumps it), so the rev IS the version.
+// The snapshot comes through cache.ts (memo + Cache API, keyed by publish).
 
 import { verifyAccess } from "../auth";
 import type { Env } from "../index";
-import { readPublishRev, readSnapshot, type State } from "../store";
+import { getPublished } from "../cache";
+import { readSnapshot, type State } from "../store";
 
 const PUBLIC_CACHE = "public, max-age=60";
 
@@ -52,17 +53,17 @@ export async function contentRoute(request: Request, env: Env, url: URL): Promis
     }
     return draftContent(env);
   }
-  return publishedContent(request, env);
+  return publishedContent(request, env, url);
 }
 
-async function publishedContent(request: Request, env: Env): Promise<Response> {
-  const inm = request.headers.get("if-none-match");
-  if (inm) {
-    const etag = etagOf(await readPublishRev(env.DB));
-    if (matches(inm, etag)) return new Response(null, { status: 304, headers: { etag, "cache-control": PUBLIC_CACHE } });
+/** From cache.ts: a warm isolate answers this (and its 304) without D1. */
+async function publishedContent(request: Request, env: Env, url: URL): Promise<Response> {
+  const { snap } = await getPublished(env, url.origin);
+  const etag = etagOf(snap.rev);
+  if (matches(request.headers.get("if-none-match"), etag)) {
+    return new Response(null, { status: 304, headers: { etag, "cache-control": PUBLIC_CACHE } });
   }
-  const snap = await readSnapshot(env.DB, "published");
-  return json(snap, 200, { etag: etagOf(snap.rev), "cache-control": PUBLIC_CACHE });
+  return json(snap, 200, { etag, "cache-control": PUBLIC_CACHE });
 }
 
 /** The draft snapshot (with locks). Callers have verified Access. */

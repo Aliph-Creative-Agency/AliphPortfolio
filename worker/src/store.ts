@@ -148,26 +148,52 @@ const parse = <T>(s: string): T => JSON.parse(s) as T;
 
 const REV_SQL = "SELECT CAST(v AS INTEGER) AS rev FROM meta WHERE k = 'publish_rev'";
 
+/* meta.publish_id: a random id publish() writes with every rev (P-09). The
+   rev alone could repeat (a D1 restore rolls it back, and the next publish
+   reuses the number with different content), so caches key on both. '' =
+   never set (a store published before P-09, or a test's hand-made rows). */
+const VERSION_SQL =
+  "SELECT CAST(v AS INTEGER) AS rev, (SELECT v FROM meta WHERE k = 'publish_id') AS id FROM meta WHERE k = 'publish_rev'";
+
+/** Which publish is live: one statement, two rows read. */
+export interface Version {
+  rev: number;
+  id: string;
+}
+
+const versionOf = (row: { rev: number; id: string | null } | undefined | null): Version => ({
+  rev: row?.rev ?? 0,
+  id: row?.id ?? "",
+});
+
 /** The publish rev alone: what an If-None-Match check needs. */
 export async function readPublishRev(db: D1Database): Promise<number> {
   const row = await db.prepare(REV_SQL).first<{ rev: number }>();
   return row?.rev ?? 0;
 }
 
-export async function readSnapshot(db: D1Database, state: State): Promise<Snapshot> {
-  return state === "published" ? readPublished(db) : readDraft(db);
+/** The live publish's rev + id (cache.ts checks it before trusting a copy). */
+export async function readPublishVersion(db: D1Database): Promise<Version> {
+  return versionOf(await db.prepare(VERSION_SQL).first<{ rev: number; id: string | null }>());
 }
 
-async function readPublished(db: D1Database): Promise<Snapshot> {
+export async function readSnapshot(db: D1Database, state: State): Promise<Snapshot> {
+  return state === "published" ? (await readPublishedVersioned(db)).snap : (await readDraftWith(db, [])).snap;
+}
+
+/** The published snapshot plus the publish id read in the same batch, so the
+ *  two always describe the same publish. */
+export async function readPublishedVersioned(db: D1Database): Promise<{ snap: Snapshot; id: string }> {
   const [meta, text, slots, gallery, rings, clients] = await db.batch([
-    db.prepare(REV_SQL),
+    db.prepare(VERSION_SQL),
     db.prepare("SELECT key, locale, published AS v FROM text_values WHERE published IS NOT NULL ORDER BY key, locale"),
     db.prepare("SELECT slot, published_json AS v FROM slot_values WHERE published_json IS NOT NULL ORDER BY slot"),
     db.prepare("SELECT id, published_json AS v FROM gallery_items WHERE published_json IS NOT NULL"),
     db.prepare("SELECT service, published_json AS v FROM ring_picks WHERE published_json IS NOT NULL ORDER BY service"),
     db.prepare("SELECT id, published_json AS v FROM clients WHERE published_json IS NOT NULL"),
   ]);
-  const s = emptySnapshot((meta.results[0] as { rev: number } | undefined)?.rev ?? 0);
+  const version = versionOf(meta.results[0] as { rev: number; id: string | null } | undefined);
+  const s = emptySnapshot(version.rev);
   for (const r of text.results as { key: string; locale: "ar" | "en"; v: string }[]) {
     (s.text[r.key] ??= {})[r.locale] = r.v;
   }
@@ -178,11 +204,17 @@ async function readPublished(db: D1Database): Promise<Snapshot> {
   );
   for (const r of rings.results as { service: string; v: string }[]) s.rings[r.service] = parse<string[]>(r.v);
   s.clients = sortById((clients.results as { id: string; v: string }[]).map((r) => ({ ...parse<Client>(r.v), id: r.id })));
-  return s;
+  return { snap: s, id: version.id };
 }
 
-async function readDraft(db: D1Database): Promise<Snapshot> {
-  const [meta, text, slots, gallery, rings, clients] = await db.batch([
+/** The draft snapshot, plus the results of `extra` statements run in the SAME
+ *  batch (one transaction, so they see exactly the rows the snapshot came
+ *  from). publish() reads its draft fingerprint this way. */
+export async function readDraftWith(
+  db: D1Database,
+  extra: D1PreparedStatement[],
+): Promise<{ snap: Snapshot; extra: D1Result[] }> {
+  const [meta, text, slots, gallery, rings, clients, ...more] = await db.batch([
     db.prepare(REV_SQL),
     db.prepare("SELECT key, locale, draft AS v, rev FROM text_values ORDER BY key, locale"),
     db.prepare("SELECT slot, draft_json AS v, rev FROM slot_values ORDER BY slot"),
@@ -191,6 +223,7 @@ async function readDraft(db: D1Database): Promise<Snapshot> {
     ),
     db.prepare("SELECT service, item_ids_json AS v, state, rev FROM ring_picks ORDER BY service"),
     db.prepare("SELECT id, name_ar, name_en, state, rev FROM clients"),
+    ...extra,
   ]);
   const s = emptySnapshot((meta.results[0] as { rev: number } | undefined)?.rev ?? 0);
   const locks: Locks = { text: {}, slots: {}, gallery: {}, rings: {}, clients: {} };
@@ -218,5 +251,5 @@ async function readDraft(db: D1Database): Promise<Snapshot> {
   }
   sortById(s.clients);
   s.locks = locks;
-  return s;
+  return { snap: s, extra: more };
 }

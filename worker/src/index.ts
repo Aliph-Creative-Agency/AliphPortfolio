@@ -14,9 +14,10 @@ import { isAdminPath, verifyAccess, type AccessEnv } from "./auth";
 import { contentRoute, draftContent } from "./api/content";
 import { etagMatches, pageEtag, pageOf, renderText, type Page } from "./render/text";
 import { onSlots } from "./render/slots";
-import { isEmpty, readSnapshot, type Snapshot } from "./store";
+import { getPublished, matchPage, pageKey, putPage, type CacheEnv, type Published } from "./cache";
+import { isEmpty } from "./store";
 
-export interface Env extends AccessEnv {
+export interface Env extends AccessEnv, CacheEnv {
   ASSETS: Fetcher;
   /** The content store (migrations/). Local miniflare D1 in development. */
   DB: D1Database;
@@ -42,7 +43,7 @@ const json = (body: unknown, status = 200) =>
   });
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     if (isAdminPath(url.pathname)) {
@@ -56,23 +57,26 @@ export default {
     if (url.pathname === "/api/content") return contentRoute(request, env, url);
 
     const page = request.method === "GET" ? pageOf(url.pathname) : null;
-    if (page) return servePage(request, env, page);
+    if (page) return servePage(request, env, ctx, url, page);
 
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;
 
 /** One of the three pages, with the published text and media slots rendered
- *  in, in one streaming pass (render/text.ts, render/slots.ts). An empty store, or any store failure, serves the assets response
- *  untouched: the site never depends on D1 being up. */
-async function servePage(request: Request, env: Env, page: Page): Promise<Response> {
-  let snap: Snapshot;
+ *  in, in one streaming pass (render/text.ts, render/slots.ts). An empty
+ *  store, or a store failure with nothing cached, serves the assets response
+ *  untouched: the site never depends on D1 being up. The snapshot and the
+ *  finished page come from cache.ts when it has them. */
+async function servePage(request: Request, env: Env, ctx: ExecutionContext, url: URL, page: Page): Promise<Response> {
+  let pub: Published;
   try {
-    snap = await readSnapshot(env.DB, "published");
+    pub = await getPublished(env, url.origin);
   } catch (err) {
     console.error("published snapshot unreadable, serving assets as-is", err);
     return env.ASSETS.fetch(request);
   }
+  const snap = pub.snap;
   if (isEmpty(snap)) return env.ASSETS.fetch(request);
 
   // The asset's own validators would 304 a page whose rewrite changed: ask
@@ -89,10 +93,24 @@ async function servePage(request: Request, env: Env, page: Page): Promise<Respon
   headers.delete("last-modified");
   headers.delete("content-length");
   if (etagMatches(request.headers.get("if-none-match"), etag)) {
+    await res.body?.cancel();
     headers.delete("content-type");
     return new Response(null, { status: 304, headers });
   }
-  return renderText(new Response(res.body, { status: 200, headers }), snap, page, (rw) => onSlots(rw, snap, page));
+
+  const key = pageKey(pub.key, url.pathname, res.headers.get("etag"));
+  if (key) {
+    const hit = await matchPage(url.origin, key);
+    if (hit) {
+      await res.body?.cancel();
+      return hit;
+    }
+  }
+  const out = renderText(new Response(res.body, { status: 200, headers }), snap, page, (rw) => onSlots(rw, snap, page));
+  if (!key) return out;
+  // Stored after the response has gone out, from a tee of the same stream.
+  ctx.waitUntil(putPage(url.origin, key, out.clone()));
+  return out;
 }
 
 async function admin(request: Request, env: Env, url: URL, ctx: AdminCtx): Promise<Response> {

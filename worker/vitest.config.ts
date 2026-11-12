@@ -25,6 +25,9 @@ export default defineConfig({
           TEST_MIGRATIONS: await readD1Migrations(path.join(root, "migrations")),
           TEST_TABLES: evalTables(fs.readFileSync(path.join(root, "prototype", "main.js"), "utf8")),
           TEST_GENERATED: generate(),
+          // tests write rows by hand and expect the next request to see them:
+          // no content caching (cache.ts); publish-cache.test.ts turns it on.
+          CONTENT_CACHE_TTL_MS: "0",
         },
       },
     })),

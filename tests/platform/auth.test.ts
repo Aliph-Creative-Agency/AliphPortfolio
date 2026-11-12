@@ -1,7 +1,7 @@
 // P-03: Cloudflare Access JWT verification on /admin* and /api/admin*.
 // A local RSA key pair stands in for the Access team's signing key; its JWKS
 // is served by a stubbed fetch for https://<team>/cdn-cgi/access/certs.
-import { env, SELF } from "cloudflare:test";
+import { createExecutionContext, env, SELF } from "cloudflare:test";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import worker, { type Env } from "../../worker/src/index";
 import { isAdminPath, resetJwksCache } from "../../worker/src/auth";
@@ -47,7 +47,7 @@ async function sign(
 const accessEnv = (extra: Partial<Env> = {}): Env => ({ ...env, ACCESS_TEAM_DOMAIN: TEAM, ACCESS_AUD: AUD, ...extra });
 
 function call(path: string, init: RequestInit = {}, e: Env = accessEnv(), host = "https://aliphcreative.com") {
-  return worker.fetch(new Request(host + path, init), e);
+  return worker.fetch(new Request(host + path, init), e, createExecutionContext());
 }
 const withToken = (t: string): RequestInit => ({ headers: { "Cf-Access-Jwt-Assertion": t } });
 

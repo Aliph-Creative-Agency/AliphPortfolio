@@ -1,6 +1,6 @@
 // P-05: the content store read path (store.ts + api/content.ts) and the
 // server-side validators (validate.ts) the write handlers must use.
-import { env } from "cloudflare:test";
+import { createExecutionContext, env } from "cloudflare:test";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import worker, { type Env } from "../../worker/src/index";
 import { resetJwksCache } from "../../worker/src/auth";
@@ -33,7 +33,7 @@ async function token(): Promise<string> {
 }
 
 const E = (): Env => ({ ...env, ACCESS_TEAM_DOMAIN: TEAM, ACCESS_AUD: AUD });
-const call = (path: string, init: RequestInit = {}) => worker.fetch(new Request("https://aliphcreative.com" + path, init), E());
+const call = (path: string, init: RequestInit = {}) => worker.fetch(new Request("https://aliphcreative.com" + path, init), E(), createExecutionContext());
 const db = () => env.DB;
 const run = (sql: string, ...args: unknown[]) => db().prepare(sql).bind(...args).run();
 
@@ -113,6 +113,7 @@ describe("draft reads need Access", () => {
     const r = await worker.fetch(
       new Request("https://aliphcreative.com/api/content?state=draft", { headers: { "Cf-Access-Jwt-Assertion": t } }),
       { ...env, ACCESS_TEAM_DOMAIN: "", ACCESS_AUD: "" },
+      createExecutionContext(),
     );
     expect(r.status).toBe(403);
   });
