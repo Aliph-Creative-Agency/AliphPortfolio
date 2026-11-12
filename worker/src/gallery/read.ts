@@ -46,7 +46,10 @@ export interface AdminRing {
   changed: boolean;
 }
 
-type Row = GalleryRow & { state: string; published_json: string | null; rev: number };
+export type Row = GalleryRow & { state: string; published_json: string | null; rev: number };
+
+/** The columns every gallery read selects (the row shape above). */
+export const ROW_COLS = "id, src, poster, cat, sub, ratio, date, alt_ar, alt_en, client_id, hidden, sort, state, published_json, rev";
 
 /** Draft ≠ published for one gallery row. publish() writes
  *  JSON.stringify(galleryItemFromRow(row)) for an active row and NULL for a
@@ -112,11 +115,19 @@ function uploadItem(r: Row): AdminItem {
   return item;
 }
 
+const MEDIA_BY_F = new Map(MEDIA.map((m) => [m.f, m]));
+
+/** One item as the grid shows it: a MEDIA f (with or without its row) or an
+ *  upload row. null = an id with neither (an upload row publish removed). */
+export function adminItem(id: string, r: Row | undefined): AdminItem | null {
+  const m = MEDIA_BY_F.get(id);
+  if (m) return defaultItem(m, r);
+  return r ? uploadItem(r) : null;
+}
+
 export async function galleryRead(env: Env): Promise<Response> {
   const [rows, rings] = await env.DB.batch([
-    env.DB.prepare(
-      "SELECT id, src, poster, cat, sub, ratio, date, alt_ar, alt_en, client_id, hidden, sort, state, published_json, rev FROM gallery_items",
-    ),
+    env.DB.prepare(`SELECT ${ROW_COLS} FROM gallery_items`),
     env.DB.prepare("SELECT service, item_ids_json, state, published_json, rev FROM ring_picks"),
   ]);
   const byId = new Map((rows.results as Row[]).map((r) => [r.id, r]));
