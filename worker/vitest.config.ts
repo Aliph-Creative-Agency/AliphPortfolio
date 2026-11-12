@@ -34,7 +34,7 @@ export default defineConfig({
   ],
   test: {
     root,
-    include: ["tests/platform/**/*.test.ts"],
+    include: ["tests/**/*.test.ts"],
     setupFiles: ["tests/platform/setup.ts"],
   },
 });
