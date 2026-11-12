@@ -5119,9 +5119,9 @@ if (document.fonts && document.fonts.ready) {
    every re-render (language toggle, ring turn, rotor tick) by a debounced
    MutationObserver; elements tagged here (data-ek-auto) lose the tag when
    they stop showing that value, the Worker's tags are never touched. Exposes
-   window.aliphEdit = { tag, apply, keys }. ───────────────────────────── */
+   window.aliphEdit = { tag, apply, lang }. ───────────────────────────── */
 if (document.documentElement.dataset.editMode === "1") {
-  const squash = (v) => String(v).replace(/s+/g, " ").trim();
+  const squash = (v) => String(v).replace(/\s+/g, " ").trim();
   const TABLES = { I18N, SUBCATS, PROJECTS, TESTIMONIALS, MEDIA };
 
   /* normalised text → key, for the language on screen. First key wins. */
