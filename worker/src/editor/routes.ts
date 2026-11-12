@@ -4,6 +4,7 @@
 
 import type { AdminCtx, Env } from "../index";
 import { json, requireSameOrigin } from "./http";
+import { editPage, editPageOf } from "./editpage";
 
 export async function editorRoute(
   request: Request,
@@ -11,9 +12,12 @@ export async function editorRoute(
   url: URL,
   ctx: AdminCtx,
 ): Promise<Response | null> {
-  void env;
   void ctx;
   const path = url.pathname;
+
+  // The three pages with the draft rendered in and the editor hooks (E-01).
+  const page = editPageOf(path);
+  if (page) return editPage(request, env, url, page);
 
   if (path === "/api/admin/text") {
     const bad = requireSameOrigin(request);
