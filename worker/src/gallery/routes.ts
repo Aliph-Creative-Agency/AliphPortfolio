@@ -7,6 +7,7 @@
 
 import type { AdminCtx, Env } from "../index";
 import { publish } from "../publish";
+import { mpuAbort, mpuComplete, mpuCreate, mpuPart } from "./multipart";
 import { mediaGet, uploadPut } from "./upload";
 
 export const json = (body: unknown, status = 200) =>
@@ -52,6 +53,10 @@ export async function galleryRoute(
   }
 
   if (path === "/api/admin/upload" && method === "POST") return uploadPut(request, env, ctx);
+  if (path === "/api/admin/upload/mpu" && method === "POST") return mpuCreate(request, env);
+  if (path === "/api/admin/upload/mpu/part" && method === "PUT") return mpuPart(request, env, url);
+  if (path === "/api/admin/upload/mpu/complete" && method === "POST") return mpuComplete(request, env, url, ctx);
+  if (path === "/api/admin/upload/mpu" && method === "DELETE") return mpuAbort(env, url);
   if (path.startsWith("/api/admin/media/") && method === "GET") return mediaGet(env, url);
 
   return null;
