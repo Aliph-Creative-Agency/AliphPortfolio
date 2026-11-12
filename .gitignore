@@ -78,3 +78,14 @@ service-account*.json
 *service_account*.json
 *.pem
 *.p12
+
+# ── Worker tooling (admin build, 2026-11-12) ───────────────────────
+# npm dev deps for the Worker in worker/ and its tests; the site itself
+# still ships no node_modules. .wrangler/ is miniflare's LOCAL state (the
+# local D1 and R2 live there). .dev.vars holds local-only env such as
+# ADMIN_DEV_BYPASS and must never be committed.
+# ⚠️ package-lock.json matches `*-*.json` above; it is tracked with
+# `git add -f`, and once tracked the ignore rule no longer hides changes.
+node_modules/
+.wrangler/
+.dev.vars
