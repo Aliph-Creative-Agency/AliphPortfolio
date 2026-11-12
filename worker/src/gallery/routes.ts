@@ -7,6 +7,7 @@
 
 import type { AdminCtx, Env } from "../index";
 import { publish } from "../publish";
+import { mediaGet, uploadPut } from "./upload";
 
 export const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -49,6 +50,9 @@ export async function galleryRoute(
     const res = await publish(env.DB, ctx.adminEmail);
     return json({ rev: res.rev, publishedAt: res.publishedAt });
   }
+
+  if (path === "/api/admin/upload" && method === "POST") return uploadPut(request, env, ctx);
+  if (path.startsWith("/api/admin/media/") && method === "GET") return mediaGet(env, url);
 
   return null;
 }

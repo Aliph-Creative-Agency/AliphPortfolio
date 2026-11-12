@@ -43,6 +43,16 @@ export async function installAccess(): Promise<void> {
     ["text_values", "slot_values", "gallery_items", "ring_picks", "clients"].map((t) => env.DB.prepare(`DELETE FROM ${t}`)),
   );
   await env.DB.prepare("UPDATE meta SET v = '0' WHERE k = 'publish_rev'").run();
+  await clearMedia();
+}
+
+/** Empties admin/ in the local test bucket (storage outlives a test). */
+export async function clearMedia(): Promise<void> {
+  for (;;) {
+    const l = await env.MEDIA_BUCKET.list({ prefix: "admin/" });
+    if (!l.objects.length) break;
+    await env.MEDIA_BUCKET.delete(l.objects.map((o) => o.key));
+  }
 }
 export function uninstallAccess(): void {
   spy?.mockRestore();
