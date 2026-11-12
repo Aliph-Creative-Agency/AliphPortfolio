@@ -45,6 +45,17 @@ describe("GET /api/admin/gallery", () => {
     expect(it.cat).toBe(defaults.MEDIA[0].c);
   });
 
+  it("a deleted override shows the default piece (as the site does); deleted only while the revert is unpublished", async () => {
+    const [a, b] = [defaults.MEDIA[1], defaults.MEDIA[2]];
+    await row(a.f, { hidden: 1, cat: "zzz", src: "https://media.aliphcreative.com/admin/2026/11/x.webp", state: "deleted" });
+    await row(b.f, { hidden: 1, state: "deleted", pub: "{}" });
+    const m = await read();
+    const ia = m.items.find((i) => i.id === a.f)!;
+    expect(ia).toMatchObject({ kind: "default", hidden: false, deleted: false, changed: false, rev: 1, cat: a.c });
+    expect(ia.full).not.toContain("/admin/");
+    expect(m.items.find((i) => i.id === b.f)).toMatchObject({ kind: "default", hidden: false, deleted: true, changed: true, rev: 1 });
+  });
+
   it("a row equal to its published copy is not changed", async () => {
     const id = defaults.MEDIA[1].f;
     await row(id, { hidden: 1, pub: JSON.stringify({ id, hidden: true }) });

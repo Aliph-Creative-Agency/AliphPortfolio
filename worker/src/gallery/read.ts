@@ -66,8 +66,14 @@ const altOf = (r: Row | undefined) => {
   return a;
 };
 
-function defaultItem(m: Media, r: Row | undefined): AdminItem {
+function defaultItem(m: Media, row: Row | undefined): AdminItem {
   const video = !!m.v;
+  /* A deleted row on a default piece means "back to the default": the site
+     shows the MEDIA entry, so the row's values are ignored here too. Its rev
+     still counts (the next save sends it), and `deleted` stays true only
+     while that revert waits for publish. */
+  const gone = row?.state === "deleted";
+  const r = gone ? undefined : row;
   /* the same fallbacks main.js builds: a video tile shows poster || thumb/<p>,
      an image tile src || thumb/<f>; the lightbox poster || poster/<p> / src || img/<f> */
   const poster = r?.poster ?? undefined;
@@ -84,9 +90,9 @@ function defaultItem(m: Media, r: Row | undefined): AdminItem {
     full: video ? (poster ?? `${R2}/poster/${m.p}`) : (src ?? `${R2}/img/${m.f}`),
     alt: altOf(r),
     hidden: r?.hidden === 1,
-    deleted: r?.state === "deleted",
-    changed: r ? rowChanged(r) : false,
-    rev: r?.rev ?? 0,
+    deleted: gone && rowChanged(row!),
+    changed: row ? rowChanged(row) : false,
+    rev: row?.rev ?? 0,
   };
   if (video) item.film = src ?? `${R2}/video/${m.f}`;
   return item;

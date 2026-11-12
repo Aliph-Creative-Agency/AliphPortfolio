@@ -101,6 +101,10 @@ export async function mpuComplete(request: Request, env: Env, url: URL, ctx: Adm
     if (!p || !Number.isInteger(p.partNumber) || typeof p.etag !== "string") return json({ error: "bad parts" }, 400);
     list.push({ partNumber: p.partNumber as number, etag: p.etag });
   }
+  // Only part 1 is sniffed, so the object must start with it: parts 1..k,
+  // each once (a list without part 1 would store unchecked bytes).
+  list.sort((a, b) => a.partNumber - b.partNumber);
+  if (list.some((p, i) => p.partNumber !== i + 1)) return json({ error: "parts must be 1..n, each once" }, 400);
   const mpu = env.MEDIA_BUCKET.resumeMultipartUpload(ku.key, ku.uploadId);
   let obj: R2Object;
   try {

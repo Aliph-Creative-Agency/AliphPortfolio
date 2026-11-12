@@ -98,6 +98,15 @@ describe("multipart", () => {
     expect((await post("/api/admin/upload/mpu", { name: "a.mp4", type: "video/mp4", size: 1 }, { origin: "https://evil.example" })).status).toBe(403);
   });
 
+  it("complete without part 1 (the only sniffed part) → 400, nothing stored", async () => {
+    const c = (await (await create()).json()) as { uploadId: string; key: string };
+    const junk = new Uint8Array(1024).fill(0x3c); // "<<<<": not a video
+    const p2 = (await (await part(c, 2, junk)).json()) as { partNumber: number; etag: string };
+    const done = await post("/api/admin/upload/mpu/complete", { key: c.key, uploadId: c.uploadId, parts: [p2] });
+    expect(done.status).toBe(400);
+    expect(await env.MEDIA_BUCKET.head(c.key)).toBeNull();
+  });
+
   it("part numbers past 60 → 413", async () => {
     const c = (await (await create()).json()) as { uploadId: string; key: string };
     expect((await part(c, 61, video(100))).status).toBe(413);
