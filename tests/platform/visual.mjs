@@ -55,15 +55,15 @@ async function waitUp() {
 
 // ---- one shooting pass: every page x size x language ----
 // `setup(context, lang)` is the hook P-07b's override scenario uses; `base` is where to point.
-export async function shoot(outDir, { base = BASE, setup } = {}) {
+export async function shoot(outDir, { base = BASE, setup, inspect, pages = PAGES, langs = LANGS } = {}) {
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
   const browser = await chromium.launch({ executablePath: EDGE, headless: true });
-  const requests = {};
+  const requests = {}, facts = {};
   try {
     for (const [sizeName, width, height] of SIZES) {
-      for (const lang of LANGS) {
-        for (const [pageName, url] of PAGES) {
+      for (const lang of langs) {
+        for (const [pageName, url] of pages) {
           const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1, reducedMotion: "no-preference" });
           await ctx.addInitScript((l) => { try { localStorage.setItem("aliph-lang", l); } catch {} }, lang);
           // the headline's ransom letters and their timings use Math.random: a fixed seed (mulberry32)
@@ -77,7 +77,9 @@ export async function shoot(outDir, { base = BASE, setup } = {}) {
           const media = [];
           page.on("request", (r) => {
             const t = r.resourceType();
-            if (t === "image" || t === "media") media.push(new URL(r.url()).pathname);
+            const p = new URL(r.url()).pathname;
+            // the ransom scraps swap on a wall-clock timer, so their requests are not an order to compare
+            if ((t === "image" || t === "media") && !p.startsWith("/assets/img/ransom/")) media.push(p);
           });
           await page.goto(base + url, { waitUntil: "load" });
           // the curtain lifts (display:none) and MEDIA HOLD is released
@@ -88,8 +90,9 @@ export async function shoot(outDir, { base = BASE, setup } = {}) {
           await page.waitForLoadState("networkidle").catch(() => {});
           await page.addStyleTag({ content: FREEZE });
           await page.evaluate(() => document.fonts.ready);
-          await page.waitForTimeout(600);
+          await page.waitForTimeout(1500);   // GSAP entrances finish (they are not CSS, so FREEZE cannot stop them)
           const name = `${pageName}-${sizeName}-${lang}`;
+          if (inspect) facts[name] = await inspect(page);
           await page.screenshot({ path: path.join(outDir, name + ".png"), animations: "disabled" });
           requests[name] = media;
           await ctx.close();
@@ -98,7 +101,7 @@ export async function shoot(outDir, { base = BASE, setup } = {}) {
     }
   } finally { await browser.close(); }
   writeFileSync(path.join(outDir, "requests.json"), JSON.stringify(requests, null, 1));
-  return requests;
+  return inspect ? { requests, facts } : requests;
 }
 
 // ---- pixel diff, done in the browser's own canvas (no image dependency) ----
@@ -146,7 +149,7 @@ async function runBuild(config, outDir) {
   finally { stop(child); await new Promise((r) => setTimeout(r, 1500)); }
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url) && !process.argv.includes("--scenario")) {
   const args = process.argv.slice(2);
   const baseDir = path.join(OUT, "baseline"), curDir = path.join(OUT, "current");
   const only = (args.find((a) => a.startsWith("--only=")) || "").slice(7);
@@ -165,4 +168,75 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   console.log("home-phone-ar first media request: " + (curReq["home-phone-ar"]?.[0] || "-"));
   if (fail) { console.log(`VISUAL FAILED (${fail})`); process.exit(1); }
   console.log(`VISUAL OK (${rows.length} shots <= ${THRESHOLD * 100}%, request order identical)`);
+}
+
+// ---- override scenario (P-07b): main.js's boot merge, driven by an injected #aliph-content ----
+//   node tests/platform/visual.mjs --scenario
+// The assets-only server stands in for the Worker: the page's HTML is rewritten in the browser's route to carry
+// the blob exactly where P-06 puts it (immediately before <script src="main.js">). Checks, en home at 390 and 1440:
+// an EN text override and a ring-line (SUBCATS desc) override both appear, a film-frame slot and a ring pick
+// land, and the media requests are the baseline's (hero first, nothing below the fold early) apart from the
+// pictures the scenario changes (CHANGED).
+export const SCENARIO = {
+  rev: 1,
+  text: { ctaStart: { en: "Begin right here" }, "subcat.design.posters.desc": { en: "RING-LINE-OVERRIDE the poster ring says this now." } },
+  slots: { "home.film.1": { src: "assets/media/pics-food-21-dsc03454.webp" } },
+  rings: { photo: ["pics-food-17-dsc00763.webp", "reels-alif-tuktuk.mp4", "not-a-real-id"] },
+};
+// the pictures the scenario itself adds or takes away: the film frame it swaps, the photo-ring items it leaves out
+const CHANGED = new Set(["pics-idk-category-28-dsc00020", "pics-food-21-dsc03454", "reels-einar-edited", "pics-Queen-retreat-52-copy-of-0c2a0144",
+  "reels-child-section-final", "reels-connect-edited", "pics-official-visits-43-dsc08794", "pics-Interactive-37-dsc03223",
+  // ... and the two it keeps, which it reorders
+  "reels-alif-tuktuk", "pics-food-17-dsc00763"].map((n) => `/assets/media/${n}.webp`));
+
+async function scenario(baseDir) {
+  const blob = JSON.stringify(SCENARIO).replace(/</g, "\u003c");
+  const setup = async (ctx) => {
+    await ctx.route(/\/$/, async (route) => {
+      const res = await route.fetch();
+      const html = (await res.text()).replace(/(<script[^>]*src="main\.js")/, `<script type="application/json" id="aliph-content">${blob}</script>\n$1`);
+      await route.fulfill({ response: res, body: html });
+    });
+  };
+  const inspect = (page) => page.evaluate(async () => {
+    const dl = (sel) => (document.querySelector(sel) || {}).textContent || "";
+    await new Promise((r) => setTimeout(r, 400));
+    const ring = document.querySelector("#ringDesc");
+    return {
+      cta: dl('[data-i18n="ctaStart"]'),
+      ringLine: ring ? ring.textContent : "",
+      film1: (document.querySelector('.film-frame[data-frame="0"] img') || {}).getAttribute?.("src") || "",
+      content: document.querySelectorAll("#aliph-content").length,
+      photoRing: [...document.querySelectorAll(".ring-item")].length,
+    };
+  });
+  const { requests, facts } = await shoot(path.join(OUT, "scenario"), { setup, inspect, pages: [["home", "/"]], langs: ["en"] });
+  const base = JSON.parse(readFileSync(path.join(baseDir, "requests.json"), "utf8"));
+  let fail = 0;
+  const check = (ok, msg) => { if (!ok) fail++; console.log((ok ? "ok   " : "FAIL ") + msg); };
+  for (const size of ["phone", "desktop"]) {
+    const n = `home-${size}-en`, f = facts[n];
+    check(f.content === 1, `${n}: blob present once`);
+    check(f.cta === "Begin right here", `${n}: EN text override shows (${JSON.stringify(f.cta)})`);
+    check(f.ringLine.includes("RING-LINE-OVERRIDE"), `${n}: ring line override shows (${JSON.stringify(f.ringLine.slice(0, 40))})`);
+    check(f.film1.endsWith("pics-food-21-dsc03454.webp"), `${n}: film frame 1 is the slot's picture`);
+    const strip = (l) => l.filter((p) => !CHANGED.has(p));
+    check(JSON.stringify(strip(requests[n])) === JSON.stringify(strip(base[n])), `${n}: media request order = baseline outside the changed pictures (hold and hero unchanged)`);
+    const got = new Set(requests[n]);
+    check(got.has("/assets/media/reels-alif-tuktuk.webp") && got.has("/assets/media/pics-food-17-dsc00763.webp") && !got.has("/assets/media/reels-einar-edited.webp"), `${n}: the ring shows the picked items only`);
+    check(requests[n][0] === base[n][0], `${n}: first media request is the hero's (${requests[n][0]})`);
+  }
+  return fail;
+}
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url) && process.argv.includes("--scenario")) {
+  const baseDir = path.join(OUT, "baseline");
+  const child = start(assetsOnlyConfig());
+  let fail;
+  try {
+    await waitUp();
+    if (!existsSync(path.join(baseDir, "requests.json"))) await shoot(baseDir);
+    fail = await scenario(baseDir);
+  } finally { stop(child); await new Promise((r) => setTimeout(r, 1500)); }
+  console.log(fail ? `SCENARIO FAILED (${fail})` : "SCENARIO OK");
+  process.exit(fail ? 1 : 0);
 }

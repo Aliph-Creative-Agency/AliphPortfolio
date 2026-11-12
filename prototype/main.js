@@ -2306,6 +2306,159 @@ const RING_MARKS = {
   tech: { img: "assets/marks/mark-tech-torn.webp" },
 };
 
+/* ══ admin content merge ══════════════════════════════════════════════
+   The admin dashboard's published content (the Worker injects it as
+   <script type="application/json" id="aliph-content">; see worker/CONTENT_API.md)
+   merged into the tables above, once, before anything renders. No element
+   (the static host, a crawler, an empty store) = nothing happens.
+   ⚠️ THE FIRST PART IS A 1:1 COPY of worker/src/shared/merge.mjs (the Worker
+   runs the same code on its own copy of these tables to render the @static
+   regions, so a crawler and a visitor read the same words). Do NOT edit it
+   here: change merge.mjs and paste it back; tests/platform/merge-sync.mjs
+   (npm run check:site) fails when the two differ. What follows the copy is
+   this file's own: the film frames and the rings, which no @static region
+   reads, and MEDIA rows an upload carries as full URLs (src / poster) —
+   the work page and the ring prefer those over the R2 URL built from f / p.
+   ══════════════════════════════════════════════════════════════════════ */
+{
+const LOCALES = ["ar", "en"];
+const own = (o, k) => o != null && Object.prototype.hasOwnProperty.call(o, k);
+
+/* The path to a field key's {ar, en} holder, worked out from the key itself
+   so main.js needs no registry. Keys are validated on write (validate.ts);
+   this still refuses anything it does not recognise, and any index or id the
+   tables do not have, by returning null. The holder of `.name` on a subcat or
+   a project is the row itself (its `ar`/`en`). */
+function fieldPath(T, key) {
+  const k = String(key).split(".");
+  const index = (list, s) => (/^\d+$/.test(s) && list && +s < list.length ? +s : -1);
+  if (k[0] === "meta" && k.length === 3) {
+    return ["home", "about", "library"].includes(k[1]) && ["title", "description", "ogTitle", "ogDescription"].includes(k[2])
+      ? ["META", k[1], k[2]] : null;
+  }
+  if (k[0] === "subcat" && k.length === 4) {
+    const list = own(T.SUBCATS, k[1]) ? T.SUBCATS[k[1]] : null;
+    const i = list ? list.findIndex((s) => s.id === k[2]) : -1;
+    if (i < 0) return null;
+    if (k[3] === "name") return ["SUBCATS", k[1], i];
+    return k[3] === "desc" || k[3] === "descShort" ? ["SUBCATS", k[1], i, k[3]] : null;
+  }
+  if (k[0] === "project" && k.length === 3) {
+    const i = index(T.PROJECTS, k[1]);
+    if (i < 0) return null;
+    if (k[2] === "name") return ["PROJECTS", i];
+    if (k[2] === "desc") return ["PROJECTS", i, "desc"];
+    return k[2] === "tagline" || k[2] === "body" ? ["PROJECTS", i, "profile", k[2]] : null;
+  }
+  if (k[0] === "testimonial" && k.length === 3) {
+    const i = index(T.TESTIMONIALS, k[1]);
+    return i >= 0 && ["name", "business", "quote"].includes(k[2]) ? ["TESTIMONIALS", i, k[2]] : null;
+  }
+  return null;
+}
+
+/* Set each overridden locale of `pair` on the holder at `path`. Everything
+   above the holder must exist (a project with no profile has no tagline to
+   set); the holder itself is created when null or absent. */
+function setPair(T, path, pair) {
+  let o = T;
+  for (let i = 0; i < path.length - 1; i++) {
+    if (o == null || typeof o !== "object") return false;
+    o = o[path[i]];
+  }
+  if (o == null || typeof o !== "object") return false;
+  const last = path[path.length - 1];
+  if (o[last] == null) o[last] = {};
+  const h = o[last];
+  LOCALES.forEach((l) => { if (pair[l] !== undefined) h[l] = pair[l]; });
+  return true;
+}
+
+/* A gallery item as a MEDIA row: `src`/`poster` are full URLs and stay under
+   their own names (MEDIA's f/p are file names main.js builds R2 URLs from);
+   a poster means a video, so `v` is set. An upload is filed as f = its id,
+   with r = 1 and d = null when it has no ratio or date. */
+function mediaRow(g, base) {
+  const m = base ? Object.assign({}, base) : { f: g.id, c: g.cat, r: 1, d: null };
+  if (g.src !== undefined) m.src = g.src;
+  if (g.poster !== undefined) { m.poster = g.poster; m.v = 1; }
+  if (g.cat !== undefined) m.c = g.cat;
+  if (g.ratio !== undefined) m.r = g.ratio;
+  if (g.date !== undefined) m.d = g.date;
+  if (g.sub !== undefined) m.sub = g.sub;
+  if (g.alt !== undefined) m.alt = Object.assign({}, g.alt);
+  if (g.client !== undefined) m.client = g.client;
+  return m;
+}
+
+/** Merge a published snapshot into the tables T, in place. Returns T. */
+function mergeContent(T, s) {
+  if (!s) return T;
+  const text = s.text || {};
+  Object.keys(text).forEach((key) => {
+    if (own(T.I18N, key)) setPair(T.I18N, [key], text[key]);
+    else {
+      const path = fieldPath(T, key);
+      if (path) setPair(T, path, text[key]);
+    }
+  });
+
+  const M = T.MEDIA;
+  (s.gallery || []).forEach((g) => {
+    if (!M) return;
+    const at = M.findIndex((m) => m.f === g.id);
+    if (at >= 0) {
+      if (g.hidden) M.splice(at, 1);
+      else M[at] = mediaRow(g, M[at]);
+    } else if (!g.hidden && g.src && g.cat) {
+      M.push(mediaRow(g, null));
+    }
+  });
+  return T;
+}
+
+const mergeEl = document.getElementById("aliph-content");
+let mergeSnap = null;
+if (mergeEl) {
+  try { mergeSnap = JSON.parse(mergeEl.textContent); } catch (e) { mergeSnap = null; }
+}
+if (mergeSnap) {
+  mergeContent({ I18N, SUBCATS, PROJECTS, TESTIMONIALS, MEDIA }, mergeSnap);
+
+  /* home.film.N = FILM_FRAMES[N-1], built by JS, so no markup for the Worker to rewrite */
+  Object.keys(mergeSnap.slots || {}).forEach((id) => {
+    const hit = /^home\.film\.(\d+)$/.exec(id);
+    const v = mergeSnap.slots[id];
+    const frame = hit && FILM_FRAMES[+hit[1] - 1];
+    if (frame && v && v.src) frame.src = v.src;
+  });
+
+  /* A ring's picks are item ids (CONTENT_API "Rings"). Resolved the way the
+     contract says: the service's own default entry first (it keeps its sub,
+     open, project and full), then a MEDIA row (an archive piece or an
+     upload; a video's ring item is its poster, opening the film), whose sub
+     comes from the row. An id nothing knows is dropped, and a ring left with
+     nothing keeps its defaults. */
+  Object.keys(mergeSnap.rings || {}).forEach((svc) => {
+    const own0 = RINGS[svc];
+    const ids = mergeSnap.rings[svc];
+    if (!own0 || !Array.isArray(ids)) return;
+    const items = ids.map((id) => {
+      const d = own0.find((x) => x.f === id || x.shot === id);
+      if (d) return d;
+      const m = MEDIA.find((x) => x.f === id);
+      if (!m) return null;
+      const it = { f: m.v ? m.p || m.f : m.f, sub: m.sub, r: m.r };
+      if (m.v) it.open = m.f;
+      if (m.src) { it.src = m.v ? m.poster : m.src; if (m.v) it.film = m.src; }
+      return it;
+    }).filter(Boolean);
+    if (items.length) RINGS[svc] = items;
+  });
+}
+}
+/* ══ end admin content merge ══ */
+
 /* Which ring is showing. Read by nothing else today, but it is the one
    name for "the service being looked at" and the chat widget asked for it
    once already. */
@@ -2362,7 +2515,8 @@ const serviceRings = (() => {
   };
 
   const srcOf = (item) =>
-    item.shot ? "assets/shots/" + item.shot + ".webp"
+    item.src ? item.src            /* an upload: a full URL */
+      : item.shot ? "assets/shots/" + item.shot + ".webp"
       : "assets/media/" + item.f;
 
   /* ══════ the band is BENT, and every number below exists for that ══════
@@ -2548,7 +2702,7 @@ const serviceRings = (() => {
            jobs: the previews module plays it in place on the front item (the
            agency's "the ring's reels should play"), and the lightbox opens it
            at the frame the preview had reached. */
-        const film = it.open && /\.mp4$/i.test(it.open) ? it.open : "";
+        const film = it.film || (it.open && /\.mp4$/i.test(it.open) ? it.open : "");
         /* ⚠️ THE MASTER, and that is the agency's decision of 2026-08-27
            reversing the 2026-08-26 round. That round pointed this at a 540px
            700 kbps derivative under `preview/` and left `video/` for the
@@ -2561,7 +2715,7 @@ const serviceRings = (() => {
            resources/make_previews.sh still derives them. They are DORMANT, not
            deleted — nothing points at them — so reversing this again is one
            string. */
-        if (film) b.dataset.preview = R2 + "/video/" + film;
+        if (film) b.dataset.preview = /^https?:/i.test(film) ? film : R2 + "/video/" + film;
         const rec = MEDIA.find((x) => x.f === (it.open || it.f) || x.p === it.f);
         if (rec && rec.d) b.dataset.date = fmtDate(rec.d);
 
@@ -3390,7 +3544,7 @@ const lightbox = (() => {
       || (node.dataset && node.dataset.full) || "";
     if (film) {
       return {
-        video: `${R2}/video/${film}`, poster: full,
+        video: /^https?:/i.test(film) ? film : `${R2}/video/${film}`, poster: full,
         date: date && date.textContent
       };
     }
@@ -4171,11 +4325,11 @@ function renderLibrary() {
          The lightbox still opens the full file — that is the one place the
          work is meant to be seen at size. resources/thumb_media.py derives
          them; every key under thumb/ is the same name as its source. */
-      const src = `${R2}/thumb/${m.v ? m.p : m.f}`;
+      const src = m.src ? (m.v ? m.poster : m.src) : `${R2}/thumb/${m.v ? m.p : m.f}`;   /* an upload carries full URLs */
       /* The full file the lightbox opens. Carried on the node because the
          overlay reads the picture that is on screen, and the picture on screen
          is now the thumbnail. */
-      const full = m.v ? `${R2}/poster/${m.p}` : `${R2}/img/${m.f}`;
+      const full = m.src ? (m.v ? m.poster : m.src) : m.v ? `${R2}/poster/${m.p}` : `${R2}/img/${m.f}`;
       const date = m.d ? `<figcaption><span class="t-date">${fmtDate(m.d)}</span></figcaption>` : "";
       /* ⚠️ EVERY tile answers the keyboard, not only the films. Until
          2026-08-26 the `role="button" tabindex="0"` rode along with
@@ -4187,7 +4341,7 @@ function renderLibrary() {
       const label = m.v ? I18N.mPlay[lang] : I18N.mOpen[lang];
       const named = ` role="button" tabindex="0" aria-label="${label}${m.d ? SEP() + fmtDate(m.d) : ""}"`;
       return `
-      <figure class="tile${m.v ? " is-film" : ""}"${m.v ? ` data-film="${m.f}"` : ""}${named}>
+      <figure class="tile${m.v ? " is-film" : ""}"${m.v ? ` data-film="${m.src || m.f}"` : ""}${named}>
         <div class="tile-img" style="aspect-ratio:${m.r}">
           <img src="${src}" data-full="${full}" alt="" loading="lazy" decoding="async">
           ${m.v ? '<span class="tile-play" aria-hidden="true"></span>' : ""}
