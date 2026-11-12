@@ -46,7 +46,7 @@
   langBtn.addEventListener("click", function () {
     var t = document.querySelector(".js-lang");
     if (t) t.click();
-    setTimeout(syncLang, 60);
+    setTimeout(function () { syncLang(); refit(document.querySelector(".hero-title")); }, 60);
   });
   syncLang();
 
@@ -124,6 +124,20 @@
     }
     if (!el.hasAttribute("data-ek")) { el.setAttribute("data-ek", cur.key); if (cur.auto) el.setAttribute("data-ek-auto", ""); }
     if (loc === edit.lang && !el.children.length && el.textContent !== value) el.textContent = value;
+    if (cur.rich) el.classList.add("ed-rich");
+    if (loc === edit.lang) refit(el);
+  }
+
+  /* a longer or shorter text can break the box it sits in: re-fit it (main.js
+     does the measuring; one pass per frame however fast the typing) */
+  var fitFrame = 0;
+  function refit(el) {
+    if (fitFrame) cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(function () {
+      fitFrame = 0;
+      if (edit.refit) edit.refit(el);
+      if (cur) place();
+    });
   }
 
   function place() {
@@ -141,7 +155,7 @@
   }
 
   function field(loc, label) {
-    var area = h("textarea", { rows: "3", "data-loc": loc, "aria-label": label, dir: loc === "ar" ? "rtl" : "ltr", lang: loc });
+    var area = h("textarea", { rows: cur.rich ? "5" : "3", "data-loc": loc, "aria-label": label, dir: loc === "ar" ? "rtl" : "ltr", lang: loc });
     var count = h("span", { class: "ed-count" });
     cur.area[loc] = area;
     cur.count[loc] = count;
@@ -160,7 +174,7 @@
     if (cur) closePop(false);
     var key = el.dataset.ek;
     var entry = entryOf(key);
-    cur = { el: el, key: key, orig: {}, area: {}, count: {}, max: entry && entry.maxLength || 0, auto: el.hasAttribute("data-ek-auto") };
+    cur = { el: el, key: key, orig: {}, area: {}, count: {}, max: entry && entry.maxLength || 0, auto: el.hasAttribute("data-ek-auto"), rich: !!entry && entry.kind === "richline" };
     LOCALES.forEach(function (l) { cur.orig[l] = origOf(key, l, null); });
     pop.textContent = "";
     var cancel = h("button", { type: "button", text: "Cancel" });
@@ -174,7 +188,7 @@
       ]),
       field("ar", "Arabic"),
       field("en", "English"),
-      h("p", { class: "ed-hint", text: "Preview only, not saved yet. Esc restores both languages." }),
+      h("p", { class: "ed-hint", text: (cur.rich ? "Enter makes a line break. " : "") + "Preview only, not saved yet. Esc restores both languages." }),
       h("div", { class: "ed-pop-actions" }, [cancel, done]),
     ].forEach(function (n) { pop.appendChild(n); });
     LOCALES.forEach(function (l) { cur.area[l].value = cur.orig[l]; updateCount(l); });
@@ -215,8 +229,27 @@
     drawOutline(el, false);
   }, true);
 
+  /* A page link in the site's own markup goes to the matching edit page, so
+     the editor is never left by following the nav. A link whose own text is
+     editable (the nav items) navigates on a plain click and edits on Alt+click;
+     while a popover is open every link is inert. */
+  function editHref(a) {
+    var u;
+    try { u = new URL(a.getAttribute("href") || "", document.baseURI); } catch (_) { return null; }
+    if (u.origin !== location.origin) return null;
+    if (!/^\/(?:index(?:\.html)?|about(?:\.html)?|library(?:\.html)?)?$/.test(u.pathname)) return null;
+    var name = u.pathname.replace(/^\/|\.html$/g, "");
+    var dest = name === "about" || name === "library" ? "/admin/edit/" + name : "/admin/edit/";
+    return dest + u.hash;
+  }
+
   document.addEventListener("click", function (e) {
     if (e.target.closest && e.target.closest("[data-editor-ui]")) return;
+    var link = e.target.closest ? e.target.closest("a[href]") : null;
+    if (link && !cur && !e.altKey && link.hasAttribute("data-ek")) {
+      var dest = editHref(link);
+      if (dest) { e.preventDefault(); e.stopPropagation(); location.href = dest; return; }
+    }
     var el = eligible(e.target);
     if (el) {
       e.preventDefault();
@@ -225,7 +258,12 @@
       return;
     }
     /* links stay inert while a popover is open */
-    if (cur && e.target.closest && e.target.closest("a")) { e.preventDefault(); e.stopPropagation(); }
+    if (link) {
+      e.preventDefault();
+      e.stopPropagation();
+      var to = !cur && editHref(link);
+      if (to) location.href = to;
+    }
   }, true);
 
   document.addEventListener("keydown", function (e) {

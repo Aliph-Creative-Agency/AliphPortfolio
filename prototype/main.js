@@ -5119,7 +5119,7 @@ if (document.fonts && document.fonts.ready) {
    every re-render (language toggle, ring turn, rotor tick) by a debounced
    MutationObserver; elements tagged here (data-ek-auto) lose the tag when
    they stop showing that value, the Worker's tags are never touched. Exposes
-   window.aliphEdit = { tag, apply, read, lang }. ───────────────────────────── */
+   window.aliphEdit = { tag, apply, read, refit, lang }. ───────────────────────────── */
 if (document.documentElement.dataset.editMode === "1") {
   const squash = (v) => String(v).replace(/\s+/g, " ").trim();
   const TABLES = { I18N, SUBCATS, PROJECTS, TESTIMONIALS, MEDIA };
@@ -5189,10 +5189,26 @@ if (document.documentElement.dataset.editMode === "1") {
     return o && typeof o[locale] === "string" ? o[locale] : undefined;
   }
 
+  /* Re-fit what a longer or shorter text may have broken. The hero headline is
+     sized by the stylesheet alone (clamp), so a long edit wraps to more lines
+     and runs off the top: it gets the same shrink-to-fit as the other fixed
+     boxes, against 40% of the overlay's height (the stock title is 30-37%).
+     Everything else main.js already fits is re-measured by its own refit. */
+  function refit(el) {
+    const title = el && el.closest ? el.closest(".hero-title") : document.querySelector(".hero-title");
+    if (title) {
+      const ov = title.closest(".hero-overlay");
+      title.style.fontSize = "";
+      if (ov) shrinkToFit(title, 0.5, () => title.getBoundingClientRect().height <= ov.clientHeight * 0.4);
+    }
+    testimonials.refit();
+    sizeRateTab();
+  }
+
   let tagTimer = null;
   const later = () => { clearTimeout(tagTimer); tagTimer = setTimeout(tag, 150); };
   new MutationObserver(later).observe(document.body, { childList: true, subtree: true, characterData: true });
-  window.aliphEdit = { tag, apply, read, get lang() { return lang; } };
+  window.aliphEdit = { tag, apply, read, refit, get lang() { return lang; } };
   later();
 }
 /* ── end EDIT MODE HOOKS ── */
