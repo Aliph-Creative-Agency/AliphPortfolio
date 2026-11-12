@@ -2462,6 +2462,9 @@ if (mergeSnap) {
     if (items.length) RINGS[svc] = items;
   });
 }
+/* the edit page's hooks (EDIT MODE HOOKS, below) need these two and they are
+   not visible outside this block; handed over, never copied */
+if (document.documentElement.dataset.editMode === "1") window.__aliphMerge = { fieldPath, setPair };
 }
 /* ══ end admin content merge ══ */
 
@@ -5103,6 +5106,87 @@ if (document.fonts && document.fonts.ready) {
     { rootMargin: "150px" },
   ).observe(title);
 })();
+
+/* ── EDIT MODE HOOKS ──────────────────────────────────────────────────────
+   Only the admin edit pages (the Worker sets <html data-edit-mode="1">) run
+   this; on the public page it is a no-op. The Worker already tagged every
+   [data-i18n] / [data-i18n-label] element with its key (data-ek /
+   data-ek-label). What main.js writes with JS carries no key, so this tags it
+   afterwards: an element with no element children whose text EQUALS a table
+   value of the current language is that value's key. Equality, not position,
+   because the same copy is rendered in several places (rotor and band, ring
+   line and sheet) and all of them should light up for one key. Re-run after
+   every re-render (language toggle, ring turn, rotor tick) by a debounced
+   MutationObserver; elements tagged here (data-ek-auto) lose the tag when
+   they stop showing that value, the Worker's tags are never touched. Exposes
+   window.aliphEdit = { tag, apply, keys }. ───────────────────────────── */
+if (document.documentElement.dataset.editMode === "1") {
+  const squash = (v) => String(v).replace(/s+/g, " ").trim();
+  const TABLES = { I18N, SUBCATS, PROJECTS, TESTIMONIALS, MEDIA };
+
+  /* normalised text → key, for the language on screen. First key wins. */
+  function valueIndex() {
+    const map = new Map();
+    const put = (key, pair) => {
+      const v = pair && typeof pair[lang] === "string" ? squash(pair[lang]) : "";
+      if (v && !map.has(v)) map.set(v, key);
+    };
+    Object.keys(I18N).forEach((k) => put(k, I18N[k]));
+    Object.keys(SUBCATS).forEach((svc) => SUBCATS[svc].forEach((s) => {
+      put(`subcat.${svc}.${s.id}.name`, s);
+      put(`subcat.${svc}.${s.id}.desc`, s.desc);
+      put(`subcat.${svc}.${s.id}.descShort`, s.descShort);
+    }));
+    PROJECTS.forEach((p, i) => {
+      put(`project.${i}.name`, p);
+      put(`project.${i}.desc`, p.desc);
+      if (p.profile) { put(`project.${i}.tagline`, p.profile.tagline); put(`project.${i}.body`, p.profile.body); }
+    });
+    TESTIMONIALS.forEach((t, i) => ["name", "business", "quote"].forEach((f) => put(`testimonial.${i}.${f}`, t[f])));
+    return map;
+  }
+
+  /* the editor's own UI (editor.js marks its nodes data-editor-ui) is never content */
+  function tag() {
+    const map = valueIndex();
+    document.querySelectorAll("body *").forEach((el) => {
+      if (el.children.length || el.closest("script,style,svg,[data-editor-ui]")) return;
+      if (el.hasAttribute("data-ek") && !el.hasAttribute("data-ek-auto")) return;
+      const key = map.get(squash(el.textContent));
+      if (key) { el.setAttribute("data-ek", key); el.setAttribute("data-ek-auto", ""); }
+      else if (el.hasAttribute("data-ek-auto")) { el.removeAttribute("data-ek"); el.removeAttribute("data-ek-auto"); }
+    });
+  }
+
+  /* Write one locale of one key into the tables and onto the page. A holder
+     with element children (the hero line carries ransom chips) cannot take a
+     textContent write, so those re-render the page's text the normal way. */
+  function apply(key, locale, value) {
+    const M = window.__aliphMerge;
+    if (!M || !["ar", "en"].includes(locale)) return false;
+    const path = Object.prototype.hasOwnProperty.call(I18N, key) ? ["I18N", key] : M.fieldPath(TABLES, key);
+    if (!path || !M.setPair(TABLES, path, { [locale]: value })) return false;
+    if (locale !== lang) return true;
+    let rebuild = false;
+    document.querySelectorAll("[data-ek]").forEach((el) => {
+      if (el.dataset.ek !== key) return;
+      if (el.children.length) rebuild = true;
+      else el.textContent = value;
+    });
+    document.querySelectorAll("[data-ek-label]").forEach((el) => {
+      if (el.dataset.ekLabel === key) el.setAttribute("aria-label", value);
+    });
+    if (rebuild) applyI18n();
+    return true;
+  }
+
+  let tagTimer = null;
+  const later = () => { clearTimeout(tagTimer); tagTimer = setTimeout(tag, 150); };
+  new MutationObserver(later).observe(document.body, { childList: true, subtree: true, characterData: true });
+  window.aliphEdit = { tag, apply, get lang() { return lang; } };
+  later();
+}
+/* ── end EDIT MODE HOOKS ── */
 
 let resizeTimer;
 let lastW = window.innerWidth;
