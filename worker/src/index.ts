@@ -9,6 +9,10 @@
 
 export interface Env {
   ASSETS: Fetcher;
+  /** The content store (migrations/). Local miniflare D1 in development. */
+  DB: D1Database;
+  /** aliph-media, for admin uploads. Local miniflare R2 in development. */
+  MEDIA_BUCKET: R2Bucket;
 }
 
 export default {
