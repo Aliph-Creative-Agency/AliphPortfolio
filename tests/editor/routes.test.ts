@@ -16,8 +16,8 @@ describe("Origin guard", () => {
   it("no Origin -> 403", async () => {
     expect((await put({})).status).toBe(403);
   });
-  it("same origin reaches the handler (501 stub)", async () => {
-    expect((await put({ origin: "http://localhost" })).status).toBe(501);
+  it("same origin reaches the handler (an empty body is its 400)", async () => {
+    expect((await put({ origin: "http://localhost" })).status).toBe(400);
   });
   it("GET routes skip the check", async () => {
     expect((await call("/api/admin/whoami")).status).toBe(200);

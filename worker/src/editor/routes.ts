@@ -3,8 +3,9 @@
 // means "not mine" and the request falls through to the rest.
 
 import type { AdminCtx, Env } from "../index";
-import { json, requireSameOrigin } from "./http";
+import { requireSameOrigin } from "./http";
 import { editPage, editPageOf } from "./editpage";
+import { textRoute } from "./text";
 
 export async function editorRoute(
   request: Request,
@@ -12,7 +13,6 @@ export async function editorRoute(
   url: URL,
   ctx: AdminCtx,
 ): Promise<Response | null> {
-  void ctx;
   const path = url.pathname;
 
   // The three pages with the draft rendered in and the editor hooks (E-01).
@@ -22,9 +22,7 @@ export async function editorRoute(
   if (path === "/api/admin/text") {
     const bad = requireSameOrigin(request);
     if (bad) return bad;
-    // E-03 fills this in.
-    if (request.method === "PUT") return json({ error: "not implemented" }, 501);
-    return json({ error: "method not allowed" }, 405);
+    return textRoute(request, env, ctx);
   }
 
   return null;
