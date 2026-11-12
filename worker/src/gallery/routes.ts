@@ -9,6 +9,7 @@ import type { AdminCtx, Env } from "../index";
 import { publish } from "../publish";
 import { itemDelete, itemPut } from "./items";
 import { galleryRead } from "./read";
+import { ringPut, ringReset } from "./rings";
 import { mpuAbort, mpuComplete, mpuCreate, mpuPart } from "./multipart";
 import { mediaGet, uploadPut } from "./upload";
 
@@ -57,6 +58,8 @@ export async function galleryRoute(
   if (path === "/api/admin/gallery" && method === "GET") return galleryRead(env);
   if (path.startsWith("/api/admin/gallery/") && method === "PUT") return itemPut(request, env, path, ctx);
   if (path.startsWith("/api/admin/gallery/") && method === "DELETE") return itemDelete(env, path, url, ctx);
+  if (path.startsWith("/api/admin/rings/") && method === "PUT") return ringPut(request, env, path, ctx);
+  if (path.startsWith("/api/admin/rings/") && method === "DELETE") return ringReset(env, path, url, ctx);
   if (path === "/api/admin/upload" && method === "POST") return uploadPut(request, env, ctx);
   if (path === "/api/admin/upload/mpu" && method === "POST") return mpuCreate(request, env);
   if (path === "/api/admin/upload/mpu/part" && method === "PUT") return mpuPart(request, env, url);

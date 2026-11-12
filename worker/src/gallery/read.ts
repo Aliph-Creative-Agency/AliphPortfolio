@@ -125,6 +125,20 @@ export function adminItem(id: string, r: Row | undefined): AdminItem | null {
   return r ? uploadItem(r) : null;
 }
 
+export type RingRow = { service: string; item_ids_json: string; state: string; published_json: string | null; rev: number };
+
+/** One ring as the panel shows it: the store list when the row is active,
+ *  else main.js's default RINGS order. */
+export function adminRing(service: string, r: RingRow | undefined): AdminRing {
+  const active = r?.state === "active";
+  return {
+    ids: active ? (JSON.parse(r!.item_ids_json) as string[]) : (RINGS[service] || []).map(ringItemId),
+    isDefault: !active,
+    rev: r?.rev ?? 0,
+    changed: !r ? false : active ? r.published_json !== r.item_ids_json : r.published_json !== null,
+  };
+}
+
 export async function galleryRead(env: Env): Promise<Response> {
   const [rows, rings] = await env.DB.batch([
     env.DB.prepare(`SELECT ${ROW_COLS} FROM gallery_items`),
@@ -137,22 +151,9 @@ export async function galleryRead(env: Env): Promise<Response> {
   const uploads = (rows.results as Row[]).filter((r) => !media.has(r.id)).sort((a, b) => (a.id < b.id ? -1 : 1));
   for (const r of uploads) items.push(uploadItem(r));
 
-  const ringRows = new Map(
-    (rings.results as { service: string; item_ids_json: string; state: string; published_json: string | null; rev: number }[]).map(
-      (r) => [r.service, r],
-    ),
-  );
+  const ringRows = new Map((rings.results as RingRow[]).map((r) => [r.service, r]));
   const out: Record<string, AdminRing> = {};
-  for (const [service, list] of Object.entries(RINGS)) {
-    const r = ringRows.get(service);
-    const active = r?.state === "active";
-    out[service] = {
-      ids: active ? (JSON.parse(r!.item_ids_json) as string[]) : list.map(ringItemId),
-      isDefault: !active,
-      rev: r?.rev ?? 0,
-      changed: !r ? false : active ? r.published_json !== r.item_ids_json : r.published_json !== null,
-    };
-  }
+  for (const service of Object.keys(RINGS)) out[service] = adminRing(service, ringRows.get(service));
 
   return json({
     items,
