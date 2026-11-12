@@ -1,0 +1,1452 @@
+{
+  "I18N": {
+    "navHome": {
+      "ar": "الرئيسيّة",
+      "en": "Home"
+    },
+    "navWork": {
+      "ar": "الأعمال",
+      "en": "Work"
+    },
+    "navAbout": {
+      "ar": "من نحن",
+      "en": "About"
+    },
+    "hero1": {
+      "ar": "نبدأ من حيث",
+      "en": "We start where"
+    },
+    "hero2": {
+      "ar": "تبدأ الأشياء.",
+      "en": "things begin."
+    },
+    "heroPara": {
+      "ar": "لِف وكالة تبدأ من الحرف الأوّل. لكل علامةٍ نقطة أصلٍ تُبنى منها وتعود إليها، \n\n  وعملنا هو العثور على تلك النقطة ومساعدتكم على الوصول من الألِف إلى الياء.",
+      "en": "liph is an agency that begins at the first letter. Every brand has an origin point it is built from and returns to, and our work is to find that point and help you get from A to Z."
+    },
+    "dropLetter": {
+      "ar": "أ",
+      "en": "A"
+    },
+    "ctaStart": {
+      "ar": "ابدأ من هنا",
+      "en": "Start here"
+    },
+    "ctaContact": {
+      "ar": "تواصل معنا",
+      "en": "Get in touch"
+    },
+    "btnWork": {
+      "ar": "كل الأعمال",
+      "en": "ALL WORK"
+    },
+    "svcInvite": {
+      "ar": "هذه نماذج فقط، والأرشيف كامل بانتظارك.",
+      "en": "A handful of samples; the full archive is one click away."
+    },
+    "btnAbout": {
+      "ar": "تعرّف على ألِف",
+      "en": "Get to know Aliph"
+    },
+    "svcBanner": {
+      "ar": "ماذا نقدم؟",
+      "en": "What we do?"
+    },
+    "svcPrev": {
+      "ar": "الخدمة السابقة",
+      "en": "Previous service"
+    },
+    "svcNext": {
+      "ar": "الخدمة التالية",
+      "en": "Next service"
+    },
+    "svcList": {
+      "ar": "الخدمات",
+      "en": "Services"
+    },
+    "reelPrev": {
+      "ar": "الوسيط السابق",
+      "en": "Previous item"
+    },
+    "reelNext": {
+      "ar": "الوسيط التالي",
+      "en": "Next item"
+    },
+    "storyBanner": {
+      "ar": "لماذا ألِف؟",
+      "en": "Why Aliph?"
+    },
+    "w1Title": {
+      "ar": "نبدأ بالسؤال، لا بالإجابة",
+      "en": "We begin with the question, not the answer."
+    },
+    "w1ParaA": {
+      "ar": "لأنّ كل علامةٍ تبدأ من نقطة، ولأنّ هذه النقطة هي الأصعب في الإيجاد والأهم في البناء.",
+      "en": "Because every brand begins at a point, and that point is the hardest thing to find and the most important thing to build on."
+    },
+    "w1ParaB": {
+      "ar": "نحن لا نبدأ بالتصميم، بل نبدأ بالسؤال: من أنت؟ وماذا تريد أن تقول؟ من هذه الإجابة، تُبنى الهوية البصرية، وتُصاغ الصورة، ويُكتب النص، ويُصمَّم الموقع، كلٌّ في مكانه، وكلٌّ بخدمة الفكرة الواحدة.",
+      "en": "We don't begin with the design. We begin with the question: who are you, and what do you want to say? From that answer the identity is built, the image is shaped, the words are written and the site is designed, each in its place and each in service of one idea."
+    },
+    "w1ParaC": {
+      "ar": "لا نقدّم حلولاً جاهزة، لأنّ لا علامتين تتشابهان في نقطة بدايتهما. نصغي أولاً، ثم نبني.",
+      "en": "We don't hand over ready-made solutions, because no two brands share a starting point. We listen first, then we build."
+    },
+    "w1ParaPhone": {
+      "ar": "كل علامةٍ تبدأ من نقطة، وهذه النقطة هي الأصعب في الإيجاد. لا نبدأ بالتصميم، بل بالسؤال: من أنت؟ وماذا تريد أن تقول؟ من الإجابة، تُبنى الهويّة، وتُصاغ الصورة، ويُكتب النص. لا حلول جاهزة: لا علامتين تتشابهان في نقطة بدايتهما.",
+      "en": "Every brand begins at a point, and that point is the hardest thing to find. We don't begin with the design, we begin with the question: who are you, and what do you want to say? From the answer the identity is built, the image is shaped, the words are written. No ready-made solutions: no two brands share a starting point."
+    },
+    "w2Title": {
+      "ar": "نقاطٌ بحثنا عنها، وأعمالٌ بنيناها منها.",
+      "en": "Points we searched for, and work we built from them."
+    },
+    "w3Title": {
+      "ar": "أن تبدو النتيجة حتميّة.",
+      "en": "That the result feels inevitable."
+    },
+    "whyOutro": {
+      "ar": "الحكاية كاملةً: كيف بدأت الوكالة، وكيف نشتغل، وما الذي نقيس عليه عملنا.",
+      "en": "The whole story: how the agency started, how we work, and what we measure the work against."
+    },
+    "cBand": {
+      "ar": "لنبدأ من الألِف",
+      "en": "Let's start from the Aliph"
+    },
+    "testiLabel": {
+      "ar": "من كلام عملائنا",
+      "en": "In our clients' words"
+    },
+    "testiLabelNext": {
+      "ar": "من كلام عملائنا · التالي",
+      "en": "In our clients' words · Next"
+    },
+    "testiPrev": {
+      "ar": "التعليق السابق",
+      "en": "Previous testimonial"
+    },
+    "testiNext": {
+      "ar": "التعليق التالي",
+      "en": "Next testimonial"
+    },
+    "rateAsk": {
+      "ar": "هل عملت معنا من قبل؟",
+      "en": "Worked with us before?"
+    },
+    "rateGo": {
+      "ar": "قيّم ألِف!",
+      "en": "Rate Aliph!"
+    },
+    "rateAskPhone": {
+      "ar": "هل عملت\nمعنا من قبل؟",
+      "en": "Worked with\nus before?"
+    },
+    "rateToggle": {
+      "ar": "لوحة التقييم",
+      "en": "Rating panel"
+    },
+    "testiBand": {
+      "ar": "آراء العملاء",
+      "en": "Client testimonials"
+    },
+    "testiRotor": {
+      "ar": "آراء العملاء",
+      "en": "Client testimonials"
+    },
+    "cLabelMail": {
+      "ar": "للمشاريع والتعاون",
+      "en": "Projects & collaboration"
+    },
+    "cLabelPhone": {
+      "ar": "هاتف",
+      "en": "Phone"
+    },
+    "cLabelWhats": {
+      "ar": "واتساب",
+      "en": "WhatsApp"
+    },
+    "cLabelPlace": {
+      "ar": "الوكالة",
+      "en": "The agency"
+    },
+    "cPlace": {
+      "ar": "القدس، جبل الزيتون",
+      "en": "Jerusalem, Mount of Olives"
+    },
+    "legal": {
+      "ar": "ألِف © ٢٠٢٦. جميع الحقوق محفوظة",
+      "en": "Aliph © 2026. All rights reserved"
+    },
+    "libTitle": {
+      "ar": "الأرشيف",
+      "en": "Archive"
+    },
+    "libStats": {
+      "ar": "الأحدث أوّلًا",
+      "en": "Newest first"
+    },
+    "mPlay": {
+      "ar": "شغّل الفيلم",
+      "en": "Play film"
+    },
+    "mOpen": {
+      "ar": "افتح الصورة",
+      "en": "Open image"
+    },
+    "mOf": {
+      "ar": "%1 من %2",
+      "en": "%1 of %2"
+    },
+    "libIndex": {
+      "ar": "فهرس",
+      "en": "Index"
+    },
+    "libGallery": {
+      "ar": "معرض",
+      "en": "Gallery"
+    },
+    "aboutBanner": {
+      "ar": "من نحن؟",
+      "en": "Who are we?"
+    },
+    "pfOpen": {
+      "ar": "افتح الملف",
+      "en": "Open profile"
+    },
+    "pfShots": {
+      "ar": "لقطات",
+      "en": "Screenshots"
+    },
+    "pfAbout": {
+      "ar": "عن المشروع",
+      "en": "About this project"
+    },
+    "pfClose": {
+      "ar": "إغلاق",
+      "en": "Close"
+    },
+    "navMenu": {
+      "ar": "القائمة",
+      "en": "Menu"
+    },
+    "navMain": {
+      "ar": "التنقّل الرئيسي",
+      "en": "Main navigation"
+    },
+    "logoHome": {
+      "ar": "ألِف، الرئيسية",
+      "en": "Aliph, Home"
+    },
+    "libView": {
+      "ar": "طريقة العرض",
+      "en": "View mode"
+    },
+    "cWrite": {
+      "ar": "راسلنا",
+      "en": "Write to us"
+    },
+    "reelTrack": {
+      "ar": "شريط الأعمال، مرّره أفقيًّا",
+      "en": "Work carousel, scroll sideways"
+    },
+    "lbTitle": {
+      "ar": "عارض الأعمال",
+      "en": "Work viewer"
+    },
+    "pfVisit": {
+      "ar": "زيارة الموقع",
+      "en": "Visit the site"
+    },
+    "cap1": {
+      "ar": "من موقع التصوير",
+      "en": "On location"
+    },
+    "cap2": {
+      "ar": "خلف الكاميرا",
+      "en": "Behind the camera"
+    },
+    "cap3": {
+      "ar": "تجهيز اللقطة",
+      "en": "Setting up the shot"
+    },
+    "quote": {
+      "ar": "«النتيجة يجب أن تبدو حتميّة: راسخة، مدروسة، وذات شخصيّة لا تُخطئها العين.»",
+      "en": "“The result should feel inevitable: rooted, considered, with a personality the eye can't miss.”"
+    },
+    "quoteCite": {
+      "ar": "دفتر ألِف",
+      "en": "The Aliph notebook"
+    },
+    "aboutH": {
+      "ar": "صوت واحد، حرفان، ولغتان.",
+      "en": "One sound, two letters, two languages."
+    },
+    "aboutP": {
+      "ar": "نحن فريق صغير من القدس يصنع الهويّات والمحتوى من حرفها الأوّل. نبدأ من النقطة التي تُبنى منها الأشياء، ونرسم منها نظامًا كاملًا: الاسم، والهويّة، والصوت، والطريقة التي تظهر بها العلامة في العالم.",
+      "en": "We are a small team from Jerusalem crafting identities and content from their first letter. We start at the point things are built from, and draw a complete system out of it: the name, the identity, the voice, and the way the brand shows up in the world."
+    },
+    "abLead": {
+      "ar": "ألِف وكالة إبداعية من القدس، من جبل الزيتون تحديدًا. بدأت بفكرة واحدة: أنّ العلامة ليست شعارًا يُرسم، بل نظام يُبنى من نقطة أصله. واسمنا نفسه هو أوّل الحروف: النقطة التي تبدأ منها كل كلمة، والمقياس الذي تُرسم عليه بقيّة الحروف.",
+      "en": "Aliph is a creative agency from Jerusalem, from the Mount of Olives, to be exact. It began on a single idea: that a brand is not a logo you draw, but a system you build from its point of origin. Our name is that point: the first letter, the place every word starts, and the measure the rest of the letters are drawn against."
+    },
+    "abP4": {
+      "ar": "من الحرف الأوّل إلى آخر تفصيل: نصمّم الهويّة وما يُطبع منها، ونصوّر ما تحتاجه لتظهر: صورًا وفيديو وريلز، ونبرمج المواقع والأنظمة التي تُشغّلها. ثلاث خدمات على الورق، لكنها في العمل خطّ واحد متّصل، وهذا هو الفرق.",
+      "en": "From the first letter to the last detail: we design the identity and everything printed from it, shoot what it needs in order to appear: stills, film and reels; and build the sites and systems that keep it running. Three services on paper, one continuous line in practice, and that is the whole difference."
+    },
+    "svcAboutBanner": {
+      "ar": "ماذا نقدّم؟",
+      "en": "What we offer"
+    },
+    "abWhat": {
+      "ar": "ما نفعله",
+      "en": "What we do"
+    },
+    "abWhy": {
+      "ar": "لماذا نحن",
+      "en": "Why us"
+    },
+    "abDoes": {
+      "ar": "يشمل",
+      "en": "Includes"
+    },
+    "abCap1": {
+      "ar": "من التصوير",
+      "en": "On the shoot"
+    },
+    "abCap2": {
+      "ar": "تجهيز الكاميرا",
+      "en": "Setting the camera"
+    },
+    "abCap3": {
+      "ar": "رفع اللقطة",
+      "en": "Rigging the shot"
+    },
+    "abCap4": {
+      "ar": "مراجعة اللقطة",
+      "en": "Reviewing the frame"
+    },
+    "abCap5": {
+      "ar": "في الموقع",
+      "en": "On location"
+    }
+  },
+  "CATS": [
+    {
+      "id": "all",
+      "ar": "الكل",
+      "en": "All"
+    },
+    {
+      "id": "design",
+      "ar": "تصميم جرافيكي",
+      "en": "Graphic Design"
+    },
+    {
+      "id": "photo",
+      "ar": "صناعة محتوى",
+      "en": "Media Production"
+    },
+    {
+      "id": "tech",
+      "ar": "حلول تقنية وبرمجية",
+      "en": "Tech & Software Solutions"
+    }
+  ],
+  "SUBCATS": {
+    "design": [
+      {
+        "id": "logos",
+        "ar": "شعارات",
+        "en": "Logos",
+        "seed": "aliph-d1",
+        "desc": {
+          "ar": "الشعار نقطة البداية. نرسمه، نسلّمه بقواعد استعماله، ونختبره حيث سيعيش فعلاً: على لافتة، وعلى فنجان، وفي صورة بحجم ظفر الإبهام.",
+          "en": "The mark is the starting point. We draw it, hand it over with the rules for using it, and test it where it will actually live: on a sign, on a cup, and in a picture the size of a thumbnail."
+        }
+      },
+      {
+        "id": "print",
+        "ar": "مطبوعات",
+        "en": "Printables",
+        "seed": "aliph-d2",
+        "desc": {
+          "ar": "نصنع المطبوع من أوله لآخره، تصميماً وطباعة.",
+          "en": "We make printed matter end to end: the design and the printing both."
+        }
+      },
+      {
+        "id": "posters",
+        "ar": "إعلانات رقمية",
+        "en": "Digital Ads",
+        "seed": "aliph-d3",
+        "desc": {
+          "ar": "بين إعلانٍ يُرى وآخر يُتجاوَز، ثانية واحدة فقط. نصمّم لتلك الثانية: فالإعلان الذي لا يوقفك، لم يُصمَّم أصلاً.",
+          "en": "Between an ad that gets seen and one that gets scrolled past there is exactly one second. We design for that second: an ad that doesn't stop you was never designed at all."
+        }
+      }
+    ],
+    "photo": [
+      {
+        "id": "reels",
+        "ar": "ريلز",
+        "en": "Reels",
+        "seed": "aliph-p1",
+        "desc": {
+          "ar": "نعرف أن انتباه المشاهد ثمين ولا يُمنح بسهولة. لهذا نبدأ كل ريلز بلحظة تستحق التوقّف، ثم نبنيه بإيقاعٍ لا يترك فراغاً يُغري بالتمرير، وتعليقات متحرّكة تصل حتى لمن يشاهد بلا صوت.",
+          "en": "We know a viewer's attention is expensive and is not given away. So every reel opens on a moment worth stopping for, then runs at a pace that leaves no gap tempting enough to scroll through, with motion captions that reach whoever is watching without sound."
+        },
+        "descShort": {
+          "ar": "انتباه المشاهد ثمين ولا يُمنح بسهولة. نبدأ كل ريلز بلحظة تستحق التوقّف، ونبنيه بإيقاعٍ لا يترك فراغاً للتمرير.",
+          "en": "A viewer's attention is expensive and is not given away. Every reel opens on a moment worth stopping for, then runs at a pace that leaves no gap to scroll through."
+        }
+      },
+      {
+        "id": "video",
+        "ar": "فيديو أفقي",
+        "en": "Video",
+        "seed": "aliph-p2",
+        "desc": {
+          "ar": "من الفيديو المؤسسي والتعريفي، إلى توثيق الفعاليات، إلى الإعلانات التجارية والمحتوى الوثائقي. نصوّر بعدسات سينمائية وإضاءة تُبنى لكل مشهد، ونمنتج ونصحّح الألوان بما يخدم الاستخدام النهائي: عرض تقديمي، إعلان، أو أرشيف مؤسسي.",
+          "en": "From corporate and profile film to event coverage, commercials and documentary work. We shoot on cinema glass with lighting built for each scene, then edit and grade for the end use: a presentation, an advert, or a corporate archive."
+        }
+      },
+      {
+        "id": "stills",
+        "ar": "صور ثابتة",
+        "en": "Stills",
+        "seed": "aliph-p3",
+        "desc": {
+          "ar": "من تصوير المنتجات، إلى التوثيق المؤسسي والفعاليات، إلى التصوير التجاري بمعايير الحملات الإعلانية. نضبط الإضاءة، والزاوية، بما يخدم الاستخدام النهائي للصورة: كتالوج، تقرير سنوي، أو حملة سوشيال ميديا. كل صورة تُصوَّر لغاية محدّدة، لا لتُضاف إلى الأرشيف فقط.",
+          "en": "From product photography to corporate and event documentation to commercial work shot to campaign standards. We set the light and the angle for what the picture is finally for: a catalogue, an annual report, or a social campaign. Every frame is shot for a specific purpose, not just to be added to the archive."
+        },
+        "descShort": {
+          "ar": "من تصوير المنتجات، إلى التوثيق المؤسسي، إلى التصوير التجاري بمعايير الحملات. نضبط الإضاءة والزاوية بما يخدم الاستخدام: كتالوج، تقرير، أو حملة. كل صورة لها غاية، لا مجرّد أرشيف.",
+          "en": "From product photography to corporate documentation to commercial work shot to campaign standards. We set the light and the angle for the end use: a catalogue, a report, or a campaign. Every frame has a purpose; it is not just archive."
+        }
+      }
+    ],
+    "tech": [
+      {
+        "id": "portfolio",
+        "ar": "بورتفوليو",
+        "en": "Portfolios",
+        "seed": "aliph-t1",
+        "desc": {
+          "ar": "موقع يعرض العمل كما يستحقّ أن يُعرض: سريع على شبكة الهاتف، عربيّ الاتّجاه من السطر الأوّل، ويُحدَّث دون أن تحتاج إلى مبرمج. ونبنيه ليُحدَّث في خمس دقائق: مشروع جديد يعني صورًا وسطرين، لا مكالمة مع مبرمج. البورتفوليو الذي لا يُحدَّث يصبح خلال سنة أسوأ من عدمه.",
+          "en": "A site that shows the work the way it deserves: fast on mobile data, right-to-left from the first line, and updatable without needing a developer. And we build it to be updated in five minutes: a new project means pictures and two lines, not a call with a developer. A portfolio nobody updates is, within a year, worse than none."
+        }
+      },
+      {
+        "id": "landing",
+        "ar": "صفحات هبوط",
+        "en": "Landing pages",
+        "seed": "aliph-t2",
+        "desc": {
+          "ar": "صفحة واحدة لحملة واحدة، مبنيّة حول فعلٍ واحد: التسجيل، أو الشراء، أو الحجز. ومعها الأرقام التي تقول إن كانت تعمل. ونقيس ما يهمّ فقط: كم وصل، وكم بدأ، وكم أكمل، وأين توقّف الباقون. ثلاثة أرقام تُقرأ في دقيقة خير من لوحة فيها أربعون رقمًا لا يفتحها أحد.",
+          "en": "One page for one campaign, built around a single action: register, buy, or book. And the numbers that say whether it works. And we measure only what matters: how many arrived, how many started, how many finished, and where the rest stopped. Three numbers read in a minute beat a dashboard of forty nobody opens."
+        },
+        "descShort": {
+          "ar": "صفحة واحدة لحملة واحدة، حول فعلٍ واحد: التسجيل، أو الشراء، أو الحجز. نقيس ما يهمّ فقط: كم وصل، وكم بدأ، وكم أكمل. ثلاثة أرقام تُقرأ في دقيقة، خيرٌ من لوحة لا يفتحها أحد.",
+          "en": "One page for one campaign, around a single action: register, buy, or book. We measure only what matters: how many arrived, how many started, how many finished. Three numbers read in a minute beat a dashboard nobody opens."
+        }
+      },
+      {
+        "id": "apps",
+        "ar": "تطبيقات",
+        "en": "Apps",
+        "seed": "aliph-t3",
+        "desc": {
+          "ar": "أنظمة تسجيل وحجز، ولوحات إدارة، وتطبيقات هاتف، تُبنى لمن يشغّلها يوميًّا، لا لمن يراها في العرض التقديمي. ونبدأ من أصعب يوم لا من أسهله: ماذا يحدث حين تنقطع الشبكة، وحين يصل مئة شخص معًا، وحين يضغط أحدهم زرًّا مرّتين. النظام الذي يُبنى لليوم الهادئ ينكسر في اليوم الذي بُني لأجله.",
+          "en": "Registration and booking systems, admin panels and mobile apps, built for whoever runs them daily, not for whoever sees them in the pitch deck. And we start from the hardest day, not the easiest: what happens when the network drops, when a hundred people arrive at once, and when somebody taps a button twice. A system built for the quiet day breaks on the day it was built for."
+        }
+      }
+    ]
+  },
+  "MEDIA": [
+    {
+      "f": "design-haqqak-1.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-haqqak-2.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-haqqak-3.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-grillit-1.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-grillit-2.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-grillit-3.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-shawarma-habash-1.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-shawarma-habash-2.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-shawarma-mix-1.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-shawarma-mix-2.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-shawarma-veal-1.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "design-shawarma-veal-2.webp",
+      "c": "design",
+      "r": 0.8,
+      "d": null
+    },
+    {
+      "f": "pics-Agreements-09-dsc05463.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-28"
+    },
+    {
+      "f": "pics-Agreements-10-dsc05514.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-28"
+    },
+    {
+      "f": "pics-Agreements-11-dsc05764.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-28"
+    },
+    {
+      "f": "pics-Agreements-12-dsc05824.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-28"
+    },
+    {
+      "f": "pics-Interactive-36-dsc02566.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-18"
+    },
+    {
+      "f": "pics-Interactive-37-dsc03223.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-18"
+    },
+    {
+      "f": "pics-Interactive-38-dsc03254.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-18"
+    },
+    {
+      "f": "pics-Interactive-39-dsc03986.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-18"
+    },
+    {
+      "f": "pics-Interactive-40-dsc04052.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-04"
+    },
+    {
+      "f": "pics-Interactive-41-dsc04135.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-04"
+    },
+    {
+      "f": "pics-Interactive-42-dsc04152.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-04"
+    },
+    {
+      "f": "pics-Queen-retreat-52-copy-of-0c2a0144.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-07-21"
+    },
+    {
+      "f": "pics-Queen-retreat-53-copy-of-0c2a0153.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-07-21"
+    },
+    {
+      "f": "pics-Queen-retreat-54-copy-of-0c2a0158.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-07-21"
+    },
+    {
+      "f": "pics-Queen-retreat-55-copy-of-0c2a0240.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-21"
+    },
+    {
+      "f": "pics-Queen-retreat-56-copy-of-0c2a0257.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-21"
+    },
+    {
+      "f": "pics-Queen-retreat-57-copy-of-0c2a9757.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-21"
+    },
+    {
+      "f": "pics-Queen-retreat-58-copy-of-0c2a9810.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-07-21"
+    },
+    {
+      "f": "pics-Queen-retreat-59-copy-of-0c2a9812.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-21"
+    },
+    {
+      "f": "pics-Queen-retreat-60-copy-of-copy-of-0c2a0144.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-07-21"
+    },
+    {
+      "f": "pics-food-14-dsc00666.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-03-22"
+    },
+    {
+      "f": "pics-food-15-dsc00669.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-03-22"
+    },
+    {
+      "f": "pics-food-16-dsc00710.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-03-22"
+    },
+    {
+      "f": "pics-food-17-dsc00763.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-03-22"
+    },
+    {
+      "f": "pics-food-18-dsc00778.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-03-22"
+    },
+    {
+      "f": "pics-food-19-dsc00812-2.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-03-22"
+    },
+    {
+      "f": "pics-food-20-dsc00890.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-03-22"
+    },
+    {
+      "f": "pics-food-21-dsc03454.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-05-29"
+    },
+    {
+      "f": "pics-food-22-dsc03532.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-05-29"
+    },
+    {
+      "f": "pics-food-23-dsc03582.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-05-29"
+    },
+    {
+      "f": "pics-food-24-dsc03667.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-05-29"
+    },
+    {
+      "f": "pics-group-pics-25-img.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-03-17"
+    },
+    {
+      "f": "pics-group-pics-26-dsc04631.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-05-17"
+    },
+    {
+      "f": "pics-group-pics-27-dsc07110.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-05"
+    },
+    {
+      "f": "pics-idk-category-28-dsc00020.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-19"
+    },
+    {
+      "f": "pics-idk-category-29-dsc00032.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-19"
+    },
+    {
+      "f": "pics-idk-category-30-dsc00036.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-19"
+    },
+    {
+      "f": "pics-idk-category-31-dsc00405.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-19"
+    },
+    {
+      "f": "pics-idk-category-32-dsc00644.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-19"
+    },
+    {
+      "f": "pics-idk-category-33-dsc00914.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-19"
+    },
+    {
+      "f": "pics-idk-category-34-dsc00968.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-19"
+    },
+    {
+      "f": "pics-idk-category-35-dsc01002.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-19"
+    },
+    {
+      "f": "pics-official-visits-43-dsc08794.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-09"
+    },
+    {
+      "f": "pics-official-visits-44-dsc08817.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-09"
+    },
+    {
+      "f": "pics-official-visits-45-dsc09024.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-09"
+    },
+    {
+      "f": "pics-portraits-46-2j6a5679.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-07-15"
+    },
+    {
+      "f": "pics-portraits-47-2j6a5684.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-07-15"
+    },
+    {
+      "f": "pics-portraits-48-2j6a5694.webp",
+      "c": "photo",
+      "r": 0.6669,
+      "d": "2026-07-15"
+    },
+    {
+      "f": "pics-public-services-49-img.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-03-17"
+    },
+    {
+      "f": "pics-public-services-50-img.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-03-17"
+    },
+    {
+      "f": "pics-public-services-51-img.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-03-17"
+    },
+    {
+      "f": "pics-students-61-dsc04057.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-07-18"
+    },
+    {
+      "f": "pics-students-62-dsc07902.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-05"
+    },
+    {
+      "f": "pics-students-63-dsc07931.webp",
+      "c": "photo",
+      "r": 1.4995,
+      "d": "2026-06-05"
+    },
+    {
+      "f": "horizontal-film-bader.mp4",
+      "c": "photo",
+      "r": 1.7778,
+      "d": "2026-05-25",
+      "v": 1,
+      "p": "horizontal-film-bader.webp"
+    },
+    {
+      "f": "reels-copy-of-bader-4.mp4",
+      "c": "photo",
+      "r": 0.5625,
+      "d": "2026-07-03",
+      "v": 1,
+      "p": "reels-copy-of-bader-4.webp"
+    },
+    {
+      "f": "reels-irth-draft1.mp4",
+      "c": "photo",
+      "r": 0.5625,
+      "d": "2026-05-17",
+      "v": 1,
+      "p": "reels-irth-draft1.webp"
+    },
+    {
+      "f": "reels-child-section-final.mp4",
+      "c": "photo",
+      "r": 0.5625,
+      "d": "2026-03-27",
+      "v": 1,
+      "p": "reels-child-section-final.webp"
+    },
+    {
+      "f": "reels-draft2-show.mp4",
+      "c": "photo",
+      "r": 0.5625,
+      "d": "2026-05-25",
+      "v": 1,
+      "p": "reels-draft2-show.webp"
+    },
+    {
+      "f": "reels-finallllllllllll.mp4",
+      "c": "photo",
+      "r": 0.5625,
+      "d": "2026-03-18",
+      "v": 1,
+      "p": "reels-finallllllllllll.webp"
+    },
+    {
+      "f": "reels-dardashat.mp4",
+      "c": "photo",
+      "r": 0.5625,
+      "d": "2025-02-20",
+      "v": 1,
+      "p": "reels-dardashat.webp"
+    },
+    {
+      "f": "reels-alif-tuktuk.mp4",
+      "c": "photo",
+      "r": 0.5625,
+      "d": "2026-08-01",
+      "v": 1,
+      "p": "reels-alif-tuktuk.webp"
+    },
+    {
+      "f": "reels-connect-edited.mp4",
+      "c": "photo",
+      "r": 0.5625,
+      "d": "2026-08-02",
+      "v": 1,
+      "p": "reels-connect-edited.webp"
+    },
+    {
+      "f": "reels-einar-edited.mp4",
+      "c": "photo",
+      "r": 0.5625,
+      "d": "2026-05-19",
+      "v": 1,
+      "p": "reels-einar-edited.webp"
+    },
+    {
+      "f": "horizontal-maqasid.mp4",
+      "c": "photo",
+      "r": 1.7778,
+      "d": "2026-08-04",
+      "v": 1,
+      "p": "horizontal-maqasid.webp"
+    },
+    {
+      "f": "horizontal-final-hasoub.mp4",
+      "c": "photo",
+      "r": 1.7778,
+      "d": "2026-03-04",
+      "v": 1,
+      "p": "horizontal-final-hasoub.webp"
+    },
+    {
+      "f": "horizontal-tone-colored.mp4",
+      "c": "photo",
+      "r": 1.7778,
+      "d": "2026-02-08",
+      "v": 1,
+      "p": "horizontal-tone-colored.webp"
+    }
+  ],
+  "PROJECTS": [
+    {
+      "ar": "رتريت عودة الملكة",
+      "en": "Queen's Retreat",
+      "date": "2026-07",
+      "cat": "tech",
+      "desc": {
+        "ar": "موقع الرتريت ونظام التسجيل الذي يقف خلفه: استمارة، وتوزيع على المحطّات، وسقف لكل جلسة.",
+        "en": "The retreat's site and the registration system behind it: a form, station allocation, and a ceiling on every session."
+      },
+      "profile": {
+        "kind": "site",
+        "url": "https://queensretreat.ceo-6c6.workers.dev",
+        "tagline": {
+          "ar": "موقع · نظام تسجيل · جدولة محطّات",
+          "en": "Website · Registration · Station scheduling"
+        },
+        "body": {
+          "ar": "رتريت قيادي ليوم واحد بستّ محطّات، كل واحدة باسم مدرّبتها، وكل مشتركة تدور على ثلاث منها في أوقات محدّدة. الصفحة تحكي الرتريت، والاستمارة تفعل الباقي: تتحقّق من المدخلات، وتحسب ما تبقّى من المقاعد في كل محطّة وكل جولة، ثم تكتب الصفّ في جدول المنظّمات مباشرة. والمقاعد المتبقّية معروضة على الصفحة نفسها، لأنّ رتريتًا محدود العدد يجب أن يقول ذلك قبل التسجيل لا بعده.",
+          "en": "A one-day leadership retreat with six stations, each named for the woman running it, and every participant rotating through three of them at set times. The page tells the retreat's story; the form does the rest: it validates, works out how many seats are left in each station in each round, then writes the row straight into the organisers' sheet. The remaining seats are shown on the page itself, because a retreat with a hard limit should say so before you register, not after."
+        },
+        "shots": [
+          "queens-retreat-1",
+          "queens-retreat-2",
+          "queens-retreat-3",
+          "queens-retreat-4",
+          "queens-retreat-5"
+        ]
+      }
+    },
+    {
+      "ar": "دعوة افتتاح البيدر",
+      "en": "Al Baydar Opening",
+      "date": "2026-08",
+      "cat": "tech",
+      "desc": {
+        "ar": "بطاقة دعوة تعمل: عدٌّ تنازليّ للموعد، ورشتان تُختار إحداهما، واستمارة تحجز المقعد باسمٍ واحد.",
+        "en": "An invitation that works: a countdown to the evening, two workshops to pick between, and a form that holds a seat on one name."
+      },
+      "profile": {
+        "kind": "site",
+        "url": "https://albaydaropening.aliphcreative.com",
+        "tagline": {
+          "ar": "دعوة · اختيار ورشة · تأكيد حضور",
+          "en": "Invitation · Workshop choice · RSVP"
+        },
+        "body": {
+          "ar": "مساء واحد، وصفحة واحدة تحمله. المكان يُعرَّف قبل أن يُدعى إليه أحد، ثمّ العدّ التنازليّ يجعل الموعد شيئًا يقترب لا سطرًا مكتوبًا. الورشتان، تعبئة العطر مع Méjana وزراعة الصبّار في الفخّار، معروضتان جنبًا إلى جنب لأنّ الاختيار بينهما هو القرار الوحيد المطلوب من الضيف، والاستمارة تحته لا تسأل إلّا عن الاسم؛ الهاتف وعدد المرافقين اختياريّان. وما إن يُسجَّل الاسم حتى تعرض الصفحة الموعد جاهزًا للإضافة إلى التقويم والمكان جاهزًا على الخريطة، لأنّ الدعوة التي لا تُوصِل إلى الباب لم تكتمل.",
+          "en": "One evening, and one page carrying it. The place introduces itself before anyone is invited into it, and the countdown turns the date into something approaching rather than a line of text. The two workshops, perfume-filling with Méjana and planting a cactus in pottery, sit side by side because choosing between them is the only decision the guest is asked to make, and the form beneath asks for nothing but a name; phone and companions are optional. The moment the name is in, the page hands back the date ready for a calendar and the address ready for a map, because an invitation that does not get you to the door is unfinished."
+        },
+        "shots": [
+          "al-baydar-1",
+          "al-baydar-2",
+          "al-baydar-3",
+          "al-baydar-4",
+          "al-baydar-5"
+        ]
+      }
+    },
+    {
+      "ar": "سيكو سيكو: ليلة سينما",
+      "en": "Seeko Seeko: Movie Night",
+      "date": "2026-05",
+      "cat": "tech",
+      "desc": {
+        "ar": "صفحة واحدة لليلة سينمائيّة واحدة، مبنيّة حول فعلٍ واحد: احجز مقعدك.",
+        "en": "One page for one film night, built around a single action: book your seat."
+      },
+      "profile": {
+        "kind": "site",
+        "url": "https://seekoseeko.ceo-6c6.workers.dev",
+        "tagline": {
+          "ar": "صفحة هبوط · حجز مقاعد · ملف واحد",
+          "en": "Landing page · Seat booking · One file"
+        },
+        "body": {
+          "ar": "ليلة واحدة، ومكان واحد، وسعر واحد، فالصفحة كلّها فعل واحد. التاريخ والمكان والوقت والتذكرة في صفٍّ واحد أعلى الطيّة، والاستمارة تحتها مباشرةً بأربعة حقول لا أكثر. صُمِّمت للهاتف أوّلًا، لأنّ الرابط يصل عبر واتساب ويُفتح في الشارع.",
+          "en": "One night, one venue, one price, so the whole page is one action. Date, venue, time and ticket sit in a single row above the fold, with the form directly beneath it and four fields in it, no more. Built phone-first, because the link arrives over WhatsApp and gets opened in the street."
+        },
+        "shots": [
+          "seeko-seeko-1",
+          "seeko-seeko-2",
+          "seeko-seeko-3",
+          "seeko-seeko-4"
+        ]
+      }
+    }
+  ],
+  "TESTIMONIALS": [
+    {
+      "name": {
+        "ar": "ريما حسين",
+        "en": "Rima Hussein"
+      },
+      "business": {
+        "ar": "مركز شمس – شؤون صور باهر",
+        "en": "Shams Centre – Sur Baher Social Affairs"
+      },
+      "quote": {
+        "ar": "حتى عدسة الكاميرا عندكم بتلتقط الأشياء بصورة تترجم الحدث نفسه.",
+        "en": "Even your camera lens catches things in a way that translates the event itself."
+      }
+    },
+    {
+      "name": {
+        "ar": "صلاح غوشة",
+        "en": "Salah Ghosheh"
+      },
+      "business": {
+        "ar": "المركز الريادي للخدمات – أبو طور",
+        "en": "The Pioneer Services Centre – Abu Tor"
+      },
+      "quote": {
+        "ar": "كنتوا قد المسؤولية من خط البداية لخط النهاية.",
+        "en": "You carried the responsibility from the starting line to the finish line."
+      }
+    },
+    {
+      "name": null,
+      "business": {
+        "ar": "شؤون جبل المكبر",
+        "en": "Jabal al-Mukabbir Social Affairs"
+      },
+      "quote": {
+        "ar": "الفيديو الإعلاني طلع رائع وفوق توقعاتنا، وكان واضح إنه في اهتمام بكل التفاصيل.",
+        "en": "The ad film came out wonderful, beyond what we expected, and the care for every detail showed."
+      }
+    },
+    {
+      "name": {
+        "ar": "حنين أبو اسبيتان",
+        "en": "Haneen Abu Sbitan"
+      },
+      "business": {
+        "ar": "مراكز تحصيل الحقوق – مكاتب الشؤون الاجتماعية",
+        "en": "Rights Collection Centres – Social Affairs Offices"
+      },
+      "quote": {
+        "ar": "تطبيق الرؤية والأهداف المطلوبة على أرض الواقع.",
+        "en": "The vision and the goals we asked for, made real on the ground."
+      }
+    }
+  ],
+  "AR_DIGITS": [
+    "٠",
+    "١",
+    "٢",
+    "٣",
+    "٤",
+    "٥",
+    "٦",
+    "٧",
+    "٨",
+    "٩"
+  ],
+  "RINGS": {
+    "design": [
+      {
+        "f": "design-grillit-1.webp",
+        "sub": "posters"
+      },
+      {
+        "f": "design-haqqak-1.webp",
+        "sub": "posters"
+      },
+      {
+        "f": "design-grillit-2.webp",
+        "sub": "posters"
+      },
+      {
+        "f": "design-shawarma-mix-1.webp",
+        "sub": "posters"
+      },
+      {
+        "f": "design-haqqak-2.webp",
+        "sub": "posters"
+      },
+      {
+        "f": "design-shawarma-habash-1.webp",
+        "sub": "posters"
+      },
+      {
+        "f": "design-grillit-3.webp",
+        "sub": "posters"
+      },
+      {
+        "f": "design-haqqak-3.webp",
+        "sub": "posters"
+      },
+      {
+        "f": "design-shawarma-veal-1.webp",
+        "sub": "posters"
+      }
+    ],
+    "photo": [
+      {
+        "f": "reels-alif-tuktuk.webp",
+        "sub": "reels",
+        "open": "reels-alif-tuktuk.mp4"
+      },
+      {
+        "f": "pics-food-17-dsc00763.webp",
+        "sub": "stills"
+      },
+      {
+        "f": "reels-einar-edited.webp",
+        "sub": "reels",
+        "open": "reels-einar-edited.mp4"
+      },
+      {
+        "f": "pics-Interactive-37-dsc03223.webp",
+        "sub": "stills"
+      },
+      {
+        "f": "reels-connect-edited.webp",
+        "sub": "reels",
+        "open": "reels-connect-edited.mp4"
+      },
+      {
+        "f": "pics-Queen-retreat-52-copy-of-0c2a0144.webp",
+        "sub": "stills"
+      },
+      {
+        "f": "reels-child-section-final.webp",
+        "sub": "reels",
+        "open": "reels-child-section-final.mp4"
+      },
+      {
+        "f": "pics-official-visits-43-dsc08794.webp",
+        "sub": "stills"
+      }
+    ],
+    "tech": [
+      {
+        "shot": "queens-retreat-cover",
+        "full": "queens-retreat-1",
+        "project": 0,
+        "sub": "landing",
+        "r": 1
+      },
+      {
+        "shot": "al-baydar-cover",
+        "full": "al-baydar-1",
+        "project": 1,
+        "sub": "landing",
+        "r": 1
+      },
+      {
+        "shot": "seeko-seeko-cover",
+        "full": "seeko-seeko-1",
+        "project": 2,
+        "sub": "landing",
+        "r": 1
+      }
+    ]
+  },
+  "FILM_FRAMES": [
+    {
+      "src": "assets/media/pics-idk-category-28-dsc00020.webp",
+      "svc": "design"
+    },
+    {
+      "src": "assets/media/pics-Interactive-37-dsc03223.webp",
+      "svc": "photo"
+    },
+    {
+      "src": "assets/media/pics-food-21-dsc03454.webp",
+      "svc": "photo"
+    },
+    {
+      "src": "assets/media/pics-public-services-49-img.webp",
+      "svc": "tech"
+    }
+  ],
+  "slots": [
+    {
+      "id": "home.media.1",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Queen-retreat-55-copy-of-0c2a0240.webp"
+    },
+    {
+      "id": "home.media.2",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-alif-tuktuk.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-alif-tuktuk.mp4",
+      "poster": "assets/media/reels-alif-tuktuk.webp"
+    },
+    {
+      "id": "home.media.3",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-connect-edited.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-connect-edited.mp4",
+      "poster": "assets/media/reels-connect-edited.webp"
+    },
+    {
+      "id": "home.media.4",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-child-section-final.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-child-section-final.mp4",
+      "poster": "assets/media/reels-child-section-final.webp"
+    },
+    {
+      "id": "home.media.5",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-einar-edited.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-einar-edited.mp4",
+      "poster": "assets/media/reels-einar-edited.webp"
+    },
+    {
+      "id": "home.media.6",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-dardashat.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-dardashat.mp4",
+      "poster": "assets/media/reels-dardashat.webp"
+    },
+    {
+      "id": "home.media.7",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-copy-of-bader-4.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-copy-of-bader-4.mp4",
+      "poster": "assets/media/reels-copy-of-bader-4.webp"
+    },
+    {
+      "id": "home.media.8",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-finallllllllllll.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-finallllllllllll.mp4",
+      "poster": "assets/media/reels-finallllllllllll.webp"
+    },
+    {
+      "id": "home.media.9",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-draft2-show.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-draft2-show.mp4",
+      "poster": "assets/media/reels-draft2-show.webp"
+    },
+    {
+      "id": "home.media.10",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Queen-retreat-53-copy-of-0c2a0153.webp"
+    },
+    {
+      "id": "home.media.11",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Interactive-37-dsc03223.webp"
+    },
+    {
+      "id": "home.media.12",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-group-pics-26-dsc04631.webp"
+    },
+    {
+      "id": "home.media.13",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-official-visits-43-dsc08794.webp"
+    },
+    {
+      "id": "home.media.14",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Interactive-40-dsc04052.webp"
+    },
+    {
+      "id": "home.media.15",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-food-15-dsc00669.webp"
+    },
+    {
+      "id": "home.media.16",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-students-62-dsc07902.webp"
+    },
+    {
+      "id": "home.media.17",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-public-services-49-img.webp"
+    },
+    {
+      "id": "home.media.18",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Queen-retreat-54-copy-of-0c2a0158.webp"
+    },
+    {
+      "id": "about.media.1",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-01.webp"
+    },
+    {
+      "id": "about.media.2",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-26.webp"
+    },
+    {
+      "id": "about.media.3",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-27.webp"
+    },
+    {
+      "id": "about.media.4",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-montage.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-montage.mp4",
+      "poster": "assets/media/bts-montage.webp"
+    },
+    {
+      "id": "about.media.5",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-28.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-28.mp4",
+      "poster": "assets/media/bts-28.webp"
+    },
+    {
+      "id": "about.media.6",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-29.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-29.mp4?v=2",
+      "poster": "assets/media/bts-29.webp"
+    },
+    {
+      "id": "about.media.7",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-30.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-30.mp4",
+      "poster": "assets/media/bts-30.webp"
+    },
+    {
+      "id": "about.media.8",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-31.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-31.mp4",
+      "poster": "assets/media/bts-31.webp"
+    },
+    {
+      "id": "home.film.1",
+      "page": "home",
+      "kind": "film",
+      "src": "assets/media/pics-idk-category-28-dsc00020.webp",
+      "svc": "design"
+    },
+    {
+      "id": "home.film.2",
+      "page": "home",
+      "kind": "film",
+      "src": "assets/media/pics-Interactive-37-dsc03223.webp",
+      "svc": "photo"
+    },
+    {
+      "id": "home.film.3",
+      "page": "home",
+      "kind": "film",
+      "src": "assets/media/pics-food-21-dsc03454.webp",
+      "svc": "photo"
+    },
+    {
+      "id": "home.film.4",
+      "page": "home",
+      "kind": "film",
+      "src": "assets/media/pics-public-services-49-img.webp",
+      "svc": "tech"
+    }
+  ]
+}

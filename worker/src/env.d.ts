@@ -8,6 +8,7 @@ declare global {
     interface Env extends WorkerEnv {
       TEST_MIGRATIONS: D1Migration[];
       TEST_TABLES: Record<string, any>;
+      TEST_GENERATED: { defaults: Record<string, any>; registry: Record<string, any> };
     }
   }
 }

@@ -1,0 +1,1279 @@
+{
+  "text": [
+    {
+      "key": "navHome",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "nav-big",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 15
+    },
+    {
+      "key": "navWork",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "nav-big",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 12
+    },
+    {
+      "key": "navAbout",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "nav-big",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 10
+    },
+    {
+      "key": "hero1",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "hero",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 23
+    },
+    {
+      "key": "hero2",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "hero",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 21
+    },
+    {
+      "key": "heroPara",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "hero",
+      "kind": "richline",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 288
+    },
+    {
+      "key": "dropLetter",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "hero",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 2
+    },
+    {
+      "key": "ctaStart",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "hero",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 18
+    },
+    {
+      "key": "ctaContact",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "nav-big",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 20
+    },
+    {
+      "key": "btnWork",
+      "page": "home",
+      "pages": [
+        "home",
+        "about"
+      ],
+      "section": "svc-static-item",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 16
+    },
+    {
+      "key": "svcInvite",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "svc-static-item",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 92
+    },
+    {
+      "key": "btnAbout",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 28
+    },
+    {
+      "key": "svcBanner",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 18
+    },
+    {
+      "key": "svcPrev",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "services",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 26
+    },
+    {
+      "key": "svcNext",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "services",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 23
+    },
+    {
+      "key": "svcList",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 13
+    },
+    {
+      "key": "reelPrev",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 21
+    },
+    {
+      "key": "reelNext",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 21
+    },
+    {
+      "key": "storyBanner",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "hero",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 18
+    },
+    {
+      "key": "w1Title",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 69
+    },
+    {
+      "key": "w1ParaA",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 199
+    },
+    {
+      "key": "w1ParaB",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 418
+    },
+    {
+      "key": "w1ParaC",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 189
+    },
+    {
+      "key": "w1ParaPhone",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 517
+    },
+    {
+      "key": "w2Title",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 84
+    },
+    {
+      "key": "w3Title",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 53
+    },
+    {
+      "key": "whyOutro",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 146
+    },
+    {
+      "key": "cBand",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 42
+    },
+    {
+      "key": "testiLabel",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "testiRotor",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 34
+    },
+    {
+      "key": "testiLabelNext",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "testiRotor",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 45
+    },
+    {
+      "key": "testiPrev",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "testiRotor",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 32
+    },
+    {
+      "key": "testiNext",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "testiRotor",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 26
+    },
+    {
+      "key": "rateAsk",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "testiRotor",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 36
+    },
+    {
+      "key": "rateGo",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 18
+    },
+    {
+      "key": "rateAskPhone",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "richline",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 36
+    },
+    {
+      "key": "rateToggle",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 20
+    },
+    {
+      "key": "testiBand",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 31
+    },
+    {
+      "key": "testiRotor",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "testiRotor",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 31
+    },
+    {
+      "key": "cLabelMail",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 39
+    },
+    {
+      "key": "cLabelPhone",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 8
+    },
+    {
+      "key": "cLabelWhats",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 13
+    },
+    {
+      "key": "cLabelPlace",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 16
+    },
+    {
+      "key": "cPlace",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 42
+    },
+    {
+      "key": "legal",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact-socials",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 53
+    },
+    {
+      "key": "libTitle",
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "masthead",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 12
+    },
+    {
+      "key": "libStats",
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "masthead",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 21
+    },
+    {
+      "key": "mPlay",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 18
+    },
+    {
+      "key": "mOpen",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 18
+    },
+    {
+      "key": "mOf",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 13
+    },
+    {
+      "key": "libIndex",
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "masthead",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 8
+    },
+    {
+      "key": "libGallery",
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "masthead",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 12
+    },
+    {
+      "key": "aboutBanner",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "main",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 18
+    },
+    {
+      "key": "pfOpen",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 20
+    },
+    {
+      "key": "pfShots",
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "sheet-head",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 18
+    },
+    {
+      "key": "pfAbout",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 29
+    },
+    {
+      "key": "pfClose",
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "sheet-head",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 8
+    },
+    {
+      "key": "navMenu",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "page",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 12
+    },
+    {
+      "key": "navMain",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "nav-big",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 24
+    },
+    {
+      "key": "logoHome",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "masthead",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 23
+    },
+    {
+      "key": "libView",
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "masthead",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 18
+    },
+    {
+      "key": "cWrite",
+      "page": "home",
+      "pages": [
+        "home",
+        "about",
+        "library"
+      ],
+      "section": "contact",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 18
+    },
+    {
+      "key": "reelTrack",
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "why-block",
+      "kind": "text",
+      "uses": [
+        "label"
+      ],
+      "maxLength": 48
+    },
+    {
+      "key": "lbTitle",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 20
+    },
+    {
+      "key": "pfVisit",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 23
+    },
+    {
+      "key": "cap1",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "about-clips",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 24
+    },
+    {
+      "key": "cap2",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "about-clips",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 28
+    },
+    {
+      "key": "cap3",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "about-clips",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 31
+    },
+    {
+      "key": "quote",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "about-clips",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 152
+    },
+    {
+      "key": "quoteCite",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "about-clips",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 29
+    },
+    {
+      "key": "aboutH",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "about-clips",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 61
+    },
+    {
+      "key": "aboutP",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "about-clips",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 407
+    },
+    {
+      "key": "abLead",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "ab-read",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 519
+    },
+    {
+      "key": "abP4",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "ab-read",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 490
+    },
+    {
+      "key": "svcAboutBanner",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 21
+    },
+    {
+      "key": "abWhat",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 16
+    },
+    {
+      "key": "abWhy",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 15
+    },
+    {
+      "key": "abDoes",
+      "page": "js",
+      "pages": [],
+      "section": "script",
+      "kind": "text",
+      "uses": [],
+      "maxLength": 13
+    },
+    {
+      "key": "abCap1",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "ab-read",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 20
+    },
+    {
+      "key": "abCap2",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "ab-read",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 29
+    },
+    {
+      "key": "abCap3",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "ab-read",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 26
+    },
+    {
+      "key": "abCap4",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "ab-read",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 31
+    },
+    {
+      "key": "abCap5",
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "ab-read",
+      "kind": "text",
+      "uses": [
+        "text"
+      ],
+      "maxLength": 18
+    }
+  ],
+  "slots": [
+    {
+      "id": "home.media.1",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Queen-retreat-55-copy-of-0c2a0240.webp"
+    },
+    {
+      "id": "home.media.2",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-alif-tuktuk.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-alif-tuktuk.mp4",
+      "poster": "assets/media/reels-alif-tuktuk.webp"
+    },
+    {
+      "id": "home.media.3",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-connect-edited.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-connect-edited.mp4",
+      "poster": "assets/media/reels-connect-edited.webp"
+    },
+    {
+      "id": "home.media.4",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-child-section-final.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-child-section-final.mp4",
+      "poster": "assets/media/reels-child-section-final.webp"
+    },
+    {
+      "id": "home.media.5",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-einar-edited.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-einar-edited.mp4",
+      "poster": "assets/media/reels-einar-edited.webp"
+    },
+    {
+      "id": "home.media.6",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-dardashat.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-dardashat.mp4",
+      "poster": "assets/media/reels-dardashat.webp"
+    },
+    {
+      "id": "home.media.7",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-copy-of-bader-4.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-copy-of-bader-4.mp4",
+      "poster": "assets/media/reels-copy-of-bader-4.webp"
+    },
+    {
+      "id": "home.media.8",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-finallllllllllll.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-finallllllllllll.mp4",
+      "poster": "assets/media/reels-finallllllllllll.webp"
+    },
+    {
+      "id": "home.media.9",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/reels-draft2-show.webp",
+      "preview": "https://media.aliphcreative.com/video/reels-draft2-show.mp4",
+      "poster": "assets/media/reels-draft2-show.webp"
+    },
+    {
+      "id": "home.media.10",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Queen-retreat-53-copy-of-0c2a0153.webp"
+    },
+    {
+      "id": "home.media.11",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Interactive-37-dsc03223.webp"
+    },
+    {
+      "id": "home.media.12",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-group-pics-26-dsc04631.webp"
+    },
+    {
+      "id": "home.media.13",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-official-visits-43-dsc08794.webp"
+    },
+    {
+      "id": "home.media.14",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Interactive-40-dsc04052.webp"
+    },
+    {
+      "id": "home.media.15",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-food-15-dsc00669.webp"
+    },
+    {
+      "id": "home.media.16",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-students-62-dsc07902.webp"
+    },
+    {
+      "id": "home.media.17",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-public-services-49-img.webp"
+    },
+    {
+      "id": "home.media.18",
+      "page": "home",
+      "kind": "media",
+      "src": "assets/media/pics-Queen-retreat-54-copy-of-0c2a0158.webp"
+    },
+    {
+      "id": "about.media.1",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-01.webp"
+    },
+    {
+      "id": "about.media.2",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-26.webp"
+    },
+    {
+      "id": "about.media.3",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-27.webp"
+    },
+    {
+      "id": "about.media.4",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-montage.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-montage.mp4",
+      "poster": "assets/media/bts-montage.webp"
+    },
+    {
+      "id": "about.media.5",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-28.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-28.mp4",
+      "poster": "assets/media/bts-28.webp"
+    },
+    {
+      "id": "about.media.6",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-29.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-29.mp4?v=2",
+      "poster": "assets/media/bts-29.webp"
+    },
+    {
+      "id": "about.media.7",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-30.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-30.mp4",
+      "poster": "assets/media/bts-30.webp"
+    },
+    {
+      "id": "about.media.8",
+      "page": "about",
+      "kind": "media",
+      "src": "assets/media/bts-31.webp",
+      "preview": "https://media.aliphcreative.com/video/bts-31.mp4",
+      "poster": "assets/media/bts-31.webp"
+    },
+    {
+      "id": "home.film.1",
+      "page": "home",
+      "kind": "film",
+      "src": "assets/media/pics-idk-category-28-dsc00020.webp",
+      "svc": "design"
+    },
+    {
+      "id": "home.film.2",
+      "page": "home",
+      "kind": "film",
+      "src": "assets/media/pics-Interactive-37-dsc03223.webp",
+      "svc": "photo"
+    },
+    {
+      "id": "home.film.3",
+      "page": "home",
+      "kind": "film",
+      "src": "assets/media/pics-food-21-dsc03454.webp",
+      "svc": "photo"
+    },
+    {
+      "id": "home.film.4",
+      "page": "home",
+      "kind": "film",
+      "src": "assets/media/pics-public-services-49-img.webp",
+      "svc": "tech"
+    }
+  ]
+}

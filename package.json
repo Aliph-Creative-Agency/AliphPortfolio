@@ -8,6 +8,7 @@
     "dev": "wrangler dev --local --port 8831 --inspector-port 9231",
     "test": "vitest run -c worker/vitest.config.ts",
     "check:site": "node --check prototype/main.js && node resources/build_static.mjs --check",
+    "gen:defaults": "node worker/scripts/gen-defaults.mjs",
     "typecheck": "tsc -p worker"
   },
   "devDependencies": {
