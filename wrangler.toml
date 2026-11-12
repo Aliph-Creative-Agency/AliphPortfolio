@@ -7,7 +7,8 @@
 #    └── worker name        └── account subdomain
 # Check it in the dashboard before the first deploy from here.
 #
-# There is no `main` — this is an assets-only Worker, no script.
+# `main` is the Worker in worker/src (admin build): it sits in front of the
+# assets and, until the store has content, passes everything through.
 #
 # ⚠️ NOT the chatbot. That is chat-worker/wrangler.toml, a separate
 # deployable with its own name. Run wrangler from the directory whose
@@ -17,6 +18,7 @@
 
 name = "aliphcreative"
 compatibility_date = "2026-08-01"
+main = "worker/src/index.ts"
 
 # ⚠️ Pinned deliberately. Logins here can reach two accounts — the studio's
 # (Ceo@aliphcreative.com's) and a personal one — and with more than one in
@@ -28,3 +30,40 @@ account_id = "6c60bd775004cfa0082f768c356c7242"
 
 [assets]
 directory = "./prototype"
+binding = "ASSETS"
+# Only these reach the Worker; css/js/img/fonts are served by the assets layer
+# without invoking it (free-plan request budget). The `*` forms cover the
+# trailing-slash variants (/about/, /library/).
+run_worker_first = ["/", "/about*", "/library*", "/*.html", "/api/*", "/admin*"]
+
+# ── Admin content store (admin build, 2026-11-12) ──────────────────
+# D1 holds drafts, published overrides, revisions and the audit log
+# (schema: migrations/). Everything in development is LOCAL miniflare state
+# under .wrangler/ — `wrangler d1 migrations apply aliph-admin --local`.
+# Keep [assets] above these tables: tests/platform/parity-live.mjs strips the
+# FIRST `binding = …` line, which must be the assets one.
+[[d1_databases]]
+binding = "DB"
+database_name = "aliph-admin"
+# TODO(orchestrator): real id at deploy — Obaida creates the remote D1 and
+# passes its id; until then this placeholder only works with --local.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# The media bucket, for admin uploads. Same bucket media.aliphcreative.com
+# serves; in development only the local miniflare copy is ever written.
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "aliph-media"
+
+# ── Cloudflare Access (admin build) ────────────────────────────────
+# The Worker verifies the Access JWT on /admin* and /api/admin* itself
+# (worker/src/auth.ts) and refuses every admin request while these are
+# empty — fail closed.
+# TODO(orchestrator): at deploy set ACCESS_TEAM_DOMAIN to the Zero Trust team
+# domain (<team>.cloudflareaccess.com) and ACCESS_AUD to the Access
+# application's Audience tag. Neither is a secret.
+# ⚠️ ADMIN_DEV_BYPASS never goes here — .dev.vars only (local dev).
+[vars]
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_AUD = ""

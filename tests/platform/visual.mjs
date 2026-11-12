@@ -1,0 +1,301 @@
+// Visual parity: headless Edge screenshots of /, /about, /library (390x844 and 1440x900, ar + en) from the
+// assets-only build (today's deployment shape) and from the Worker build with an empty store, pixel-diffed.
+// Also records the order of media requests (the hero's own pictures must come first; MEDIA HOLD).
+//   node tests/platform/visual.mjs                run both builds, compare, exit 1 over 0.1% on any shot
+//   node tests/platform/visual.mjs --keep         reuse .wrangler/visual/baseline when it exists
+//   node tests/platform/visual.mjs --only=worker  just (re)shoot the Worker build into .wrangler/visual/current
+// Needs the Edge at EDGE below (no Chrome on this machine). Never touches a remote anything.
+import { spawn, execSync } from "node:child_process";
+import { mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import { chromium } from "playwright-core";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const EDGE = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe";
+const PORT = 8831, INSPECTOR = 9231;
+const BASE = `http://127.0.0.1:${PORT}`;
+const OUT = path.join(ROOT, ".wrangler", "visual");
+const THRESHOLD = 0.001;               // 0.1% of the pixels
+const PAGES = [["home", "/"], ["about", "/about"], ["library", "/library"]];
+const SIZES = [["phone", 390, 844], ["desktop", 1440, 900]];
+const LANGS = ["ar", "en"];
+
+// Everything that moves on its own is frozen, so two runs of the same build give the same pixels.
+const FREEZE = `*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}
+video{visibility:hidden!important}
+/* masked: the headline's ransom scrap swaps on a wall-clock timer and the film strip scrolls on its own */
+.ransom img,.film-scroll{visibility:hidden!important}`;
+
+// ---- servers (same shape as parity-live.mjs) ----
+function assetsOnlyConfig() {
+  let t = readFileSync(path.join(ROOT, "wrangler.toml"), "utf8");
+  t = t.replace(/^main\s*=.*$/m, "").replace(/^binding\s*=.*$/m, "").replace(/^run_worker_first\s*=.*$/m, "");
+  t = t.replace(/^directory\s*=.*$/m, `directory = ${JSON.stringify(path.join(ROOT, "prototype"))}`);
+  mkdirSync(path.join(ROOT, ".wrangler"), { recursive: true });
+  const p = path.join(ROOT, ".wrangler", "visual-assets-only.toml");
+  writeFileSync(p, t);
+  return p;
+}
+function start(config) {
+  const bin = path.join(ROOT, "node_modules/wrangler/bin/wrangler.js");
+  const child = spawn(process.execPath, [bin, "dev", "--local", "--config", config, "--port", String(PORT),
+    "--inspector-port", String(INSPECTOR), "--ip", "127.0.0.1"], { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] });
+  child.stdout.on("data", () => {}); child.stderr.on("data", () => {});
+  return child;
+}
+function stop(child) { try { execSync(`taskkill /pid ${child.pid} /T /F`, { stdio: "ignore" }); } catch {} }
+async function waitUp() {
+  for (let i = 0; i < 90; i++) {
+    try { const r = await fetch(BASE + "/style.css", { redirect: "manual" }); if (r.status) return; } catch {}
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  throw new Error("dev server did not come up");
+}
+
+// ---- one shooting pass: every page x size x language ----
+// `setup(context, lang)` is the hook P-07b's override scenario uses; `base` is where to point.
+export async function shoot(outDir, { base = BASE, setup, inspect, pages = PAGES, langs = LANGS } = {}) {
+  rmSync(outDir, { recursive: true, force: true });
+  mkdirSync(outDir, { recursive: true });
+  const browser = await chromium.launch({ executablePath: EDGE, headless: true });
+  const requests = {}, facts = {};
+  try {
+    for (const [sizeName, width, height] of SIZES) {
+      for (const lang of langs) {
+        for (const [pageName, url] of pages) {
+          const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1, reducedMotion: "no-preference" });
+          await ctx.addInitScript((l) => { try { localStorage.setItem("aliph-lang", l); } catch {} }, lang);
+          // the headline's ransom letters and their timings use Math.random: a fixed seed (mulberry32)
+          await ctx.addInitScript(() => {
+            let s = 0x9e3779b9;
+            Math.random = () => { s = (s + 0x6d2b79f5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s);
+              t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+          });
+          if (setup) await setup(ctx, lang);
+          const page = await ctx.newPage();
+          const media = [];
+          page.on("request", (r) => {
+            const t = r.resourceType();
+            const p = new URL(r.url()).pathname;
+            // the ransom scraps swap on a wall-clock timer, so their requests are not an order to compare
+            if ((t === "image" || t === "media") && !p.startsWith("/assets/img/ransom/")) media.push(p);
+          });
+          await page.goto(base + url, { waitUntil: "load" });
+          // the curtain lifts (display:none) and MEDIA HOLD is released
+          await page.waitForFunction(() => {
+            const c = document.getElementById("curtain");
+            return (!c || getComputedStyle(c).display === "none") && !document.documentElement.classList.contains("media-hold");
+          }, null, { timeout: 20000 });
+          await page.waitForLoadState("networkidle").catch(() => {});
+          await page.addStyleTag({ content: FREEZE });
+          await page.evaluate(() => document.fonts.ready);
+          await page.waitForTimeout(1500);   // GSAP entrances finish (they are not CSS, so FREEZE cannot stop them)
+          const name = `${pageName}-${sizeName}-${lang}`;
+          if (inspect) facts[name] = await inspect(page);
+          await page.screenshot({ path: path.join(outDir, name + ".png"), animations: "disabled" });
+          requests[name] = media;
+          await ctx.close();
+        }
+      }
+    }
+  } finally { await browser.close(); }
+  writeFileSync(path.join(outDir, "requests.json"), JSON.stringify(requests, null, 1));
+  return inspect ? { requests, facts } : requests;
+}
+
+// ---- pixel diff, done in the browser's own canvas (no image dependency) ----
+export async function diffDirs(aDir, bDir) {
+  const names = LANGS.flatMap((l) => SIZES.flatMap(([s]) => PAGES.map(([p]) => `${p}-${s}-${l}`)));
+  const browser = await chromium.launch({ executablePath: EDGE, headless: true });
+  const page = await browser.newPage();
+  const rows = [];
+  try {
+    for (const n of names) {
+      const a = readFileSync(path.join(aDir, n + ".png")).toString("base64");
+      const b = readFileSync(path.join(bDir, n + ".png")).toString("base64");
+      const r = await page.evaluate(async ([a, b]) => {
+        const load = (s) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = "data:image/png;base64," + s; });
+        const [ia, ib] = await Promise.all([load(a), load(b)]);
+        if (ia.width !== ib.width || ia.height !== ib.height) return { size: true };
+        const px = (img) => { const c = document.createElement("canvas"); c.width = img.width; c.height = img.height;
+          const x = c.getContext("2d"); x.drawImage(img, 0, 0); return x.getImageData(0, 0, c.width, c.height).data; };
+        const da = px(ia), db = px(ib);
+        let bad = 0;
+        for (let i = 0; i < da.length; i += 4) {
+          if (Math.abs(da[i] - db[i]) + Math.abs(da[i + 1] - db[i + 1]) + Math.abs(da[i + 2] - db[i + 2]) > 24) bad++;
+        }
+        return { bad, total: da.length / 4 };
+      }, [a, b]);
+      rows.push({ name: n, ...r, ratio: r.size ? 1 : r.bad / r.total });
+    }
+  } finally { await browser.close(); }
+  return rows;
+}
+
+// The media requests must be the same sequence of paths in both builds (the hero's pictures first, nothing
+// below the fold before the hold lifts).
+export function compareRequests(a, b) {
+  const bad = [];
+  for (const n of Object.keys(a)) {
+    if (JSON.stringify(a[n]) !== JSON.stringify(b[n] || [])) bad.push(n);
+  }
+  return bad;
+}
+
+async function runBuild(config, outDir) {
+  const child = start(config);
+  try { await waitUp(); return await shoot(outDir); }
+  finally { stop(child); await new Promise((r) => setTimeout(r, 1500)); }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url) && !process.argv.includes("--scenario")) {
+  const args = process.argv.slice(2);
+  const baseDir = path.join(OUT, "baseline"), curDir = path.join(OUT, "current");
+  const only = (args.find((a) => a.startsWith("--only=")) || "").slice(7);
+  let baseReq;
+  if (only === "worker" || (args.includes("--keep") && existsSync(path.join(baseDir, "requests.json")))) {
+    baseReq = JSON.parse(readFileSync(path.join(baseDir, "requests.json"), "utf8"));
+  } else baseReq = await runBuild(assetsOnlyConfig(), baseDir);
+  const curReq = await runBuild(path.join(ROOT, "wrangler.toml"), curDir);
+  const rows = await diffDirs(baseDir, curDir);
+  let fail = 0;
+  for (const r of rows) {
+    const ok = r.ratio <= THRESHOLD; if (!ok) fail++;
+    console.log((ok ? "ok   " : "FAIL ") + r.name.padEnd(22) + (r.size ? "size differs" : `${(r.ratio * 100).toFixed(4)}% (${r.bad}/${r.total})`));
+  }
+  for (const n of compareRequests(baseReq, curReq)) { fail++; console.log("FAIL request order differs: " + n); }
+  console.log("home-phone-ar first media request: " + (curReq["home-phone-ar"]?.[0] || "-"));
+  if (fail) { console.log(`VISUAL FAILED (${fail})`); process.exit(1); }
+  console.log(`VISUAL OK (${rows.length} shots <= ${THRESHOLD * 100}%, request order identical)`);
+}
+
+// ---- override scenario (P-07b): main.js's boot merge, driven by an injected #aliph-content ----
+//   node tests/platform/visual.mjs --scenario
+// The assets-only server stands in for the Worker: the page's HTML is rewritten in the browser's route to carry
+// the blob exactly where P-06 puts it (immediately before <script src="main.js">). Checks, en home at 390 and 1440:
+// an EN text override and a ring-line (SUBCATS desc) override both appear, a film-frame slot and a ring pick
+// land, and the media requests are the baseline's (hero first, nothing below the fold early) apart from the
+// pictures the scenario changes (CHANGED).
+// Then /library en at 390 and 1440 (P-10b), opened as ?open=<video upload id>: every media tile has a real src and
+// data-full, the uploads and the poster-only / src-only overrides of default videos show the right URLs, and the deep
+// link opens the upload's film.
+export const SCENARIO = {
+  rev: 1,
+  text: { ctaStart: { en: "Begin right here" }, "subcat.design.posters.desc": { en: "RING-LINE-OVERRIDE the poster ring says this now." } },
+  slots: { "home.film.1": { src: "assets/media/pics-food-21-dsc03454.webp" } },
+  // reels-alif-tuktuk.mp4 and horizontal-maqasid.mp4 are MEDIA rows, not the ring's own entries (those are filed
+  // under their .webp), so they resolve to R2 URLs (P-10b): maqasid's poster is not in the bundle at all.
+  rings: { photo: ["pics-food-17-dsc00763.webp", "reels-alif-tuktuk.mp4", "horizontal-maqasid.mp4", "not-a-real-id"] },
+};
+const R2 = "https://media.aliphcreative.com";
+// the pictures the scenario itself adds or takes away: the film frame it swaps, the photo-ring items it leaves out
+const CHANGED = new Set(["pics-idk-category-28-dsc00020", "pics-food-21-dsc03454", "reels-einar-edited", "pics-Queen-retreat-52-copy-of-0c2a0144",
+  "reels-child-section-final", "reels-connect-edited", "pics-official-visits-43-dsc08794", "pics-Interactive-37-dsc03223",
+  // ... and the two it keeps, which it reorders
+  "reels-alif-tuktuk", "pics-food-17-dsc00763"].map((n) => `/assets/media/${n}.webp`)
+  // ... and the two MEDIA-row picks, which come from R2 (request paths are pathnames)
+  .concat(["/poster/reels-alif-tuktuk.webp", "/poster/horizontal-maqasid.webp"]));
+
+// /library (P-10b): an image upload, a video upload, a poster-only and a src-only override of default videos.
+// Opened as ?open=<video upload id>, the deep link a ring would send.
+export const LIB_SCENARIO = {
+  rev: 1,
+  gallery: [
+    { id: "up-still", src: `${R2}/img/design-haqqak-1.webp`, cat: "photo", ratio: 0.8, date: "2026-11-01" },
+    { id: "up-film", src: `${R2}/video/horizontal-maqasid.mp4`, poster: `${R2}/poster/horizontal-maqasid.webp`, cat: "photo", ratio: 1.7778, date: "2026-11-02" },
+    { id: "reels-alif-tuktuk.mp4", poster: `${R2}/poster/reels-einar-edited.webp` },
+    { id: "reels-copy-of-bader-4.mp4", src: `${R2}/video/reels-einar-edited.mp4` },
+  ],
+};
+
+const inject = (blob) => (html) =>
+  html.replace(/(<script[^>]*src="main\.js")/, `<script type="application/json" id="aliph-content">${blob}</script>\n$1`);
+const routeWith = (re, snapshot) => async (ctx) => {
+  const add = inject(JSON.stringify(snapshot).replace(/</g, "\\u003c"));
+  await ctx.route(re, async (route) => {
+    const res = await route.fetch();
+    await route.fulfill({ response: res, body: add(await res.text()) });
+  });
+};
+
+async function scenario(baseDir) {
+  const setup = routeWith(/\/$/, SCENARIO);
+  const inspect = (page) => page.evaluate(async () => {
+    const dl = (sel) => (document.querySelector(sel) || {}).textContent || "";
+    await new Promise((r) => setTimeout(r, 400));
+    const ring = document.querySelector("#ringDesc");
+    return {
+      cta: dl('[data-i18n="ctaStart"]'),
+      ringLine: ring ? ring.textContent : "",
+      film1: (document.querySelector('.film-frame[data-frame="0"] img') || {}).getAttribute?.("src") || "",
+      content: document.querySelectorAll("#aliph-content").length,
+      photoRing: [...document.querySelectorAll(".ring-item")].length,
+      ringFull: [...document.querySelectorAll(".ring-item")].map((b) => b.dataset.full || ""),
+    };
+  });
+  const { requests, facts } = await shoot(path.join(OUT, "scenario"), { setup, inspect, pages: [["home", "/"]], langs: ["en"] });
+  const base = JSON.parse(readFileSync(path.join(baseDir, "requests.json"), "utf8"));
+  let fail = 0;
+  const check = (ok, msg) => { if (!ok) fail++; console.log((ok ? "ok   " : "FAIL ") + msg); };
+  for (const size of ["phone", "desktop"]) {
+    const n = `home-${size}-en`, f = facts[n];
+    check(f.content === 1, `${n}: blob present once`);
+    check(f.cta === "Begin right here", `${n}: EN text override shows (${JSON.stringify(f.cta)})`);
+    check(f.ringLine.includes("RING-LINE-OVERRIDE"), `${n}: ring line override shows (${JSON.stringify(f.ringLine.slice(0, 40))})`);
+    check(f.film1.endsWith("pics-food-21-dsc03454.webp"), `${n}: film frame 1 is the slot's picture`);
+    const strip = (l) => l.filter((p) => !CHANGED.has(p));
+    check(JSON.stringify(strip(requests[n])) === JSON.stringify(strip(base[n])), `${n}: media request order = baseline outside the changed pictures (hold and hero unchanged)`);
+    const got = new Set(requests[n]);
+    check(got.has("/poster/reels-alif-tuktuk.webp") && got.has("/assets/media/pics-food-17-dsc00763.webp") && !got.has("/assets/media/reels-einar-edited.webp"), `${n}: the ring shows the picked items only`);
+    check(f.ringFull.includes(`${R2}/poster/horizontal-maqasid.webp`) && !f.ringFull.some((s) => s.includes("assets/media/horizontal-maqasid")),
+      `${n}: a ring pick of horizontal-maqasid.mp4 shows its R2 poster`);
+    check(requests[n][0] === base[n][0], `${n}: first media request is the hero's (${requests[n][0]})`);
+  }
+
+  const libInspect = (page) => page.evaluate(async () => {
+    await new Promise((r) => setTimeout(r, 800));
+    const tiles = [...document.querySelectorAll(".tile")];
+    const imgOf = (t) => (t && t.querySelector("img")) || null;
+    const byFilm = (v) => tiles.find((t) => t.dataset.film === v);
+    const lb = document.querySelector(".lb");
+    return {
+      /* media tiles (a project tile shows its own cover from assets/shots/, no data-full) */
+      srcs: tiles.filter((t) => t.dataset.project === undefined).map(imgOf).filter(Boolean).map((i) => [i.getAttribute("src"), i.getAttribute("data-full")]),
+      films: tiles.map((t) => t.dataset.film).filter((v) => v !== undefined),
+      still: tiles.map(imgOf).filter(Boolean).some((i) => i.getAttribute("src") === "https://media.aliphcreative.com/img/design-haqqak-1.webp"),
+      upFilm: !!byFilm("https://media.aliphcreative.com/video/horizontal-maqasid.mp4"),
+      posterOnly: imgOf(byFilm("reels-alif-tuktuk.mp4"))?.getAttribute("src") || "",
+      srcOnly: imgOf(byFilm("https://media.aliphcreative.com/video/reels-einar-edited.mp4"))?.getAttribute("src") || "",
+      lightbox: lb ? lb.innerHTML.includes("https://media.aliphcreative.com/video/horizontal-maqasid.mp4") : false,
+    };
+  });
+  const lib = await shoot(path.join(OUT, "scenario-library"), {
+    setup: routeWith(/\/library(\?.*)?$/, LIB_SCENARIO), inspect: libInspect,
+    pages: [["library", "/library?open=up-film"]], langs: ["en"],
+  });
+  const real = (s) => typeof s === "string" && /^(https:\/\/media\.aliphcreative\.com\/|assets\/)/.test(s) && !s.includes("undefined");
+  for (const size of ["phone", "desktop"]) {
+    const n = `library-${size}-en`, f = lib.facts[n];
+    check(f.srcs.length > 0 && f.srcs.every(([s, full]) => real(s) && real(full)), `${n}: every tile's src and data-full is a real URL (${f.srcs.length} tiles${f.srcs.filter(([s, full]) => !(real(s) && real(full))).slice(0, 2).map((x) => " BAD " + JSON.stringify(x)).join("")})`);
+    check(f.films.every((s) => s && !s.includes("undefined")), `${n}: no data-film is empty or undefined (${f.films.length})`);
+    check(f.still, `${n}: the image upload's tile shows its src`);
+    check(f.upFilm, `${n}: the video upload's data-film is its mp4 URL`);
+    check(f.posterOnly === `${R2}/poster/reels-einar-edited.webp`, `${n}: a poster-only override shows that poster (${f.posterOnly})`);
+    check(f.srcOnly === `${R2}/thumb/reels-copy-of-bader-4.webp`, `${n}: a src-only override keeps the R2 thumb (${f.srcOnly})`);
+    check(f.lightbox, `${n}: ?open=<video upload id> opens its film`);
+  }
+  return fail;
+}
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url) && process.argv.includes("--scenario")) {
+  const baseDir = path.join(OUT, "baseline");
+  const child = start(assetsOnlyConfig());
+  let fail;
+  try {
+    await waitUp();
+    if (!existsSync(path.join(baseDir, "requests.json"))) await shoot(baseDir);
+    fail = await scenario(baseDir);
+  } finally { stop(child); await new Promise((r) => setTimeout(r, 1500)); }
+  console.log(fail ? `SCENARIO FAILED (${fail})` : "SCENARIO OK");
+  process.exit(fail ? 1 : 0);
+}
