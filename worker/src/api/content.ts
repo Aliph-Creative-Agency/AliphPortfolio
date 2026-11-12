@@ -56,9 +56,17 @@ export async function contentRoute(request: Request, env: Env, url: URL): Promis
   return publishedContent(request, env, url);
 }
 
-/** From cache.ts: a warm isolate answers this (and its 304) without D1. */
+/** From cache.ts: a warm isolate answers this (and its 304) without D1. A
+ *  store failure with nothing cached is a 503 that no cache may keep (the
+ *  pages themselves fall back to the assets; this JSON has no fallback). */
 async function publishedContent(request: Request, env: Env, url: URL): Promise<Response> {
-  const { snap } = await getPublished(env, url.origin);
+  let snap;
+  try {
+    ({ snap } = await getPublished(env, url.origin));
+  } catch (e) {
+    console.error("GET /api/content: store unavailable", e);
+    return json({ error: "content store unavailable" }, 503, { "cache-control": "no-store" });
+  }
   const etag = etagOf(snap.rev);
   if (matches(request.headers.get("if-none-match"), etag)) {
     return new Response(null, { status: 304, headers: { etag, "cache-control": PUBLIC_CACHE } });

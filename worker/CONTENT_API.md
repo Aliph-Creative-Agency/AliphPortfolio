@@ -22,6 +22,7 @@ site is unchanged. The editable surface is `worker/src/generated/registry.json` 
 | `GET /api/content?state=draft` | Access | the same as above. The route is not under `/api/admin`, so the handler calls `verifyAccess` itself. |
 | `?state=` anything else | | `400 {"error"}` |
 | non-GET/HEAD on `/api/content` | | `405` |
+| `/api/content` published, the store failing and nothing cached | | `503 {"error": "content store unavailable"}`, `no-store` (the pages fall back to the assets instead) |
 
 With no valid Access JWT, either draft route returns `403` (plain text, `no-store`). If `ACCESS_*` is empty, they
 also return 403 (fail closed). Locally, `ADMIN_DEV_BYPASS=1` in `.dev.vars` works on localhost only (see `auth.ts`).

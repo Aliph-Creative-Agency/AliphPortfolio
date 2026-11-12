@@ -95,6 +95,20 @@ describe("GET /api/content (published)", () => {
     }
     expect((await call("/api/content", { method: "POST", body: "{}" })).status).toBe(405);
   });
+
+  // P-10: a D1 failure with nothing cached was an uncaught exception (1101).
+  it("store failure with nothing cached → 503, no-store", async () => {
+    const broken = new Proxy(env.DB, {
+      get() {
+        throw new Error("D1 unavailable");
+      },
+    }) as D1Database;
+    const r = await worker.fetch(new Request("https://aliphcreative.com/api/content"), { ...E(), DB: broken }, createExecutionContext());
+    expect(r.status).toBe(503);
+    expect(r.headers.get("cache-control")).toBe("no-store");
+    expect(r.headers.get("content-type")).toMatch(/^application\/json/);
+    expect(await r.json()).toEqual({ error: "content store unavailable" });
+  });
 });
 
 describe("draft reads need Access", () => {
