@@ -189,6 +189,19 @@ published snapshot is not empty. An empty store, or a D1 read that fails, serves
   preview, and `src` otherwise. `alt` becomes `alt.ar`, and the enclosing `<figure data-preview>` gets `preview`.
   Each element is checked against its registry default first; one that no longer matches is skipped with a
   `console.warn`. `home.film.N` has no markup and is left to the main.js merge.
+- The `@static:*` SEO regions (render/regions.ts, P-08) go into the same pass. The tables are `defaults.json` with
+  the snapshot merged in by `worker/src/shared/merge.mjs` `mergeContent(T, snapshot)`, the ONE merge main.js's boot
+  hook copies (P-07b). `pageRegions(T)` renders them with build_static's own renderers. A region is replaced only
+  when its output differs from the default's, between its markers, with the exact bytes `fill()` writes. So the
+  markup never changes, and a snapshot that touches no region (EN-only, head, slots, rings) leaves them byte-identical.
+  The merge, in place (arrays spliced and pushed, never reassigned):
+  - An I18N key sets `I18N[key][locale]`. A field key sets the holder at `fieldPath(T, key)`. That path is derived
+    from the key alone (main.js has no registry), and a test pins it equal to `registry.fields[].path`.
+  - Gallery: a row whose `id` is a MEDIA `f` overrides that row in place (`cat`→`c`, `ratio`→`r`, `date`→`d`; a
+    `poster` sets `v: 1`; `src`/`poster` are full URLs and stay under those names, so `f`/`p` keep the file names).
+    `hidden` removes the row. Any other id is an upload, appended as `{f: id, c: cat, r: ratio ?? 1, d: date ?? null,
+    src, poster?, v?, sub?, alt?, client?}`. Hidden uploads and uploads without `src` and `cat` are skipped.
+  - Rings, slots and film frames are not merged here (no region reads them); the boot merge does them.
 
 ## Publish (publish.ts, cache.ts, P-09)
 
