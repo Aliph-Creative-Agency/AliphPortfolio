@@ -55,3 +55,15 @@ migrations_dir = "migrations"
 [[r2_buckets]]
 binding = "MEDIA_BUCKET"
 bucket_name = "aliph-media"
+
+# ── Cloudflare Access (admin build) ────────────────────────────────
+# The Worker verifies the Access JWT on /admin* and /api/admin* itself
+# (worker/src/auth.ts) and refuses every admin request while these are
+# empty — fail closed.
+# TODO(orchestrator): at deploy set ACCESS_TEAM_DOMAIN to the Zero Trust team
+# domain (<team>.cloudflareaccess.com) and ACCESS_AUD to the Access
+# application's Audience tag. Neither is a secret.
+# ⚠️ ADMIN_DEV_BYPASS never goes here — .dev.vars only (local dev).
+[vars]
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_AUD = ""
