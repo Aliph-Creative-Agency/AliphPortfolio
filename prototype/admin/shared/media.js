@@ -20,7 +20,13 @@
  *       never fires an event; the timeout is what ends the wait).
  *   kindOf(file) -> "image" | "video" | null  (by MIME type, else extension;
  *       HEIC and anything else is null).
- *   (upload: a later task, same file.)
+ *   upload(blob, name, {onProgress, posterFor, signal, base, threshold}) -> {id, key, url, type, size}
+ *       <= 90 MB: one XHR POST /api/admin/upload (XHR for upload progress).
+ *       Bigger video: multipart, 10 MiB parts, 3 retries per part (network/5xx),
+ *       DELETE-abort on failure or cancel. onProgress gets {loaded, total}, always
+ *       called at 0 and at total. Errors: MediaError unsupported (415), toolarge
+ *       (413), network, aborted. `base` = origin prefix (default same-origin);
+ *       `threshold` = single-POST limit (default 90 MB; tests lower it).
  *   MediaError — code "unreadable" | "unsupported" | "toolarge" | "network" | "aborted".
  *
  * Browser support / fallbacks
@@ -236,5 +242,96 @@ export async function preparePoster(file, opts = {}) {
     v.removeAttribute("src");
     v.load();
     URL.revokeObjectURL(url);
+  }
+}
+
+export const SINGLE_MAX = 90 * 1024 * 1024; // the Worker takes one POST up to 90 MB
+export const PART_SIZE = 10 * 1024 * 1024; // multipart parts (R2 wants >= 5 MiB, equal sizes)
+const PART_RETRIES = 3;
+
+/** One XHR (fetch has no upload progress). Resolves {status, body}; rejects MediaError network/aborted. */
+function xhr(method, url, body, headers, onUpload, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(new MediaError("aborted", "upload cancelled"));
+    const x = new XMLHttpRequest();
+    x.open(method, url);
+    for (const [k, v] of Object.entries(headers || {})) x.setRequestHeader(k, v);
+    if (onUpload) x.upload.onprogress = (e) => onUpload(e.loaded);
+    const onAbort = () => x.abort();
+    signal?.addEventListener("abort", onAbort, { once: true });
+    const end = () => signal?.removeEventListener("abort", onAbort);
+    x.onload = () => {
+      end();
+      let parsed = null;
+      try { parsed = JSON.parse(x.responseText); } catch { /* not JSON */ }
+      resolve({ status: x.status, body: parsed });
+    };
+    x.onerror = () => { end(); reject(new MediaError("network", "network error during upload")); };
+    x.onabort = () => { end(); reject(new MediaError("aborted", "upload cancelled")); };
+    x.send(body);
+  });
+}
+
+/** Turns a non-2xx Worker answer into a MediaError (415 unsupported, 413 toolarge). */
+function failure(res, what) {
+  const msg = res.body?.error || `${what} failed (${res.status})`;
+  const code = res.status === 415 ? "unsupported" : res.status === 413 ? "toolarge" : "network";
+  return new MediaError(code, msg);
+}
+
+/**
+ * @param {Blob} blob  prepared image/poster blob, or a video File
+ * @param {string} name  original file name (only used to build the slug)
+ * @param {{onProgress?: (p: {loaded: number, total: number}) => void, posterFor?: string, signal?: AbortSignal, base?: string}} [opts]
+ * @returns {Promise<{id: string, key: string, url: string, type: string, size: number}>}
+ */
+export async function upload(blob, name, opts = {}) {
+  const { onProgress, posterFor, signal, base = "", threshold = SINGLE_MAX } = opts;
+  const total = blob.size;
+  const progress = (loaded) => onProgress?.({ loaded: Math.min(loaded, total), total });
+  progress(0);
+  const videoType = blob.type === "video/mp4" || blob.type === "video/webm";
+  if (total <= threshold || !videoType || posterFor) {
+    const headers = { "x-file-name": name };
+    if (posterFor) headers["x-poster-for"] = posterFor;
+    const res = await xhr("POST", `${base}/api/admin/upload`, blob, headers, progress, signal);
+    if (res.status !== 201 && res.status !== 200) throw failure(res, "upload");
+    progress(total);
+    return res.body;
+  }
+  // Multipart (videos over 90 MB).
+  const json = { "content-type": "application/json" };
+  const made = await xhr("POST", `${base}/api/admin/upload/mpu`, JSON.stringify({ name, type: blob.type, size: total }), json, null, signal);
+  if (made.status !== 201 && made.status !== 200) throw failure(made, "upload");
+  const { uploadId, key } = made.body;
+  const q = `key=${encodeURIComponent(key)}&uploadId=${encodeURIComponent(uploadId)}`;
+  const abort = () => xhr("DELETE", `${base}/api/admin/upload/mpu?${q}`, null, null, null, null).catch(() => {});
+  try {
+    const parts = [];
+    let done = 0;
+    for (let n = 1, off = 0; off < total; n++, off += PART_SIZE) {
+      const chunk = blob.slice(off, Math.min(off + PART_SIZE, total));
+      let res;
+      for (let attempt = 0; ; attempt++) {
+        try {
+          res = await xhr("PUT", `${base}/api/admin/upload/mpu/part?${q}&n=${n}`, chunk, null, (l) => progress(done + l), signal);
+        } catch (e) {
+          if (e.code === "network" && attempt < PART_RETRIES) continue;
+          throw e;
+        }
+        if (res.status >= 500 && attempt < PART_RETRIES) continue;
+        break;
+      }
+      if (res.status !== 200) throw failure(res, "upload");
+      parts.push({ partNumber: res.body.partNumber, etag: res.body.etag });
+      done += chunk.size;
+      progress(done);
+    }
+    const fin = await xhr("POST", `${base}/api/admin/upload/mpu/complete`, JSON.stringify({ key, uploadId, parts }), json, null, signal);
+    if (fin.status !== 201 && fin.status !== 200) throw failure(fin, "upload");
+    return fin.body;
+  } catch (e) {
+    await abort();
+    throw e;
   }
 }
