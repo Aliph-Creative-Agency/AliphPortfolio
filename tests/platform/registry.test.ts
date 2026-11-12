@@ -46,6 +46,53 @@ describe("text registry", () => {
   });
 });
 
+describe("fields (P-05: SEO head strings + SUBCATS / PROJECTS / TESTIMONIALS copy)", () => {
+  const D = defaults as Record<string, any>;
+  const at = (path: (string | number)[]) => path.reduce((o: any, k) => (o == null ? o : o[k]), D);
+
+  it("keys are unique, never collide with I18N, and follow the documented patterns", () => {
+    const keys = registry.fields.map((f) => f.key);
+    expect(new Set(keys).size).toBe(keys.length);
+    for (const k of keys) {
+      expect(D.I18N[k], k).toBeUndefined();
+      expect(k).toMatch(
+        /^(meta\.(home|about|library)\.(title|description|ogTitle|ogDescription)|subcat\.(design|photo|tech)\.[a-z]+\.(name|desc|descShort)|project\.\d+\.(name|desc|tagline|body)|testimonial\.\d+\.(name|business|quote))$/,
+      );
+    }
+  });
+
+  it("every SEO string of the 3 pages is a field whose default is what the HTML has", async () => {
+    for (const page of Object.keys(FILES)) {
+      const src = await html(page);
+      const title = /<title>([^<]*)<\/title>/.exec(src)![1];
+      const desc = /<meta name="description" content="([^"]*)"/.exec(src)![1];
+      expect(D.META[page].title.ar).toBe(title);
+      expect(D.META[page].description.ar).toBe(desc);
+      for (const f of ["title", "description", "ogTitle", "ogDescription"]) {
+        const e = registry.fields.find((x) => x.key === `meta.${page}.${f}`)!;
+        expect(e.locales).toEqual(["ar"]);
+        expect(e.minLength).toBe(1);
+        expect(e.maxLength).toBe(Math.ceil(D.META[page][f].ar.length * 1.6));
+      }
+    }
+  });
+
+  it("covers every SUBCATS / PROJECTS / TESTIMONIALS entry and each path reaches its default", () => {
+    const n = (t: string) => registry.fields.filter((f) => f.table === t).length;
+    const subs = Object.values(D.SUBCATS).flat().length;
+    expect(n("SUBCATS")).toBe(subs * 3);
+    expect(n("PROJECTS")).toBe(D.PROJECTS.length * 4);
+    expect(n("TESTIMONIALS")).toBe(D.TESTIMONIALS.length * 3);
+    for (const f of registry.fields) {
+      const v = at(f.path);
+      /* absent/null only where the copy may be ADDED (a phone line, a name) */
+      if (v == null) expect(f.key, f.key).toMatch(/\.(descShort|name)$/);
+      else for (const l of f.locales) expect(typeof v[l], f.key).toBe("string");
+    }
+    expect(at(["SUBCATS", "photo", 0, "desc"]).ar).toBe(D.SUBCATS.photo[0].desc.ar);
+  });
+});
+
 describe("media slots", () => {
   it("ids are <page>.<kind>.<ordinal>, unique, ordinals gapless per page+kind", () => {
     const seen = new Set<string>();

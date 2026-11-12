@@ -10,6 +10,7 @@
 // layer directly and never cost a Worker request.
 
 import { isAdminPath, verifyAccess, type AccessEnv } from "./auth";
+import { contentRoute, draftContent } from "./api/content";
 
 export interface Env extends AccessEnv {
   ASSETS: Fetcher;
@@ -46,6 +47,10 @@ export default {
       return admin(request, env, url, { adminEmail: auth.email });
     }
 
+    // The store as JSON (api/content.ts). Public for the published state; a
+    // ?state=draft read checks Access itself, since this is not an admin path.
+    if (url.pathname === "/api/content") return contentRoute(request, env, url);
+
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;
@@ -55,6 +60,8 @@ async function admin(request: Request, env: Env, url: URL, ctx: AdminCtx): Promi
     // Who the Worker thinks you are: the admin UI shows it, and it is the
     // cheapest end-to-end check that Access + the JWT check are wired.
     if (url.pathname === "/api/admin/whoami" && request.method === "GET") return json({ email: ctx.adminEmail });
+    // The draft snapshot the editor and gallery screens start from.
+    if (url.pathname === "/api/admin/content" && request.method === "GET") return draftContent(env);
     return json({ error: "not found" }, 404);
   }
   // /admin pages and their files (prototype/admin/**), only once verified.

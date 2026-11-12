@@ -63,6 +63,7 @@ const TABLES: Record<string, Col[]> = {
     ["rev", "INTEGER", 1, 0],
     ["updated_at", "TEXT", 1, 0],
     ["updated_by", "TEXT", 1, 0],
+    ["state", "TEXT", 1, 0], // 0002
   ],
   revisions: [
     ["id", "INTEGER", 1, 1],
@@ -167,6 +168,16 @@ describe("constraints", () => {
     await db()
       .prepare(`INSERT INTO ring_picks (service, item_ids_json, updated_by) VALUES ('design', '["a.webp"]', 'a@x')`)
       .run();
+  });
+
+  it("ring_picks: state defaults to active and is active/deleted (0002)", async () => {
+    await db().prepare(`INSERT INTO ring_picks (service, item_ids_json, updated_by) VALUES ('photo', '[]', 'a@x')`).run();
+    const row = await db().prepare("SELECT state FROM ring_picks WHERE service = 'photo'").first<{ state: string }>();
+    expect(row?.state).toBe("active");
+    await db().prepare("UPDATE ring_picks SET state = 'deleted' WHERE service = 'photo'").run();
+    await expect(
+      db().prepare("UPDATE ring_picks SET state = 'reset' WHERE service = 'photo'").run(),
+    ).rejects.toThrow(/CHECK/i);
   });
 
   it("gallery_items: hidden is 0/1, state active/deleted, client must exist", async () => {

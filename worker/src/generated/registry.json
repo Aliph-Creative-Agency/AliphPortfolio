@@ -1064,6 +1064,1379 @@
       "maxLength": 18
     }
   ],
+  "fields": [
+    {
+      "key": "meta.home.title",
+      "table": "META",
+      "path": [
+        "META",
+        "home",
+        "title"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 32
+    },
+    {
+      "key": "meta.home.description",
+      "table": "META",
+      "path": [
+        "META",
+        "home",
+        "description"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 269
+    },
+    {
+      "key": "meta.home.ogTitle",
+      "table": "META",
+      "path": [
+        "META",
+        "home",
+        "ogTitle"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 32
+    },
+    {
+      "key": "meta.home.ogDescription",
+      "table": "META",
+      "path": [
+        "META",
+        "home",
+        "ogDescription"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 269
+    },
+    {
+      "key": "meta.about.title",
+      "table": "META",
+      "path": [
+        "META",
+        "about",
+        "title"
+      ],
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 21
+    },
+    {
+      "key": "meta.about.description",
+      "table": "META",
+      "path": [
+        "META",
+        "about",
+        "description"
+      ],
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 205
+    },
+    {
+      "key": "meta.about.ogTitle",
+      "table": "META",
+      "path": [
+        "META",
+        "about",
+        "ogTitle"
+      ],
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 21
+    },
+    {
+      "key": "meta.about.ogDescription",
+      "table": "META",
+      "path": [
+        "META",
+        "about",
+        "ogDescription"
+      ],
+      "page": "about",
+      "pages": [
+        "about"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 205
+    },
+    {
+      "key": "meta.library.title",
+      "table": "META",
+      "path": [
+        "META",
+        "library",
+        "title"
+      ],
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 23
+    },
+    {
+      "key": "meta.library.description",
+      "table": "META",
+      "path": [
+        "META",
+        "library",
+        "description"
+      ],
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 154
+    },
+    {
+      "key": "meta.library.ogTitle",
+      "table": "META",
+      "path": [
+        "META",
+        "library",
+        "ogTitle"
+      ],
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 23
+    },
+    {
+      "key": "meta.library.ogDescription",
+      "table": "META",
+      "path": [
+        "META",
+        "library",
+        "ogDescription"
+      ],
+      "page": "library",
+      "pages": [
+        "library"
+      ],
+      "section": "head",
+      "kind": "text",
+      "locales": [
+        "ar"
+      ],
+      "minLength": 1,
+      "maxLength": 154
+    },
+    {
+      "key": "subcat.design.logos.name",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "design",
+        0
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 10
+    },
+    {
+      "key": "subcat.design.logos.desc",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "design",
+        0,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 303
+    },
+    {
+      "key": "subcat.design.logos.descShort",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "design",
+        0,
+        "descShort"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 303
+    },
+    {
+      "key": "subcat.design.print.name",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "design",
+        1
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 16
+    },
+    {
+      "key": "subcat.design.print.desc",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "design",
+        1,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 109
+    },
+    {
+      "key": "subcat.design.print.descShort",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "design",
+        1,
+        "descShort"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 109
+    },
+    {
+      "key": "subcat.design.posters.name",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "design",
+        2
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 21
+    },
+    {
+      "key": "subcat.design.posters.desc",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "design",
+        2,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 274
+    },
+    {
+      "key": "subcat.design.posters.descShort",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "design",
+        2,
+        "descShort"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 274
+    },
+    {
+      "key": "subcat.photo.reels.name",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "photo",
+        0
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 8
+    },
+    {
+      "key": "subcat.photo.reels.desc",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "photo",
+        0,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 412
+    },
+    {
+      "key": "subcat.photo.reels.descShort",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "photo",
+        0,
+        "descShort"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 261
+    },
+    {
+      "key": "subcat.photo.video.name",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "photo",
+        1
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 16
+    },
+    {
+      "key": "subcat.photo.video.desc",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "photo",
+        1,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 373
+    },
+    {
+      "key": "subcat.photo.video.descShort",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "photo",
+        1,
+        "descShort"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 373
+    },
+    {
+      "key": "subcat.photo.stills.name",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "photo",
+        2
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 15
+    },
+    {
+      "key": "subcat.photo.stills.desc",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "photo",
+        2,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 496
+    },
+    {
+      "key": "subcat.photo.stills.descShort",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "photo",
+        2,
+        "descShort"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 376
+    },
+    {
+      "key": "subcat.tech.portfolio.name",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "tech",
+        0
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 16
+    },
+    {
+      "key": "subcat.tech.portfolio.desc",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "tech",
+        0,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 527
+    },
+    {
+      "key": "subcat.tech.portfolio.descShort",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "tech",
+        0,
+        "descShort"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 527
+    },
+    {
+      "key": "subcat.tech.landing.name",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "tech",
+        1
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 21
+    },
+    {
+      "key": "subcat.tech.landing.desc",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "tech",
+        1,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 498
+    },
+    {
+      "key": "subcat.tech.landing.descShort",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "tech",
+        1,
+        "descShort"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 354
+    },
+    {
+      "key": "subcat.tech.apps.name",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "tech",
+        2
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 12
+    },
+    {
+      "key": "subcat.tech.apps.desc",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "tech",
+        2,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 605
+    },
+    {
+      "key": "subcat.tech.apps.descShort",
+      "table": "SUBCATS",
+      "path": [
+        "SUBCATS",
+        "tech",
+        2,
+        "descShort"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "services",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 605
+    },
+    {
+      "key": "project.0.name",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        0
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 28
+    },
+    {
+      "key": "project.0.desc",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        0,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 188
+    },
+    {
+      "key": "project.0.tagline",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        0,
+        "profile",
+        "tagline"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 69
+    },
+    {
+      "key": "project.0.body",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        0,
+        "profile",
+        "body"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 767
+    },
+    {
+      "key": "project.1.name",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        1
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 29
+    },
+    {
+      "key": "project.1.desc",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        1,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 202
+    },
+    {
+      "key": "project.1.tagline",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        1,
+        "profile",
+        "tagline"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 56
+    },
+    {
+      "key": "project.1.body",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        1,
+        "profile",
+        "body"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 1010
+    },
+    {
+      "key": "project.2.name",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        2
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 39
+    },
+    {
+      "key": "project.2.desc",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        2,
+        "desc"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 119
+    },
+    {
+      "key": "project.2.tagline",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        2,
+        "profile",
+        "tagline"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 61
+    },
+    {
+      "key": "project.2.body",
+      "table": "PROJECTS",
+      "path": [
+        "PROJECTS",
+        2,
+        "profile",
+        "body"
+      ],
+      "page": "home",
+      "pages": [
+        "home",
+        "library"
+      ],
+      "section": "projects",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 456
+    },
+    {
+      "key": "testimonial.0.name",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        0,
+        "name"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 28
+    },
+    {
+      "key": "testimonial.0.business",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        0,
+        "business"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 63
+    },
+    {
+      "key": "testimonial.0.quote",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        0,
+        "quote"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 127
+    },
+    {
+      "key": "testimonial.1.name",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        1,
+        "name"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 28
+    },
+    {
+      "key": "testimonial.1.business",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        1,
+        "business"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 60
+    },
+    {
+      "key": "testimonial.1.quote",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        1,
+        "quote"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 117
+    },
+    {
+      "key": "testimonial.2.name",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        2,
+        "name"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 28
+    },
+    {
+      "key": "testimonial.2.business",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        2,
+        "business"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 52
+    },
+    {
+      "key": "testimonial.2.quote",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        2,
+        "quote"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 151
+    },
+    {
+      "key": "testimonial.3.name",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        3,
+        "name"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 28
+    },
+    {
+      "key": "testimonial.3.business",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        3,
+        "business"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 80
+    },
+    {
+      "key": "testimonial.3.quote",
+      "table": "TESTIMONIALS",
+      "path": [
+        "TESTIMONIALS",
+        3,
+        "quote"
+      ],
+      "page": "home",
+      "pages": [
+        "home"
+      ],
+      "section": "testimonials",
+      "kind": "text",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "minLength": 0,
+      "maxLength": 101
+    }
+  ],
   "slots": [
     {
       "id": "home.media.1",
