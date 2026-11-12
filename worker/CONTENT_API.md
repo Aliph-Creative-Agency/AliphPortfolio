@@ -121,7 +121,10 @@ markup's default.
   category, or an active gallery item of that category (the caller passes that lookup to `validateRing`).
 - Resolving an id when merging (P-07b, P-08): first the service's default RINGS entry with that id (it keeps its
   `sub`, `open`, `project` and `full`), then a MEDIA entry, then a gallery item. For the last two, `sub` comes from
-  the item, and for a gallery video `open` is its file.
+  the item, and for a gallery video `open` is its file. A MEDIA or gallery pick always gets a full picture URL,
+  never `assets/media/<f>` (only the default ring entries are in the bundle; five photo posters are on R2 alone):
+  the upload's `src` (image) or `poster` (video), else `R2/img/<f>` or `R2/poster/<p>`, the archive's `full`. A
+  video pick plays its `src` when one is set, else `R2/video/<f>`.
 
 **Resetting a ring to its default** is a staged removal. `item_ids_json` is NOT NULL, so it cannot be a NULL draft.
 It works like gallery and clients do (migration `0002_ring_picks_state.sql`):
@@ -150,6 +153,14 @@ that is both deleted and unpublished.
 - `ratio` is width/height, in the range (0, 10]. `date` is `YYYY-MM` or `YYYY-MM-DD`. `hidden` is a boolean.
   `sort` is a finite number.
 - Mapping to MEDIA: `src` ≈ `f`, `poster` ≈ `p` (set means video), `cat` ≈ `c`, `ratio` ≈ `r`, `date` ≈ `d`.
+- **Images and videos (P-10b).** An item is a video when it overrides a MEDIA row with `v`, or when it is an upload
+  carrying `poster`. A video's `src` is the film main.js plays (`data-film`, the ring preview, the lightbox), so it
+  must be an mp4/webm on `media.aliphcreative.com`, and its `poster` is the picture (an image). Anything else is an
+  image: `src` is an image and `poster` is refused (400 `only a video has a poster`). An upload whose `src` is a
+  video and has no `poster` gets 400 on `poster`. An override may set either field alone: main.js falls back per
+  field, so a video tile shows `poster || R2/thumb/<p>` (lightbox `poster || R2/poster/<p>`) and plays
+  `src || R2/video/<f>`, and an image tile shows `src || R2/thumb/<f>` (lightbox `src || R2/img/<f>`).
+  Upload tiles use the full file as the thumbnail (there is no `thumb/` derivative for an upload).
 - `published_json` is exactly `JSON.stringify(galleryItemFromRow(row))`, so an unchanged row reads the same in
   both states. A row with `state = 'deleted'` is a removal staged until publish. For an override, removing the row
   means going back to the default piece. Use `hidden` to take a default piece off the site.

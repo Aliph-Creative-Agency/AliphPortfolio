@@ -177,27 +177,50 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 // an EN text override and a ring-line (SUBCATS desc) override both appear, a film-frame slot and a ring pick
 // land, and the media requests are the baseline's (hero first, nothing below the fold early) apart from the
 // pictures the scenario changes (CHANGED).
+// Then /library en at 390 and 1440 (P-10b), opened as ?open=<video upload id>: every media tile has a real src and
+// data-full, the uploads and the poster-only / src-only overrides of default videos show the right URLs, and the deep
+// link opens the upload's film.
 export const SCENARIO = {
   rev: 1,
   text: { ctaStart: { en: "Begin right here" }, "subcat.design.posters.desc": { en: "RING-LINE-OVERRIDE the poster ring says this now." } },
   slots: { "home.film.1": { src: "assets/media/pics-food-21-dsc03454.webp" } },
-  rings: { photo: ["pics-food-17-dsc00763.webp", "reels-alif-tuktuk.mp4", "not-a-real-id"] },
+  // reels-alif-tuktuk.mp4 and horizontal-maqasid.mp4 are MEDIA rows, not the ring's own entries (those are filed
+  // under their .webp), so they resolve to R2 URLs (P-10b): maqasid's poster is not in the bundle at all.
+  rings: { photo: ["pics-food-17-dsc00763.webp", "reels-alif-tuktuk.mp4", "horizontal-maqasid.mp4", "not-a-real-id"] },
 };
+const R2 = "https://media.aliphcreative.com";
 // the pictures the scenario itself adds or takes away: the film frame it swaps, the photo-ring items it leaves out
 const CHANGED = new Set(["pics-idk-category-28-dsc00020", "pics-food-21-dsc03454", "reels-einar-edited", "pics-Queen-retreat-52-copy-of-0c2a0144",
   "reels-child-section-final", "reels-connect-edited", "pics-official-visits-43-dsc08794", "pics-Interactive-37-dsc03223",
   // ... and the two it keeps, which it reorders
-  "reels-alif-tuktuk", "pics-food-17-dsc00763"].map((n) => `/assets/media/${n}.webp`));
+  "reels-alif-tuktuk", "pics-food-17-dsc00763"].map((n) => `/assets/media/${n}.webp`)
+  // ... and the two MEDIA-row picks, which come from R2 (request paths are pathnames)
+  .concat(["/poster/reels-alif-tuktuk.webp", "/poster/horizontal-maqasid.webp"]));
+
+// /library (P-10b): an image upload, a video upload, a poster-only and a src-only override of default videos.
+// Opened as ?open=<video upload id>, the deep link a ring would send.
+export const LIB_SCENARIO = {
+  rev: 1,
+  gallery: [
+    { id: "up-still", src: `${R2}/img/design-haqqak-1.webp`, cat: "photo", ratio: 0.8, date: "2026-11-01" },
+    { id: "up-film", src: `${R2}/video/horizontal-maqasid.mp4`, poster: `${R2}/poster/horizontal-maqasid.webp`, cat: "photo", ratio: 1.7778, date: "2026-11-02" },
+    { id: "reels-alif-tuktuk.mp4", poster: `${R2}/poster/reels-einar-edited.webp` },
+    { id: "reels-copy-of-bader-4.mp4", src: `${R2}/video/reels-einar-edited.mp4` },
+  ],
+};
+
+const inject = (blob) => (html) =>
+  html.replace(/(<script[^>]*src="main\.js")/, `<script type="application/json" id="aliph-content">${blob}</script>\n$1`);
+const routeWith = (re, snapshot) => async (ctx) => {
+  const add = inject(JSON.stringify(snapshot).replace(/</g, "\\u003c"));
+  await ctx.route(re, async (route) => {
+    const res = await route.fetch();
+    await route.fulfill({ response: res, body: add(await res.text()) });
+  });
+};
 
 async function scenario(baseDir) {
-  const blob = JSON.stringify(SCENARIO).replace(/</g, "\u003c");
-  const setup = async (ctx) => {
-    await ctx.route(/\/$/, async (route) => {
-      const res = await route.fetch();
-      const html = (await res.text()).replace(/(<script[^>]*src="main\.js")/, `<script type="application/json" id="aliph-content">${blob}</script>\n$1`);
-      await route.fulfill({ response: res, body: html });
-    });
-  };
+  const setup = routeWith(/\/$/, SCENARIO);
   const inspect = (page) => page.evaluate(async () => {
     const dl = (sel) => (document.querySelector(sel) || {}).textContent || "";
     await new Promise((r) => setTimeout(r, 400));
@@ -208,6 +231,7 @@ async function scenario(baseDir) {
       film1: (document.querySelector('.film-frame[data-frame="0"] img') || {}).getAttribute?.("src") || "",
       content: document.querySelectorAll("#aliph-content").length,
       photoRing: [...document.querySelectorAll(".ring-item")].length,
+      ringFull: [...document.querySelectorAll(".ring-item")].map((b) => b.dataset.full || ""),
     };
   });
   const { requests, facts } = await shoot(path.join(OUT, "scenario"), { setup, inspect, pages: [["home", "/"]], langs: ["en"] });
@@ -223,8 +247,43 @@ async function scenario(baseDir) {
     const strip = (l) => l.filter((p) => !CHANGED.has(p));
     check(JSON.stringify(strip(requests[n])) === JSON.stringify(strip(base[n])), `${n}: media request order = baseline outside the changed pictures (hold and hero unchanged)`);
     const got = new Set(requests[n]);
-    check(got.has("/assets/media/reels-alif-tuktuk.webp") && got.has("/assets/media/pics-food-17-dsc00763.webp") && !got.has("/assets/media/reels-einar-edited.webp"), `${n}: the ring shows the picked items only`);
+    check(got.has("/poster/reels-alif-tuktuk.webp") && got.has("/assets/media/pics-food-17-dsc00763.webp") && !got.has("/assets/media/reels-einar-edited.webp"), `${n}: the ring shows the picked items only`);
+    check(f.ringFull.includes(`${R2}/poster/horizontal-maqasid.webp`) && !f.ringFull.some((s) => s.includes("assets/media/horizontal-maqasid")),
+      `${n}: a ring pick of horizontal-maqasid.mp4 shows its R2 poster`);
     check(requests[n][0] === base[n][0], `${n}: first media request is the hero's (${requests[n][0]})`);
+  }
+
+  const libInspect = (page) => page.evaluate(async () => {
+    await new Promise((r) => setTimeout(r, 800));
+    const tiles = [...document.querySelectorAll(".tile")];
+    const imgOf = (t) => (t && t.querySelector("img")) || null;
+    const byFilm = (v) => tiles.find((t) => t.dataset.film === v);
+    const lb = document.querySelector(".lb");
+    return {
+      /* media tiles (a project tile shows its own cover from assets/shots/, no data-full) */
+      srcs: tiles.filter((t) => t.dataset.project === undefined).map(imgOf).filter(Boolean).map((i) => [i.getAttribute("src"), i.getAttribute("data-full")]),
+      films: tiles.map((t) => t.dataset.film).filter((v) => v !== undefined),
+      still: tiles.map(imgOf).filter(Boolean).some((i) => i.getAttribute("src") === "https://media.aliphcreative.com/img/design-haqqak-1.webp"),
+      upFilm: !!byFilm("https://media.aliphcreative.com/video/horizontal-maqasid.mp4"),
+      posterOnly: imgOf(byFilm("reels-alif-tuktuk.mp4"))?.getAttribute("src") || "",
+      srcOnly: imgOf(byFilm("https://media.aliphcreative.com/video/reels-einar-edited.mp4"))?.getAttribute("src") || "",
+      lightbox: lb ? lb.innerHTML.includes("https://media.aliphcreative.com/video/horizontal-maqasid.mp4") : false,
+    };
+  });
+  const lib = await shoot(path.join(OUT, "scenario-library"), {
+    setup: routeWith(/\/library(\?.*)?$/, LIB_SCENARIO), inspect: libInspect,
+    pages: [["library", "/library?open=up-film"]], langs: ["en"],
+  });
+  const real = (s) => typeof s === "string" && /^(https:\/\/media\.aliphcreative\.com\/|assets\/)/.test(s) && !s.includes("undefined");
+  for (const size of ["phone", "desktop"]) {
+    const n = `library-${size}-en`, f = lib.facts[n];
+    check(f.srcs.length > 0 && f.srcs.every(([s, full]) => real(s) && real(full)), `${n}: every tile's src and data-full is a real URL (${f.srcs.length} tiles${f.srcs.filter(([s, full]) => !(real(s) && real(full))).slice(0, 2).map((x) => " BAD " + JSON.stringify(x)).join("")})`);
+    check(f.films.every((s) => s && !s.includes("undefined")), `${n}: no data-film is empty or undefined (${f.films.length})`);
+    check(f.still, `${n}: the image upload's tile shows its src`);
+    check(f.upFilm, `${n}: the video upload's data-film is its mp4 URL`);
+    check(f.posterOnly === `${R2}/poster/reels-einar-edited.webp`, `${n}: a poster-only override shows that poster (${f.posterOnly})`);
+    check(f.srcOnly === `${R2}/thumb/reels-copy-of-bader-4.webp`, `${n}: a src-only override keeps the R2 thumb (${f.srcOnly})`);
+    check(f.lightbox, `${n}: ?open=<video upload id> opens its film`);
   }
   return fail;
 }

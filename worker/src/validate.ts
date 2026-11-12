@@ -150,6 +150,7 @@ export const ringItemId = (it: RingDefault): string => (it.f ?? it.shot) as stri
 
 export const RING_MAX = 24;
 const MEDIA_CAT = new Map((defaults.MEDIA as { f: string; c: string }[]).map((m) => [m.f, m.c]));
+const MEDIA_VIDEO = new Set((defaults.MEDIA as { f: string; v?: number }[]).filter((m) => m.v).map((m) => m.f));
 
 /** True for an id the ring may hold without a gallery lookup: one of its
  *  default items, or a MEDIA file of the same category. */
@@ -192,15 +193,28 @@ export function validateGalleryItem(v: unknown): Result<GalleryItem> {
   const it = v as Record<string, unknown>;
   if (typeof it.id !== "string" || !ID_RE.test(it.id)) return bad("bad id", "id");
   const isDefault = MEDIA_CAT.has(it.id);
+  /* A video's src is the film main.js plays (data-film, the ring preview) and
+     its poster the picture it shows; an image has a src and no poster. A
+     default row is what MEDIA says it is; an upload is a video when it
+     carries a poster (P-10b). */
+  const isVideo = isDefault ? MEDIA_VIDEO.has(it.id) : it.poster !== undefined;
   const out: GalleryItem = { id: it.id };
   for (const [k, x] of Object.entries(it)) {
     switch (k) {
       case "id":
         break;
       case "src":
+        if (isVideo && !isUrl(VIDEO, x)) return bad("a video's src must be an mp4/webm on media.aliphcreative.com", k);
+        if (!isVideo && !isUrl(IMAGE, x)) {
+          if (!isDefault && isUrl(VIDEO, x)) return bad("a video upload needs a poster", "poster");
+          return bad("not an image under assets/media/ or media.aliphcreative.com", k);
+        }
+        out.src = x as string;
+        break;
       case "poster":
+        if (!isVideo) return bad("only a video has a poster", k);
         if (!isUrl(IMAGE, x)) return bad("not an image under assets/media/ or media.aliphcreative.com", k);
-        out[k] = x as string;
+        out.poster = x as string;
         break;
       case "cat":
         if (typeof x !== "string" || !CAT_IDS.has(x)) return bad("unknown category", k);

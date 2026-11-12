@@ -2450,7 +2450,13 @@ if (mergeSnap) {
       if (!m) return null;
       const it = { f: m.v ? m.p || m.f : m.f, sub: m.sub, r: m.r };
       if (m.v) it.open = m.f;
-      if (m.src) { it.src = m.v ? m.poster : m.src; if (m.v) it.film = m.src; }
+      /* ⚠️ Always a full URL, never srcOf's `assets/media/<f>`: only the
+         default ring entries are in the bundle, and a MEDIA row's picture may
+         be on R2 alone (five photo posters are). Each field falls back on its
+         own, the way the archive tile's `full` does: an override that sets
+         only a video's src still has the R2 poster to show. */
+      it.src = m.v ? m.poster || `${R2}/poster/${m.p}` : m.src || `${R2}/img/${m.f}`;
+      if (m.v && m.src) it.film = m.src;
       return it;
     }).filter(Boolean);
     if (items.length) RINGS[svc] = items;
@@ -4325,11 +4331,13 @@ function renderLibrary() {
          The lightbox still opens the full file — that is the one place the
          work is meant to be seen at size. resources/thumb_media.py derives
          them; every key under thumb/ is the same name as its source. */
-      const src = m.src ? (m.v ? m.poster : m.src) : `${R2}/thumb/${m.v ? m.p : m.f}`;   /* an upload carries full URLs */
+      /* An admin row carries full URLs (src = the image, or a video's film;
+         poster = a video's picture), each falling back on its own R2 key. */
+      const src = m.v ? m.poster || `${R2}/thumb/${m.p}` : m.src || `${R2}/thumb/${m.f}`;
       /* The full file the lightbox opens. Carried on the node because the
          overlay reads the picture that is on screen, and the picture on screen
          is now the thumbnail. */
-      const full = m.src ? (m.v ? m.poster : m.src) : m.v ? `${R2}/poster/${m.p}` : `${R2}/img/${m.f}`;
+      const full = m.v ? m.poster || `${R2}/poster/${m.p}` : m.src || `${R2}/img/${m.f}`;
       const date = m.d ? `<figcaption><span class="t-date">${fmtDate(m.d)}</span></figcaption>` : "";
       /* ⚠️ EVERY tile answers the keyboard, not only the films. Until
          2026-08-26 the `role="button" tabindex="0"` rode along with
@@ -4986,18 +4994,23 @@ function openFromQuery() {
      be in the document at all yet. Build the one that holds it — its service
      for a media file, `tech` for a project — and `all` as the fallback the
      search below falls through to. */
-  const home = wantProject !== null
-    ? "tech"
-    : (MEDIA.find((m) => m.f === wantOpen || m.p === wantOpen) || {}).c;
+  /* An admin upload is filed under its id but its tile carries full URLs: a
+     video's data-film is its src, an image's <img> its src. Look those up by
+     the row, so `?open=<upload id>` lands like any other piece. */
+  const row = wantOpen ? MEDIA.find((m) => m.f === wantOpen || m.p === wantOpen || m.src === wantOpen) : null;
+  const home = wantProject !== null ? "tech" : (row || {}).c;
   if (home) ensurePanel(home);
   ensurePanel("all");
 
   const sel = wantProject !== null
     ? '.tile[data-project="' + CSS.escape(wantProject) + '"]'
-    : '.tile[data-film="' + CSS.escape(wantOpen) + '"]';
+    : '.tile[data-film="' + CSS.escape(row && row.v && row.src ? row.src : wantOpen) + '"]';
   let all = Array.from(document.querySelectorAll(sel));
   if (!all.length && wantOpen) {
-    all = Array.from(document.querySelectorAll('.tile img[src$="/' + wantOpen + '"]'))
+    const img = row && row.src && !row.v
+      ? '.tile img[src="' + CSS.escape(row.src) + '"]'
+      : '.tile img[src$="/' + wantOpen + '"]';
+    all = Array.from(document.querySelectorAll(img))
       .map((i) => i.closest(".tile"));
   }
   /* ⚠️ Every piece appears TWICE — once in its category panel and once in the

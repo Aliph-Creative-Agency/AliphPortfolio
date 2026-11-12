@@ -294,6 +294,27 @@ describe("validation by registry (write handlers answer a failure with badReques
     expect(validateClient({ id: "c1", name: { ar: "", en: "Client" } })).toMatchObject({ ok: false, field: "name.ar" });
   });
 
+  // P-10b: a video's src is the film (main.js plays it: data-film, ring
+  // preview) and its poster the picture; an image has no poster.
+  it("gallery: src is a video exactly when the item is a video; poster only on a video", () => {
+    const H = "https://media.aliphcreative.com";
+    const vid = "horizontal-maqasid.mp4"; /* a default MEDIA video row */
+    const img = "design-haqqak-1.webp"; /* a default MEDIA image row */
+    /* uploads */
+    expect(validateGalleryItem({ id: "up-v", src: `${H}/video/u.mp4`, poster: `${H}/poster/u.webp`, cat: "photo" }).ok).toBe(true);
+    expect(validateGalleryItem({ id: "up-v", src: `${H}/img/u.webp`, poster: `${H}/poster/u.webp`, cat: "photo" })).toMatchObject({ ok: false, field: "src" });
+    expect(validateGalleryItem({ id: "up-v", src: `${H}/video/u.mp4`, cat: "photo" })).toMatchObject({ ok: false, field: "poster" });
+    expect(validateGalleryItem({ id: "up-v", src: `${H}/video/u.mp4`, poster: `${H}/video/u.mp4`, cat: "photo" })).toMatchObject({ ok: false, field: "poster" });
+    /* override of a default video */
+    expect(validateGalleryItem({ id: vid, src: `${H}/video/new.mp4` }).ok).toBe(true);
+    expect(validateGalleryItem({ id: vid, poster: `${H}/poster/new.webp` }).ok).toBe(true);
+    expect(validateGalleryItem({ id: vid, src: `${H}/img/new.webp` })).toMatchObject({ ok: false, field: "src" });
+    /* override of a default image */
+    expect(validateGalleryItem({ id: img, src: `${H}/img/new.webp` }).ok).toBe(true);
+    expect(validateGalleryItem({ id: img, src: `${H}/video/new.mp4` })).toMatchObject({ ok: false, field: "src" });
+    expect(validateGalleryItem({ id: img, poster: `${H}/poster/new.webp` })).toMatchObject({ ok: false, field: "poster" });
+  });
+
   // P-10a: main.js puts table text into innerHTML (renderLibrary fill(): the
   // SUBCATS name) and into double-quoted attributes (aria-label from I18N), so
   // < > and " would let a published value become markup. Refused at the door.
