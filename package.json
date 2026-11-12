@@ -6,8 +6,9 @@
   "description": "aliphcreative.com: static site in prototype/ served by the aliphcreative Worker (worker/). Dev tooling only; nothing here is bundled into the page.",
   "scripts": {
     "dev": "wrangler dev --local --port 8831 --inspector-port 9231",
-    "test": "vitest run",
-    "check:site": "node --check prototype/main.js && node resources/build_static.mjs --check"
+    "test": "vitest run -c worker/vitest.config.ts",
+    "check:site": "node --check prototype/main.js && node resources/build_static.mjs --check",
+    "typecheck": "tsc -p worker"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.23.0",
