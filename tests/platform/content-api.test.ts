@@ -238,7 +238,6 @@ describe("validation by registry (write handlers answer a failure with badReques
     expect(validateText("heroPara", "en", "two\nlines")).toEqual({ ok: true, value: "two\nlines" });
     expect(validateText("heroPara", "en", "bell\u0007")).toMatchObject({ ok: false });
     expect(validateText("heroPara", "en", "cr\r\n")).toMatchObject({ ok: false });
-    expect(validateText("hero1", "en", "<b>is text</b>")).toEqual({ ok: true, value: "<b>is text</b>" });
     const max = registry.text.find((e) => e.key === "hero1")!.maxLength;
     expect(validateText("hero1", "en", "x".repeat(max)).ok).toBe(true);
     expect(validateText("hero1", "en", "x".repeat(max + 1))).toMatchObject({ ok: false, field: "value" });
@@ -293,5 +292,37 @@ describe("validation by registry (write handlers answer a failure with badReques
     expect(validateGalleryItem({ id: "../x" })).toMatchObject({ ok: false, field: "id" });
     expect(validateClient({ id: "c1", name: { ar: "عميل", en: "Client" } }).ok).toBe(true);
     expect(validateClient({ id: "c1", name: { ar: "", en: "Client" } })).toMatchObject({ ok: false, field: "name.ar" });
+  });
+
+  // P-10a: main.js puts table text into innerHTML (renderLibrary fill(): the
+  // SUBCATS name) and into double-quoted attributes (aria-label from I18N), so
+  // < > and " would let a published value become markup. Refused at the door.
+  describe("markup characters < > \" are refused (main.js innerHTML / attribute sinks)", () => {
+    const MSG = "use “ ” instead of \"; no < or >";
+    for (const ch of ["<", ">", "\""]) {
+      it(`text refuses ${ch}`, async () => {
+        for (const [key, locale] of [["hero1", "en"], ["heroPara", "ar"], ["subcat.photo.reels.name", "en"], ["meta.home.title", "ar"]]) {
+          const r = validateText(key, locale, `a${ch}b`);
+          expect(r, key).toEqual({ ok: false, error: MSG, field: "value" });
+          if (r.ok) throw new Error("unreachable");
+          const res = badRequest(r);
+          expect(res.status).toBe(400);
+          expect(await res.json()).toEqual({ error: MSG, field: "value" });
+        }
+      });
+      it(`alt refuses ${ch} (slots and gallery)`, () => {
+        const plain = registry.slots.find((s) => s.kind === "media" && !("preview" in s))!.id;
+        expect(validateSlot(plain, { alt: { en: `a${ch}b` } })).toEqual({ ok: false, error: MSG, field: "alt.en" });
+        expect(validateGalleryItem({ id: "design-haqqak-1.webp", alt: { ar: `a${ch}b` } })).toEqual({ ok: false, error: MSG, field: "alt.ar" });
+      });
+      it(`client name refuses ${ch}`, () => {
+        expect(validateClient({ id: "c1", name: { ar: "عميل", en: `a${ch}b` } })).toEqual({ ok: false, error: MSG, field: "name.en" });
+        expect(validateClient({ id: "c1", name: { ar: `a${ch}b`, en: "Client" } })).toEqual({ ok: false, error: MSG, field: "name.ar" });
+      });
+    }
+    it("curly quotes, apostrophes and & stay allowed", () => {
+      expect(validateText("hero1", "en", "“quoted” it's A & B").ok).toBe(true);
+      expect(validateClient({ id: "c1", name: { ar: "عميل", en: "A & B's" } }).ok).toBe(true);
+    });
   });
 });

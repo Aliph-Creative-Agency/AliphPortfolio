@@ -5,10 +5,15 @@
 // and answers a failure with `badRequest(result)` — a 400 the editor can show
 // next to the field. worker/CONTENT_API.md "Validation" is the contract.
 //
-// Values are TEXT. Nothing here strips or escapes markup: the Worker escapes
-// on output (P-06) and main.js sets textContent, so "<b>" in a value is shown
-// as the five characters it is. What IS refused is what text cannot carry:
-// control characters, and line breaks outside a `richline`.
+// Values are TEXT. The Worker escapes everything it injects (P-06), but main.js
+// does NOT only set textContent: it builds markup from its tables with
+// innerHTML (renderLibrary's fill(): the SUBCATS name) and writes I18N values
+// into double-quoted attributes (aria-label on the lightbox and the thumbs,
+// renderServiceSections). The boot merge feeds published values into those
+// tables, so `<`, `>` and `"` are refused in every text value, alt and client
+// name (P-10a) instead of being escaped sink by sink; “ ” stand in for ".
+// Also refused is what text cannot carry: control characters, and line breaks
+// outside a `richline`.
 
 import registry from "./generated/registry.json";
 import defaults from "./generated/defaults.json";
@@ -58,6 +63,11 @@ export const textEntry = (key: string): TextEntry | undefined => TEXT.get(key);
 const CONTROL = /[\u0000-\u0009\u000B-\u001F\u007F]/;
 /* plain text in an attribute or a short label: no \n either */
 const CONTROL_OR_NL = /[\u0000-\u001F\u007F]/;
+/* what would make a value markup in main.js's innerHTML and double-quoted
+   attribute sinks (P-10a). `'` and `&` stay: no sink is single-quoted, and an
+   entity decodes to text. */
+const MARKUP = /[<>"]/;
+export const MARKUP_ERROR = "use “ ” instead of \"; no < or >";
 
 /** A text value for (key, locale). `null` = reset to the default. */
 export function validateText(key: unknown, locale: unknown, value: unknown): Result<string | null> {
@@ -69,6 +79,7 @@ export function validateText(key: unknown, locale: unknown, value: unknown): Res
   if ((e.kind === "richline" ? CONTROL : CONTROL_OR_NL).test(value)) {
     return bad(e.kind === "richline" ? "control characters are not allowed" : "line breaks are not allowed here", "value");
   }
+  if (MARKUP.test(value)) return bad(MARKUP_ERROR, "value");
   if (value.length < e.minLength) return bad("value is required", "value");
   if (value.length > e.maxLength) return bad(`longer than ${e.maxLength} characters`, "value");
   return good(value);
@@ -95,6 +106,7 @@ function validateAlt(v: unknown, field: string): Result<Pair> {
   for (const [l, s] of Object.entries(v)) {
     if (l !== "ar" && l !== "en") return bad("unknown locale", `${field}.${l}`);
     if (typeof s !== "string" || CONTROL_OR_NL.test(s)) return bad("alt must be plain text", `${field}.${l}`);
+    if (MARKUP.test(s)) return bad(MARKUP_ERROR, `${field}.${l}`);
     if (s.length > ALT_MAX) return bad(`longer than ${ALT_MAX} characters`, `${field}.${l}`);
     out[l] = s;
   }
@@ -245,6 +257,7 @@ export function validateClient(v: unknown): Result<{ id: string; name: { ar: str
   for (const l of ["ar", "en"] as const) {
     const s = c.name?.[l];
     if (typeof s !== "string" || s.length < 1 || CONTROL_OR_NL.test(s)) return bad("name is required", `name.${l}`);
+    if (MARKUP.test(s)) return bad(MARKUP_ERROR, `name.${l}`);
     if (s.length > CLIENT_NAME_MAX) return bad(`longer than ${CLIENT_NAME_MAX} characters`, `name.${l}`);
   }
   return good({ id: c.id, name: { ar: c.name!.ar as string, en: c.name!.en as string } });

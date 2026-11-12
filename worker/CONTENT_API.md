@@ -90,8 +90,7 @@ and `pages`, `section`, `uses` (`text` = element content, `label` = `data-i18n-l
 - `richline`: plain text whose only structure is `\n` (a line break). `\r`, other control characters and markup
   are not structure. The kind is decided by the default: `heroPara` and `rateAskPhone` today, and any field whose
   default contains `\n`.
-- Values are always text. `<b>` is accepted and shown as those three characters. The Worker escapes everything it
-  injects (P-06), and main.js sets `textContent`. Neither ever produces HTML from a value.
+- Values are always text, and `<`, `>` and `"` are refused in every value (see Validation). Use “ ” for quotes.
 
 **Lengths.** `maxLength = ceil(longest default locale × 1.6)`, counted in UTF-16 code units (JS `.length`). For
 `descShort` it is sized on the full `desc` when there is no short one. For a testimonial `name` it is sized on all
@@ -162,6 +161,13 @@ that is both deleted and unpublished.
    `{"error", "field"}`) before touching D1. These all return 400: an unknown key, slot, ring, ring item or gallery
    field; a locale the entry does not list; a wrong kind; a length outside `[minLength, maxLength]`; a URL outside
    the allowed origins.
+   Also 400 `{"error": "use “ ” instead of \"; no < or >", field}`: a `<`, `>` or `"` in any text value
+   (I18N keys, fields, `meta.*`, richlines), any `alt` (slots and gallery) or a client name. Why: the Worker escapes
+   what it injects, but main.js does not only set `textContent`. It builds markup with `innerHTML` from table text
+   (renderLibrary `fill()` writes the SUBCATS name) and puts I18N values inside double-quoted attributes
+   (`aria-label` on the lightbox and the thumbs, renderServiceSections). The boot merge feeds published values into
+   those tables, so these three characters are refused at the door instead of escaped at each sink. `'` and `&` are
+   allowed: no sink is single-quoted, and an entity decodes to text. No default value contains them.
 2. Write with the rev the client read (`locks`) using `… WHERE rev = ?` and `rev = rev + 1`. Zero rows changed
    means a conflict: return 409 with the current row.
 3. Text and slot drafts reset with `draft = NULL` / `draft_json = NULL`. Gallery items, rings and clients reset or
