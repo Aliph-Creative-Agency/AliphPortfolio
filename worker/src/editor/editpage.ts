@@ -9,7 +9,7 @@
 //   <base href="/">         first in <head>: the page lives under /admin/edit/
 //                           but its relative URLs (main.js, style.css,
 //                           assets/…) must resolve as on the public page
-//   editor.css + editor.js  before </body>
+//   editor.css + editor-api.js + editor.js  before </body>
 // The blob main.js merges is the draft minus `locks` (renderText's blob()
 // strips them). Never cached: no cache.ts, `no-store`, and `noindex` in case
 // a crawler ever gets past Access. A store failure is a 503 — an edit page
@@ -30,7 +30,7 @@ export function editPageOf(pathname: string): Page | null {
   return pageOf(pathname.slice("/admin/edit".length));
 }
 
-const TAIL = '<link rel="stylesheet" href="/admin/editor.css">\n<script src="/admin/editor.js" defer></script>\n';
+const TAIL = '<link rel="stylesheet" href="/admin/editor.css">\n<script src="/admin/editor-api.js" defer></script>\n<script src="/admin/editor.js" defer></script>\n';
 
 export async function editPage(request: Request, env: Env, url: URL, page: Page): Promise<Response> {
   if (request.method !== "GET") {

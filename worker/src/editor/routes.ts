@@ -3,7 +3,8 @@
 // means "not mine" and the request falls through to the rest.
 
 import type { AdminCtx, Env } from "../index";
-import { requireSameOrigin } from "./http";
+import { json, requireSameOrigin } from "./http";
+import registry from "../generated/registry.json";
 import { editPage, editPageOf } from "./editpage";
 import { textRoute } from "./text";
 
@@ -18,6 +19,10 @@ export async function editorRoute(
   // The three pages with the draft rendered in and the editor hooks (E-01).
   const page = editPageOf(path);
   if (page) return editPage(request, env, url, page);
+
+  // What the editor may edit and how long each value may be (E-04): the same
+  // registry validate.ts checks writes against. GET, so no Origin check.
+  if (path === "/api/admin/registry" && request.method === "GET") return json(registry);
 
   if (path === "/api/admin/text") {
     const bad = requireSameOrigin(request);

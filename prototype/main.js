@@ -5119,7 +5119,7 @@ if (document.fonts && document.fonts.ready) {
    every re-render (language toggle, ring turn, rotor tick) by a debounced
    MutationObserver; elements tagged here (data-ek-auto) lose the tag when
    they stop showing that value, the Worker's tags are never touched. Exposes
-   window.aliphEdit = { tag, apply, lang }. ───────────────────────────── */
+   window.aliphEdit = { tag, apply, read, lang }. ───────────────────────────── */
 if (document.documentElement.dataset.editMode === "1") {
   const squash = (v) => String(v).replace(/\s+/g, " ").trim();
   const TABLES = { I18N, SUBCATS, PROJECTS, TESTIMONIALS, MEDIA };
@@ -5180,10 +5180,19 @@ if (document.documentElement.dataset.editMode === "1") {
     return true;
   }
 
+  /* the value a locale currently holds in the tables (undefined for a key the tables do not carry, e.g. meta.*) */
+  function read(key, locale) {
+    const M = window.__aliphMerge;
+    const path = Object.prototype.hasOwnProperty.call(I18N, key) ? ["I18N", key] : M && M.fieldPath(TABLES, key);
+    let o = TABLES;
+    for (const seg of path || []) { if (o == null) return undefined; o = o[seg]; }
+    return o && typeof o[locale] === "string" ? o[locale] : undefined;
+  }
+
   let tagTimer = null;
   const later = () => { clearTimeout(tagTimer); tagTimer = setTimeout(tag, 150); };
   new MutationObserver(later).observe(document.body, { childList: true, subtree: true, characterData: true });
-  window.aliphEdit = { tag, apply, get lang() { return lang; } };
+  window.aliphEdit = { tag, apply, read, get lang() { return lang; } };
   later();
 }
 /* ── end EDIT MODE HOOKS ── */

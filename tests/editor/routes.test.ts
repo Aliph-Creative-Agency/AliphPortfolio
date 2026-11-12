@@ -30,3 +30,18 @@ describe("access", () => {
     expect(r.status).toBe(403);
   });
 });
+
+describe("GET /api/admin/registry", () => {
+  it("with Access: 200 JSON with text, fields and slots", async () => {
+    const r = await call("/api/admin/registry");
+    expect(r.status).toBe(200);
+    expect(r.headers.get("content-type")).toContain("application/json");
+    const b = (await r.json()) as { text: { key: string; maxLength: number }[]; fields: unknown[]; slots: unknown[] };
+    expect(b.text.some((t) => t.key === "hero1")).toBe(true);
+    expect(Array.isArray(b.fields) && Array.isArray(b.slots)).toBe(true);
+  });
+  it("without Access: 403", async () => {
+    const r = await call("/api/admin/registry", {}, { ...env, ADMIN_DEV_BYPASS: undefined } as Env);
+    expect(r.status).toBe(403);
+  });
+});
