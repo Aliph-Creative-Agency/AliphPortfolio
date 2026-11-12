@@ -10,5 +10,6 @@ export function archiveBlock(T: Tables): string;
 export function reviewsLD(T: Tables): object;
 export function projectsLD(T: Tables): object;
 export function ldScript(obj: object): string;
+export function regionInner(body: string): string;
 export function fill(html: string, name: string, body: string, file: string): string;
 export function pageRegions(T: Tables): Record<string, Record<string, string>>;

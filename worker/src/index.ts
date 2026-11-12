@@ -14,6 +14,7 @@ import { isAdminPath, verifyAccess, type AccessEnv } from "./auth";
 import { contentRoute, draftContent } from "./api/content";
 import { etagMatches, pageEtag, pageOf, renderText, type Page } from "./render/text";
 import { onSlots } from "./render/slots";
+import { onRegions } from "./render/regions";
 import { getPublished, matchPage, pageKey, putPage, type CacheEnv, type Published } from "./cache";
 import { isEmpty } from "./store";
 
@@ -63,8 +64,9 @@ export default {
   },
 } satisfies ExportedHandler<Env>;
 
-/** One of the three pages, with the published text and media slots rendered
- *  in, in one streaming pass (render/text.ts, render/slots.ts). An empty
+/** One of the three pages, with the published text, media slots and @static
+ *  SEO regions rendered in, in one streaming pass (render/text.ts,
+ *  render/slots.ts, render/regions.ts). An empty
  *  store, or a store failure with nothing cached, serves the assets response
  *  untouched: the site never depends on D1 being up. The snapshot and the
  *  finished page come from cache.ts when it has them. */
@@ -106,7 +108,10 @@ async function servePage(request: Request, env: Env, ctx: ExecutionContext, url:
       return hit;
     }
   }
-  const out = renderText(new Response(res.body, { status: 200, headers }), snap, page, (rw) => onSlots(rw, snap, page));
+  const out = renderText(new Response(res.body, { status: 200, headers }), snap, page, (rw) => {
+    onSlots(rw, snap, page);
+    onRegions(rw, snap, page);
+  });
   if (!key) return out;
   // Stored after the response has gone out, from a tee of the same stream.
   ctx.waitUntil(putPage(url.origin, key, out.clone()));
