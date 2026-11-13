@@ -15,6 +15,8 @@ const RSA = { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: ne
 
 let key: CryptoKeyPair | undefined;
 let spy: ReturnType<typeof vi.spyOn> | undefined;
+/** audit is append-only (a trigger refuses DELETE): tests read rows above this id. */
+export let auditFloor = 0;
 
 const b64url = (b: Uint8Array | ArrayBuffer) =>
   btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -43,6 +45,7 @@ export async function installAccess(): Promise<void> {
     ["text_values", "slot_values", "gallery_items", "ring_picks", "clients"].map((t) => env.DB.prepare(`DELETE FROM ${t}`)),
   );
   await env.DB.prepare("UPDATE meta SET v = '0' WHERE k = 'publish_rev'").run();
+  auditFloor = (await env.DB.prepare("SELECT coalesce(max(id), 0) AS m FROM audit").first<{ m: number }>())!.m;
   await clearMedia();
 }
 
