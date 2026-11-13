@@ -185,6 +185,13 @@ try {
   p = await look("en", "?client=nope-0000");
   check("unknown client id: the normal archive (same DOM), no error", (await p.locator(".acc").evaluate((e) => e.outerHTML)) === plainDom);
   await p.close();
+  /* ids that are Object.prototype keys are unknown ids too, not a crash (leader fix C-16) */
+  for (const id of ["constructor", "__proto__", "toString"]) {
+    const n = errors.length;
+    p = await look("en", `?client=${id}`);
+    check(`?client=${id}: the normal archive, no error`, (await p.locator(".acc").evaluate((e) => e.outerHTML)) === plainDom && errors.length === n && !(await p.locator(".lib-client").count()), errors.slice(n).join(" | "));
+    await p.close();
+  }
 
   p = await look("en", `?client=${B.id}&open=${dUp.id}`);
   await p.waitForFunction(() => document.querySelector(".lb") && !document.querySelector(".lb").hidden, null, { timeout: 4000 }).catch(() => {});

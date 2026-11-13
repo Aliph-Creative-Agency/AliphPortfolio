@@ -2474,8 +2474,9 @@ if (document.documentElement.dataset.editMode === "1") window.__aliphMerge = { f
    same snapshot the merge block reads but kept OUT of that block: merge.mjs
    is copied verbatim into it and knows nothing about clients (a piece only
    carries the id, mediaRow copies it). Empty when nothing is published, so a
-   store with no clients behaves exactly as before. */
-const CLIENTS = {};
+   store with no clients behaves exactly as before. No prototype: `?client=constructor`
+   (or `__proto__`, `toString`) must read as an unknown id, not as Object's own keys. */
+const CLIENTS = Object.create(null);
 {
   const el = document.getElementById("aliph-content");
   let snap = null;
