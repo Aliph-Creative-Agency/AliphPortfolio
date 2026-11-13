@@ -148,6 +148,16 @@ export function adminItem(id: string, r: Row | undefined): AdminItem | null {
   return r ? uploadItem(r) : null;
 }
 
+/** Every item the grid lists: each MEDIA default (with its row, if any),
+ *  then every upload row by id. */
+export function itemsOf(rows: Row[]): AdminItem[] {
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const items: AdminItem[] = MEDIA.map((m) => defaultItem(m, byId.get(m.f)));
+  const uploads = rows.filter((r) => !MEDIA_BY_F.has(r.id)).sort((a, b) => (a.id < b.id ? -1 : 1));
+  for (const r of uploads) items.push(uploadItem(r));
+  return items;
+}
+
 export type RingRow = { service: string; item_ids_json: string; state: string; published_json: string | null; rev: number };
 
 /** One ring as the panel shows it: the store list when the row is active,
@@ -167,12 +177,7 @@ export async function galleryRead(env: Env): Promise<Response> {
     env.DB.prepare(`SELECT ${ROW_COLS} FROM gallery_items`),
     env.DB.prepare("SELECT service, item_ids_json, state, published_json, rev FROM ring_picks"),
   ]);
-  const byId = new Map((rows.results as Row[]).map((r) => [r.id, r]));
-  const media = new Set(MEDIA.map((m) => m.f));
-
-  const items: AdminItem[] = MEDIA.map((m) => defaultItem(m, byId.get(m.f)));
-  const uploads = (rows.results as Row[]).filter((r) => !media.has(r.id)).sort((a, b) => (a.id < b.id ? -1 : 1));
-  for (const r of uploads) items.push(uploadItem(r));
+  const items = itemsOf(rows.results as Row[]);
 
   const ringRows = new Map((rings.results as RingRow[]).map((r) => [r.service, r]));
   const out: Record<string, AdminRing> = {};
