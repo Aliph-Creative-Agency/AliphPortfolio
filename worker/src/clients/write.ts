@@ -86,3 +86,84 @@ export async function clientCreate(request: Request, env: Env, ctx: AdminCtx): P
   }
   return json({ error: "could not find a free id; try again" }, 503);
 }
+
+/* ── C-05: edit and delete ─────────────────────────────────────────── */
+//
+//   PUT    /api/admin/clients/:id        {name, line?, year?, url?, rev}  → 200 {client}
+//   DELETE /api/admin/clients/:id?rev=n                                    → 200 {deleted: id}
+//
+// PUT replaces every detail with exactly what is sent (left out or blank =
+// NULL), on the active row with that rev; 0 rows = 409 {error, current}
+// (current null = gone or deleted). Audit 'client.update'.
+// DELETE stages the removal (state 'deleted', publish takes it off the site)
+// in ONE statement whose WHERE also requires that no ACTIVE draft gallery
+// item names the client, so an assignment cannot slip in between a check and
+// the write. 0 rows: 409 {error: "in use", count} when that guard stopped it,
+// else the stale-rev 409. Audit 'client.delete'.
+
+const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
+const CLIENT_PATH = /^\/api\/admin\/clients\/([^/]+)$/;
+
+/** The id in /api/admin/clients/:id, decoded; null when the path is not one. */
+export function clientPathId(path: string): string | null {
+  const m = CLIENT_PATH.exec(path);
+  if (!m) return null;
+  try {
+    return decodeURIComponent(m[1]);
+  } catch {
+    return null;
+  }
+}
+
+const isRev = (n: unknown): n is number => typeof n === "number" && Number.isInteger(n) && n >= 1;
+
+async function stale(env: Env, id: string): Promise<Response> {
+  return json({ error: "changed elsewhere; reload", current: await readClient(env, id) }, 409);
+}
+
+export async function clientUpdate(request: Request, env: Env, id: string, ctx: AdminCtx): Promise<Response> {
+  const body = await readBody(request);
+  if (body instanceof Response) return body;
+  const { rev, id: bodyId, ...rest } = body;
+  if (!isRev(rev)) return badRequest({ ok: false, error: "rev must be the rev you read", field: "rev" });
+  if (bodyId !== undefined && bodyId !== id) return badRequest({ ok: false, error: "id does not match the path", field: "id" });
+  const v = validateClient({ ...rest, id });
+  if (!v.ok) return badRequest(v);
+
+  const res = await env.DB.prepare(
+    `UPDATE clients SET name_ar = ?2, name_en = ?3, line_ar = ?4, line_en = ?5, year = ?6, url = ?7,
+       rev = rev + 1, updated_at = ${NOW}, updated_by = ?8
+     WHERE id = ?1 AND rev = ?9 AND state = 'active'`,
+  )
+    .bind(id, ...clientCols(v.value), ctx.adminEmail, rev)
+    .run();
+  if (!res.meta.changes) return stale(env, id);
+  const client = await readClient(env, id);
+  await audit(env, ctx.adminEmail, "client.update", id, { rev, next: client?.rev });
+  return json({ client });
+}
+
+export async function clientDelete(env: Env, id: string, url: URL, ctx: AdminCtx): Promise<Response> {
+  const raw = url.searchParams.get("rev");
+  const rev = raw !== null && /^\d{1,15}$/.test(raw) ? Number(raw) : NaN;
+  if (!isRev(rev)) return badRequest({ ok: false, error: "rev must be the rev you read", field: "rev" });
+
+  const res = await env.DB.prepare(
+    `UPDATE clients SET state = 'deleted', rev = rev + 1, updated_at = ${NOW}, updated_by = ?3
+     WHERE id = ?1 AND rev = ?2 AND state = 'active'
+       AND NOT EXISTS (SELECT 1 FROM gallery_items WHERE client_id = ?1 AND state = 'active')`,
+  )
+    .bind(id, rev, ctx.adminEmail)
+    .run();
+  if (!res.meta.changes) {
+    // nothing was written; say why (the row as it is now)
+    const current = await readClient(env, id);
+    if (current && current.rev === rev && current.pieces > 0) {
+      const n = current.pieces;
+      return json({ error: "in use", count: n, message: `${n} piece${n === 1 ? " uses" : "s use"} this client` }, 409);
+    }
+    return json({ error: "changed elsewhere; reload", current }, 409);
+  }
+  await audit(env, ctx.adminEmail, "client.delete", id, { rev });
+  return json({ deleted: id });
+}

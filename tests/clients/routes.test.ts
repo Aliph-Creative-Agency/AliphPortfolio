@@ -1,7 +1,7 @@
 // C-04: GET /api/admin/clients + POST /api/admin/clients.
 import { env } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ADMIN, call, installAccess, post, uninstallAccess } from "../gallery/helpers";
+import { ADMIN, call, del, installAccess, post, put, uninstallAccess } from "../gallery/helpers";
 import { slugOf } from "../../worker/src/clients/write";
 
 const db = () => env.DB;
@@ -148,5 +148,127 @@ describe("POST /api/admin/clients", () => {
 
   it("other methods on the collection → 405", async () => {
     expect((await call("/api/admin/clients", { method: "PATCH", headers: { origin: "https://aliphcreative.com" } })).status).toBe(405);
+  });
+});
+
+/* ── C-05: PUT + DELETE ───────────────────────────────────────────── */
+
+const made = async (en = "Client", extra: Record<string, unknown> = {}) => {
+  const r = await create({ name: { ar: "ع", en }, ...extra });
+  expect(r.status).toBe(201);
+  return ((await r.json()) as { client: AdminClient }).client;
+};
+const items = async (client: string, n: number, state = "active") => {
+  for (let i = 0; i < n; i++) {
+    await run(
+      "INSERT INTO gallery_items (id, src, cat, client_id, state, updated_by) VALUES (?1, ?2, 'photo', ?3, ?4, 'a@b.c')",
+      `${client}-${state}-${i}`, `https://media.aliphcreative.com/${i}.webp`, client, state,
+    );
+  }
+};
+const auditOf = (action: string) =>
+  db().prepare("SELECT actor, target FROM audit WHERE action = ? ORDER BY id DESC").bind(action).first();
+
+describe("PUT /api/admin/clients/:id", () => {
+  it("replaces every field on the rev you read, bumps rev, audit client.update", async () => {
+    const c = await made("Before", { line: { en: "old" }, year: 2000, url: "https://old.example/" });
+    const r = await put(`/api/admin/clients/${c.id}`, {
+      rev: c.rev, name: { ar: "بعد", en: "After" }, line: { ar: "جديد" }, year: "2024", url: "https://new.example",
+    });
+    expect(r.status).toBe(200);
+    expect(((await r.json()) as { client: AdminClient }).client).toEqual({
+      id: c.id, name: { ar: "بعد", en: "After" }, line: { ar: "جديد" }, year: 2024, url: "https://new.example/",
+      rev: 2, published: false, changed: true, pieces: 0,
+    });
+    expect(await auditOf("client.update")).toEqual({ actor: ADMIN, target: c.id });
+
+    // a field left out is cleared
+    const r2 = await put(`/api/admin/clients/${c.id}`, { rev: 2, name: { ar: "بعد", en: "After" } });
+    expect(Object.keys(((await r2.json()) as { client: AdminClient }).client)).toEqual(["id", "name", "rev", "published", "changed", "pieces"]);
+  });
+
+  it("stale rev → 409 {error, current}, nothing written", async () => {
+    const c = await made("Stale");
+    await put(`/api/admin/clients/${c.id}`, { rev: 1, name: { ar: "ع", en: "First" } });
+    const r = await put(`/api/admin/clients/${c.id}`, { rev: 1, name: { ar: "ع", en: "Second" } });
+    expect(r.status).toBe(409);
+    const b = (await r.json()) as { error: string; current: AdminClient };
+    expect(b.current).toMatchObject({ id: c.id, name: { en: "First" }, rev: 2 });
+    expect((await list())[0].name.en).toBe("First");
+  });
+
+  it("unknown or deleted client → 409 with current null; bad body → 400", async () => {
+    expect(((await (await put("/api/admin/clients/nobody", { rev: 1, name: { ar: "ع", en: "X" } })).json()) as { current: null }).current).toBeNull();
+    const c = await made("Gone");
+    await run("UPDATE clients SET state = 'deleted' WHERE id = ?", c.id);
+    const r = await put(`/api/admin/clients/${c.id}`, { rev: 1, name: { ar: "ع", en: "X" } });
+    expect(r.status).toBe(409);
+    for (const [body, field] of [
+      [{ name: { ar: "ع", en: "X" } }, "rev"],
+      [{ rev: 0, name: { ar: "ع", en: "X" } }, "rev"],
+      [{ rev: 1, name: { ar: "ع", en: "X" }, id: "other" }, "id"],
+      [{ rev: 1, name: { ar: "ع", en: "X" }, url: "javascript:x" }, "url"],
+    ] as [unknown, string][]) {
+      const b = await put(`/api/admin/clients/${c.id}`, body);
+      expect(b.status, JSON.stringify(body)).toBe(400);
+      expect(((await b.json()) as { field: string }).field).toBe(field);
+    }
+  });
+
+  it("cross-origin → 403", async () => {
+    const c = await made("Csrf");
+    expect((await put(`/api/admin/clients/${c.id}`, { rev: 1, name: { ar: "ع", en: "X" } }, { origin: "https://evil.example" })).status).toBe(403);
+    expect((await del(`/api/admin/clients/${c.id}?rev=1`, { origin: "https://evil.example" })).status).toBe(403);
+    expect((await list())[0]).toMatchObject({ name: { en: "Csrf" }, rev: 1 });
+  });
+});
+
+describe("DELETE /api/admin/clients/:id?rev=", () => {
+  it("in use by 7 active items → 409 {error: 'in use', count: 7}, nothing deleted", async () => {
+    const c = await made("Busy");
+    await items(c.id, 7);
+    const r = await del(`/api/admin/clients/${c.id}?rev=${c.rev}`);
+    expect(r.status).toBe(409);
+    expect(await r.json()).toEqual({ error: "in use", count: 7, message: "7 pieces use this client" });
+    expect(await list()).toMatchObject([{ id: c.id, rev: 1, pieces: 7 }]);
+    expect(await auditOf("client.delete")).toBeNull();
+  });
+
+  it("used only by deleted items → 200, staged as deleted, audit client.delete", async () => {
+    const c = await made("Free");
+    await items(c.id, 3, "deleted");
+    const r = await del(`/api/admin/clients/${c.id}?rev=${c.rev}`);
+    expect(r.status).toBe(200);
+    expect(await r.json()).toEqual({ deleted: c.id });
+    expect(await list()).toEqual([]);
+    expect(await db().prepare("SELECT state, rev FROM clients WHERE id = ?").bind(c.id).first()).toEqual({ state: "deleted", rev: 2 });
+    expect(await auditOf("client.delete")).toEqual({ actor: ADMIN, target: c.id });
+  });
+
+  it("stale rev → 409 with current; missing / bad rev → 400; deleting twice → 409 current null", async () => {
+    const c = await made("Twice");
+    await put(`/api/admin/clients/${c.id}`, { rev: 1, name: { ar: "ع", en: "Twice!" } });
+    const r = await del(`/api/admin/clients/${c.id}?rev=1`);
+    expect(r.status).toBe(409);
+    expect(((await r.json()) as { current: AdminClient }).current).toMatchObject({ rev: 2 });
+    for (const q of ["", "?rev=", "?rev=0", "?rev=x", "?rev=1.5"]) {
+      expect((await del(`/api/admin/clients/${c.id}${q}`)).status, q).toBe(400);
+    }
+    expect((await del(`/api/admin/clients/${c.id}?rev=2`)).status).toBe(200);
+    const again = await del(`/api/admin/clients/${c.id}?rev=3`);
+    expect(again.status).toBe(409);
+    expect(((await again.json()) as { current: null }).current).toBeNull();
+  });
+
+  it("a stale rev on a used client is the stale 409, not the in-use one", async () => {
+    const c = await made("Both");
+    await items(c.id, 2);
+    const r = await del(`/api/admin/clients/${c.id}?rev=9`);
+    expect(r.status).toBe(409);
+    expect(((await r.json()) as { error: string }).error).toBe("changed elsewhere; reload");
+  });
+
+  it("deeper paths → 404", async () => {
+    expect((await call("/api/admin/clients/a/b")).status).toBe(404);
   });
 });

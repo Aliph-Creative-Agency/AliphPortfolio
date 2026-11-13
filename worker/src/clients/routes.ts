@@ -8,7 +8,7 @@
 import type { AdminCtx, Env } from "../index";
 import { json, requireSameOrigin } from "../gallery/routes";
 import { clientsList } from "./read";
-import { clientCreate } from "./write";
+import { clientCreate, clientDelete, clientPathId, clientUpdate } from "./write";
 
 const isMine = (path: string) => /^\/api\/admin\/clients(\/|$)/.test(path);
 
@@ -28,5 +28,9 @@ export async function clientsRoute(request: Request, env: Env, url: URL, ctx: Ad
     if (method === "POST") return clientCreate(request, env, ctx);
     return json({ error: "method not allowed" }, 405);
   }
-  return null;
+  const id = clientPathId(path);
+  if (id === null) return json({ error: "not found" }, 404);
+  if (method === "PUT") return clientUpdate(request, env, id, ctx);
+  if (method === "DELETE") return clientDelete(env, id, url, ctx);
+  return json({ error: "method not allowed" }, 405);
 }

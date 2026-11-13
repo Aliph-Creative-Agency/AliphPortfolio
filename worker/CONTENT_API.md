@@ -188,6 +188,17 @@ Admin only (Access), English UI. Every write: Origin must equal the request orig
   when nothing Latin is left), `-`, and 4 random `[a-z0-9]`. So it matches `[a-z0-9-]`, is at most 40
   characters, and never changes. A collision with any row (deleted ones too) draws a new suffix. A body carrying
   `id` is a 400 (`field: "id"`). Audit `client.create`, target = the id.
+- `PUT /api/admin/clients/<id>` `{rev, name, line?, year?, url?}` → `200 {client}`. Replaces every detail with exactly
+  what is sent (a detail left out or blank becomes NULL), only on the ACTIVE row with that `rev`; `rev` + 1. A
+  missing or bad `rev` is a 400 (`field: "rev"`), a body `id` other than the path's a 400 (`field: "id"`). A stale
+  rev, an unknown or a deleted id: `409 {error, current}` (`current` = the AdminClient now, or `null`). Audit
+  `client.update`.
+- `DELETE /api/admin/clients/<id>?rev=<n>` → `200 {deleted: id}`. Stages the removal (`state = 'deleted'`, `rev` + 1;
+  publish takes it off the site) in ONE statement whose WHERE also requires that no ACTIVE draft `gallery_items`
+  row names the client, so an assignment cannot slip in between a check and the write. Hidden items count; deleted
+  ones do not. When that guard stops it: `409 {error: "in use", count, message: "7 pieces use this client"}`.
+  A stale rev, unknown or already deleted id: `409 {error, current}`. A missing or bad `rev`: 400. Audit
+  `client.delete`.
 
 ## Validation (every write, server side)
 
