@@ -13,8 +13,11 @@
 //    javascript:/data:/vbscript: url, keep the JSON island parseable with the
 //    vector inside it verbatim, and never emit the vector unescaped outside it.
 // URL fields (slot src/poster/preview, gallery src, client url) get their own
-// scheme table. Browser-side sinks of main.js are covered by Q-07's
-// xss-browser.mjs on the same vectors.
+// scheme table. Browser side: main.js's innerHTML sinks (renderLibrary fill,
+// client header/index, lightbox, about services) each parse a value ONCE, so an
+// entity decodes to text and `&quot;` stays inside its quoted attribute; no
+// textContent -> innerHTML round trip exists (main.js:1712 rebuilds from text
+// nodes). The visitor browser runs (Q-16/Q-17) publish one entity vector too.
 import { env } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { call, installAccess, post, put, uninstallAccess } from "../gallery/helpers";
