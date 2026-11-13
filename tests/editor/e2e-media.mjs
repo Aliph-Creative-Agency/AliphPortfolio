@@ -222,6 +222,81 @@ ok("figure data-preview updated", (await p.evaluate(() => document.querySelector
 await resetSlot("about.media.2");
 await resetSlot("about.media.4");
 
+// 9. E-15e end to end: replace an about photo, a home video (+poster) and a film frame, publish, check the public pages
+const publish = () => p.evaluate(async () => {
+  const c = await (await fetch("/api/admin/changes")).json();
+  if (!c.changes.length) return { status: 204 };
+  const r = await fetch("/api/admin/publish", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token: c.token }) });
+  return { status: r.status };
+});
+const drawerUpload = async (holderLoc, file, via = "click") => {
+  await holderLoc.scrollIntoViewIfNeeded();
+  if (via === "click") await holderLoc.click({ force: true });
+  else await holderLoc.evaluate((el) => el.click());
+  await p.waitForSelector("#ed-media:not([hidden])");
+  await p.setInputFiles("#ed-media .ed-media-file-input", path.join(FIX, file));
+  await p.waitForFunction(() => document.querySelector("#ed-media .ed-media-status").textContent.startsWith("Uploaded") || document.querySelector("#ed-media .ed-media-uperr").textContent, null, { timeout: 30000 });
+  ok("uploaded " + file, (await p.textContent("#ed-media .ed-media-uperr")) === "");
+  await p.keyboard.press("Escape");
+};
+await ready("/admin/edit/about");
+for (const sl of ["about.media.1", "home.media.2", "home.film.1"]) await resetSlot(sl);
+await publish();
+await ready("/admin/edit/about");
+await drawerUpload(p.locator('[data-es="about.media.1"]'), "photo-plain.jpg");
+await ready("/admin/edit/");
+await drawerUpload(p.locator('[data-es="home.media.2"]').first(), "clip.mp4");
+await p.waitForSelector('[data-es="home.film.1"]');
+await drawerUpload(p.locator('[data-es="home.film.1"]').first(), "photo-plain.jpg", "js");
+d = await draft();
+const S = d.slots;
+ok("draft has all three", S["about.media.1"]?.src && S["home.media.2"]?.preview && S["home.media.2"]?.poster && S["home.film.1"]?.src, JSON.stringify(S));
+const pub = await publish();
+ok("published", pub.status === 200, String(pub.status));
+
+const servedAbout = await (await fetch(BASE + "/about")).text();
+ok("served /about carries the uploaded photo before JS", servedAbout.includes('src="' + S["about.media.1"].src + '"'));
+const servedHome = await (await fetch(BASE + "/")).text();
+ok("served / carries the video's preview and poster before JS", servedHome.includes(S["home.media.2"].preview) && servedHome.includes('src="' + S["home.media.2"].poster + '"'));
+
+/* the public page, with a layout-shift observer from the first byte */
+const pubPage = await ctx.newPage();
+await pubPage.addInitScript(() => {
+  window.__ls = [];
+  try {
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__ls.push(e); }).observe({ type: "layout-shift", buffered: true });
+  } catch (_) {}
+});
+const shifts = async (selector) => pubPage.evaluate((sel) => {
+  const hold = document.querySelector(sel);
+  /* the holder itself: what the replacement can move. The page's own early shifts (a quote card or caption re-flowing
+     when the fonts arrive, ~0.08 at 390 on the unedited page too) are not the slot's. */
+  return window.__ls.filter((e) => e.sources.some((x) => x.node && x.node === hold)).reduce((a, e) => a + e.value, 0);
+}, selector);
+await pubPage.goto(BASE + "/about");
+await pubPage.waitForTimeout(2500);
+await pubPage.evaluate(() => document.querySelectorAll("img").forEach((i) => i.scrollIntoView()));
+await pubPage.waitForTimeout(1000);
+const aboutSel = 'img[src="' + S["about.media.1"].src + '"]';
+ok("public /about shows the upload", (await pubPage.locator(aboutSel).count()) === 1);
+ok("CLS 0 on the replaced about photo", (await shifts(aboutSel)) === 0, String(await shifts(aboutSel)));
+await pubPage.goto(BASE + "/");
+await pubPage.waitForTimeout(3500);
+const filmSrc = await pubPage.evaluate(() => document.querySelector('.film-frame[data-frame="0"] img')?.getAttribute("src"));
+ok("public / film frame 1 shows the upload after JS", filmSrc === S["home.film.1"].src, String(filmSrc));
+ok("CLS 0 on the film frame", (await shifts('.film-frame[data-frame="0"] img')) === 0);
+const videoSel = 'img[src="' + S["home.media.2"].poster + '"]';
+ok("public / shows the new poster after JS", (await pubPage.locator(videoSel).count()) >= 1);
+ok("CLS 0 on the video's poster", (await shifts(videoSel)) === 0);
+await pubPage.close();
+
+// clean up: slots back to defaults, publish again
+await ready("/admin/edit/");
+for (const sl of ["about.media.1", "home.media.2", "home.film.1"]) await resetSlot(sl);
+const back = await publish();
+ok("cleanup published", back.status === 200, String(back.status));
+ok("served /about back to the default photo", (await (await fetch(BASE + "/about")).text()).includes("assets/media/bts-01.webp"));
+
 await resetSlot("about.media.1");
 await resetSlot("home.media.2");
 ok("no page errors", errs.length === 0, errs.join("|"));
