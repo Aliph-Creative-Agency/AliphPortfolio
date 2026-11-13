@@ -66,7 +66,7 @@ await dash.close();
 await p.click(".ed-publish");
 await p.waitForSelector(".ed-confirm");
 const listText = await p.textContent(".ed-confirm");
-ok("dialog lists the changes per page", /Home: 4 changes/.test(listText) && KEYS.every((k) => listText.includes(k)), listText.slice(0, 200));
+ok("dialog lists the changes per page", /Home: 4 changes/.test(listText) && ["Home · Hero · ", "Home · Services · ", "Home · Testimonials · ", "Home · Page title · "].every((r) => listText.includes(r)) && !KEYS.some((k) => listText.includes(k)), listText.slice(0, 200));
 await p.screenshot({ path: `.wrangler/e06b-dialog-${W}.png` });
 await p.click(".ed-confirm .is-primary");
 await p.waitForSelector(".ed-toast:not([hidden])");

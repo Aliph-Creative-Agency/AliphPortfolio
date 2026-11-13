@@ -61,7 +61,7 @@ await p.waitForSelector(`#ed-history:not([hidden]) .ed-rev[data-rev="${r1}"]`, {
 const revs = await p.$$eval("#ed-history .ed-rev", (xs) => xs.map((x) => Number(x.dataset.rev)));
 ok("panel lists newest first", revs[0] === r2 && revs[1] === r1, revs.slice(0, 3).join(","));
 ok("newest marked live", (await p.textContent(`.ed-rev[data-rev="${r2}"]`)).includes("live"));
-ok("each lists what it changed", (await p.textContent(`.ed-rev[data-rev="${r2}"] .ed-rev-changes`)).includes("hero1 (AR + EN)"));
+ok("each lists what it changed", (await p.textContent(`.ed-rev[data-rev="${r2}"] .ed-rev-changes`)).includes("Home · Hero · AR + EN"));
 ok("History button expanded", (await p.getAttribute('[aria-controls="ed-history"]', "aria-expanded")) === "true");
 const sw = await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
 ok("no horizontal scroll", sw);

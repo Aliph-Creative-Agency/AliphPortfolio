@@ -94,6 +94,27 @@ await p.keyboard.press("Escape");
 await p.waitForTimeout(150);
 ok("next Esc closes the panel", !(await visible("#ed-panel")));
 
+// E-13b: change rows read "Page · Section · text", never a raw key
+await p.evaluate(async () => {
+  const c = await (await fetch("/api/admin/content")).json();
+  const baseRev = (c.locks.slots || {})["about.media.3"] || 0;
+  await fetch("/api/admin/slot", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ slot: "about.media.3", value: { src: "https://media.aliphcreative.com/img/design-haqqak-1.webp" }, baseRev }) });
+});
+await ready("/admin/edit/");
+await p.waitForFunction(() => !document.querySelector(".ed-publish").disabled, null, { timeout: 5000 });
+await p.click(".ed-publish");
+await p.waitForSelector(".ed-confirm li");
+const rows = await p.$$eval(".ed-confirm li", (l) => l.map((x) => x.textContent));
+const dlg = await p.textContent(".ed-confirm");
+ok("hero1 row reads Home · Hero · text", rows.some((r) => /^Home · Hero · /.test(r) && r.includes("عنوان مسودة")), JSON.stringify(rows));
+ok("picture row reads About · Media · photo 3", rows.some((r) => r === "About · Media · photo 3"), JSON.stringify(rows));
+ok("no raw key in the dialog", !/hero1|about.media/.test(dlg), dlg.slice(0, 200));
+await p.keyboard.press("Escape");
+await p.evaluate(async () => {
+  const c = await (await fetch("/api/admin/content")).json();
+  await fetch("/api/admin/slot?slot=about.media.3&baseRev=" + (c.locks.slots["about.media.3"] || 0), { method: "DELETE" });
+});
+
 // cleanup
 await write("hero1", "ar", null);
 ok("no page errors", errs.length === 0, errs.join("|"));

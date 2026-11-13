@@ -254,14 +254,51 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.hidden = true; }, 5000);
   }
-  function describe(c) {
-    if (c.section === "slots") return "Picture " + c.id;
-    if (c.section === "rings") return "Ring order: " + c.id;
-    var label = c.id + (c.locales ? " (" + c.locales.join(" + ").toUpperCase() + ")" : "");
-    var v = c.locales && edit.read ? edit.read(c.id, c.locales[0]) : null;
-    if (typeof v === "string" && v) label += ": " + (v.length > 60 ? v.slice(0, 59) + "…" : v);
-    return label;
+  /* A change row reads "Page · Section · what": the registry's page and section for text (the first 40 characters of the
+     text when this page can read it), "About · Media · photo 3" for a picture, then Library · Gallery, Rings, Clients.
+     The raw key is never shown. Client names come from the draft (loadNames). */
+  var SECTION_TITLES = {
+    "nav-big": "Navigation", hero: "Hero", services: "Services", script: "Script", testiRotor: "Testimonials", contact: "Contact",
+    "contact-socials": "Contact", masthead: "Masthead", main: "Main", "sheet-head": "Header", page: "Page", "about-clips": "Clippings",
+    "ab-read": "About text", head: "Page title", "svc-static-item": "Services", "why-block": "Why Aliph",
+  };
+  function titleCase(w) { return String(w).replace(/[-_]+/g, " ").replace(/^./, function (m) { return m.toUpperCase(); }); }
+  var names = {};
+  function loadNames() {
+    return api.content().then(function (d) {
+      ((d && d.clients) || []).forEach(function (c) { names[c.id] = (c.name && (c.name.en || c.name.ar)) || c.id; });
+    }, function () {});
   }
+  function clip(v, n) { v = String(v).replace(/\s+/g, " ").trim(); return v.length > n ? v.slice(0, n - 1) + "…" : v; }
+  function slotWhat(id) {
+    var m = /\.(media|film)\.(\d+)$/.exec(id);
+    var e = null;
+    ((registry.slots) || []).forEach(function (x) { if (x.id === id) e = x; });
+    if (!m) return "picture";
+    if (m[1] === "film") return "film frame " + m[2];
+    return (e && e.preview ? "video " : "photo ") + m[2];
+  }
+  function rowLabel(c, withText) {
+    var parts;
+    if (c.section === "slots") {
+      parts = [PAGE_NAMES[c.page] || titleCase(c.page || "site"), "Media", slotWhat(c.id)];
+    } else if (c.section === "gallery") {
+      parts = ["Library", "Gallery", c.id];
+    } else if (c.section === "rings") {
+      parts = ["Rings", c.id];
+    } else if (c.section === "clients") {
+      parts = ["Clients", names[c.id] || c.id];
+    } else {
+      var e = entryOf(c.id);
+      parts = [PAGE_NAMES[c.page || (e && e.page)] || "Site", (e && (SECTION_TITLES[e.section] || titleCase(e.section))) || "Text"];
+      var loc = c.locales && c.locales.length ? c.locales[0] : null;
+      var v = withText && loc && edit.read ? edit.read(c.id, loc) : null;
+      if (typeof v === "string" && v.trim()) parts.push(clip(v, 40));
+      else if (c.locales) parts.push(c.locales.join(" + ").toUpperCase());
+    }
+    return parts.join(" · ");
+  }
+  function describe(c) { return rowLabel(c, true); }
   /* the changes per page, then one "Gallery: N changes" line */
   function changeList(changes) {
     var groups = {}, order = [], gallery = 0, nodes = [];
@@ -314,7 +351,8 @@
   /* settle the open popover and every pending save, then read the list */
   function settled() {
     if (cur) closePop(false);
-    return flushAll().then(function () { return api.changes(); }).then(function (c) {
+    return flushAll().then(function () { return Promise.all([api.changes(), loadNames()]); }).then(function (both) {
+      var c = both[0];
       lastChanges = c;
       syncPublishBtns();
       return c;
@@ -686,18 +724,14 @@
   hist.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "History" }), h("span", { class: "ed-panel-page", text: "published revisions" }), histClose]));
   hist.appendChild(h("p", { class: "ed-hint", text: "Restore copies a revision into the draft. Publish to make it live." }));
   hist.appendChild(histList);
-  var SECTION_NAMES = { slots: "Picture", gallery: "Gallery", rings: "Ring", clients: "Client" };
-  function changeLabel(c) {
-    if (c.section === "text") return c.id + (c.locales ? " (" + c.locales.join(" + ").toUpperCase() + ")" : "");
-    return (SECTION_NAMES[c.section] || c.section) + " " + c.id;
-  }
+    function changeLabel(c) { return rowLabel(c, false); }
   function when(iso) {
     var d = new Date(iso);
     return isNaN(d) ? iso : d.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
   }
   function revRow(r, live) {
     var n = r.changed.length;
-    var shown = r.changed.slice(0, 4).map(changeLabel).join(", ") + (n > 4 ? ", +" + (n - 4) + " more" : "");
+    var shown = r.changed.slice(0, 4).map(changeLabel).join("; ") + (n > 4 ? ", +" + (n - 4) + " more" : "");
     var btn = h("button", { type: "button", class: "ed-reset", "data-rev": String(r.id), text: "Restore" });
     btn.addEventListener("click", function () { startRestore(r); });
     return h("section", { class: "ed-rev", "data-rev": String(r.id) }, [
@@ -714,7 +748,7 @@
   function loadHistory() {
     histList.textContent = "";
     histList.appendChild(h("p", { class: "ed-hint", text: "Loading…" }));
-    api.revisions(50).then(function (list) {
+    loadNames().then(function () { return api.revisions(50); }).then(function (list) {
       histList.textContent = "";
       if (!list.length) histList.appendChild(h("p", { class: "ed-hint", text: "Nothing has been published yet." }));
       list.forEach(function (r, i) { histList.appendChild(revRow(r, i === 0)); });
