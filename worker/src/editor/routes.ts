@@ -8,6 +8,7 @@ import registry from "../generated/registry.json";
 import { editPage, editPageOf } from "./editpage";
 import { textRoute } from "./text";
 import { publishRoute } from "./publish";
+import { historyRoute, isHistoryPath } from "./history";
 
 export async function editorRoute(
   request: Request,
@@ -36,6 +37,13 @@ export async function editorRoute(
     const bad = requireSameOrigin(request);
     if (bad) return bad;
     return publishRoute(path, request, env, ctx);
+  }
+
+  // Published revisions, and restoring one into the draft (E-07).
+  if (isHistoryPath(path)) {
+    const bad = requireSameOrigin(request);
+    if (bad) return bad;
+    return historyRoute(path, request, env, url, ctx);
   }
 
   return null;
