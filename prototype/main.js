@@ -2469,6 +2469,25 @@ if (document.documentElement.dataset.editMode === "1") window.__aliphMerge = { f
 }
 /* ══ end admin content merge ══ */
 
+/* ══ clients ═══════════════════════════════════════════════════════════
+   The published clients, id → {id, name, line?, year?, url?}, read from the
+   same snapshot the merge block reads but kept OUT of that block: merge.mjs
+   is copied verbatim into it and knows nothing about clients (a piece only
+   carries the id, mediaRow copies it). Empty when nothing is published, so a
+   store with no clients behaves exactly as before. */
+const CLIENTS = {};
+{
+  const el = document.getElementById("aliph-content");
+  let snap = null;
+  if (el) { try { snap = JSON.parse(el.textContent); } catch (e) { snap = null; } }
+  (snap && Array.isArray(snap.clients) ? snap.clients : []).forEach((c) => {
+    if (c && c.id && c.name) CLIENTS[c.id] = c;
+  });
+}
+const clientOf = (m) => (m && m.client ? CLIENTS[m.client] || null : null);
+const escHTML = (t) => String(t).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+/* ══ end clients ══ */
+
 /* Which ring is showing. Read by nothing else today, but it is the one
    name for "the service being looked at" and the chat widget asked for it
    once already. */
@@ -4348,7 +4367,13 @@ function renderLibrary() {
          overlay reads the picture that is on screen, and the picture on screen
          is now the thumbnail. */
       const full = m.v ? m.poster || `${R2}/poster/${m.p}` : m.src || `${R2}/img/${m.f}`;
-      const date = m.d ? `<figcaption><span class="t-date">${fmtDate(m.d)}</span></figcaption>` : "";
+      /* A piece naming a client the published snapshot does not know (a draft-only
+         client, or one deleted since) gets no caption: its markup is today's. */
+      const cl = clientOf(m);
+      const cname = cl ? cl.name[lang] || cl.name.en || cl.name.ar : "";
+      const date = m.d || cname
+        ? `<figcaption>${cname ? `<span class="t-client">${escHTML(cname)}</span>` : ""}${m.d ? `<span class="t-date">${fmtDate(m.d)}</span>` : ""}</figcaption>`
+        : "";
       /* ⚠️ EVERY tile answers the keyboard, not only the films. Until
          2026-08-26 the `role="button" tabindex="0"` rode along with
          `data-film`, so in a grid of 82 pieces the 13 reels could be opened

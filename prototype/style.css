@@ -5683,3 +5683,6 @@ body.sheet-open { overflow: hidden; }
   .curtain { display: none; }
   *, *::before, *::after { transition-duration: 0.01ms !important; }
 }
+
+/* clients */
+.tile figcaption .t-client { color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
