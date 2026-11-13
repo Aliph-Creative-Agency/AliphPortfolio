@@ -7,6 +7,7 @@ import { json, requireSameOrigin } from "./http";
 import registry from "../generated/registry.json";
 import { editPage, editPageOf } from "./editpage";
 import { textRoute } from "./text";
+import { publishRoute } from "./publish";
 
 export async function editorRoute(
   request: Request,
@@ -28,6 +29,13 @@ export async function editorRoute(
     const bad = requireSameOrigin(request);
     if (bad) return bad;
     return textRoute(request, env, ctx);
+  }
+
+  // What would go live, publish it, or throw the text/slot drafts away (E-06).
+  if (path === "/api/admin/changes" || path === "/api/admin/publish" || path === "/api/admin/discard") {
+    const bad = requireSameOrigin(request);
+    if (bad) return bad;
+    return publishRoute(path, request, env, ctx);
   }
 
   return null;
