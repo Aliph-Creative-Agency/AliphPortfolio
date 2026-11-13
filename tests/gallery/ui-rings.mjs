@@ -90,7 +90,14 @@ const ringOf = async () => {
 const pubRing = await ringOf();
 check("home photo ring: exactly 3, in order C, A, B", pubRing.length === 3 && pubRing[0].includes(C) && pubRing[1].includes(A) && pubRing[2].includes(keyOf(up.url)), pubRing.join(" | "));
 
-// Hide the upload elsewhere: the panel flags it only through the API refusal; a hidden DEFAULT pick keeps its badge.
+// Hide the upload AFTER the ring was saved (leader, relay #7): the saved ring still names it, but the public ring
+// must drop it (a hidden upload never enters MEDIA, so main.js cannot resolve the id).
+const rowB = (await read()).items.find((i) => i.id === B);
+const hid = await ctx.request.put(`${ORIGIN}/api/admin/gallery/${B}`, { headers: H, data: { src: up.url, cat: "photo", ratio: 1.5, date: "2026-02", hidden: true, baseRev: rowB.rev } });
+check("upload hidden after the ring save", hid.status() === 200, String(hid.status()));
+await publish();
+const afterHide = await ringOf();
+check("home photo ring drops the hidden upload: C, A", afterHide.length === 2 && afterHide[0].includes(C) && afterHide[1].includes(A) && !afterHide.some((u) => u.includes(keyOf(up.url))), afterHide.join(" | "));
 // Reset to default (confirm), publish, the default ring is back.
 await box.locator("[data-act=reset]").click();
 await page.click("#confirm-no");
