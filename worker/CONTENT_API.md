@@ -279,6 +279,11 @@ published snapshot is not empty. An empty store, or a D1 read that fails, serves
     `hidden` removes the row. Any other id is an upload, appended as `{f: id, c: cat, r: ratio ?? 1, d: date ?? null,
     src, poster?, v?, sub?, alt?, client?}`. Hidden uploads and uploads without `src` and `cat` are skipped.
   - Rings, slots and film frames are not merged here (no region reads them); the boot merge does them.
+  - Clients (C-15): `mergedTables` adds `T.CLIENTS` = the published clients (the merge itself has no clients
+    table). `@static:archive` then opens with `<nav class="acc-static acc-static-clients">`: the clients with at
+    least one MEDIA row naming them (hidden pieces are not in MEDIA), newest piece first, then name, each a link to
+    `/library?client=<id>` with its piece count and `line.ar`. No such client → nothing, so build_static (no
+    `CLIENTS` in main.js's tables) and a client-only snapshot leave the region byte-identical.
 
 ## Publish (publish.ts, cache.ts, P-09)
 

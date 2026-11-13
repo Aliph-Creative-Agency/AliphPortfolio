@@ -6,6 +6,7 @@ export const LANG: string;
 export const STAMP: string;
 export function servicesBlock(T: Tables): string;
 export function bandBlock(T: Tables): string;
+export function clientsBlock(T: Tables): string;
 export function archiveBlock(T: Tables): string;
 export function reviewsLD(T: Tables): object;
 export function projectsLD(T: Tables): object;

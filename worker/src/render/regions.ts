@@ -30,17 +30,23 @@ const NAMES = ["I18N", "CATS", "SUBCATS", "MEDIA", "PROJECTS", "TESTIMONIALS", "
 const D = defaults as unknown as Tables;
 
 /** Does the snapshot touch anything a region reads? Text that only an
- *  element or the head shows (P-06) and slots never do. */
+ *  element or the head shows (P-06) and slots never do. Clients alone never
+ *  do either: a client is listed only with a piece, and a piece names its
+ *  client through a gallery row (defaults carry no `client`). */
 export function touchesRegions(s: Snapshot): boolean {
   if (s.gallery.length) return true;
   return Object.keys(s.text).some((k) => k === "pfVisit" || /^(subcat|project|testimonial)\./.test(k));
 }
 
-/** defaults.json + the published snapshot, as the renderers' tables. */
+/** defaults.json + the published snapshot, as the renderers' tables, plus
+ *  T.CLIENTS = the published clients, for the archive's client list (C-15).
+ *  The shared merge has no CLIENTS table: main.js builds its own from the blob. */
 export function mergedTables(s: Snapshot): Tables {
   const T: Tables = {};
   for (const n of NAMES) T[n] = structuredClone(D[n]);
-  return mergeContent(T, s);
+  mergeContent(T, s);
+  T.CLIENTS = structuredClone(s.clients);
+  return T;
 }
 
 let defaultRegions: Record<string, Record<string, string>> | undefined;

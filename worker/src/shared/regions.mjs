@@ -67,6 +67,42 @@ export function bandBlock(T) {
   }).join("");
 }
 
+/* archive — the clients with at least one piece in the archive (C-15), each a
+   link to its /library?client= view, for crawlers: the Clients index main.js
+   draws (renderClientsIndex), same filter and order (newest piece, then name).
+   T.CLIENTS is the PUBLISHED clients, which only the Worker attaches
+   (render/regions.ts); main.js's tables have none, so build_static writes
+   nothing here and the committed pages stay byte-identical. A piece counts
+   when its MEDIA row names the client: hidden pieces are not in MEDIA. */
+export function clientsBlock(T) {
+  const clients = T.CLIENTS || [];
+  if (!clients.length) return "";
+  const byId = new Map(clients.map((c) => [c.id, c]));
+  const stat = new Map();
+  T.MEDIA.forEach((m) => {
+    if (!m.client || !byId.has(m.client)) return;
+    const s = stat.get(m.client) || { n: 0, d: "" };
+    s.n++;
+    if ((m.d || "") > s.d) s.d = m.d || "";
+    stat.set(m.client, s);
+  });
+  const list = [...stat.keys()].map((id) => byId.get(id))
+    .sort((a, b) => stat.get(b.id).d.localeCompare(stat.get(a.id).d) || a.name[LANG].localeCompare(b.name[LANG]));
+  if (!list.length) return "";
+  const rows = list.map((c) => {
+    const line = c.line && c.line[LANG] ? c.line[LANG] : "";
+    return `
+        <li><a href="/library?client=${esc(encodeURIComponent(c.id))}">${esc(c.name[LANG])}</a> <span class="acc-static-count">${num(T, stat.get(c.id).n)}</span>${line ? `
+          <p>${esc(line)}</p>` : ""}</li>`;
+  }).join("");
+  return `
+    <nav class="acc-static acc-static-clients" aria-label="العملاء">
+      <h2>العملاء <span class="acc-static-count">${num(T, list.length)}</span></h2>
+      <ul>${rows}
+      </ul>
+    </nav>`;
+}
+
 /* archive — one panel per service with its runs and counts, and the software
    projects in full: name, tagline, line, body, and the live site. This is the
    library's LIBSUBS filing, not the SUBCATS taxonomy — see renderLibrary. */
@@ -85,7 +121,7 @@ export function archiveBlock(T) {
     ],
   };
   const svc = T.CATS.filter((c) => c.id !== "all");
-  return svc.map((cat) => {
+  return clientsBlock(T) + svc.map((cat) => {
     const media = T.MEDIA.filter((m) => m.c === cat.id).map((m) => ({ d: m.d, key: m.f, m }));
     const projects = cat.id === "tech"
       ? T.PROJECTS.filter((p) => p.cat === "tech" && p.profile).map((p) => ({ d: p.date, key: p.en, p }))
