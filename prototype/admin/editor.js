@@ -230,16 +230,15 @@
      saving. It lists the changes per page in a dialog; Publish there POSTs the
      token that list came with, so a draft that moved meanwhile is a 409 and the
      list is shown again instead of publishing something unseen. Discard puts
-     the text (and picture) drafts back to the live values and reloads; gallery
-     changes are kept (they have their own reset). */
+     every draft (text, pictures, gallery, rings, clients) back to the live state
+     and reloads. */
   var lastChanges = null, changesTimer = 0, modal = null, toastTimer = 0;
   var PAGE_NAMES = { home: "Home", about: "About", library: "Library" };
-  function isTextual(c) { return c.section === "text" || c.section === "slots"; }
   function syncPublishBtns() {
     var all = lastChanges ? lastChanges.changes : [];
     var busy = pendingCount() > 0 || !!modal;
     publishBtn.disabled = busy || !all.length;
-    discardBtn.disabled = busy || !all.filter(isTextual).length;
+    discardBtn.disabled = busy || !all.length;
     publishBtn.textContent = all.length ? "Publish (" + all.length + ")" : "Publish";
   }
   function refreshChanges() {
@@ -340,12 +339,10 @@
   }
   function startDiscard() {
     settled().then(function (c) {
-      var mine = c.changes.filter(isTextual);
+      var mine = c.changes;
       if (!mine.length) return;
-      var kept = c.changes.length - mine.length;
       var body = changeList(mine);
-      if (kept) body.push(h("p", { class: "ed-dialog-note", text: "Gallery changes are kept (" + kept + ")." }));
-      openModal("Discard " + mine.length + " unpublished text " + (mine.length === 1 ? "change" : "changes") + "? The live text comes back.", body, "Discard", function (msg) {
+      openModal("Discard " + mine.length + " unpublished " + (mine.length === 1 ? "change" : "changes") + "? The live site's content comes back.", body, "Discard", function (msg) {
         return api.discard(c.token).then(function (r) {
           if (r.status === 200) {
             try { localStorage.removeItem(BACKUP); } catch (_) {}

@@ -82,7 +82,7 @@ async function list(db: D1Database, url: URL): Promise<Response> {
 
 /** The statements that make the draft equal `snap` (text, slots, clients,
  *  gallery, rings), plus what had to be skipped. */
-function restoreStatements(db: D1Database, snap: Snapshot, by: string) {
+export function restoreStatements(db: D1Database, snap: Snapshot, by: string) {
   const skipped: string[] = [];
   const text: [string, string, string][] = [];
   for (const [key, pair] of Object.entries(snap.text ?? {})) {

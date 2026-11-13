@@ -3,6 +3,7 @@ import { createExecutionContext, env } from "cloudflare:test";
 import { beforeEach, describe, expect, it } from "vitest";
 import worker, { type Env } from "../../worker/src/index";
 import { diff } from "../../worker/src/editor/diff";
+import defaults from "../../worker/src/generated/defaults.json";
 import { emptySnapshot } from "../../worker/src/store";
 
 const ORIGIN = "http://localhost";
@@ -40,6 +41,8 @@ const draft = async () =>
   };
 const publicPage = async () => (await call("/")).text();
 const publishRev = async () => Number((await one<{ v: string }>("SELECT v FROM meta WHERE k = 'publish_rev'"))!.v);
+
+const HIDDEN_DEFAULT = (defaults.MEDIA as { f: string }[])[0].f;
 
 let base: number;
 let auditFrom: number;
@@ -152,7 +155,7 @@ describe("POST /api/admin/publish", () => {
 });
 
 describe("POST /api/admin/discard", () => {
-  it("text + slot drafts go back to the live values; gallery untouched; public unchanged; one audit row", async () => {
+  it("text + slot drafts go back to the live values; public unchanged; one audit row", async () => {
     await put("heroPara", "ar", "منشور", 0);
     await post("/api/admin/publish", { token: (await changes()).token });
     const page = await publicPage();
@@ -173,19 +176,49 @@ describe("POST /api/admin/discard", () => {
       "hero1",
       "heroPara",
       "home.media.1",
+      "up-1",
     ]);
 
-    expect((await changes()).changes).toEqual([{ section: "gallery", id: "up-1" }]);
+    expect((await changes()).changes).toEqual([]);
     const d = await draft();
     expect(d.text).toEqual({ heroPara: { ar: "منشور" } });
     expect(d.slots).toEqual({});
-    expect(d.gallery.map((g) => g.id)).toEqual(["up-1"]);
+    expect(d.gallery).toEqual([]);
     expect(await publicPage()).toBe(page);
     expect(await publishRev()).toBe(base + 1);
     expect(await auditActions()).toEqual([{ action: "discard", target: "draft" }]);
     // every touched row's lock moved on: a save with the pre-discard rev is a 409
     expect(d.locks.text.heroPara.ar).toBe(locksBefore.heroPara.ar + 1);
     expect((await put("heroPara", "ar", "قديم", locksBefore.heroPara.ar)).status).toBe(409);
+  });
+
+  it("gallery, rings and clients drafts go too; the published snapshot is identical before and after", async () => {
+    // live: one upload, a ring pick, a client
+    await run("INSERT INTO clients (id, name_ar, name_en, updated_by) VALUES ('c-live', 'عميل', 'Live client', 'a@b.c')");
+    await run("INSERT INTO gallery_items (id, src, cat, updated_by) VALUES ('up-live', 'assets/media/l.webp', 'photo', 'a@b.c')");
+    await run("INSERT INTO ring_picks (service, item_ids_json, updated_by) VALUES ('photo', '[\"up-live\"]', 'a@b.c')");
+    await post("/api/admin/publish", { token: (await changes()).token });
+    const snapshot = async () => JSON.stringify(await (await call("/api/content")).json());
+    const before = await snapshot();
+    const draftBefore = await draft();
+
+    // draft: a hidden default, a new upload, an edited live upload, a new client, a ring change
+    await run("INSERT INTO gallery_items (id, hidden, updated_by) VALUES ('" + HIDDEN_DEFAULT + "', 1, 'a@b.c')");
+    await run("INSERT INTO gallery_items (id, src, cat, updated_by) VALUES ('up-new', 'assets/media/n.webp', 'design', 'a@b.c')");
+    await run("UPDATE gallery_items SET src = 'assets/media/edited.webp', rev = rev + 1 WHERE id = 'up-live'");
+    await run("INSERT INTO clients (id, name_ar, name_en, updated_by) VALUES ('c-new', 'جديد', 'New client', 'a@b.c')");
+    await run("UPDATE ring_picks SET item_ids_json = '[]', rev = rev + 1 WHERE service = 'photo'");
+    expect((await changes()).changes.length).toBeGreaterThanOrEqual(4);
+
+    const r = await post("/api/admin/discard", { token: (await changes()).token });
+    expect(r.status).toBe(200);
+    expect((await changes()).changes).toEqual([]);
+    const d = await draft();
+    expect(d.gallery.map((g) => g.id)).toEqual(draftBefore.gallery.map((g) => g.id));
+    expect(await snapshot()).toBe(before);
+    const detail = JSON.parse((await one<{ detail: string }>("SELECT detail FROM audit WHERE action = 'discard' ORDER BY id DESC"))!.detail);
+    expect(detail.gallery).toEqual(expect.arrayContaining(["up-new", "up-live", HIDDEN_DEFAULT]));
+    expect(detail.clients).toContain("c-new");
   });
 
   it("a stale token → 409 and nothing changes", async () => {
