@@ -36,7 +36,7 @@ also return 403 (fail closed). Locally, `ADMIN_DEV_BYPASS=1` in `.dev.vars` work
   "slots": { "<slot id>": { "src"?, "poster"?, "preview"?, "alt"?: { "ar"?, "en"? } } },
   "gallery": [ { "id", "src"?, "poster"?, "cat"?, "sub"?, "ratio"?, "date"?, "alt"?: {…}, "client"?, "hidden"?: true, "sort"? } ],
   "rings": { "<service>": ["<item id>", …] },          // whole list, ring order
-  "clients": [ { "id", "name": { "ar", "en" } } ],
+  "clients": [ { "id", "name": { "ar", "en" }, "line"?: { "ar"?, "en"? }, "year"?, "url"? } ],
   "locks": {                         // DRAFT ONLY: every existing row's optimistic-lock rev
     "text": { "<key>": { "ar"?: 1, "en"?: 2 } }, "slots": { "<id>": 1 },
     "gallery": { "<id>": 1 }, "rings": { "<service>": 1 }, "clients": { "<id>": 1 }
@@ -165,7 +165,14 @@ that is both deleted and unpublished.
 - `published_json` is exactly `JSON.stringify(galleryItemFromRow(row))`, so an unchanged row reads the same in
   both states. A row with `state = 'deleted'` is a removal staged until publish. For an override, removing the row
   means going back to the default piece. Use `hidden` to take a default piece off the site.
-- Clients: `{id, name: {ar, en}}`, both names 1 to 80 characters. `published_json` is the same object.
+- Clients: `{id, name: {ar, en}, line?: {ar?, en?}, year?, url?}`, both names 1 to 80 characters. Migration
+  `0003_clients_details.sql` added the optional columns `line_ar`, `line_en` (one short line), `year` (INTEGER,
+  NULL or 1000-9999, a CHECK) and `url` (the client's https website, stored normalised). A NULL column is left out
+  of the object, and `line` is left out when both languages are NULL, in this key order: id, name, line, year,
+  url. So a client with no details is exactly `{id, name}`, as before 0003. `published_json` is the same object
+  (`JSON.stringify(clientFromRow(row))`; every client read selects `store.ts CLIENT_COLS`).
+- No client rows ship: no migration, `defaults.json` or runtime fixture creates one (tests/clients/guard.test.ts).
+  The boss creates clients in the admin after launch.
 
 ## Validation (every write, server side)
 

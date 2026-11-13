@@ -43,9 +43,14 @@ export interface GalleryItem {
   sort?: number;
 }
 
+/** A client the gallery credits. `line`, `year` and `url` are present only
+ *  when set (migration 0003; CONTENT_API.md "Gallery and clients"). */
 export interface Client {
   id: string;
   name: { ar: string; en: string };
+  line?: Pair;
+  year?: number;
+  url?: string;
 }
 
 /** Optimistic-lock revs of every row that exists (draft snapshots only). */
@@ -125,9 +130,29 @@ export interface ClientRow {
   id: string;
   name_ar: string;
   name_en: string;
+  line_ar: string | null;
+  line_en: string | null;
+  year: number | null;
+  url: string | null;
 }
 
-export const clientFromRow = (r: ClientRow): Client => ({ id: r.id, name: { ar: r.name_ar, en: r.name_en } });
+/** The draft columns every client read selects, in ClientRow order. */
+export const CLIENT_COLS = "id, name_ar, name_en, line_ar, line_en, year, url";
+
+/** A client row as a snapshot client; publish() writes JSON.stringify of it
+ *  into published_json. Key order is fixed (id, name, line, year, url) and
+ *  NULL columns are left out, so a client with none of the 0003 details
+ *  serialises exactly as it did before them. */
+export function clientFromRow(r: ClientRow): Client {
+  const c: Client = { id: r.id, name: { ar: r.name_ar, en: r.name_en } };
+  const line: Pair = {};
+  if (r.line_ar != null) line.ar = r.line_ar;
+  if (r.line_en != null) line.en = r.line_en;
+  if (line.ar !== undefined || line.en !== undefined) c.line = line;
+  if (r.year != null) c.year = r.year;
+  if (r.url != null) c.url = r.url;
+  return c;
+}
 
 /** Gallery order: `sort` ascending (unsorted last), then id. Deterministic,
  *  so the snapshot (and the ETag'd body) is the same for the same rows. */
@@ -222,7 +247,7 @@ export async function readDraftWith(
       "SELECT id, src, poster, cat, sub, ratio, date, alt_ar, alt_en, client_id, hidden, sort, state, rev FROM gallery_items",
     ),
     db.prepare("SELECT service, item_ids_json AS v, state, rev FROM ring_picks ORDER BY service"),
-    db.prepare("SELECT id, name_ar, name_en, state, rev FROM clients"),
+    db.prepare(`SELECT ${CLIENT_COLS}, state, rev FROM clients`),
     ...extra,
   ]);
   const s = emptySnapshot((meta.results[0] as { rev: number } | undefined)?.rev ?? 0);
