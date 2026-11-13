@@ -7,9 +7,9 @@
 // (upload/cleanup has no row to lock: it re-reads the used set instead.)
 
 import type { AdminCtx, Env } from "../index";
-import { publish } from "../publish";
 import { cleanupPost, unusedGet } from "./cleanup";
 import { itemDelete, itemPut } from "./items";
+import { orderPost } from "./order";
 import { galleryRead } from "./read";
 import { ringPut, ringReset } from "./rings";
 import { mpuAbort, mpuComplete, mpuCreate, mpuPart } from "./multipart";
@@ -29,7 +29,6 @@ export function requireSameOrigin(request: Request, url: URL): Response | null {
   return json({ error: "cross-origin request refused" }, 403);
 }
 
-const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1"]);
 
 /** Paths this module owns (used for the Origin guard). */
 const isMine = (path: string) => /^\/api\/admin\/(gallery|upload|rings)(\/|$)/.test(path);
@@ -49,15 +48,8 @@ export async function galleryRoute(
     if (bad) return bad;
   }
 
-  // Dev only: lets browser e2e publish before the editor team's publish
-  // route is merged. Needs the bypass flag AND a local hostname.
-  if (path === "/api/admin/gallery/dev-publish" && method === "POST") {
-    if (env.ADMIN_DEV_BYPASS !== "1" || !LOCAL_HOSTS.has(url.hostname)) return json({ error: "not found" }, 404);
-    const res = await publish(env.DB, ctx.adminEmail);
-    return json({ rev: res.rev, publishedAt: res.publishedAt });
-  }
-
   if (path === "/api/admin/gallery" && method === "GET") return galleryRead(env);
+  if (path === "/api/admin/gallery/order" && method === "POST") return orderPost(request, env, ctx);
   if (path.startsWith("/api/admin/gallery/") && method === "PUT") return itemPut(request, env, path, ctx);
   if (path.startsWith("/api/admin/gallery/") && method === "DELETE") return itemDelete(env, path, url, ctx);
   if (path.startsWith("/api/admin/rings/") && method === "PUT") return ringPut(request, env, path, ctx);

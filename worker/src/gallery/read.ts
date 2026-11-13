@@ -81,6 +81,12 @@ const altOf = (r: Row | undefined) => {
   return a;
 };
 
+/** A row on a default piece that only places it (G-06a: `sort` and nothing
+ *  else) leaves the piece itself as MEDIA has it: still kind "default" (no
+ *  "Revert to default" for it), with the row's rev and own.sort. */
+const changesPiece = (r: Row) =>
+  r.hidden === 1 || [r.src, r.poster, r.cat, r.sub, r.ratio, r.date, r.alt_ar, r.alt_en, r.client_id].some((v) => v != null);
+
 function defaultItem(m: Media, row: Row | undefined): AdminItem {
   const video = !!m.v;
   /* A deleted row on a default piece means "back to the default": the site
@@ -95,7 +101,7 @@ function defaultItem(m: Media, row: Row | undefined): AdminItem {
   const src = r?.src ?? undefined;
   const item: AdminItem = {
     id: m.f,
-    kind: r ? "override" : "default",
+    kind: r && changesPiece(r) ? "override" : "default",
     cat: r?.cat ?? m.c,
     sub: r?.sub ?? null,
     ratio: r?.ratio ?? m.r,
@@ -148,6 +154,16 @@ export function adminItem(id: string, r: Row | undefined): AdminItem | null {
   return r ? uploadItem(r) : null;
 }
 
+/** Every item the grid lists: each MEDIA default (with its row, if any),
+ *  then every upload row by id. */
+export function itemsOf(rows: Row[]): AdminItem[] {
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const items: AdminItem[] = MEDIA.map((m) => defaultItem(m, byId.get(m.f)));
+  const uploads = rows.filter((r) => !MEDIA_BY_F.has(r.id)).sort((a, b) => (a.id < b.id ? -1 : 1));
+  for (const r of uploads) items.push(uploadItem(r));
+  return items;
+}
+
 export type RingRow = { service: string; item_ids_json: string; state: string; published_json: string | null; rev: number };
 
 /** One ring as the panel shows it: the store list when the row is active,
@@ -167,12 +183,7 @@ export async function galleryRead(env: Env): Promise<Response> {
     env.DB.prepare(`SELECT ${ROW_COLS} FROM gallery_items`),
     env.DB.prepare("SELECT service, item_ids_json, state, published_json, rev FROM ring_picks"),
   ]);
-  const byId = new Map((rows.results as Row[]).map((r) => [r.id, r]));
-  const media = new Set(MEDIA.map((m) => m.f));
-
-  const items: AdminItem[] = MEDIA.map((m) => defaultItem(m, byId.get(m.f)));
-  const uploads = (rows.results as Row[]).filter((r) => !media.has(r.id)).sort((a, b) => (a.id < b.id ? -1 : 1));
-  for (const r of uploads) items.push(uploadItem(r));
+  const items = itemsOf(rows.results as Row[]);
 
   const ringRows = new Map((rings.results as RingRow[]).map((r) => [r.service, r]));
   const out: Record<string, AdminRing> = {};

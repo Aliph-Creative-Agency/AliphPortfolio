@@ -102,6 +102,36 @@ check("main note updated", /Deleted 1 unused file/.test(await page.textContent("
 check("nothing ticked -> Delete off", await page.locator("#cleanup-go").isDisabled());
 await page.click("#cleanup-close");
 
+// G-10b: files only a past revision names: a quiet group below, no checkbox, never posted.
+const KEPT = [
+  { key: `admin/2026/01/zx${run}-b.webp`, url: `https://media.aliphcreative.com/admin/2026/01/zx${run}-b.webp`, size: 5120, rev: 4 },
+  { key: `admin/2026/01/zx${run}-a.mp4`, url: `https://media.aliphcreative.com/admin/2026/01/zx${run}-a.mp4`, size: 3145728, rev: 2 },
+];
+list = { files: LIST.files, totalSize: LIST.totalSize, kept: KEPT };
+await page.setViewportSize({ width: 1440, height: 900 });
+await page.click("#cleanup-find");
+await page.waitForSelector("#cleanup-dlg[open] .adm-crow");
+const keptRows = page.locator("#cleanup-kept li");
+check("2 kept lines shown", (await keptRows.count()) === 2);
+check("kept line ends 'kept: used by revision N'", /kept: used by revision 4$/.test(await keptRows.nth(0).textContent()), await keptRows.nth(0).textContent());
+check("kept lines have no checkbox", (await page.locator("#cleanup-kept input").count()) === 0);
+check("kept lines are not among the deletable rows", (await page.locator("#cleanup-list .adm-crow").count()) === 3);
+const [kreq] = await Promise.all([
+  page.waitForRequest((r) => r.url().endsWith("/api/admin/upload/cleanup")),
+  page.click("#cleanup-go"),
+]);
+check("POST never carries a kept key", !kreq.postDataJSON().keys.some((k) => KEPT.some((x) => x.key === k)));
+await page.waitForFunction(() => document.getElementById("cleanup-msg").textContent.length > 0);
+// only kept files: dialog opens with nothing to delete
+list = { files: [], totalSize: 0, kept: KEPT };
+await page.click("#cleanup-close");
+await page.click("#cleanup-find");
+await page.waitForSelector("#cleanup-dlg[open]");
+check("only kept: dialog opens, Delete off, no rows to tick", (await page.locator("#cleanup-list .adm-crow").count()) === 0 && (await page.locator("#cleanup-go").isDisabled()));
+await page.screenshot({ path: path.join(OUT, "cleanup-kept-1440.png") });
+list = { files: LIST.files, totalSize: LIST.totalSize, kept: KEPT };
+await page.click("#cleanup-close");
+
 // 390: no horizontal scroll with the dialog open.
 await page.setViewportSize({ width: 390, height: 844 });
 await page.click("#cleanup-find");

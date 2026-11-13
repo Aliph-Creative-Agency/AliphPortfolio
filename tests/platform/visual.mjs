@@ -13,7 +13,7 @@ import { chromium } from "playwright-core";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const EDGE = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe";
-const PORT = 8831, INSPECTOR = 9231;
+const PORT = Number(process.env.PORT) || 8831, INSPECTOR = Number(process.env.INSPECTOR) || 9231;
 const BASE = `http://127.0.0.1:${PORT}`;
 const OUT = path.join(ROOT, ".wrangler", "visual");
 const THRESHOLD = 0.001;               // 0.1% of the pixels

@@ -2,11 +2,11 @@
 // `wrangler dev --local --port 8851 --inspector-port 9251` (ADMIN_DEV_BYPASS=1).
 //   node tests/gallery/ui-add.mjs
 // Adds 3 JPEG + 1 mp4 (+ one bad file) to the LOCAL dev store and publishes it
-// (dev-publish); harmless, the dev DB accumulates.
+// (editor publish route); harmless, the dev DB accumulates.
 import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright-core";
-import { EDGE, FIX, ROOT, check, done } from "./browser.mjs";
+import { EDGE, FIX, ROOT, check, done, publish as publishDraft } from "./browser.mjs";
 
 const ORIGIN = process.env.ORIGIN || "http://127.0.0.1:8851";
 const OUT = path.join(ROOT, "tests/gallery/out");
@@ -27,7 +27,7 @@ async function library() {
   const m = arch.match(/data-cat="photo">\s*<h2>[^<]*<span class="acc-static-count">([^<]+)<\/span>/);
   return { rest: (html.slice(0, a) + html.slice(b)).replace(/<script type="application\/json" id="aliph-content">[\s\S]*?<\/script>/, ""), photo: Number(m[1].replace(/./g, (d) => String(AR.indexOf(d)))) };
 }
-await ctx.request.post(ORIGIN + "/api/admin/gallery/dev-publish", { headers: { origin: ORIGIN } });
+await publishDraft(ctx.request, ORIGIN);
 const before = await library();
 
 const jpg = fs.readFileSync(path.join(FIX, "photo-plain.jpg"));
@@ -71,7 +71,7 @@ check("grid shows the 4 tiles marked changed", (await page.locator('.adm-tile[da
 await page.screenshot({ path: path.join(OUT, "add-done-1440.png") });
 
 // Publish, then the served /library (before JS) changes only in the archive region.
-await ctx.request.post(ORIGIN + "/api/admin/gallery/dev-publish", { headers: { origin: ORIGIN } });
+await publishDraft(ctx.request, ORIGIN);
 const after = await library();
 check("/library: counts include the 4", after.photo === before.photo + 4, `${before.photo} -> ${after.photo}`);
 check("/library: only the archive region (and the #aliph-content payload) differs", after.rest === before.rest);

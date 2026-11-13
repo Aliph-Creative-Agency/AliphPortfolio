@@ -18,7 +18,8 @@ const RUNS = {
 const CAT_LABEL = { design: "Design", photo: "Photo", tech: "Tech" };
 const CAT_ORDER = ["design", "photo", "tech"];
 
-export const state = { items: [], subcats: {}, rings: {}, publishRev: 0, cat: null, q: "" };
+// order = the library sub being reordered (order.js): {cat, run, ids, base} or null
+export const state = { items: [], subcats: {}, rings: {}, publishRev: 0, cat: null, q: "", order: null };
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => {
@@ -36,6 +37,17 @@ const subLabel = (it) => {
   const s = (state.subcats[it.cat] || []).find((x) => x.id === it.sub);
   return s ? s.en : it.sub;
 };
+
+/** Library order inside a sub, as /library files it (editor E-10): a piece
+ *  with a saved `sort` first, ascending; the rest after, newest date first,
+ *  undated last, ties by id. */
+export function byOrder(a, b) {
+  const sa = a.own && Number.isFinite(a.own.sort) ? a.own.sort : null;
+  const sb = b.own && Number.isFinite(b.own.sort) ? b.own.sort : null;
+  if (sa !== null && sb !== null && sa !== sb) return sa - sb;
+  if ((sa === null) !== (sb === null)) return sa === null ? 1 : -1;
+  return (b.date || "").localeCompare(a.date || "") || a.id.localeCompare(b.id);
+}
 
 /** Tabs: design + photo always, any other category only when it has items. */
 function categories() {
@@ -94,23 +106,29 @@ export function render() {
     t.setAttribute("role", "tab");
     t.setAttribute("aria-selected", c === state.cat ? "true" : "false");
     t.dataset.cat = c;
-    t.addEventListener("click", () => { state.cat = c; render(); });
+    t.addEventListener("click", () => { if (c !== state.cat) state.order = null; state.cat = c; render(); });
     tabs.append(t);
   }
 
   const grid = $("grid");
   grid.textContent = "";
   const inCat = state.items.filter((it) => it.cat === state.cat && match(it));
+  const ord = state.order && state.order.cat === state.cat ? state.order : null;
   const runs = RUNS[state.cat] || [{ id: "all", en: CAT_LABEL[state.cat] || state.cat, of: () => true }];
   const claimed = new Set();
   for (const run of runs) {
     const rows = inCat.filter((it) => !claimed.has(it.id) && run.of(it));
     rows.forEach((it) => claimed.add(it.id));
     if (!rows.length) continue;
-    // newest first, undated last, ties by file name (as /library does)
-    rows.sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.id.localeCompare(b.id));
+    // saved order first, then newest (as /library does); the sub being
+    // reordered follows its working list (a removed upload stays last)
+    if (ord && ord.run === run.id) {
+      const at = new Map(ord.ids.map((id, i) => [id, i]));
+      rows.sort((a, b) => (at.has(a.id) ? at.get(a.id) : 1e9) - (at.has(b.id) ? at.get(b.id) : 1e9) || byOrder(a, b));
+    } else rows.sort(byOrder);
     const sec = el("section", "adm-run");
     sec.dataset.run = run.id;
+    sec.dataset.cat = state.cat;
     const h = el("h2", "", run.en + " ");
     h.append(el("span", "", `(${rows.length})`));
     const ul = el("ul", "adm-grid");
@@ -133,5 +151,5 @@ export async function load() {
 }
 
 $("search").addEventListener("input", (e) => { state.q = e.target.value; render(); });
-window.gallery = { state, render, load };
+window.gallery = { state, render, load, byOrder };
 load();
