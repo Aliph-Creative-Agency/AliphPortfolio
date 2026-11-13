@@ -10,9 +10,10 @@
 //   - ring picks: every id in an active draft ring or a published ring,
 //     resolved to its gallery row's draft columns AND published_json, in any
 //     state (a ring can still name a row deleted after the ring was saved);
-//   - slot values of EVERY past revision: the editor's History restore copies
-//     a revision's slots back into the draft (gallery rows are not restored,
-//     so past gallery snapshots do not protect a file);
+//   - slot values AND gallery rows (src/poster) of EVERY past revision: the
+//     editor's History restore copies a revision's slots, gallery rows and
+//     clients back into the draft, so a file only an old revision names is
+//     still reachable (G-10); `Used.revOnly` tells which revision;
 //   - a video's poster by name: <stem>.mp4 used → <stem>.poster.* used.
 // A deleted row whose deletion is published is in neither snapshot, so its
 // files are listed (with `item` = its id, for the confirm list).
@@ -69,6 +70,10 @@ export interface Used {
   /** key → the gallery row whose (draft or published) columns name it, for
    *  keys that are NOT used; tells the admin what a listed file was. */
   owner: Map<string, string>;
+  /** key → the highest revision id naming it, for keys that ONLY past
+   *  revisions protect (not the draft, the published state or a ring). These
+   *  are also in `keys`. */
+  revOnly: Map<string, number>;
 }
 
 /** The used set, read in one D1 batch (one consistent view). */
@@ -77,7 +82,9 @@ export async function usedKeys(env: Env): Promise<Used> {
     env.DB.prepare("SELECT id, src, poster, published_json, state FROM gallery_items"),
     env.DB.prepare("SELECT draft_json, published_json FROM slot_values"),
     env.DB.prepare("SELECT item_ids_json, published_json, state FROM ring_picks"),
-    env.DB.prepare("SELECT json_extract(snapshot_json, '$.slots') AS slots FROM revisions"),
+    env.DB.prepare(
+      "SELECT id, json_extract(snapshot_json, '$.slots') AS slots, json_extract(snapshot_json, '$.gallery') AS gallery FROM revisions",
+    ),
   ]);
   const keys = new Set<string>();
   const owner = new Map<string, string>();
@@ -107,9 +114,6 @@ export async function usedKeys(env: Env): Promise<Used> {
     for (const s of strings(parse(r.draft_json))) add(s);
     for (const s of strings(parse(r.published_json))) add(s);
   }
-  for (const r of past.results as { slots: string | null }[]) {
-    for (const s of strings(parse(r.slots))) add(s);
-  }
   for (const r of rings.results as { item_ids_json: string; published_json: string | null; state: string }[]) {
     const ids = [...(r.state === "active" ? strings(parse(r.item_ids_json)) : []), ...strings(parse(r.published_json))];
     for (const id of ids) {
@@ -117,12 +121,41 @@ export async function usedKeys(env: Env): Promise<Used> {
       if (row) for (const k of rowKeys(row)) keys.add(k);
     }
   }
-  for (const k of [...keys]) {
-    const m = /^(admin\/.+)\.(mp4|webm)$/.exec(k);
-    if (m) for (const ext of ["webp", "jpg", "png", "avif"]) keys.add(`${m[1]}.poster.${ext}`);
+  /** a video's poster follows it by name */
+  const withPosters = (set: Set<string>) => {
+    for (const k of [...set]) {
+      const m = /^(admin\/.+)\.(mp4|webm)$/.exec(k);
+      if (m) for (const ext of ["webp", "jpg", "png", "avif"]) set.add(`${m[1]}.poster.${ext}`);
+    }
+  };
+  withPosters(keys);
+  // Past revisions: every URL in their slots, plus src/poster of their gallery rows.
+  const inRevs = new Map<string, number>();
+  for (const r of past.results as { id: number; slots: string | null; gallery: string | null }[]) {
+    const names = new Set<string>();
+    for (const s of strings(parse(r.slots))) {
+      const k = keyOf(s);
+      if (k) names.add(k);
+    }
+    const rows = parse(r.gallery);
+    if (Array.isArray(rows)) {
+      for (const row of rows as { src?: unknown; poster?: unknown }[]) {
+        for (const v of [row?.src, row?.poster]) {
+          const k = keyOf(v);
+          if (k) names.add(k);
+        }
+      }
+    }
+    withPosters(names);
+    for (const k of names) inRevs.set(k, Math.max(inRevs.get(k) ?? 0, r.id));
   }
+  const revOnly = new Map<string, number>();
+  for (const [k, rev] of inRevs) {
+    if (!keys.has(k)) revOnly.set(k, rev);
+  }
+  for (const k of inRevs.keys()) keys.add(k);
   for (const k of keys) owner.delete(k);
-  return { keys, owner };
+  return { keys, owner, revOnly };
 }
 
 const isOld = (uploaded: Date, now: number) => now - uploaded.getTime() >= MIN_AGE_MS;

@@ -90,9 +90,11 @@ describe("GET /api/admin/upload/unused", () => {
     const gone = await obj("iiiiii-gone.mp4");
     const gonePoster = await obj("iiiiii-gone.poster.webp");
     await put("/api/admin/gallery/up-ringed", { src: URL_OF(ringed), cat: "photo", baseRev: 0 });
-    await put("/api/admin/gallery/up-gone", { src: URL_OF(gone), poster: URL_OF(gonePoster), cat: "photo", baseRev: 0 });
     expect((await put("/api/admin/rings/photo", { ids: ["up-ringed"], baseRev: 0 })).status).toBe(200);
     await publish(env.DB, ADMIN);
+    // up-gone is created after that publish, so no revision ever names it (a
+    // published one would be kept for History restore, see "revisions" below)
+    await put("/api/admin/gallery/up-gone", { src: URL_OF(gone), poster: URL_OF(gonePoster), cat: "photo", baseRev: 0 });
     // both deleted and the deletion published: neither snapshot's gallery has them
     await del("/api/admin/gallery/up-ringed?baseRev=1");
     await del("/api/admin/gallery/up-gone?baseRev=1");
@@ -193,5 +195,28 @@ describe("revisions (leader fix, relay #7)", () => {
     expect(r.status).toBe(200);
     expect(((await r.json()) as Cleaned).refused).toEqual([{ key: old, reason: "in use" }]);
     expect(await exists(old)).toBe(true);
+  });
+
+  // History restore also copies a revision's gallery rows (src/poster) back (G-10).
+  it("a file named only by a past revision's gallery item is not listed and is refused", async () => {
+    const photo = await obj("jjjjjj-gal.mp4");
+    const poster = await obj("jjjjjj-gal.poster.webp");
+    const orphan = await obj("kkkkkk-orphan.webp");
+    expect((await put("/api/admin/gallery/up-g", { src: URL_OF(photo), poster: URL_OF(poster), cat: "photo", baseRev: 0 })).status).toBe(200);
+    await publish(env.DB, ADMIN); // revision N names it
+    expect((await del("/api/admin/gallery/up-g?baseRev=1")).status).toBe(200);
+    await publish(env.DB, ADMIN); // revision N+1 does not
+    // the revision's snapshot really carries the item
+    const snaps = await env.DB.prepare("SELECT json_extract(snapshot_json, '$.gallery') AS g FROM revisions").all<{ g: string }>();
+    expect(snaps.results.some((r) => r.g.includes(photo))).toBe(true);
+
+    later();
+    expect(await unusedKeys()).toEqual([orphan]);
+    for (const k of [photo, poster]) {
+      const r = await cleanup([k]);
+      expect(r.status).toBe(200);
+      expect(((await r.json()) as Cleaned).refused).toEqual([{ key: k, reason: "in use" }]);
+      expect(await exists(k)).toBe(true);
+    }
   });
 });
