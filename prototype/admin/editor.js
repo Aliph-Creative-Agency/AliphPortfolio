@@ -421,7 +421,7 @@
     panelVals[cur.key + "|" + loc] = value;
     if (cur.virtual) return; /* opened from the panel: the page shows it (if at all) through apply() */
     if (loc === edit.lang && !el.children.length && el.textContent !== value) el.textContent = value;
-    if (cur.rich) el.classList.add("ed-rich");
+    if (cur.rich && !cur.collapse) el.classList.add("ed-rich");
     if (loc === edit.lang) refit(el);
   }
 
@@ -464,10 +464,22 @@
   }
 
   function field(loc, label) {
-    var area = h("textarea", { rows: cur.rich ? "5" : "3", "data-loc": loc, "aria-label": label, dir: loc === "ar" ? "rtl" : "ltr", lang: loc });
+    var area = h("textarea", { rows: cur.rich && !cur.collapse ? "5" : "3", "data-loc": loc, "aria-label": label, dir: loc === "ar" ? "rtl" : "ltr", lang: loc });
     var count = h("span", { class: "ed-count" });
     cur.area[loc] = area;
     cur.count[loc] = count;
+    if (cur.collapse) {
+      /* the public element collapses whitespace: a line break typed here would show in the editor only */
+      area.addEventListener("keydown", function (e) { if (e.key === "Enter") e.preventDefault(); });
+      area.addEventListener("beforeinput", function (e) { if (e.inputType === "insertLineBreak" || e.inputType === "insertParagraph") e.preventDefault(); });
+      area.addEventListener("paste", function (e) {
+        var t = e.clipboardData && e.clipboardData.getData("text");
+        if (!t || !/[\r\n]/.test(t)) return;
+        e.preventDefault();
+        area.setRangeText(t.replace(/\s*[\r\n]+\s*/g, " "), area.selectionStart, area.selectionEnd, "end");
+        area.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
     area.addEventListener("input", function () {
       updateCount(loc);
       preview(loc, area.value);
@@ -508,7 +520,18 @@
     var key = panelKey || el.dataset.ek;
     var entry = entryOf(key);
     var locs = entry && entry.locales ? LOCALES.filter(function (l) { return entry.locales.indexOf(l) >= 0; }) : LOCALES;
-    cur = { el: el, key: key, locs: locs, virtual: !!panelKey, orig: {}, area: {}, count: {}, max: entry && entry.maxLength || 0, auto: el.hasAttribute("data-ek-auto"), rich: !!entry && entry.kind === "richline" };
+    cur = { el: el, key: key, locs: locs, virtual: !!panelKey, orig: {}, area: {}, count: {}, max: entry && entry.maxLength || 0, auto: el.hasAttribute("data-ek-auto"), rich: !!entry && entry.kind === "richline", collapse: false };
+    /* a richline keeps its line breaks only where the public element does: read what it computes to, not a key list */
+    if (cur.rich) {
+      var live = el.hasAttribute("data-ek") ? el : document.querySelector('[data-ek="' + key + '"]');
+      if (live) {
+        var had = live.classList.contains("ed-rich");
+        live.classList.remove("ed-rich");
+        var ws = getComputedStyle(live).whiteSpace;
+        cur.collapse = ws === "normal" || ws === "nowrap";
+        if (had && !cur.collapse) live.classList.add("ed-rich");
+      }
+    }
     locs.forEach(function (l) { cur.orig[l] = origOf(key, l, panelKey ? panelDraft : null); });
     pop.textContent = "";
     var cancel = h("button", { type: "button", text: "Cancel" });
@@ -522,7 +545,7 @@
       ]),
       locs.indexOf("ar") >= 0 ? field("ar", "Arabic") : null,
       locs.indexOf("en") >= 0 ? field("en", "English") : null,
-      h("p", { class: "ed-hint", text: (locs.length === 1 ? "Arabic only. " : "") + (cur.rich ? "Enter makes a line break. " : "") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
+      h("p", { class: "ed-hint", text: (locs.length === 1 ? "Arabic only. " : "") + (cur.rich ? (cur.collapse ? "This line has no line breaks on the page. " : "Enter makes a line break. ") : "") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
       h("div", { class: "ed-pop-actions" }, [cancel, done]),
     ].forEach(function (n) { if (n) pop.appendChild(n); });
     locs.forEach(function (l) { cur.area[l].value = cur.orig[l]; updateCount(l); });
