@@ -10,16 +10,25 @@
 //   text_values  every (key, locale) in the snapshot: draft = its value
 //                (INSERT or UPDATE); every other row: draft = NULL (default).
 //   slot_values  the same with draft_json.
+//   clients / gallery_items / ring_picks (E-07b)
+//                every row in the snapshot: its columns from the JSON,
+//                state 'active' (INSERT or UPDATE); every other active row:
+//                state 'deleted' (a staged removal, as the gallery admin
+//                stages one). Clients go first: gallery_items.client_id
+//                references them, and a client the table never had is
+//                written as NULL rather than failing the batch.
 //   audit        one 'restore' row, target 'rev:<id>'.
 // Only rows whose draft actually changes are written, and each of them gets
 // rev + 1, so a save still holding a pre-restore lock is a 409 and publish's
-// fingerprint sees the change. Values the registry no longer accepts (a key
-// or slot removed since that publish) are skipped and listed in `skipped`.
+// fingerprint sees the change. Values the rules no longer accept (a key or
+// slot removed since that publish, an item validate.ts now refuses, a ring
+// naming an item that is gone) are skipped, listed in `skipped`, and so
+// staged as removed like any row absent from the snapshot.
 
 import type { AdminCtx, Env } from "../index";
 import type { Snapshot } from "../store";
 import { emptySnapshot } from "../store";
-import { validateSlot, validateText } from "../validate";
+import { validateClient, validateGalleryItem, validateRing, validateSlot, validateText } from "../validate";
 import { diff } from "./diff";
 import { json } from "./http";
 
@@ -71,8 +80,8 @@ async function list(db: D1Database, url: URL): Promise<Response> {
   );
 }
 
-/** The statements that make the draft equal `snap` (text + slots), plus what
- *  had to be skipped. E-07b appends gallery / rings / clients to the same batch. */
+/** The statements that make the draft equal `snap` (text, slots, clients,
+ *  gallery, rings), plus what had to be skipped. */
 function restoreStatements(db: D1Database, snap: Snapshot, by: string) {
   const skipped: string[] = [];
   const text: [string, string, string][] = [];
@@ -91,8 +100,43 @@ function restoreStatements(db: D1Database, snap: Snapshot, by: string) {
     if (ok.ok && ok.value) slots.push([id, JSON.stringify(ok.value)]);
     else skipped.push(`slot:${id}`);
   }
+  const clients: [string, string, string][] = [];
+  for (const c of snap.clients ?? []) {
+    const ok = validateClient(c);
+    if (ok.ok) clients.push([ok.value.id, ok.value.name.ar, ok.value.name.en]);
+    else skipped.push(`client:${(c as { id?: unknown })?.id}`);
+  }
+  // [id, src, poster, cat, sub, ratio, date, alt_ar, alt_en, client_id, hidden, sort]: the gallery_items columns
+  const gallery: (string | number | null)[][] = [];
+  const visible = new Map<string, string | undefined>();
+  for (const g of snap.gallery ?? []) {
+    const ok = validateGalleryItem(g);
+    if (!ok.ok) {
+      skipped.push(`gallery:${(g as { id?: unknown })?.id}`);
+      continue;
+    }
+    const it = ok.value;
+    if (!it.hidden) visible.set(it.id, it.cat);
+    gallery.push([
+      it.id, it.src ?? null, it.poster ?? null, it.cat ?? null, it.sub ?? null, it.ratio ?? null, it.date ?? null,
+      it.alt?.ar ?? null, it.alt?.en ?? null, it.client ?? null, it.hidden ? 1 : 0, it.sort ?? null,
+    ]);
+  }
+  // a ring may hold its defaults, MEDIA files of its category, and the
+  // snapshot's own visible items of that category (validateRing's lookup)
+  const rings: [string, string][] = [];
+  for (const [service, ids] of Object.entries(snap.rings ?? {})) {
+    const ok = validateRing(service, ids, (id) => visible.has(id) && visible.get(id) === service);
+    if (ok.ok && ok.value) rings.push([service, JSON.stringify(ok.value)]);
+    else skipped.push(`ring:${service}`);
+  }
   const textJson = JSON.stringify(text);
   const slotsJson = JSON.stringify(slots);
+  const clientsJson = JSON.stringify(clients);
+  const galleryJson = JSON.stringify(gallery);
+  const ringsJson = JSON.stringify(rings);
+  const col = (i: number) => `json_extract(value, '$[${i}]')`;
+  const GALLERY_COLS = ["src", "poster", "cat", "sub", "ratio", "date", "alt_ar", "alt_en", "client_id", "hidden", "sort"];
 
   const stmts = [
     // present in the snapshot: set the draft (insert the row if there is none)
@@ -129,6 +173,54 @@ function restoreStatements(db: D1Database, snap: Snapshot, by: string) {
            WHERE json_extract(value, '$[0]') = slot_values.slot)`,
       )
       .bind(slotsJson, by),
+    // clients before gallery_items (client_id references them)
+    db
+      .prepare(
+        `INSERT INTO clients (id, name_ar, name_en, state, updated_by)
+         SELECT ${col(0)}, ${col(1)}, ${col(2)}, 'active', ?2 FROM json_each(?1) WHERE true
+         ON CONFLICT (id) DO UPDATE SET name_ar = excluded.name_ar, name_en = excluded.name_en, state = 'active',
+           rev = rev + 1, updated_at = ${NOW}, updated_by = ?2
+         WHERE clients.state IS NOT 'active' OR clients.name_ar IS NOT excluded.name_ar OR clients.name_en IS NOT excluded.name_en`,
+      )
+      .bind(clientsJson, by),
+    db
+      .prepare(
+        `UPDATE clients SET state = 'deleted', rev = rev + 1, updated_at = ${NOW}, updated_by = ?2
+         WHERE state = 'active' AND NOT EXISTS (SELECT 1 FROM json_each(?1) WHERE ${col(0)} = clients.id)`,
+      )
+      .bind(clientsJson, by),
+    db
+      .prepare(
+        `INSERT INTO gallery_items (id, ${GALLERY_COLS.join(", ")}, state, updated_by)
+         SELECT ${col(0)}, ${col(1)}, ${col(2)}, ${col(3)}, ${col(4)}, ${col(5)}, ${col(6)}, ${col(7)}, ${col(8)},
+           CASE WHEN EXISTS (SELECT 1 FROM clients WHERE id = ${col(9)}) THEN ${col(9)} END, ${col(10)}, ${col(11)}, 'active', ?2
+         FROM json_each(?1) WHERE true
+         ON CONFLICT (id) DO UPDATE SET ${GALLERY_COLS.map((c) => `${c} = excluded.${c}`).join(", ")}, state = 'active',
+           rev = rev + 1, updated_at = ${NOW}, updated_by = ?2
+         WHERE gallery_items.state IS NOT 'active' OR ${GALLERY_COLS.map((c) => `gallery_items.${c} IS NOT excluded.${c}`).join(" OR ")}`,
+      )
+      .bind(galleryJson, by),
+    db
+      .prepare(
+        `UPDATE gallery_items SET state = 'deleted', rev = rev + 1, updated_at = ${NOW}, updated_by = ?2
+         WHERE state = 'active' AND NOT EXISTS (SELECT 1 FROM json_each(?1) WHERE ${col(0)} = gallery_items.id)`,
+      )
+      .bind(galleryJson, by),
+    db
+      .prepare(
+        `INSERT INTO ring_picks (service, item_ids_json, state, updated_by)
+         SELECT ${col(0)}, ${col(1)}, 'active', ?2 FROM json_each(?1) WHERE true
+         ON CONFLICT (service) DO UPDATE SET item_ids_json = excluded.item_ids_json, state = 'active',
+           rev = rev + 1, updated_at = ${NOW}, updated_by = ?2
+         WHERE ring_picks.state IS NOT 'active' OR json(ring_picks.item_ids_json) IS NOT json(excluded.item_ids_json)`,
+      )
+      .bind(ringsJson, by),
+    db
+      .prepare(
+        `UPDATE ring_picks SET state = 'deleted', rev = rev + 1, updated_at = ${NOW}, updated_by = ?2
+         WHERE state = 'active' AND NOT EXISTS (SELECT 1 FROM json_each(?1) WHERE ${col(0)} = ring_picks.service)`,
+      )
+      .bind(ringsJson, by),
   ];
   return { stmts, skipped };
 }

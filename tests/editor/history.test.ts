@@ -146,3 +146,104 @@ describe("POST /api/admin/revisions/:id/restore", () => {
     expect((await readSnapshot(db(), "draft")).text).toEqual({ hero1: { ar: "صالح" } });
   });
 });
+
+describe("restore: gallery / rings / clients (E-07b)", () => {
+  const BY = "a@b.c";
+  const galleryRow = (
+    id: string,
+    cols: { src?: string; cat?: string; sub?: string; ratio?: number; alt_en?: string; client_id?: string; hidden?: number; sort?: number },
+  ) =>
+    run(
+      `INSERT INTO gallery_items (id, src, cat, sub, ratio, alt_en, client_id, hidden, sort, updated_by)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
+       ON CONFLICT (id) DO UPDATE SET src = ?2, cat = ?3, sub = ?4, ratio = ?5, alt_en = ?6, client_id = ?7, hidden = ?8,
+         sort = ?9, state = 'active', rev = rev + 1`,
+      id, cols.src ?? null, cols.cat ?? null, cols.sub ?? null, cols.ratio ?? null, cols.alt_en ?? null,
+      cols.client_id ?? null, cols.hidden ?? 0, cols.sort ?? null, BY,
+    );
+  const ring = (service: string, ids: string[] | null) =>
+    run(
+      `INSERT INTO ring_picks (service, item_ids_json, state, updated_by) VALUES (?1, ?2, ?3, ?4)
+       ON CONFLICT (service) DO UPDATE SET item_ids_json = ?2, state = ?3, rev = rev + 1`,
+      service, JSON.stringify(ids ?? ["x"]), ids ? "active" : "deleted", BY,
+    );
+  const client = (id: string, ar: string, en: string, state = "active") =>
+    run(
+      `INSERT INTO clients (id, name_ar, name_en, state, updated_by) VALUES (?1, ?2, ?3, ?4, ?5)
+       ON CONFLICT (id) DO UPDATE SET name_ar = ?2, name_en = ?3, state = ?4, rev = rev + 1`,
+      id, ar, en, state, BY,
+    );
+  const media = (s: { gallery: unknown; rings: unknown; clients: unknown }) => ({ gallery: s.gallery, rings: s.rings, clients: s.clients });
+
+  it("a revision's uploads, overrides, rings and clients come back after later edits and removals", async () => {
+    await client("c1", "عميل", "Client one");
+    await galleryRow("up-1", { src: "https://media.aliphcreative.com/img/up-1.webp", cat: "design", sub: "logos", ratio: 1.5, alt_en: "A logo", client_id: "c1", sort: 2 });
+    await galleryRow("design-haqqak-1.webp", { hidden: 1, sort: 1 });
+    await ring("design", ["up-1", "design-grillit-1.webp"]);
+    await ring("photo", ["reels-alif-tuktuk.webp"]);
+    const r1 = await publish();
+    const snap1 = media(await readSnapshot(db(), "published"));
+    expect((snap1.gallery as unknown[]).length).toBe(2);
+
+    // later: change the upload, drop the override, add another upload, re-pick / reset rings, retire + add clients
+    await client("c2", "آخر", "Other");
+    await galleryRow("up-1", { src: "https://media.aliphcreative.com/img/up-1b.webp", cat: "design", ratio: 2, client_id: "c2" });
+    await run("UPDATE gallery_items SET state = 'deleted', rev = rev + 1 WHERE id = 'design-haqqak-1.webp'");
+    await galleryRow("up-2", { src: "assets/media/x.webp", cat: "photo" });
+    await ring("design", ["design-grillit-2.webp"]);
+    await ring("photo", null);
+    await ring("tech", ["al-baydar-cover"]);
+    await client("c1", "عميل", "Client one", "deleted");
+    await publish();
+    const live2 = media(await readSnapshot(db(), "published"));
+    const before = (await readSnapshot(db(), "draft")).locks!;
+
+    const res = await post(`/api/admin/revisions/${r1}/restore`);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ restored: r1, skipped: [] });
+    const draft = await readSnapshot(db(), "draft");
+    expect(media(draft)).toEqual(snap1);
+    expect(media(await readSnapshot(db(), "published"))).toEqual(live2);
+
+    // every touched row moved its lock; rows absent from the snapshot are staged removals, not gone
+    for (const id of ["up-1", "design-haqqak-1.webp", "up-2"]) expect(draft.locks!.gallery[id]).toBe(before.gallery[id] + 1);
+    for (const s of ["design", "photo", "tech"]) expect(draft.locks!.rings[s]).toBe(before.rings[s] + 1);
+    for (const c of ["c1", "c2"]) expect(draft.locks!.clients[c]).toBe(before.clients[c] + 1);
+    expect(await one("SELECT state FROM gallery_items WHERE id = 'up-2'")).toEqual({ state: "deleted" });
+    expect(await one("SELECT state FROM ring_picks WHERE service = 'tech'")).toEqual({ state: "deleted" });
+    expect(await one("SELECT state FROM clients WHERE id = 'c2'")).toEqual({ state: "deleted" });
+
+    // restoring the same revision again writes nothing
+    await post(`/api/admin/revisions/${r1}/restore`);
+    expect((await readSnapshot(db(), "draft")).locks).toEqual(draft.locks);
+
+    await publish();
+    expect(media(await readSnapshot(db(), "published"))).toEqual(snap1);
+  });
+
+  it("an item, ring or client the rules no longer accept is skipped (staged as removed)", async () => {
+    await galleryRow("up-1", { src: "assets/media/x.webp", cat: "design" });
+    await ring("design", ["design-grillit-1.webp"]);
+    await run(
+      "INSERT INTO revisions (id, published_by, snapshot_json) VALUES (?1, 'a@b.c', ?2)",
+      base + 1,
+      JSON.stringify({
+        rev: base + 1,
+        text: {},
+        slots: {},
+        gallery: [{ id: "up-ok", src: "assets/media/y.webp", cat: "photo" }, { id: "bad", src: "javascript:x", cat: "design" }],
+        rings: { photo: ["up-ok", "reels-alif-tuktuk.webp"], design: ["no-such-item"] },
+        clients: [{ id: "c1", name: { ar: "<b>", en: "x" } }],
+      }),
+    );
+    await run("UPDATE meta SET v = ? WHERE k = 'publish_rev'", String(base + 1));
+    const res = await post(`/api/admin/revisions/${base + 1}/restore`);
+    expect(await res.json()).toEqual({ restored: base + 1, skipped: ["client:c1", "gallery:bad", "ring:design"] });
+    expect(media(await readSnapshot(db(), "draft"))).toEqual({
+      gallery: [{ id: "up-ok", src: "assets/media/y.webp", cat: "photo" }],
+      rings: { photo: ["up-ok", "reels-alif-tuktuk.webp"] },
+      clients: [],
+    });
+    expect(await one("SELECT state FROM gallery_items WHERE id = 'up-1'")).toEqual({ state: "deleted" });
+  });
+});
