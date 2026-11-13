@@ -97,6 +97,8 @@ body.adm {
 .adm-ctxt { display: flex; flex-direction: column; min-inline-size: 0; flex: 1 1 auto; }
 .adm-ctxt .adm-pick-name { flex: none; }
 .adm-cmeta { color: var(--ink-mute); font-size: 1.2rem; }
+.adm-ckeptlist { margin-block-start: 0.8rem; }
+.adm-ckept { padding: 0.4rem 0.6rem; border: 1px dashed var(--ink-faint); color: var(--ink-mute); }
 .adm-cwarn { color: var(--accent); font-size: 1.2rem; }
 .adm-cvid { display: grid; place-items: center; color: var(--ink-mute); font-size: 1.1rem; }
 .adm-dmsg[data-kind="ok"] { color: var(--ink); }

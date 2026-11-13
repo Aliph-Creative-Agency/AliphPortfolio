@@ -1,5 +1,8 @@
 // "Clean up unused files" (G-08):
-//   GET  /api/admin/upload/unused             → {files: [{key, size, uploaded, url, item?}], totalSize}
+//   GET  /api/admin/upload/unused             → {files: [{key, size, uploaded, url, item?}], totalSize,
+//                                                kept: [{key, url, size, rev}]}
+//   (`kept` = old admin/ files that only a past revision names: never listed
+//   for deletion, shown so the admin knows why they stay)
 //   POST /api/admin/upload/cleanup {keys}     → {deleted, refused: [{key, reason}]}
 //
 // An admin/ object is USED when the draft or the published state names it:
@@ -164,18 +167,23 @@ export async function unusedGet(env: Env): Promise<Response> {
   const used = await usedKeys(env);
   const now = Date.now();
   const files: { key: string; size: number; uploaded: string; url: string; item?: string }[] = [];
+  const kept: { key: string; url: string; size: number; rev: number }[] = [];
   let cursor: string | undefined;
   do {
     const l = await env.MEDIA_BUCKET.list({ prefix: "admin/", cursor });
     for (const o of l.objects) {
-      if (!ADMIN_KEY_RE.test(o.key) || used.keys.has(o.key) || !isOld(o.uploaded, now)) continue;
+      if (!ADMIN_KEY_RE.test(o.key) || !isOld(o.uploaded, now)) continue;
+      const rev = used.revOnly.get(o.key);
+      if (rev !== undefined) kept.push({ key: o.key, url: PREFIX + o.key, size: o.size, rev });
+      if (used.keys.has(o.key)) continue;
       const item = used.owner.get(o.key);
       files.push({ key: o.key, size: o.size, uploaded: o.uploaded.toISOString(), url: PREFIX + o.key, ...(item ? { item } : {}) });
     }
     cursor = l.truncated ? l.cursor : undefined;
   } while (cursor);
   files.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
-  return json({ files, totalSize: files.reduce((n, f) => n + f.size, 0) });
+  kept.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+  return json({ files, totalSize: files.reduce((n, f) => n + f.size, 0), kept });
 }
 
 export async function cleanupPost(request: Request, env: Env, ctx: AdminCtx): Promise<Response> {

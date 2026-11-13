@@ -1,11 +1,13 @@
 // Admin gallery: "Clean up unused files" (G-08).
-//   Find     GET  /api/admin/upload/unused -> {files: [{key, size, uploaded, url, item?}], totalSize}
+//   Find     GET  /api/admin/upload/unused -> {files: [...], totalSize, kept: [{key, url, size, rev}]}
 //   Delete   POST /api/admin/upload/cleanup {keys} -> {deleted, refused: [{key, reason}]}
 // The server lists only uploads that neither the draft nor the published site
 // names and that are at least a day old, and checks every key again when it
 // deletes. The dialog lists them with sizes, every row ticked; the admin
 // unticks what to keep and confirms. A file of a deleted item (`item`) is
-// flagged: once it is gone, restoring that item shows nothing.
+// flagged: once it is gone, restoring that item shows nothing. `kept` files
+// (only an old revision names them, History restore would bring them back)
+// show under the list as plain lines, with no checkbox: they cannot be sent.
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => {
@@ -70,6 +72,16 @@ function row(f) {
   return li;
 }
 
+/** A file that stays: no checkbox, so it can never be ticked or posted. */
+function keptRow(f) {
+  const li = el("li", "adm-ckept");
+  const txt = el("span", "adm-ctxt");
+  txt.append(el("span", "adm-pick-name", nameOf(f.key)));
+  txt.append(el("span", "adm-cmeta", `${size(f.size)} · kept: used by revision ${f.rev}`));
+  li.append(txt);
+  return li;
+}
+
 async function find() {
   const btn = $("cleanup-find");
   btn.disabled = true;
@@ -79,14 +91,20 @@ async function find() {
     if (!r.ok) throw new Error(`Could not list the files (${r.status}).`);
     const j = await r.json();
     files = j.files;
-    if (!files.length) {
+    const kept = Array.isArray(j.kept) ? j.kept : [];
+    if (!files.length && !kept.length) {
       $("cleanup-note").textContent = "No unused files. Uploads stay at least a day before they can be cleaned up.";
       return;
     }
     $("cleanup-note").textContent = "";
     const list = $("cleanup-list");
     list.replaceChildren(...files.map(row));
-    $("cleanup-sum").textContent = `${files.length} ${files.length === 1 ? "file" : "files"}, ${size(j.totalSize)}, used by neither the draft nor the published site and uploaded over a day ago. Deleting cannot be undone.`;
+    const keptList = $("cleanup-kept");
+    keptList.replaceChildren(...kept.map(keptRow));
+    keptList.hidden = !kept.length;
+    $("cleanup-sum").textContent = files.length
+      ? `${files.length} ${files.length === 1 ? "file" : "files"}, ${size(j.totalSize)}, used by neither the draft nor the published site and uploaded over a day ago. Deleting cannot be undone.`
+      : "Nothing can be deleted now.";
     say("");
     sync();
     $("cleanup-dlg").showModal();

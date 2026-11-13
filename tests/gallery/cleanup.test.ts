@@ -212,6 +212,13 @@ describe("revisions (leader fix, relay #7)", () => {
 
     later();
     expect(await unusedKeys()).toEqual([orphan]);
+    // G-10b: shown as kept, with the revision that names it (the revision that carried the item)
+    const { kept, files } = (await (await call("/api/admin/upload/unused")).json()) as { kept: { key: string; url: string; size: number; rev: number }[]; files: Unused[] };
+    expect(files.map((f) => f.key)).not.toContain(photo);
+    expect(kept.map((k) => k.key)).toEqual([photo, poster].sort());
+    // revision ids outlive tests (append-only), so the expected one is read back
+    const rev1 = (await env.DB.prepare("SELECT max(id) AS id FROM revisions WHERE snapshot_json LIKE ?").bind(`%${photo}%`).first<{ id: number }>())!.id;
+    expect(kept[0]).toMatchObject({ rev: rev1, size: 10, url: URL_OF(kept[0].key) });
     for (const k of [photo, poster]) {
       const r = await cleanup([k]);
       expect(r.status).toBe(200);
