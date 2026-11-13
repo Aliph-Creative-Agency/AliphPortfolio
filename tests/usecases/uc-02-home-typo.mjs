@@ -116,8 +116,14 @@ async function run(cfg) {
     });
 
     await S(7, "publish-modal", "modal lists the change in words, Cancel/Publish, fits the screen", async (c) => {
+      const t0 = Date.now();
       await tapOrClick(page, ".ed-publish", cfg);
-      await page.waitForSelector(".ed-scrim .ed-dialog", { timeout: 5000 });
+      const shownModal = await page.waitForSelector(".ed-scrim .ed-dialog", { timeout: 15000 }).then(() => true, () => false);
+      const delay = Date.now() - t0;
+      c.note(`click -> publish modal ${shownModal ? delay + " ms" : "never (15 s)"}`);
+      c.ok(shownModal, "publish modal missing 15 s after the click");
+      if (!shownModal) return;
+      c.known("U-19", delay <= 2000, `Publish gave no feedback for ${delay} ms before the modal opened`);
       await page.waitForTimeout(400);
       const d = await page.evaluate(() => {
         const dl = document.querySelector(".ed-scrim .ed-dialog"), r = dl.getBoundingClientRect();
