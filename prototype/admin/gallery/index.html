@@ -23,6 +23,13 @@
   <button id="add-go" class="adm-btn" type="button" disabled>Upload</button>
 </section>
 <section id="rings" class="adm-rings" aria-label="Ring picks"></section>
+<section id="clients" class="adm-clients" aria-labelledby="clients-h">
+  <div class="adm-chead"><h2 id="clients-h">Clients <span id="clients-count"></span></h2><button id="clients-new" class="adm-btn" type="button" aria-expanded="false" aria-controls="clients-form">New client</button></div>
+  <div id="clients-form"></div>
+  <p id="clients-note" class="adm-dmsg" role="status"></p>
+  <p id="clients-empty" class="adm-cempty" hidden>No clients yet</p>
+  <ul id="clients-list" class="adm-clist adm-clients-list"></ul>
+</section>
 <section class="adm-clean" aria-labelledby="cleanup-h">
   <h2 id="cleanup-h">Unused files</h2>
   <p class="adm-sub">Replaced and deleted pieces leave their old files in storage. This lists the ones nothing on the site uses any more.</p>
@@ -65,5 +72,6 @@
 <script type="module" src="/admin/gallery/rings.js"></script>
 <script type="module" src="/admin/gallery/order.js"></script>
 <script type="module" src="/admin/gallery/cleanup.js"></script>
+<script type="module" src="/admin/gallery/clients.js"></script>
 </body>
 </html>
