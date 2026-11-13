@@ -6,7 +6,8 @@
 // One file failing (unreadable / 415 / 413 / network) marks its row and the
 // batch carries on. Cat is required, sub optional; both set once for the batch
 // and editable per row until the row is uploading.
-import { MediaError, kindOf, prepareImage, preparePoster, upload } from "/admin/shared/media.js";
+import { MediaError, kindOf } from "/admin/shared/media.js";
+import { prepareAndUpload } from "./pipeline.js";
 import { state, load } from "./gallery.js";
 
 const $ = (id) => document.getElementById(id);
@@ -101,28 +102,13 @@ async function put(id, body) {
 
 async function run(r) {
   r.status = "uploading"; r.msg = "Preparing…"; drawRow(r);
-  const progress = (lo, hi) => ({ loaded, total }) => {
-    r.pct = Math.round(lo + (hi - lo) * (total ? loaded / total : 0));
-    const b = r.node.querySelector("progress");
-    if (b) b.value = r.pct;
-  };
   try {
-    if (r.kind === "image") {
-      const p = await prepareImage(r.file);
-      r.msg = "Uploading…"; drawRow(r);
-      const nm = r.file.name.replace(/\.[^.]+$/, "") + (p.type === "image/webp" ? ".webp" : ".jpg");
-      const up = await upload(p.blob, nm, { onProgress: progress(0, 95) });
-      await put(up.id, { src: up.url, cat: r.cat, sub: r.sub || null, ratio: p.ratio, date: p.date });
-    } else {
-      const p = await preparePoster(r.file);
-      r.msg = "Uploading film…"; drawRow(r);
-      const film = await upload(r.file, r.file.name, { onProgress: progress(0, 90) });
-      r.msg = "Uploading poster…";
-      const pst = await upload(p.blob, "poster", { posterFor: film.key, onProgress: progress(90, 97) });
-      const d = new Date(r.file.lastModified || Date.now());
-      const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      await put(film.id, { src: film.url, poster: pst.url, cat: r.cat, sub: r.sub || null, ratio: p.ratio, date });
-    }
+    const out = await prepareAndUpload(r.file, r.kind, {
+      onStage: (m) => { r.msg = m; drawRow(r); },
+      onProgress: (pct) => { r.pct = pct; const b = r.node.querySelector("progress"); if (b) b.value = pct; },
+    });
+    const { id, ...fields } = out;
+    await put(id, { ...fields, cat: r.cat, sub: r.sub || null });
     r.status = "done"; r.pct = 100; r.msg = "Added (not published yet)";
   } catch (e) {
     r.status = "error"; r.msg = problem(e);

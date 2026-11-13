@@ -10,7 +10,9 @@
 // Server answers: 200 {item}; 400 {error, field} shown on that field; 409
 // {error, current} -> "changed elsewhere", the form refills with the current
 // values and the new rev.
+import { MediaError, kindOf } from "/admin/shared/media.js";
 import { state, render, fileName } from "./gallery.js";
+import { prepareAndUpload } from "./pipeline.js";
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => {
@@ -98,6 +100,7 @@ function draw() {
     return b;
   };
   btn("d-save", "Save details", () => save({}));
+  if (!(isUpload() && it.deleted)) btn("d-replace", "Replace file…", () => $("d-file").click(), "adm-btn adm-btn-2");
   btn("d-hide", it.hidden ? "Unhide" : "Hide", () => save({ hidden: !it.hidden }), "adm-btn adm-btn-2");
   if (isUpload()) {
     if (it.deleted) btn("d-restore", "Restore", () => save({}), "adm-btn adm-btn-2");
@@ -171,6 +174,32 @@ async function save(over) {
   flash(over.hidden === undefined ? "Saved (not published yet)." : over.hidden ? "Hidden (not published yet)." : "Unhidden (not published yet).", "ok");
 }
 
+/** Replace the file: same pipeline as Add, then PUT the new src (+ poster, ratio) with the item's rev.
+ *  The old file stays in R2 until the clean-up. Typed edits in the form are saved with it. */
+async function replace(file) {
+  const kind = kindOf(file);
+  if (!kind || (kind === "video") !== it.video) return flash(it.video ? "This item is a video: choose an mp4 or webm film." : "This item is a picture: choose an image.", "error");
+  const prog = $("drawer-prog");
+  prog.hidden = false; prog.value = 0;
+  setBusy(true);
+  let out;
+  try {
+    out = await prepareAndUpload(file, kind, { onStage: (m) => flash(m, ""), onProgress: (p) => { prog.value = p; } });
+  } catch (e) {
+    prog.hidden = true; setBusy(false);
+    return flash(e instanceof MediaError ? (e.code === "unreadable" ? "That file could not be read." : e.message) : e?.message || "Upload failed.", "error");
+  }
+  prog.hidden = true; setBusy(false);
+  const b = body({});
+  b.src = out.src; b.ratio = out.ratio;
+  if (it.video) b.poster = out.poster;
+  const j = await send("PUT", "/api/admin/gallery/" + encodeURIComponent(it.id), b);
+  if (!j) return;
+  setBusy(false);
+  adopt(j.item); draw();
+  flash("File replaced (not published yet). The old file stays in storage until you clean up unused files.", "ok");
+}
+
 /** A small confirm dialog; resolves true on the confirm button. */
 function confirmBox(text, yes) {
   return new Promise((resolve) => {
@@ -211,5 +240,6 @@ $("grid").addEventListener("click", (e) => {
   const t = e.target.closest(".adm-tile");
   if (t) open(t.dataset.id);
 });
+$("d-file").addEventListener("change", (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) replace(f); });
 $("drawer-close").addEventListener("click", () => dlg().close());
 window.gallery.openDrawer = open;
