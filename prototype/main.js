@@ -5126,7 +5126,7 @@ function openFromQuery() {
   if (!all.length && wantOpen) {
     const img = row && row.src && !row.v
       ? '.tile img[src="' + CSS.escape(row.src) + '"]'
-      : '.tile img[src$="/' + wantOpen + '"]';
+      : '.tile img[src$="/' + CSS.escape(wantOpen) + '"]';
     all = Array.from(document.querySelectorAll(img))
       .map((i) => i.closest(".tile"));
   }
