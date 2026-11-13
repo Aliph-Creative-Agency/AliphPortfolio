@@ -45,9 +45,9 @@ run_worker_first = ["/", "/about*", "/library*", "/*.html", "/api/*", "/admin*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "aliph-admin"
-# TODO(orchestrator): real id at deploy — Obaida creates the remote D1 and
-# passes its id; until then this placeholder only works with --local.
-database_id = "00000000-0000-0000-0000-000000000000"
+# Remote D1 `aliph-admin`, created by Obaida in the dashboard 2026-11-13.
+# Local dev still uses --local state under .wrangler/
+database_id = "2719753f-ab1d-40ac-9d68-22ff0250eefc"
 migrations_dir = "migrations"
 
 # The media bucket, for admin uploads. Same bucket media.aliphcreative.com
@@ -65,5 +65,5 @@ bucket_name = "aliph-media"
 # application's Audience tag. Neither is a secret.
 # ⚠️ ADMIN_DEV_BYPASS never goes here — .dev.vars only (local dev).
 [vars]
-ACCESS_TEAM_DOMAIN = ""
+ACCESS_TEAM_DOMAIN = "orange-moon-60e5.cloudflareaccess.com"
 ACCESS_AUD = ""
