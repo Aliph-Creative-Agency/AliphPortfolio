@@ -4249,14 +4249,38 @@ const coverOf = (p) =>
 const CLIENT_T = {
   clients: { ar: "العملاء", en: "Clients" },
   piece1: { ar: "قطعة واحدة", en: "1 piece" },
-  pieces: { ar: "قطعة", en: "pieces" }
+  pieces: { ar: "قطعة", en: "pieces" },
+  back: { ar: "العودة إلى الأرشيف", en: "Back to the archive" },
+  since: { ar: "منذ", en: "Since" },
+  visit: { ar: "الموقع", en: "Website" },
+  empty: { ar: "لا توجد أعمال لهذا العميل بعد.", en: "No work to show for this client yet." }
 };
 const piecesOf = (n) => (n === 1 ? CLIENT_T.piece1[lang] : num(n) + " " + CLIENT_T.pieces[lang]);
 function renderClientsIndex() {
   const host = accRoot.closest("main");
   if (!host) return;
-  const old = document.querySelector(".lib-clients");
-  if (old) old.remove();
+  document.querySelectorAll(".lib-clients, .lib-client").forEach((e) => e.remove());
+  const nm = (c) => c.name[lang] || c.name.en || c.name.ar;
+  /* A client's view swaps the index for the client's own header. Zero visible
+     pieces still gets the header, with a line saying so (the archive under it is empty). */
+  if (CLIENT_VIEW) {
+    const c = CLIENT_VIEW;
+    const n = MEDIA.filter((m) => m.client === c.id).length;
+    const back = lang === "ar" ? "→ " : "← ";
+    const sec = document.createElement("section");
+    sec.className = "lib-client";
+    sec.setAttribute("aria-label", nm(c));
+    sec.innerHTML = `
+      <a class="ch-back" href="/library">${back}${CLIENT_T.back[lang]}</a>
+      <span class="lc-mono lg" aria-hidden="true">${escHTML(Array.from(nm(c))[0] || "")}</span>
+      <h2 class="ch-name">${escHTML(nm(c))}</h2>
+      ${c.line && (c.line[lang] || "") ? `<p class="ch-line">${escHTML(c.line[lang])}</p>` : ""}
+      <div class="ch-meta">${c.year ? `<span>${CLIENT_T.since[lang]} ${num(c.year)}</span>` : ""}<span>${piecesOf(n)}</span>${c.url ? `<a href="${escHTML(c.url)}" target="_blank" rel="noopener">${CLIENT_T.visit[lang]} · ${escHTML(c.url.slice(8).replace(/[/]$/, ""))}</a>` : ""}</div>
+      ${n ? "" : `<p class="ch-empty">${CLIENT_T.empty[lang]}</p>`}`;
+    host.before(sec);
+    fitClientNames();
+    return;
+  }
   const stat = {};
   MEDIA.forEach((m) => {
     if (!m.client || !CLIENTS[m.client]) return;
@@ -4264,7 +4288,6 @@ function renderClientsIndex() {
     s.n++;
     if ((m.d || "") > s.d) s.d = m.d || "";
   });
-  const nm = (c) => c.name[lang] || c.name.en || c.name.ar;
   const list = Object.keys(stat).map((id) => CLIENTS[id])
     .sort((a, b) => stat[b.id].d.localeCompare(stat[a.id].d) || nm(a).localeCompare(nm(b)));
   if (!list.length) return;
@@ -4287,7 +4310,7 @@ function renderClientsIndex() {
 /* FIT THE TYPE: a client's name is at most two lines (floor 0.75). Re-run when
    the width changes or the fonts arrive, both of which move the line breaks. */
 function fitClientNames() {
-  document.querySelectorAll(".lc-name").forEach((el) => fitLines(el, 2, 0.75));
+  document.querySelectorAll(".lc-name, .ch-name").forEach((el) => fitLines(el, 2, 0.75));
 }
 window.addEventListener("resize", fitClientNames);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitClientNames);

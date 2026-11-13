@@ -29,7 +29,7 @@ async function look(lang, query = "", opts = {}) {
   await page.addInitScript((l) => { try { localStorage.setItem("aliph-lang", l); } catch {} }, lang);
   if (opts.route) await page.route("**/library" + (query || ""), opts.route);
   await page.goto(ORIGIN + "/library" + query);
-  await page.waitForSelector(".acc-panel.open .tile, .acc-panel.open .lib-run", { state: "attached" });
+  await page.waitForSelector(".acc-panel.open .tile, .acc-panel.open .lib-run, .lib-client", { state: "attached" });
   return page;
 }
 /* the tile a given upload paints (its picture's src carries the upload's id) */
@@ -124,7 +124,7 @@ try {
   await p.close();
   /* --- C-12 the Clients index --- */
   const LONG = `Al-Mustaqbal Al-Wa'id Foundation for Heritage Arts and Exchange ${run}`;
-  const B = (await (await api.post(ORIGIN + "/api/admin/clients", { headers: H, data: { name: { ar: "مؤسسة المستقبل الواعد للتراث والفنون والتبادل الثقافي بين الشعوب", en: LONG }, line: { ar: "تغطية فعاليات", en: "Event coverage" }, year: 2024 } })).json()).client;
+  const B = (await (await api.post(ORIGIN + "/api/admin/clients", { headers: H, data: { name: { ar: "مؤسسة المستقبل الواعد للتراث والفنون والتبادل الثقافي بين الشعوب", en: LONG }, line: { ar: "تغطية فعاليات", en: "Event coverage" }, year: 2024, url: "https://example.com/b/" } })).json()).client;
   await upload("c", { client: B.id, date: "2026-05" });
   await upload("d", { client: B.id, date: "2026-05" });
   await upload("e", { client: B.id, date: "2026-05", hidden: true });
@@ -202,6 +202,51 @@ try {
   await p.waitForTimeout(900);
   check("?open=<piece outside the view> opens nothing", !(await lbOpen(p)));
   await p.close();
+  /* --- C-13b the client header --- */
+  p = await look("en", "?client=" + B.id);
+  check("header replaces the index (no .lib-clients), one .lib-client", (await p.locator(".lib-clients").count()) === 0 && (await p.locator(".lib-client").count()) === 1);
+  const hd = (await p.locator(".lib-client").innerText());
+  check("header: back, name, line, since year, 2 pieces", hd.includes("Back to the archive") && hd.includes("Al-Mustaqbal") && hd.includes("Event coverage") && hd.includes("Since 2024") && hd.includes("2 pieces"), hd);
+  check("back link goes to /library", (await p.locator(".ch-back").getAttribute("href")) === "/library");
+  const site = p.locator(".ch-meta a");
+  check("website link: https, rel=noopener, host shown", (await site.getAttribute("href")) === "https://example.com/b/" && (await site.getAttribute("rel")) === "noopener" && (await site.textContent()).includes("example.com/b"), await site.textContent());
+  await p.addStyleTag({ content: ".curtain{display:none!important}" });
+  await p.screenshot({ path: path.join(OUT, "header-en-1440.png") });
+  await p.close();
+
+  p = await look("en", "?client=" + A.id);
+  check("no url -> no website link", (await p.locator(".ch-meta a").count()) === 0 && (await p.locator(".ch-meta").textContent()).includes("1 piece"));
+  await p.close();
+
+  p = await look("ar", "?client=" + B.id);
+  const hdAr = (await p.locator(".lib-client").innerText());
+  check("ar header: Arabic back/since/count, arrow points right", hdAr.includes("العودة إلى الأرشيف") && hdAr.includes("منذ ٢٠٢٤") && hdAr.includes("٢ قطعة") && hdAr.includes("→"), hdAr);
+  await p.close();
+
+  /* zero visible pieces: the header and an empty-state line, nothing else, no errors */
+  p = await look("en", "?client=" + lone.id);
+  check("zero pieces: header + empty line, no panels", (await p.locator(".lib-client .ch-empty").count()) === 1 && (await p.locator(".acc-panel").count()) === 0 && (await p.locator(".lib-client").innerText()).includes("0 pieces"), (await p.locator(".lib-client").innerText()));
+  await p.close();
+
+  /* A realistic long name (about 45 characters): two lines at 390 in both languages. The 80-character maximum
+     (client B) can need more than two lines at the 0.75 floor; it wraps, never clips (see HANDOVER). */
+  const LN = (await (await api.post(ORIGIN + "/api/admin/clients", { headers: H, data: { name: { ar: "مؤسسة القدس للتراث والفنون الشعبية " + run, en: "Jerusalem Heritage Foundation for the Arts " + run }, line: { ar: "تراث", en: "Heritage" } } })).json()).client;
+  await publish(api, ORIGIN);
+  for (const l of ["en", "ar"]) {
+    p = await look(l, "?client=" + LN.id);
+    await p.setViewportSize({ width: 390, height: 844 });
+    await p.addStyleTag({ content: ".curtain{display:none!important}" });
+    await p.evaluate(() => document.fonts.ready);
+    await p.waitForTimeout(250);
+    const m = await p.evaluate(() => {
+      const el = document.querySelector(".ch-name");
+      const lh = parseFloat(getComputedStyle(el).lineHeight);
+      return { lines: Math.round(el.scrollHeight / lh), sideways: document.documentElement.scrollWidth > innerWidth + 1 };
+    });
+    check(`390 ${l}: header name (45 chars) <= 2 lines, no sideways scroll`, m.lines <= 2 && !m.sideways, JSON.stringify(m));
+    await p.screenshot({ path: path.join(OUT, `header-${l}-390.png`) });
+    await p.close();
+  }
   void lone; void made;
 } finally {
   await clean();

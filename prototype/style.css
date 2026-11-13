@@ -5712,3 +5712,21 @@ body.sheet-open { overflow: hidden; }
 .lc-meta { font-size: 0.75rem; font-weight: 500; color: var(--ink-mute); font-variant-numeric: tabular-nums; display: flex; gap: 0.5rem; }
 .lc-arrow { margin-inline-start: auto; color: var(--ink); font-weight: 700; }
 @media (max-width: 900px) { .lc-list { grid-template-columns: minmax(0, 1fr); } }
+
+/* the client header of /library?client=<id>: name at display size (fitLines, 2 lines), line, year, count, website */
+.lib-client { background: var(--cream); border-top: var(--hair); padding: 0.8rem var(--pad) 1rem; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.3rem 1rem; align-items: start; }
+.lib-client .ch-back { grid-column: 1 / -1; font-size: 0.8rem; font-weight: 700; color: var(--ink); justify-self: start; }
+.lib-client .ch-back:hover, .lib-client .ch-back:focus-visible { color: var(--accent); }
+.lib-client .lc-mono { grid-row: span 4; }
+.lc-mono.lg { inline-size: 3.4rem; block-size: 3.4rem; font-size: 1.9rem; }
+.ch-name { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.5rem, 3.4vw, 2.6rem); line-height: 1.3; margin: 0; overflow-wrap: anywhere; }
+.ch-line, .ch-empty { grid-column: 2; margin: 0; font-size: 0.85rem; font-weight: 500; color: var(--ink-soft); line-height: 1.5; max-inline-size: 38rem; }
+.ch-meta { grid-column: 2; display: flex; flex-wrap: wrap; gap: 0.2rem 1.2rem; font-size: 0.75rem; font-weight: 500; color: var(--ink-mute); font-variant-numeric: tabular-nums; }
+.ch-meta a { color: var(--ink); font-weight: 700; border-block-end: 1px solid var(--ink); overflow-wrap: anywhere; }
+.ch-meta a:hover, .ch-meta a:focus-visible { color: var(--accent); border-color: var(--accent); }
+@media (max-width: 900px) { .lc-mono.lg { inline-size: 2.4rem; block-size: 2.4rem; font-size: 1.3rem; } }
+@media (max-width: 900px) {
+  .lib-client { gap: 0.3rem 0.7rem; }
+  .ch-name { font-size: 1.2rem; }
+  .lib-client .lc-mono.lg { inline-size: 2rem; block-size: 2rem; font-size: 1.1rem; }
+}
