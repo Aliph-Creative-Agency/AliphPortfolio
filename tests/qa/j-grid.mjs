@@ -21,6 +21,9 @@ const gallery = async (page) => {
   await page.goto(ORIGIN + "/admin/gallery/", { waitUntil: "load" });
   await page.waitForFunction(() => document.querySelector("#summary") && !/Loading/.test(document.querySelector("#summary").textContent) && document.querySelector("#grid .adm-tile"), null, { timeout: 30000 });
   await page.waitForTimeout(600);
+  // style.css has `scroll-behavior: smooth`: a drag whose target is off screen scrolls while the pointer is down and drops on the
+  // wrong tile (grown local DB = a long grid). A person's drag auto-scrolls instantly under the pointer, so scroll instantly here.
+  await page.addStyleTag({ content: "html { scroll-behavior: auto !important; }" });
 };
 const publish = (page) => page.evaluate(async () => {
   const c = await (await fetch("/api/admin/changes")).json();
@@ -42,12 +45,21 @@ async function run(label, launch, vp, touch) {
   const visitor = await context.newPage();
   const vw = watch(visitor);
 
-  // a tap that Playwright's WebKit may not turn into a click (F-08): check the outcome, fall back to a script click and say so
+  // a tap must turn into a click (F-08, fixed): a miss fails the run, then a script click lets the journey go on.
+  // Tap where a person would: a fixed bar can cover a tile scrolled just into view, so scroll it to the middle first.
+  // Saves take ~1 s on a grown local DB (one took 9 s), so the outcome gets 10 s.
+  const covered = (l) => l.evaluate((e) => { const r = e.getBoundingClientRect(); return !e.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); });
   const press = async (loc, ok, what, arg = null) => {
+    if (touch && (await covered(loc))) {
+      await loc.evaluate((e) => e.scrollIntoView({ block: "center" }));
+      let still = true; // the page scrolls smoothly: wait for it to settle
+      for (let i = 0; i < 20 && still; i++) { await page.waitForTimeout(150); still = await covered(loc); }
+      check(`${label} ${what} is not covered where it is tapped`, !still);
+    }
     if (touch) await loc.tap({ force: true, timeout: 5000 }).catch(() => {}); else await loc.click({ force: true, timeout: 5000 });
-    if (await page.waitForFunction(ok, arg, { timeout: 2500 }).then(() => true, () => false)) return;
+    if (await page.waitForFunction(ok, arg, { timeout: 10000 }).then(() => true, () => false)) return;
     if (!touch) throw new Error("click had no effect: " + what);
-    console.log(`KNOWN F-08 ${label} tap on ${what} gave no click`);
+    check(`${label} tap on ${what} gives a click (F-08)`, false, "fell back to a script click");
     await loc.evaluate((e) => e.click());
     await page.waitForFunction(ok, arg, { timeout: 5000 });
   };
