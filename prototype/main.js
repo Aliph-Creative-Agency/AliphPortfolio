@@ -5212,8 +5212,16 @@ if (document.documentElement.dataset.editMode === "1") {
     sizeRateTab();
   }
 
+  /* Film frames (home.film.N) are built here, not in the markup: tag the FIRST group only, since buildFilm()
+     clones the group across the strip and every clone would otherwise claim the same slot. */
+  function tagFilm() {
+    const g = filmScroll && filmScroll.querySelector(".film-group");
+    if (!g) return;
+    g.querySelectorAll(":scope > .film-frame").forEach((fr) => fr.setAttribute("data-es", "home.film." + (+fr.dataset.frame + 1)));
+  }
+
   let tagTimer = null;
-  const later = () => { clearTimeout(tagTimer); tagTimer = setTimeout(tag, 150); };
+  const later = () => { clearTimeout(tagTimer); tagTimer = setTimeout(() => { tag(); tagFilm(); }, 150); };
   new MutationObserver(later).observe(document.body, { childList: true, subtree: true, characterData: true });
   window.aliphEdit = { tag, apply, read, refit, get lang() { return lang; } };
   later();

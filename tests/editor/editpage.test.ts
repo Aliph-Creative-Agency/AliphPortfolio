@@ -1,6 +1,7 @@
 // E-01: the edit-mode pages /admin/edit/, /admin/edit/about, /admin/edit/library.
 import { createExecutionContext, env } from "cloudflare:test";
 import { beforeEach, describe, expect, it } from "vitest";
+import registry from "../../worker/src/generated/registry.json";
 import worker, { type Env } from "../../worker/src/index";
 
 const local = (extra: Partial<Env> = {}): Env => ({ ...env, ADMIN_DEV_BYPASS: "1", ...extra });
@@ -85,5 +86,40 @@ describe("edit pages", () => {
   it("other /admin paths are not edit pages; non-GET is 405", async () => {
     expect((await call("/admin/edit/nope")).status).toBe(404);
     expect((await call("/admin/edit/", { method: "POST", headers: { origin: "http://localhost" } })).status).toBe(405);
+  });
+});
+
+describe("media holders (E-15a)", () => {
+  const slots = (registry.slots as { id: string; page: string; kind: string; src: string; preview?: string }[]).filter(
+    (d) => d.kind === "media",
+  );
+  for (const [edit, pub, page] of [
+    ["/admin/edit/", "/", "home"],
+    ["/admin/edit/about", "/about", "about"],
+  ] as const) {
+    it(`${edit}: data-es ids = the registry's media slots in order, each img at its default src`, async () => {
+      const html = await (await call(edit)).text();
+      const want = slots.filter((d) => d.page === page);
+      const got = [...html.matchAll(/<img\b[^>]*>/g)]
+        .map((m) => m[0])
+        .filter((t) => /\sdata-es="/.test(t))
+        .map((t) => ({ id: /data-es="([^"]*)"/.exec(t)![1], src: /\ssrc="([^"]*)"/.exec(t)![1] }));
+      expect(got.map((g) => g.id)).toEqual(want.map((d) => d.id));
+      expect(got.map((g) => g.src)).toEqual(want.map((d) => d.src));
+      const previews = [...html.matchAll(/<figure\b[^>]*data-es-preview="([^"]*)"/g)].map((m) => m[1]);
+      expect(previews).toEqual(want.filter((d) => d.preview).map((d) => d.id));
+      const pubHtml = await (await call(pub)).text();
+      expect(pubHtml).not.toContain("data-es");
+    });
+  }
+
+  it("a draft override still tags the right holder", async () => {
+    await run(
+      "INSERT INTO slot_values (slot, draft_json, updated_by) VALUES ('about.media.1', ?1, 'a@b.c')",
+      JSON.stringify({ src: "https://media.aliphcreative.com/img/x.webp" }),
+    );
+    const html = await (await call("/admin/edit/about")).text();
+    expect(html).toMatch(/<img\b[^>]*data-es="about\.media\.1"[^>]*>/);
+    expect(html).toContain("https://media.aliphcreative.com/img/x.webp");
   });
 });
