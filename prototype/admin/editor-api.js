@@ -1,6 +1,7 @@
 /* Editor API wrapper (classic script, no build). One place for every call the
    edit-mode overlay makes to /api/admin/*. Exposes window.aliphEditorApi.
-   Reads, the text writes (PUT/DELETE /api/admin/text) and publish / discard. */
+   Reads, the text writes (PUT/DELETE /api/admin/text), publish / discard and
+   the history (revisions + restore). */
 (function () {
   "use strict";
 
@@ -47,6 +48,10 @@
     publish: function (token) { return send("POST", { token: token }, "/api/admin/publish"); },
     /** POST with the token from changes(): 200 {discarded} (text + slot drafts back to live), 409 stale. */
     discard: function (token) { return send("POST", { token: token }, "/api/admin/discard"); },
+    /** [{id, publishedAt, by, changed}], newest first (the first is live). */
+    revisions: function (limit) { return getJson("/api/admin/revisions?limit=" + (limit || 50)); },
+    /** POST: 200 {restored, skipped} = that revision copied into the draft, 404 unknown id. */
+    restore: function (id) { return send("POST", {}, "/api/admin/revisions/" + encodeURIComponent(id) + "/restore"); },
     getJson: getJson,
   };
 })();

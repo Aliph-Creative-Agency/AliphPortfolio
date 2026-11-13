@@ -60,11 +60,13 @@
   var publishBtn = h("button", { type: "button", class: "ed-publish", disabled: "", text: "Publish" });
   var discardBtn = h("button", { type: "button", class: "ed-discard", disabled: "", text: "Discard" });
   var panelBtn = h("button", { type: "button", "aria-expanded": "false", "aria-controls": "ed-panel", text: "Page text" });
+  var histBtn = h("button", { type: "button", "aria-expanded": "false", "aria-controls": "ed-history", text: "History" });
   var bar = h("div", { class: "ed-bar", role: "toolbar", "aria-label": "Page editor" }, [
     h("span", { class: "ed-brand", text: "Aliph editor" }),
     h("div", { class: "ed-pages" }, pageLinks),
     langBtn,
     panelBtn,
+    histBtn,
     h("span", { class: "ed-spacer" }),
     chip,
     discardBtn,
@@ -635,6 +637,7 @@
       panelBtn.setAttribute("aria-expanded", "false");
       return;
     }
+    if (!hist.hidden) toggleHistory();
     panel.hidden = false;
     panelBtn.setAttribute("aria-expanded", "true");
     api.registry().then(function (r) { registry = r; return api.content(); }).catch(function () { return null; }).then(function (d) {
@@ -642,6 +645,97 @@
       buildPanel();
     });
   });
+
+  /* ── history ──
+     Every publish, newest first (the first one is what the site shows now),
+     each with what it changed against the one before. Restore copies that
+     revision into the DRAFT, text, pictures and gallery alike (POST
+     /api/admin/revisions/:id/restore); nothing goes live until Publish. The
+     page then reloads, because the edit page is rendered from the draft on the
+     server. /admin/edit/?history opens the panel (the dashboard links there). */
+  var hist = h("aside", { id: "ed-history", class: "ed-panel ed-history", "aria-label": "History", hidden: "" });
+  var histList = h("div", { class: "ed-panel-list" });
+  hist.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "History" }), h("span", { class: "ed-panel-page", text: "published revisions" })]));
+  hist.appendChild(h("p", { class: "ed-hint", text: "Restore copies a revision into the draft. Publish to make it live." }));
+  hist.appendChild(histList);
+  var SECTION_NAMES = { slots: "Picture", gallery: "Gallery", rings: "Ring", clients: "Client" };
+  function changeLabel(c) {
+    if (c.section === "text") return c.id + (c.locales ? " (" + c.locales.join(" + ").toUpperCase() + ")" : "");
+    return (SECTION_NAMES[c.section] || c.section) + " " + c.id;
+  }
+  function when(iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? iso : d.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+  function revRow(r, live) {
+    var n = r.changed.length;
+    var shown = r.changed.slice(0, 4).map(changeLabel).join(", ") + (n > 4 ? ", +" + (n - 4) + " more" : "");
+    var btn = h("button", { type: "button", class: "ed-reset", "data-rev": String(r.id), text: "Restore" });
+    btn.addEventListener("click", function () { startRestore(r); });
+    return h("section", { class: "ed-rev", "data-rev": String(r.id) }, [
+      h("div", { class: "ed-rev-head" }, [
+        h("strong", { text: "Revision " + r.id }),
+        live ? h("span", { class: "ed-rev-live", text: "live" }) : null,
+        h("span", { class: "ed-spacer" }),
+        btn,
+      ].filter(Boolean)),
+      h("p", { class: "ed-rev-meta", text: when(r.publishedAt) + " · " + r.by }),
+      h("p", { class: "ed-rev-changes", dir: "auto", text: n ? n + (n === 1 ? " change: " : " changes: ") + shown : "No changes" }),
+    ]);
+  }
+  function loadHistory() {
+    histList.textContent = "";
+    histList.appendChild(h("p", { class: "ed-hint", text: "Loading…" }));
+    api.revisions(50).then(function (list) {
+      histList.textContent = "";
+      if (!list.length) histList.appendChild(h("p", { class: "ed-hint", text: "Nothing has been published yet." }));
+      list.forEach(function (r, i) { histList.appendChild(revRow(r, i === 0)); });
+    }, function () {
+      histList.textContent = "";
+      histList.appendChild(h("p", { class: "ed-hint", text: "Could not load the history. Try again." }));
+    });
+  }
+  function toggleHistory() {
+    if (!hist.hidden) {
+      hist.hidden = true;
+      histBtn.setAttribute("aria-expanded", "false");
+      return;
+    }
+    if (!panel.hidden) panelBtn.click();
+    hist.hidden = false;
+    histBtn.setAttribute("aria-expanded", "true");
+    loadHistory();
+  }
+  histBtn.addEventListener("click", toggleHistory);
+  function startRestore(r) {
+    settled().then(function (c) {
+      var body = [h("p", { text: "This copies revision " + r.id + " into the draft. The live site does not change until you publish." })];
+      if (c.changes.length) {
+        body.push(h("p", { class: "ed-dialog-note", text: "It replaces the " + c.changes.length + " unpublished " + (c.changes.length === 1 ? "change" : "changes") + " in the draft, gallery included." }));
+      }
+      openModal("Restore revision " + r.id + "?", body, "Restore", function (msg) {
+        return api.restore(r.id).then(function (res) {
+          if (res.status === 200) {
+            try { localStorage.removeItem(BACKUP); } catch (_) {}
+            Object.keys(st).forEach(function (id) { st[id].saved = st[id].value; });
+            location.replace(location.pathname + "?restored=" + r.id);
+            return true;
+          }
+          msg.textContent = "Not restored: " + ((res.body && res.body.error) || res.status);
+          return true;
+        });
+      });
+    }, function () { toast("Could not read the changes. Try again."); });
+  }
+  (function fromQuery() {
+    var q = new URLSearchParams(location.search);
+    if (q.has("history")) toggleHistory();
+    var done = q.get("restored");
+    if (done) {
+      toast("Revision " + done + " is in the draft. Publish to make it live.");
+      history.replaceState(null, "", location.pathname);
+    }
+  })();
 
   /* ── events ── */
   document.addEventListener("mouseover", function (e) {
@@ -720,6 +814,11 @@
   document.body.appendChild(outline);
   document.body.appendChild(pop);
   document.body.appendChild(panel);
+  document.body.appendChild(hist);
   document.body.appendChild(bar);
+  /* the side panels end where the bar starts (the bar wraps to two rows on a phone) */
+  if (window.ResizeObserver) new ResizeObserver(function () {
+    document.documentElement.style.setProperty("--ed-bar-h", bar.offsetHeight + "px");
+  }).observe(bar);
   refreshChanges();
 })();
