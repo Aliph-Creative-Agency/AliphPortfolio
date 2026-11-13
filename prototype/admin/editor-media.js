@@ -173,6 +173,9 @@
     var holder = cur.holder;
     upMsg.textContent = "";
     bar.hidden = true;
+    pickGrid.hidden = true;
+    pickBtn.setAttribute("aria-expanded", "false");
+    galleryItems = null;
     cur.holder.classList.remove("ed-es-active");
     cur = null;
     drawer.hidden = true;
@@ -316,6 +319,7 @@
   }
   function busyUi(on) {
     uploadBtn.disabled = on;
+    pickBtn.disabled = on;
     resetBtn.disabled = on || !(cur && cur.value);
     cancelBtn.hidden = !on;
     if (!on) setTimeout(function () { if (!op) bar.hidden = true; }, 1200);
@@ -385,11 +389,67 @@
   pickInput.addEventListener("change", function () { if (pickInput.files && pickInput.files[0]) startUpload(pickInput.files[0]); });
   cancelBtn.addEventListener("click", function () { if (op) op.ctl.abort(); });
 
+  /* ── pick from the gallery ──
+     GET /api/admin/gallery (the gallery team's read model): uploads first, then
+     the archive. An image slot offers the pictures (item.full = the image URL);
+     a preview slot offers the films (item.film = the video, item.full = its
+     poster) -> {preview, poster}. Deleted items are left out. */
+  var pickBtn = h("button", { type: "button", class: "ed-reset", text: "Pick from gallery", "aria-expanded": "false" });
+  var pickGrid = h("div", { class: "ed-media-grid", hidden: "", role: "group", "aria-label": "Gallery" });
+  more.querySelector(".ed-media-actions").appendChild(pickBtn);
+  more.appendChild(pickGrid);
+  var galleryItems = null;
+  function loadGallery() {
+    if (galleryItems) return galleryItems;
+    galleryItems = api.getJson("/api/admin/gallery").then(function (r) {
+      var list = (r.items || []).filter(function (i) { return !i.deleted; });
+      var ups = list.filter(function (i) { return i.kind === "upload"; });
+      var rest = list.filter(function (i) { return i.kind !== "upload"; });
+      return ups.concat(rest);
+    }).catch(function (e) { galleryItems = null; throw e; });
+    return galleryItems;
+  }
+  function renderGrid(c, items) {
+    pickGrid.textContent = "";
+    var want = isPreviewSlot(c);
+    var shown = items.filter(function (i) { return want ? i.video && i.film : !i.video; });
+    if (!shown.length) pickGrid.appendChild(h("p", { class: "ed-hint", text: want ? "No films in the gallery yet." : "No pictures in the gallery yet." }));
+    shown.forEach(function (i) {
+      var b = h("button", { type: "button", class: "ed-pick", "data-id": i.id, "data-kind": i.kind, title: i.id, "aria-label": "Use " + i.id }, [
+        h("img", { src: i.thumb, alt: "", loading: "lazy", decoding: "async" }),
+      ]);
+      b.addEventListener("click", function () {
+        pickGrid.hidden = true;
+        pickBtn.setAttribute("aria-expanded", "false");
+        upMsg.textContent = "";
+        commit(c, want ? { preview: i.film, poster: i.full } : { src: i.full }).then(function () { if (cur === c) say("Picked " + i.id + ". Saved to the draft."); });
+      });
+      pickGrid.appendChild(b);
+    });
+  }
+  pickBtn.addEventListener("click", function () {
+    var c = cur;
+    if (!c) return;
+    if (!pickGrid.hidden) { pickGrid.hidden = true; pickBtn.setAttribute("aria-expanded", "false"); return; }
+    pickGrid.hidden = false;
+    pickBtn.setAttribute("aria-expanded", "true");
+    pickGrid.textContent = "";
+    pickGrid.appendChild(h("p", { class: "ed-hint", text: "Loading…" }));
+    loadGallery().then(function (items) { if (cur === c) renderGrid(c, items); }, function () {
+      pickGrid.textContent = "";
+      pickGrid.appendChild(h("p", { class: "ed-hint", text: "Could not load the gallery. Try again." }));
+    });
+  });
+
   /* ── events ── */
   function holderOf(t) {
     if (!t || !t.closest) return null;
     if (t.closest("[data-editor-ui]")) return null;
-    return t.closest("[data-es]");
+    var own = t.closest("[data-es]");
+    if (own) return own;
+    /* a play button or caption layered over the picture belongs to the same frame */
+    var frame = t.closest("figure, .holder, .film-frame, [data-es-preview]");
+    return frame ? frame.querySelector("[data-es]") : null;
   }
   /* window + capture: before editor.js's document listener and before every handler the page has */
   window.addEventListener("click", function (e) {

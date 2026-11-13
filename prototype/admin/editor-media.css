@@ -29,3 +29,9 @@ html[data-edit-mode="1"] [data-es].ed-es-active { outline: 2px solid #BB5C39; ou
 .ed-media-progress > span { display: block; height: 100%; width: 0; background: #BB5C39; transition: width 0.15s linear; }
 .ed-media-uperr:empty { display: none; }
 .ed-media-uperr { color: #8a3f22; }
+.ed-media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; max-height: 320px; overflow: auto; }
+.ed-media-grid[hidden] { display: none; }
+.ed-media-grid .ed-hint { grid-column: 1 / -1; }
+.ed-pick { padding: 0; border: 1px solid rgba(15, 24, 32, 0.3); border-radius: 3px; background: #fff; cursor: pointer; aspect-ratio: 1; overflow: hidden; min-height: 44px; }
+.ed-pick:hover, .ed-pick:focus-visible { border-color: #BB5C39; outline: 2px solid #BB5C39; outline-offset: 1px; }
+.ed-pick img { width: 100%; height: 100%; object-fit: cover; display: block; }
