@@ -2,12 +2,12 @@
 // `wrangler dev --local --port 8851 --inspector-port 9251` (ADMIN_DEV_BYPASS=1).
 //   node tests/gallery/ui-rings.mjs
 // Sets the LOCAL dev store's photo ring to 3 picks (one an upload), reorders
-// with the keyboard, publishes (dev-publish), checks the home page ring, then
+// with the keyboard, publishes (editor publish route), checks the home page ring, then
 // resets the ring to its default. Harmless, the dev DB accumulates.
 import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright-core";
-import { EDGE, FIX, ROOT, check, done } from "./browser.mjs";
+import { EDGE, FIX, ROOT, check, done, publish as publishDraft } from "./browser.mjs";
 
 const ORIGIN = process.env.ORIGIN || "http://127.0.0.1:8851";
 const OUT = path.join(ROOT, "tests/gallery/out");
@@ -21,7 +21,7 @@ const browser = await chromium.launch({ executablePath: EDGE, headless: true });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 const page = await ctx.newPage();
 const read = async () => (await (await ctx.request.get(ORIGIN + "/api/admin/gallery")).json());
-const publish = () => ctx.request.post(ORIGIN + "/api/admin/gallery/dev-publish", { headers: H });
+const publish = () => publishDraft(ctx.request, ORIGIN);
 
 // Start from the default ring, and one fresh upload to pick.
 let m = await read();

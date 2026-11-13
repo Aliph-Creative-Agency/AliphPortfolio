@@ -25,7 +25,10 @@ const setup = await page.evaluate(async () => {
   //    override has nothing to revert, so the read model shows the plain default)
   let d = (await get()).items.find((i) => i.id === design.id);
   await send("PUT", "/api/admin/gallery/" + encodeURIComponent(d.id), { hidden: false, alt: { en: "grid test" }, baseRev: d.rev });
-  await send("POST", "/api/admin/gallery/dev-publish");
+  // the editor's publish route: changes -> {token} -> publish {token} (the page's own Origin header is the same origin)
+  const { token } = await (await fetch("/api/admin/changes")).json();
+  const pub = await send("POST", "/api/admin/publish", { token });
+  if (pub.status !== 200) throw new Error("publish -> " + pub.status);
   d = (await get()).items.find((i) => i.id === design.id);
   await send("DELETE", `/api/admin/gallery/${encodeURIComponent(d.id)}?baseRev=${d.rev}`);
   // 1) (after the publish, so it stays changed) hidden override on a photo image (reuse its row if an earlier run made one)

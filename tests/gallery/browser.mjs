@@ -52,3 +52,21 @@ export const done = () => {
   console.log(failed ? `${failed} FAILED` : "all passed");
   process.exit(failed ? 1 : 0);
 };
+
+/**
+ * Publishes the draft through the editor's real route (GET /api/admin/changes
+ * -> {token} -> POST /api/admin/publish {token}, same-origin header). `request`
+ * is a playwright APIRequestContext (ctx.request). Nothing staged -> no POST,
+ * returns null (the route would answer 409 "nothing to publish"); any other
+ * non-200 throws.
+ */
+export async function publish(request, origin) {
+  const h = { origin };
+  const c = await request.get(origin + "/api/admin/changes", { headers: h });
+  if (c.status() !== 200) throw new Error(`GET /api/admin/changes -> ${c.status()}`);
+  const { token, changes } = await c.json();
+  if (!changes.length) return null;
+  const r = await request.post(origin + "/api/admin/publish", { headers: h, data: { token } });
+  if (r.status() !== 200) throw new Error(`POST /api/admin/publish -> ${r.status()} ${await r.text()}`);
+  return r.json();
+}

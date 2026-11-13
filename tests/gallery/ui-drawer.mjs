@@ -2,11 +2,11 @@
 // `wrangler dev --local --port 8851 --inspector-port 9251` (ADMIN_DEV_BYPASS=1).
 //   node tests/gallery/ui-drawer.mjs
 // Edits one new upload and one default piece in the LOCAL dev store, publishes
-// (dev-publish) and puts the default piece back; harmless, the dev DB accumulates.
+// (editor publish route) and puts the default piece back; harmless, the dev DB accumulates.
 import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright-core";
-import { EDGE, FIX, ROOT, check, done } from "./browser.mjs";
+import { EDGE, FIX, ROOT, check, done, publish as publishDraft } from "./browser.mjs";
 
 const ORIGIN = process.env.ORIGIN || "http://127.0.0.1:8851";
 const OUT = path.join(ROOT, "tests/gallery/out");
@@ -18,7 +18,7 @@ const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
 const page = await ctx.newPage();
 const api = async (p) => (await (await ctx.request.get(ORIGIN + p)).json());
 const item = async (id) => (await api("/api/admin/gallery")).items.find((i) => i.id === id);
-const publish = () => ctx.request.post(ORIGIN + "/api/admin/gallery/dev-publish", { headers: H });
+const publish = () => publishDraft(ctx.request, ORIGIN);
 const AR = JSON.parse(fs.readFileSync(path.join(ROOT, "worker/src/generated/defaults.json"), "utf8")).AR_DIGITS;
 /** The design headline count the served /library (before JS) states. */
 const library = async () => {
@@ -103,7 +103,7 @@ check("restore: active again with its details", a.deleted === false && a.alt.en 
 await page.keyboard.press("Escape");
 check("Escape closes the drawer", (await page.locator("#drawer[open]").count()) === 0);
 
-// 6. Default piece: hide -> dev-publish -> gone from the public /library; then revert.
+// 6. Default piece: hide -> publish -> gone from the public /library; then revert.
 const pieces = (await api("/api/admin/gallery")).items.filter((i) => i.kind === "default" && !i.video && i.cat === "design" && !i.hidden);
 const def = pieces[0];
 await publish();

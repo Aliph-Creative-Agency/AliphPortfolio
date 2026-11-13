@@ -2,11 +2,11 @@
 // `wrangler dev --local --port 8851 --inspector-port 9251` (ADMIN_DEV_BYPASS=1).
 //   node tests/gallery/ui-replace.mjs
 // Replaces an upload's photo, an upload's video and a default photo in the LOCAL
-// dev store, publishes (dev-publish), then reverts the default piece.
+// dev store, publishes (editor publish route), then reverts the default piece.
 import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright-core";
-import { EDGE, FIX, ROOT, check, done } from "./browser.mjs";
+import { EDGE, FIX, ROOT, check, done, publish as publishDraft } from "./browser.mjs";
 
 const ORIGIN = process.env.ORIGIN || "http://127.0.0.1:8851";
 const OUT = path.join(ROOT, "tests/gallery/out");
@@ -19,7 +19,7 @@ const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
 const page = await ctx.newPage();
 const items = async () => (await (await ctx.request.get(ORIGIN + "/api/admin/gallery")).json()).items;
 const item = async (id) => (await items()).find((i) => i.id === id);
-const publish = () => ctx.request.post(ORIGIN + "/api/admin/gallery/dev-publish", { headers: H });
+const publish = () => publishDraft(ctx.request, ORIGIN);
 const inR2 = async (u) => (await ctx.request.get(`${ORIGIN}/api/admin/media/${keyOf(u)}`)).status();
 const upload = async (name, file, extra = {}) => (await ctx.request.post(ORIGIN + "/api/admin/upload", { headers: { ...H, "x-file-name": name, ...extra }, data: fs.readFileSync(path.join(FIX, file)) })).json();
 
