@@ -33,6 +33,17 @@
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) { who.textContent = j && j.email ? "Signed in as " + j.email : ""; })
     .catch(function () { who.textContent = ""; });
+  /* the draft-changes count: what Publish would make live (E-06b) */
+  var box = document.getElementById("changes"), n = document.getElementById("changes-n");
+  fetch("/api/admin/changes", { credentials: "same-origin" })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      if (!j || !j.changes) return;
+      var g = j.changes.filter(function (c) { return c.section === "gallery" || c.section === "clients"; }).length;
+      n.textContent = String(j.changes.length) + (g ? " (gallery " + g + ")" : "");
+      box.setAttribute("data-count", String(j.changes.length));
+    })
+    .catch(function () {});
 })();
 </script>
 </body>

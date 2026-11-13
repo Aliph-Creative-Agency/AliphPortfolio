@@ -1,6 +1,6 @@
 /* Editor API wrapper (classic script, no build). One place for every call the
    edit-mode overlay makes to /api/admin/*. Exposes window.aliphEditorApi.
-   Reads, plus the text writes (PUT/DELETE /api/admin/text). */
+   Reads, the text writes (PUT/DELETE /api/admin/text) and publish / discard. */
 (function () {
   "use strict";
 
@@ -22,8 +22,8 @@
   /* A write never throws on an HTTP answer: it resolves { status, body } so the
      caller can tell 409 (conflict) from 400 (invalid) from 5xx. Only a network
      failure rejects (that is "offline"). */
-  function send(method, payload) {
-    return fetch("/api/admin/text", {
+  function send(method, payload, url) {
+    return fetch(url || "/api/admin/text", {
       method: method,
       credentials: "same-origin",
       headers: { "content-type": "application/json", accept: "application/json" },
@@ -41,6 +41,12 @@
     /** The draft snapshot with locks; fresh each call (it moves as people save). */
     content: function () { return getJson("/api/admin/content"); },
     whoami: function () { return once("whoami", "/api/admin/whoami"); },
+    /** { rev, token, changes:[{section, id, page?, locales?}] } = draft vs live, fresh each call. */
+    changes: function () { return getJson("/api/admin/changes"); },
+    /** POST with the token from changes(): 200 {rev, publishedAt, changed}, 409 stale / nothing to publish. */
+    publish: function (token) { return send("POST", { token: token }, "/api/admin/publish"); },
+    /** POST with the token from changes(): 200 {discarded} (text + slot drafts back to live), 409 stale. */
+    discard: function (token) { return send("POST", { token: token }, "/api/admin/discard"); },
     getJson: getJson,
   };
 })();

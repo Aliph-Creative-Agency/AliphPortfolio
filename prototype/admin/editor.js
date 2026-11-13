@@ -1,7 +1,7 @@
 /* Edit-mode overlay (classic script, no build). Loaded only by the /admin/edit/*
    pages, after main.js has run its EDIT MODE HOOKS (window.aliphEdit).
    What it adds: a slim bar at the bottom edge (page switcher, AR/EN toggle,
-   status chip), a hover outline on [data-ek] text, and a click popover with
+   status chip, Publish / Discard), a hover outline on [data-ek] text, and a click popover with
    an Arabic and an English field. Typing previews live through
    aliphEdit.apply; Esc or Cancel puts both languages back; Done keeps the
    preview and closes. Nothing is saved here yet (autosave is E-05).
@@ -57,6 +57,8 @@
     return a;
   });
   var chip = h("span", { class: "ed-chip", text: "Draft" });
+  var publishBtn = h("button", { type: "button", class: "ed-publish", disabled: "", text: "Publish" });
+  var discardBtn = h("button", { type: "button", class: "ed-discard", disabled: "", text: "Discard" });
   var panelBtn = h("button", { type: "button", "aria-expanded": "false", "aria-controls": "ed-panel", text: "Page text" });
   var bar = h("div", { class: "ed-bar", role: "toolbar", "aria-label": "Page editor" }, [
     h("span", { class: "ed-brand", text: "Aliph editor" }),
@@ -65,6 +67,8 @@
     panelBtn,
     h("span", { class: "ed-spacer" }),
     chip,
+    discardBtn,
+    publishBtn,
     h("a", { href: "/admin/", text: "Dashboard" }),
   ]);
 
@@ -117,6 +121,8 @@
     if (conflicts.length) return setChip("conflict", "Conflict");
     if (chipState === "error" || chipState === "offline") return;
     setChip(pendingCount() ? "saving" : "saved", pendingCount() ? "Saving…" : "Saved");
+    syncPublishBtns();
+    if (!pendingCount()) refreshChanges();
   }
 
   /* called by preview(): the value now on screen for (key, loc) */
@@ -215,6 +221,145 @@
     document.body.appendChild(dlg);
     mine.focus();
   }
+
+  /* ── publish / discard ──
+     Publish is enabled when the draft differs from the live site (GET
+     /api/admin/changes, re-read once saves settle) and nothing is still
+     saving. It lists the changes per page in a dialog; Publish there POSTs the
+     token that list came with, so a draft that moved meanwhile is a 409 and the
+     list is shown again instead of publishing something unseen. Discard puts
+     the text (and picture) drafts back to the live values and reloads; gallery
+     changes are kept (they have their own reset). */
+  var lastChanges = null, changesTimer = 0, modal = null, toastTimer = 0;
+  var PAGE_NAMES = { home: "Home", about: "About", library: "Library" };
+  function isTextual(c) { return c.section === "text" || c.section === "slots"; }
+  function syncPublishBtns() {
+    var all = lastChanges ? lastChanges.changes : [];
+    var busy = pendingCount() > 0 || !!modal;
+    publishBtn.disabled = busy || !all.length;
+    discardBtn.disabled = busy || !all.filter(isTextual).length;
+    publishBtn.textContent = all.length ? "Publish (" + all.length + ")" : "Publish";
+  }
+  function refreshChanges() {
+    clearTimeout(changesTimer);
+    changesTimer = setTimeout(function () {
+      api.changes().then(function (c) { lastChanges = c; syncPublishBtns(); }).catch(function () {});
+    }, 300);
+  }
+  function toast(text) {
+    var t = document.querySelector(".ed-toast") || document.body.appendChild(h("div", { class: "ed-toast", role: "status" }));
+    t.textContent = text;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 5000);
+  }
+  function describe(c) {
+    if (c.section === "slots") return "Picture " + c.id;
+    if (c.section === "rings") return "Ring order: " + c.id;
+    var label = c.id + (c.locales ? " (" + c.locales.join(" + ").toUpperCase() + ")" : "");
+    var v = c.locales && edit.read ? edit.read(c.id, c.locales[0]) : null;
+    if (typeof v === "string" && v) label += ": " + (v.length > 60 ? v.slice(0, 59) + "…" : v);
+    return label;
+  }
+  /* the changes per page, then one "Gallery: N changes" line */
+  function changeList(changes) {
+    var groups = {}, order = [], gallery = 0, nodes = [];
+    changes.forEach(function (c) {
+      if (c.section === "gallery" || c.section === "clients") { gallery++; return; }
+      var p = c.page || "other";
+      if (!groups[p]) { groups[p] = []; order.push(p); }
+      groups[p].push(c);
+    });
+    function n(k) { return k + (k === 1 ? " change" : " changes"); }
+    order.forEach(function (p) {
+      nodes.push(h("p", { class: "ed-dialog-page", text: (PAGE_NAMES[p] || p) + ": " + n(groups[p].length) }));
+      nodes.push(h("ul", { class: "ed-dialog-list" }, groups[p].map(function (c) { return h("li", { dir: "auto", text: describe(c) }); })));
+    });
+    if (gallery) nodes.push(h("p", { class: "ed-dialog-page", text: "Gallery: " + n(gallery) }));
+    return nodes;
+  }
+  function closeModal() {
+    if (modal) { modal.remove(); modal = null; }
+    syncPublishBtns();
+  }
+  /* onConfirm(msg) resolves true to keep the dialog open (msg says why) */
+  function openModal(title, body, confirmText, onConfirm) {
+    closeModal();
+    var ok = h("button", { type: "button", class: "is-primary", text: confirmText });
+    var cancel = h("button", { type: "button", text: "Cancel" });
+    var msg = h("p", { class: "ed-dialog-msg", role: "status" });
+    var dlg = h("div", { class: "ed-dialog ed-confirm", role: "dialog", "aria-modal": "true", "aria-label": title },
+      [h("p", { class: "ed-dialog-title", text: title }), h("div", { class: "ed-dialog-body" }, body), msg,
+        h("div", { class: "ed-pop-actions" }, [cancel, ok])]);
+    modal = h("div", { class: "ed-scrim" }, [dlg]);
+    cancel.addEventListener("click", closeModal);
+    ok.addEventListener("click", function () {
+      ok.disabled = cancel.disabled = true;
+      msg.textContent = "Working…";
+      onConfirm(msg).then(function (keep) {
+        if (keep) { ok.disabled = cancel.disabled = false; } else closeModal();
+      }, function () { ok.disabled = cancel.disabled = false; msg.textContent = "Could not reach the server. Try again."; });
+    });
+    document.body.appendChild(modal);
+    ok.focus();
+    syncPublishBtns();
+  }
+  /* settle the open popover and every pending save, then read the list */
+  function settled() {
+    if (cur) closePop(false);
+    return flushAll().then(function () { return api.changes(); }).then(function (c) {
+      lastChanges = c;
+      syncPublishBtns();
+      return c;
+    });
+  }
+  function startPublish(note) {
+    settled().then(function (c) {
+      if (!c.changes.length) { toast("Nothing to publish"); return; }
+      var body = changeList(c.changes);
+      if (note) body.unshift(h("p", { class: "ed-dialog-note", text: note }));
+      openModal("Publish " + c.changes.length + (c.changes.length === 1 ? " change" : " changes") + " to the live site?", body, "Publish", function (msg) {
+        return api.publish(c.token).then(function (r) {
+          if (r.status === 200) {
+            toast("Published. The live site is now revision " + r.body.rev + ".");
+            refreshChanges();
+            return false;
+          }
+          if (r.status === 409) {
+            closeModal();
+            startPublish("The draft changed while this list was open. Here is the list as it is now.");
+            return false;
+          }
+          msg.textContent = "Not published: " + ((r.body && r.body.error) || r.status);
+          return true;
+        });
+      });
+    }, function () { toast("Could not read the changes. Try again."); });
+  }
+  function startDiscard() {
+    settled().then(function (c) {
+      var mine = c.changes.filter(isTextual);
+      if (!mine.length) return;
+      var kept = c.changes.length - mine.length;
+      var body = changeList(mine);
+      if (kept) body.push(h("p", { class: "ed-dialog-note", text: "Gallery changes are kept (" + kept + ")." }));
+      openModal("Discard " + mine.length + " unpublished text " + (mine.length === 1 ? "change" : "changes") + "? The live text comes back.", body, "Discard", function (msg) {
+        return api.discard(c.token).then(function (r) {
+          if (r.status === 200) {
+            try { localStorage.removeItem(BACKUP); } catch (_) {}
+            Object.keys(st).forEach(function (id) { st[id].saved = st[id].value; });
+            location.reload();
+            return true;
+          }
+          if (r.status === 409) { closeModal(); startDiscard(); return false; }
+          msg.textContent = "Not discarded: " + ((r.body && r.body.error) || r.status);
+          return true;
+        });
+      });
+    }, function () { toast("Could not read the changes. Try again."); });
+  }
+  publishBtn.addEventListener("click", function () { startPublish(); });
+  discardBtn.addEventListener("click", startDiscard);
 
   /* ── hover outline ── */
   var outline = h("div", { class: "ed-outline", "aria-hidden": "true" });
@@ -545,6 +690,7 @@
   }, true);
 
   document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal) { e.preventDefault(); closeModal(); return; }
     if (e.key === "Escape" && cur) { e.preventDefault(); closePop(true); }
   }, true);
 
@@ -575,4 +721,5 @@
   document.body.appendChild(pop);
   document.body.appendChild(panel);
   document.body.appendChild(bar);
+  refreshChanges();
 })();
