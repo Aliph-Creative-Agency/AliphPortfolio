@@ -12,7 +12,8 @@
 //    slug; every stored key matches ADMIN_KEY_RE and nothing appears outside
 //    admin/. x-poster-for that is not an admin/ video key is a 400.
 //  - COLLISIONS: same-named uploads get distinct keys; a forced RNG collision
-//    is F-05 (silent overwrite, no onlyIf guard).
+//    re-rolls the id, and a key that stays taken (or fills in a race) is a
+//    409, never an overwrite (F-05, fixed). A poster keeps its fixed key.
 //  - SIZE: a declared Content-Length that disagrees with the body is a 400
 //    with nothing stored; a streamed body over the image cap is a 413;
 //    multipart reports the size R2 counted, never the claimed one, and an
@@ -330,13 +331,26 @@ describe("key collisions", () => {
     expect(((await r.json()) as Up).key).toBe(p1.key);
     expect(await bytesOf(p1.key)).toEqual(two);
   });
-  it.fails("F-05 a random-id collision on multipart create hands out a key that already holds a video", async () => {
+  it("F-05 a random-id collision on multipart create never hands out a key that already holds a video", async () => {
     sameRandom();
     const v = (await (await up(cat(HEAD.mp4, "FIRST", new Uint8Array(40)), { "x-file-name": "reel.mp4" })).json()) as Up;
-    const c = (await (await post("/api/admin/upload/mpu", { name: "reel.mp4", type: "video/mp4", size: 100 })).json()) as {
-      key: string;
-    };
+    const r = await post("/api/admin/upload/mpu", { name: "reel.mp4", type: "video/mp4", size: 100 });
+    // every draw collides here: a refusal, never the video's key
+    expect(r.status).toBe(409);
+    expect(((await r.json()) as Partial<Mpu>).key).toBeUndefined();
+  });
+  it("F-05 one collision on multipart create re-rolls: 201 on a fresh key, the video intact", async () => {
+    sameRandomFor(2); // the single upload's draw + create's first draw
+    const first = cat(HEAD.mp4, "FIRST", new Uint8Array(40));
+    const v = (await (await up(first, { "x-file-name": "reel.mp4" })).json()) as Up;
+    const r = await post("/api/admin/upload/mpu", { name: "reel.mp4", type: "video/mp4", size: 100 });
+    expect(r.status).toBe(201);
+    const c = (await r.json()) as Mpu;
     expect(c.key).not.toBe(v.key);
+    expect(c.key).toMatch(ADMIN_KEY_RE);
+    expect(c.id).toBe(c.key.split("/").pop()!.replace(/\.mp4$/, ""));
+    await del(`/api/admin/upload/mpu?key=${encodeURIComponent(c.key)}&uploadId=${encodeURIComponent(c.uploadId)}`);
+    expect(await bytesOf(v.key)).toEqual(first);
   });
 });
 
@@ -426,6 +440,21 @@ const complete = (c: { key: string; uploadId: string }, parts: unknown) =>
 const MP4_BODY = cat(HEAD.mp4, "x".repeat(500));
 
 describe("multipart abuse", () => {
+  it("F-05 an object landing on the upload's key before complete → 409, upload aborted, that object intact", async () => {
+    const c = await create();
+    const p1 = (await (await part(c, 1, MP4_BODY)).json()) as { partNumber: number; etag: string };
+    const other = cat(HEAD.mp4, "OTHER", new Uint8Array(40));
+    await env.MEDIA_BUCKET.put(c.key, other); // a racing writer took the key after create's check
+    const audits = await uploadAudits();
+    const r = await complete(c, [p1]);
+    expect(r.status).toBe(409);
+    expect(await bytesOf(c.key)).toEqual(other);
+    expect(await uploadAudits()).toBe(audits);
+    // the upload is gone: a second complete cannot assemble it either
+    expect((await complete(c, [p1])).status).not.toBe(201);
+    expect(await bytesOf(c.key)).toEqual(other);
+  });
+
   it("part numbers outside 1..60 → 400/413, nothing uploaded", async () => {
     const c = await create();
     for (const n of ["0", "-1", "1.5", "abc", "", "NaN", "Infinity", "-Infinity", "1e9", "61", "9007199254740993"]) {
@@ -512,6 +541,7 @@ describe("multipart abuse", () => {
         complete: async () => ({ size: VIDEO_MAX + 1, httpMetadata: { contentType: "video/mp4" } }),
         abort: async () => {},
       }),
+      head: async () => null, // the key is still free (F-05 check before complete)
       delete: async (k: string) => void deleted.push(k),
     } as unknown as R2Bucket;
     const r = await call("/api/admin/upload/mpu/complete", {
