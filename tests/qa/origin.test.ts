@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 // Q-06 (QA): Origin / CSRF guard on every non-GET admin route.
 // The Access cookie (CF_Authorization) is accepted as identity, so a page on
 // another site that the signed-in admin visits could send a write with it.
