@@ -1,0 +1,102 @@
+/* Admin gallery grid. /style.css is linked only for its custom properties
+   (--ink, --cream, --accent, fonts); the public body rules are reset here.
+   English chrome, spacing uses logical properties. */
+html { font-size: 62.5%; } /* admin runs at 1rem = 10px, not the site's 24px */
+body.adm {
+  margin: 0; min-height: 100vh; overflow: auto; overflow-x: hidden;
+  background: var(--cream); color: var(--ink);
+  font: 1.4rem/1.45 var(--font-body); padding-inline: 1.6rem; padding-block-end: 4rem;
+}
+.adm-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.8rem 1.6rem; padding-block: 1.6rem 0.8rem; }
+.adm-head h1 { margin: 0; font: 2.8rem/1 var(--font-display); }
+.adm-sub { margin: 0; color: var(--ink-mute); flex: 1 1 12rem; }
+.adm-search { flex: 1 1 18rem; max-inline-size: 28rem; box-sizing: border-box; padding: 0.7rem 1rem; font: inherit; color: inherit;
+  background: var(--cream-warm); border: 1px solid var(--ink-faint); border-radius: 0; }
+.adm-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; border-block-end: 2px solid var(--ink); }
+.adm-tab { font: inherit; color: inherit; background: none; border: 0; padding: 0.8rem 1.4rem; cursor: pointer; }
+.adm-tab[aria-selected="true"] { background: var(--ink); color: var(--cream); }
+.adm button:focus-visible, .adm input:focus-visible, .adm-tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.adm-run { margin-block-start: 2.4rem; }
+.adm-run h2 { margin: 0 0 1rem; font: 1.8rem/1.2 var(--font-display); border-block-end: 1px solid var(--ink-faint); padding-block-end: 0.4rem; }
+.adm-run h2 span { color: var(--ink-mute); font-size: 1.4rem; }
+.adm-empty { color: var(--ink-mute); padding-block: 2rem; }
+.adm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1.2rem; list-style: none; margin: 0; padding: 0; }
+.adm-grid > li { min-inline-size: 0; }
+.adm-tile { position: relative; display: block; inline-size: 100%; text-align: start; font: inherit; color: inherit; background: var(--cream-warm);
+  border: 1px solid var(--ink-faint); padding: 0; cursor: pointer; }
+.adm-pic { display: block; inline-size: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: rgba(15, 24, 32, 0.08); }
+.adm-meta { display: flex; flex-wrap: wrap; gap: 0.3rem 0.6rem; align-items: center; padding: 0.5rem 0.7rem; font-size: 1.2rem; color: var(--ink-mute); }
+.adm-name { flex: 1 1 100%; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; }
+.adm-chip, .adm-badge { padding: 0 0.5rem; border: 1px solid currentColor; font-size: 1.1rem; line-height: 1.6; }
+.adm-badge { position: absolute; inset-block-start: 0.5rem; inset-inline-start: 0.5rem; background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.adm-badge + .adm-badge { inset-block-start: 2.7rem; }
+.adm-dot { position: absolute; inset-block-start: 0.7rem; inset-inline-end: 0.7rem; inline-size: 1rem; block-size: 1rem; border-radius: 50%; background: var(--accent); border: 2px solid var(--cream); }
+.adm-vid { position: absolute; inset-block-end: 4.6rem; inset-inline-end: 0.5rem; background: var(--ink); color: var(--cream); padding: 0 0.5rem; font-size: 1.1rem; }
+.adm-tile[data-hidden="1"] .adm-pic { opacity: 0.35; }
+.adm-tile[data-removed="1"] .adm-pic { opacity: 0.35; }
+.adm-tile[data-removed="1"] .adm-name { text-decoration: line-through; }
+.adm-add { margin-block: 1.2rem; }
+.adm-add h2 { margin: 0 0 0.8rem; font: 1.8rem/1.2 var(--font-display); }
+.adm-zone { border: 2px dashed var(--ink-faint); padding: 2rem 1.2rem; text-align: center; cursor: pointer; color: var(--ink-mute); }
+.adm-zone[data-over="1"] { border-color: var(--accent); color: var(--ink); }
+.adm-zone:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.adm-batch { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; margin-block: 0.8rem; }
+.adm-sel { font: inherit; color: inherit; background: var(--cream-warm); border: 1px solid var(--ink-faint); border-radius: 0; padding: 0.4rem 0.6rem; max-inline-size: 100%; }
+.adm-rows { list-style: none; margin: 0; padding: 0; }
+.adm-row { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; align-items: center; padding-block: 0.6rem; border-block-end: 1px solid var(--ink-faint); }
+.adm-rname { flex: 1 1 14rem; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; }
+.adm-prog { flex: 0 1 10rem; inline-size: 10rem; max-inline-size: 100%; }
+.adm-rmsg { flex: 1 1 14rem; color: var(--ink-mute); }
+.adm-row[data-status="error"] .adm-rmsg { color: var(--accent); }
+.adm-btn, .adm-x { font: inherit; color: var(--cream); background: var(--ink); border: 0; padding: 0.7rem 1.4rem; cursor: pointer; }
+.adm-btn:disabled { opacity: 0.4; cursor: default; }
+.adm-x { background: none; color: var(--ink); border: 1px solid var(--ink-faint); padding: 0.3rem 0.8rem; }
+.adm-btn-2 { background: none; color: var(--ink); border: 1px solid var(--ink); }
+.adm-drawer { margin: 0; margin-inline-start: auto; inline-size: min(42rem, 100vw); max-inline-size: 100vw; block-size: 100vh; max-block-size: 100vh; box-sizing: border-box;
+  padding: 1.6rem; border: 0; border-inline-start: 2px solid var(--ink); background: var(--cream); color: var(--ink); overflow-y: auto; font: 1.4rem/1.45 var(--font-body); }
+.adm-drawer::backdrop, .adm-confirm::backdrop { background: rgba(15, 24, 32, 0.45); }
+.adm-dhead { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.adm-dhead h2 { margin: 0; font: 2rem/1.2 var(--font-display); overflow-wrap: anywhere; direction: ltr; }
+.adm-dpic { display: block; inline-size: 100%; max-block-size: 22rem; object-fit: contain; background: rgba(15, 24, 32, 0.08); margin-block: 1rem; }
+.adm-fld { display: block; margin-block-end: 1rem; }
+.adm-flab { display: block; color: var(--ink-mute); font-size: 1.2rem; }
+.adm-in { display: block; inline-size: 100%; box-sizing: border-box; font: inherit; color: inherit; background: var(--cream-warm); border: 1px solid var(--ink-faint); border-radius: 0; padding: 0.6rem 0.8rem; }
+.adm-fld .adm-sel { display: block; inline-size: 100%; box-sizing: border-box; }
+.adm-ferr, .adm-dmsg[data-kind="error"] { color: var(--accent); }
+.adm-ferr { display: block; min-block-size: 0; font-size: 1.2rem; }
+.adm-dmsg { margin: 0.6rem 0; min-block-size: 1.4em; color: var(--ink-mute); }
+.adm-dact { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-block-start: 1rem; }
+.adm-confirm { border: 2px solid var(--ink); background: var(--cream); color: var(--ink); padding: 1.6rem; max-inline-size: min(36rem, 92vw); font: 1.4rem/1.45 var(--font-body); }
+.adm-drawer :focus-visible, .adm-confirm :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.adm-rings { margin-block: 1.6rem; }
+.adm-rings > h2 { margin: 0 0 0.8rem; font: 1.8rem/1.2 var(--font-display); }
+.adm-ring-box { border: 1px solid var(--ink-faint); padding: 1rem 1.2rem; margin-block-end: 1.2rem; }
+.adm-ring-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 1.2rem; }
+.adm-ring-head h3 { margin: 0; font: 1.6rem/1.2 var(--font-display); }
+.adm-ring-sub { color: var(--ink-mute); }
+.adm-ring { list-style: none; margin: 0.8rem 0; padding: 0; display: grid; gap: 0.5rem; }
+.adm-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.8rem; padding: 0.4rem 0.6rem; background: var(--cream-warm); border: 1px solid var(--ink-faint); cursor: grab; }
+.adm-pick[data-drag="1"] { opacity: 0.4; }
+.adm-pick:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.adm-pick-pic { inline-size: 5.6rem; block-size: 4.2rem; object-fit: cover; background: rgba(15, 24, 32, 0.08); flex: none; }
+.adm-pick-n { inline-size: 2.2rem; color: var(--ink-mute); text-align: end; }
+.adm-pick-name { flex: 1 1 12rem; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; }
+.adm-badge-inline { padding: 0 0.5rem; border: 1px solid currentColor; font-size: 1.1rem; line-height: 1.6; }
+.adm-ring-note { margin: 0.6rem 0 0; min-block-size: 1.4em; color: var(--ink-mute); }
+.adm-ring-note[data-kind="error"] { color: var(--accent); }
+.adm-picker { inline-size: min(64rem, 100vw); }
+.adm-x:disabled { opacity: 0.4; cursor: default; }
+.adm-clean { margin-block: 1.6rem; }
+.adm-clean > h2 { margin: 0 0 0.4rem; font: 1.8rem/1.2 var(--font-display); }
+.adm-clean .adm-dact { align-items: center; margin-block-start: 0.8rem; }
+.adm-clean .adm-dmsg { margin: 0; flex: 1 1 16rem; }
+.adm-clist { list-style: none; margin: 0.8rem 0; padding: 0; display: grid; gap: 0.5rem; }
+.adm-crow { display: flex; align-items: center; gap: 0.8rem; padding: 0.4rem 0.6rem; background: var(--cream-warm); border: 1px solid var(--ink-faint); }
+.adm-crow input { flex: none; inline-size: 1.8rem; block-size: 1.8rem; accent-color: var(--ink); }
+.adm-clab { display: flex; flex: 1 1 auto; min-inline-size: 0; align-items: center; gap: 0.8rem; cursor: pointer; }
+.adm-ctxt { display: flex; flex-direction: column; min-inline-size: 0; flex: 1 1 auto; }
+.adm-ctxt .adm-pick-name { flex: none; }
+.adm-cmeta { color: var(--ink-mute); font-size: 1.2rem; }
+.adm-cwarn { color: var(--accent); font-size: 1.2rem; }
+.adm-cvid { display: grid; place-items: center; color: var(--ink-mute); font-size: 1.1rem; }
+.adm-dmsg[data-kind="ok"] { color: var(--ink); }

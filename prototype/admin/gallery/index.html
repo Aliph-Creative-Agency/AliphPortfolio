@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Gallery · Aliph admin</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/admin/gallery/gallery.css">
+</head>
+<body class="adm">
+<header class="adm-head">
+  <h1>Gallery</h1>
+  <p class="adm-sub" id="summary" aria-live="polite">Loading…</p>
+  <input id="search" class="adm-search" type="search" placeholder="Search by file name" aria-label="Search by file name" autocomplete="off">
+</header>
+<section class="adm-add" aria-labelledby="add-h">
+  <h2 id="add-h">Add files</h2>
+  <div id="add-zone" class="adm-zone" role="button" tabindex="0">Drop photos or videos here, or press to choose</div>
+  <input id="add-file" type="file" multiple accept="image/*,video/mp4,video/webm" hidden>
+  <div id="add-batch" class="adm-batch"></div>
+  <ul id="add-rows" class="adm-rows"></ul>
+  <button id="add-go" class="adm-btn" type="button" disabled>Upload</button>
+</section>
+<section id="rings" class="adm-rings" aria-label="Ring picks"></section>
+<section class="adm-clean" aria-labelledby="cleanup-h">
+  <h2 id="cleanup-h">Unused files</h2>
+  <p class="adm-sub">Replaced and deleted pieces leave their old files in storage. This lists the ones nothing on the site uses any more.</p>
+  <div class="adm-dact"><button id="cleanup-find" class="adm-btn adm-btn-2" type="button">Clean up unused files</button><p id="cleanup-note" class="adm-dmsg" role="status"></p></div>
+</section>
+<nav class="adm-tabs" id="tabs" role="tablist" aria-label="Category"></nav>
+<main id="grid" class="adm-main" tabindex="-1"></main>
+<dialog id="drawer" class="adm-drawer" aria-labelledby="drawer-title">
+  <header class="adm-dhead">
+    <div><h2 id="drawer-title"></h2><p id="drawer-status" class="adm-sub"></p></div>
+    <button id="drawer-close" class="adm-x" type="button">Close</button>
+  </header>
+  <input id="d-file" type="file" accept="image/*,video/mp4,video/webm" hidden>
+  <progress id="drawer-prog" class="adm-prog" max="100" value="0" hidden></progress>
+  <p id="drawer-msg" class="adm-dmsg" role="status"></p>
+  <div id="drawer-body" class="adm-dbody"></div>
+  <div id="drawer-actions" class="adm-dact"></div>
+</dialog>
+<dialog id="picker" class="adm-drawer adm-picker" aria-labelledby="picker-title">
+  <header class="adm-dhead"><h2 id="picker-title"></h2><button id="picker-close" class="adm-x" type="button">Done</button></header>
+  <input id="picker-q" class="adm-search" type="search" placeholder="Search by file name" aria-label="Search by file name" autocomplete="off">
+  <p id="picker-count" class="adm-dmsg" role="status"></p>
+  <ul id="picker-list" class="adm-grid"></ul>
+</dialog>
+<dialog id="confirm" class="adm-confirm" aria-labelledby="confirm-text">
+  <p id="confirm-text"></p>
+  <div class="adm-dact"><button id="confirm-yes" class="adm-btn" type="button">OK</button><button id="confirm-no" class="adm-btn adm-btn-2" type="button">Cancel</button></div>
+</dialog>
+<dialog id="cleanup-dlg" class="adm-drawer" aria-labelledby="cleanup-title">
+  <header class="adm-dhead"><h2 id="cleanup-title">Unused files</h2><button id="cleanup-close" class="adm-x" type="button">Close</button></header>
+  <p id="cleanup-sum" class="adm-dmsg"></p>
+  <ul id="cleanup-list" class="adm-clist"></ul>
+  <p id="cleanup-msg" class="adm-dmsg" role="status"></p>
+  <div class="adm-dact"><button id="cleanup-go" class="adm-btn" type="button">Delete</button></div>
+</dialog>
+<script type="module" src="/admin/gallery/gallery.js"></script>
+<script type="module" src="/admin/gallery/add.js"></script>
+<script type="module" src="/admin/gallery/drawer.js"></script>
+<script type="module" src="/admin/gallery/rings.js"></script>
+<script type="module" src="/admin/gallery/cleanup.js"></script>
+</body>
+</html>
