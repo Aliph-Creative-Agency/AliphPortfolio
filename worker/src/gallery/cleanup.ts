@@ -10,6 +10,9 @@
 //   - ring picks: every id in an active draft ring or a published ring,
 //     resolved to its gallery row's draft columns AND published_json, in any
 //     state (a ring can still name a row deleted after the ring was saved);
+//   - slot values of EVERY past revision: the editor's History restore copies
+//     a revision's slots back into the draft (gallery rows are not restored,
+//     so past gallery snapshots do not protect a file);
 //   - a video's poster by name: <stem>.mp4 used → <stem>.poster.* used.
 // A deleted row whose deletion is published is in neither snapshot, so its
 // files are listed (with `item` = its id, for the confirm list).
@@ -70,10 +73,11 @@ export interface Used {
 
 /** The used set, read in one D1 batch (one consistent view). */
 export async function usedKeys(env: Env): Promise<Used> {
-  const [gallery, slots, rings] = await env.DB.batch([
+  const [gallery, slots, rings, past] = await env.DB.batch([
     env.DB.prepare("SELECT id, src, poster, published_json, state FROM gallery_items"),
     env.DB.prepare("SELECT draft_json, published_json FROM slot_values"),
     env.DB.prepare("SELECT item_ids_json, published_json, state FROM ring_picks"),
+    env.DB.prepare("SELECT json_extract(snapshot_json, '$.slots') AS slots FROM revisions"),
   ]);
   const keys = new Set<string>();
   const owner = new Map<string, string>();
@@ -102,6 +106,9 @@ export async function usedKeys(env: Env): Promise<Used> {
   for (const r of slots.results as { draft_json: string | null; published_json: string | null }[]) {
     for (const s of strings(parse(r.draft_json))) add(s);
     for (const s of strings(parse(r.published_json))) add(s);
+  }
+  for (const r of past.results as { slots: string | null }[]) {
+    for (const s of strings(parse(r.slots))) add(s);
   }
   for (const r of rings.results as { item_ids_json: string; published_json: string | null; state: string }[]) {
     const ids = [...(r.state === "active" ? strings(parse(r.item_ids_json)) : []), ...strings(parse(r.published_json))];

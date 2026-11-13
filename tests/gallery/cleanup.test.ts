@@ -175,3 +175,23 @@ describe("POST /api/admin/upload/cleanup", () => {
     expect(r.status).toBe(403);
   });
 });
+
+describe("revisions (leader fix, relay #7)", () => {
+  // The editor's History restore (E-07) copies ANY revision's slots back into the
+  // draft, so a file a past revision's slot names is still reachable.
+  it("a file named only by a past revision's slot is not listed and is refused", async () => {
+    const old = await obj("gggggg-past.webp");
+    const orphan = await obj("hhhhhh-orphan.webp");
+    const { id } = (await env.DB.prepare("SELECT coalesce(max(id), 0) + 1 AS id FROM revisions").first<{ id: number }>())!;
+    const snap = { rev: id, text: {}, slots: { "about.media.2": { src: URL_OF(old) } }, gallery: [], rings: {}, clients: [] };
+    await env.DB.prepare("INSERT INTO revisions (id, published_by, snapshot_json) VALUES (?, ?, ?)")
+      .bind(id, ADMIN, JSON.stringify(snap))
+      .run();
+    later();
+    expect(await unusedKeys()).toEqual([orphan]);
+    const r = await cleanup([old]);
+    expect(r.status).toBe(200);
+    expect(((await r.json()) as Cleaned).refused).toEqual([{ key: old, reason: "in use" }]);
+    expect(await exists(old)).toBe(true);
+  });
+});
