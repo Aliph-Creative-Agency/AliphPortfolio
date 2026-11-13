@@ -99,9 +99,10 @@ function draw() {
     cl.value = cl.dataset.prev; // back to the old pick while the dialog is open (and if it is cancelled)
     const made = await newClientDialog();
     if (!made) return;
-    await loadClients();
+    // Pick it the moment the dialog closes; the shared list refreshes after (a slow GET must not leave the old pick showing).
     cl.insertBefore(new Option(made.name.en, made.id), cl.querySelector(`option[value="${NEW}"]`));
     cl.value = made.id; cl.dataset.prev = made.id;
+    await loadClients();
   });
   f.append(
     field("Sub-category", sub, "sub"),
