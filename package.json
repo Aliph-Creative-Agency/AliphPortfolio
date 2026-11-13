@@ -9,7 +9,7 @@
     "test": "vitest run -c worker/vitest.config.ts",
     "check:site": "node --check prototype/main.js && node resources/build_static.mjs --check && node tests/platform/merge-sync.mjs",
     "gen:defaults": "node worker/scripts/gen-defaults.mjs",
-    "typecheck": "tsc -p worker"
+    "typecheck": "tsc -p worker && tsc -p tests/gallery"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.23.0",

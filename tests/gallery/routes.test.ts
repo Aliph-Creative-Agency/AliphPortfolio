@@ -5,35 +5,23 @@ import { call, installAccess, post, uninstallAccess } from "./helpers";
 beforeEach(installAccess);
 afterEach(uninstallAccess);
 
+// Any non-GET gallery path is guarded before routing; clean-up with an empty
+// key list is the cheapest one that answers 400 once past the guard.
+const GUARDED = "/api/admin/upload/cleanup";
+
 describe("same-origin guard on gallery writes", () => {
   it("foreign Origin → 403", async () => {
-    const r = await post("/api/admin/gallery/dev-publish", {}, { origin: "https://evil.example" });
+    const r = await post(GUARDED, { keys: [] }, { origin: "https://evil.example" });
     expect(r.status).toBe(403);
   });
   it("no Origin → 403", async () => {
-    const r = await post("/api/admin/gallery/dev-publish", {}, { origin: null });
+    const r = await post(GUARDED, { keys: [] }, { origin: null });
     expect(r.status).toBe(403);
   });
-  it("same origin reaches the handler (dev-publish is 404 off localhost)", async () => {
-    const r = await post("/api/admin/gallery/dev-publish", {});
-    expect(r.status).toBe(404);
-    expect(((await r.json()) as { error: string }).error).toBe("not found");
-  });
-});
-
-describe("dev-publish", () => {
-  it("404 on the real hostname even with the bypass flag set", async () => {
-    const r = await post("/api/admin/gallery/dev-publish", {}, { env: { ADMIN_DEV_BYPASS: "1" } });
-    expect(r.status).toBe(404);
-  });
-  it("publishes on localhost with the bypass", async () => {
-    const r = await call("/api/admin/gallery/dev-publish", {
-      method: "POST",
-      base: "http://localhost:8851",
-      env: { ADMIN_DEV_BYPASS: "1" },
-    });
-    expect(r.status).toBe(200);
-    expect(typeof ((await r.json()) as { rev: number }).rev).toBe("number");
+  it("same origin reaches the handler (empty key list → its 400)", async () => {
+    const r = await post(GUARDED, { keys: [] });
+    expect(r.status).toBe(400);
+    expect(((await r.json()) as { field: string }).field).toBe("keys");
   });
 });
 
