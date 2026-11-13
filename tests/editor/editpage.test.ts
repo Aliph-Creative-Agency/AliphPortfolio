@@ -46,7 +46,7 @@ describe("edit pages", () => {
       expect(html).toMatch(/<html[^>]*\sdata-edit-mode="1"/);
       expect(html).toMatch(/<head[^>]*>\s*<base href="\/">/);
       expect(html).toMatch(
-        /<link rel="stylesheet" href="\/admin\/editor.css">\s*<script src="\/admin\/editor-api.js" defer><\/script>\s*<script src="\/admin\/editor.js" defer><\/script>\s*<\/body>/,
+        /<link rel="stylesheet" href="\/admin\/editor.css">\s*<link rel="stylesheet" href="\/admin\/editor-media.css">\s*<script src="\/admin\/editor-api.js" defer><\/script>\s*<script src="\/admin\/editor.js" defer><\/script>\s*<script src="\/admin\/editor-media.js" defer><\/script>\s*<\/body>/,
       );
       expect(html.split(BLOB_OPEN).length - 1).toBe(1);
     });

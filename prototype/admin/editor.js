@@ -818,4 +818,6 @@
     document.documentElement.style.setProperty("--ed-bar-h", bar.offsetHeight + "px");
   }).observe(bar);
   refreshChanges();
+  /* what editor-media.js (the picture drawer) needs from here */
+  window.aliphEditorUi = { refreshChanges: refreshChanges, toast: toast, setChip: setChip, bar: bar };
 })();

@@ -39,7 +39,7 @@ export function editPageOf(pathname: string): Page | null {
   return pageOf(pathname.slice("/admin/edit".length));
 }
 
-const TAIL = '<link rel="stylesheet" href="/admin/editor.css">\n<script src="/admin/editor-api.js" defer></script>\n<script src="/admin/editor.js" defer></script>\n';
+const TAIL = '<link rel="stylesheet" href="/admin/editor.css">\n<link rel="stylesheet" href="/admin/editor-media.css">\n<script src="/admin/editor-api.js" defer></script>\n<script src="/admin/editor.js" defer></script>\n<script src="/admin/editor-media.js" defer></script>\n';
 
 export async function editPage(request: Request, env: Env, url: URL, page: Page): Promise<Response> {
   if (request.method !== "GET") {
