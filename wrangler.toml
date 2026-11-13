@@ -60,10 +60,10 @@ bucket_name = "aliph-media"
 # The Worker verifies the Access JWT on /admin* and /api/admin* itself
 # (worker/src/auth.ts) and refuses every admin request while these are
 # empty — fail closed.
-# TODO(orchestrator): at deploy set ACCESS_TEAM_DOMAIN to the Zero Trust team
-# domain (<team>.cloudflareaccess.com) and ACCESS_AUD to the Access
-# application's Audience tag. Neither is a secret.
+# Set 2026-11-13: ACCESS_TEAM_DOMAIN = the Zero Trust team domain and ACCESS_AUD =
+# the Audience tag of the one Access app covering aliphcreative.com/admin and
+# /api/admin (policy `admins`, One-time PIN). Neither is a secret.
 # ⚠️ ADMIN_DEV_BYPASS never goes here — .dev.vars only (local dev).
 [vars]
 ACCESS_TEAM_DOMAIN = "orange-moon-60e5.cloudflareaccess.com"
-ACCESS_AUD = ""
+ACCESS_AUD = "6388e6185de998e5e49d9e8ccf8f911a7f842fe0461e198111d9e9bb1a2ca14e"
