@@ -35,8 +35,16 @@
   <p class="adm-sub">Replaced and deleted pieces leave their old files in storage. This lists the ones nothing on the site uses any more.</p>
   <div class="adm-dact"><button id="cleanup-find" class="adm-btn adm-btn-2" type="button">Clean up unused files</button><p id="cleanup-note" class="adm-dmsg" role="status"></p></div>
 </section>
+<div class="adm-seltools"><button id="select-toggle" class="adm-btn adm-btn-2" type="button" aria-pressed="false">Select pieces</button></div>
 <nav class="adm-tabs" id="tabs" role="tablist" aria-label="Category"></nav>
 <main id="grid" class="adm-main" tabindex="-1"></main>
+<div id="assign-bar" class="adm-assignbar" hidden>
+  <span id="assign-n">Assign to</span>
+  <select id="assign-client" class="adm-sel" aria-label="Client to assign"></select>
+  <button id="assign-go" class="adm-btn" type="button" disabled>Assign</button>
+  <button id="assign-clear" class="adm-btn adm-btn-2" type="button" disabled>Clear</button>
+  <p id="assign-note" class="adm-dmsg" role="status"></p>
+</div>
 <dialog id="drawer" class="adm-drawer" aria-labelledby="drawer-title">
   <header class="adm-dhead">
     <div><h2 id="drawer-title"></h2><p id="drawer-status" class="adm-sub"></p></div>
@@ -77,5 +85,6 @@
 <script type="module" src="/admin/gallery/order.js"></script>
 <script type="module" src="/admin/gallery/cleanup.js"></script>
 <script type="module" src="/admin/gallery/clients.js"></script>
+<script type="module" src="/admin/gallery/assign.js"></script>
 </body>
 </html>

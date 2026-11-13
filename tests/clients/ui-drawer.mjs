@@ -27,7 +27,7 @@ await ctx.request.put(`${ORIGIN}/api/admin/gallery/${up.id}`, { headers: H, data
 
 await page.goto(ORIGIN + "/admin/gallery/");
 await page.waitForSelector(".adm-tile");
-await page.waitForFunction((n) => document.querySelector(".adm-client")?.textContent.includes(n), `Beta ${run}`);
+await page.locator(".adm-client", { hasText: `Beta ${run}` }).waitFor();
 const open = async () => {
   await page.click('.adm-tab[data-cat="photo"]');
   await page.locator(`.adm-tile[data-id="${up.id}"]`).click();

@@ -137,3 +137,17 @@ body.adm {
 .adm-cnew::backdrop { background: rgba(15, 24, 32, 0.45); }
 .adm-cnew h2 { margin: 0; font: 1.8rem/1.2 var(--font-display); }
 .adm-cnew :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* bulk assign (C-10) */
+.adm-seltools { display: flex; justify-content: flex-end; margin-block: 0 0.8rem; }
+.adm-tick { position: absolute; inset-block-start: 0.5rem; inset-inline-end: 0.5rem; display: grid; place-items: center; inline-size: 2.4rem; block-size: 2.4rem;
+  background: var(--cream); border: 2px solid var(--ink); color: var(--cream); font-size: 1.6rem; line-height: 1; }
+.adm-tile[data-picked="1"] .adm-tick { background: var(--ink); }
+.adm-tile[data-picked="1"] { outline: 3px solid var(--accent); outline-offset: -3px; }
+.adm-tile[data-pickable="0"] { cursor: default; }
+.adm-tile[data-pickable="0"] .adm-pic { opacity: 0.35; }
+.adm-assignbar { position: fixed; inset-block-end: 0; inset-inline: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; box-sizing: border-box;
+  padding: 1rem 1.6rem; background: var(--cream); border-block-start: 2px solid var(--ink); }
+.adm-assignbar[hidden] { display: none; }
+.adm-assignbar .adm-sel { flex: 1 1 16rem; max-inline-size: 28rem; }
+.adm-assignbar .adm-dmsg { flex: 1 1 100%; margin: 0; }
+#grid[data-selecting="1"] { padding-block-end: 14rem; } /* room for the fixed bar */
