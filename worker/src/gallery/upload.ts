@@ -2,6 +2,8 @@
 // videos use the multipart routes). GET /api/admin/media/<key>: streams an
 // admin/ object back, for local previews where media.aliphcreative.com has no
 // copy. Keys: admin/<yyyy>/<mm>/<id>.<ext>, id = 6 random base36 + "-" + slug.
+// A new key never replaces an object (F-05): the id is re-rolled while the key
+// is taken, and the put itself only writes if the key is still free.
 
 import type { AdminCtx, Env } from "../index";
 import { json } from "./routes";
@@ -46,6 +48,26 @@ export function newKeyBase(name: string, now = new Date()): { id: string; base: 
   const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
   return { id, base: `admin/${yyyy}/${mm}/${id}` };
 }
+
+/** Fresh ids tried before giving up. A clash needs the same slug in the same
+ *  month AND the same ~31-bit draw, so a second try is already rare. */
+export const KEY_TRIES = 5;
+
+/** A key base whose `<base>.<ext>` holds no object yet; null after KEY_TRIES
+ *  taken keys. Runs before any body is streamed (a stream cannot be re-sent). */
+export async function freeKeyBase(env: Env, name: string, ext: string): Promise<{ id: string; base: string } | null> {
+  for (let i = 0; i < KEY_TRIES; i++) {
+    const nb = newKeyBase(name);
+    if (!(await env.MEDIA_BUCKET.head(`${nb.base}.${ext}`))) return nb;
+  }
+  return null;
+}
+
+/** put() only if the key is still free: R2 checks it as it commits, so two
+ *  uploads racing for one key cannot both land (the loser's put is null). */
+export const IF_ABSENT = (): R2PutOptions["onlyIf"] => new Headers({ "if-none-match": "*" });
+
+export const KEY_TAKEN = () => json({ error: "storage key already taken; upload the file again" }, 409);
 
 export async function audit(env: Env, actor: string, action: string, target: string | null, detail?: unknown) {
   await env.DB.prepare("INSERT INTO audit (actor, action, target, detail) VALUES (?, ?, ?, ?)")
@@ -105,7 +127,10 @@ export async function uploadPut(request: Request, env: Env, ctx: AdminCtx): Prom
     return json({ error: "a poster must be an image" }, 415);
   }
 
-  const opts = { httpMetadata: { contentType: kind.type, cacheControl: CACHE } };
+  // A poster's key is fixed and a new poster replaces the old one; every
+  // other upload must land on a key that was free.
+  const opts: R2PutOptions = { httpMetadata: { contentType: kind.type, cacheControl: CACHE } };
+  if (posterFor === null) opts.onlyIf = IF_ABSENT();
   const cap = kind.kind === "image" ? IMAGE_MAX : VIDEO_MAX;
   const capMsg = kind.kind === "image" ? "image over 25 MB" : "video over 300 MB";
 
@@ -117,7 +142,11 @@ export async function uploadPut(request: Request, env: Env, ctx: AdminCtx): Prom
     key = posterFor.replace(/\.(mp4|webm)$/, `.poster.${kind.ext}`);
     id = key.split("/").pop()!.replace(/\.[a-z0-9]+$/, "");
   } else {
-    const nb = newKeyBase(name);
+    const nb = await freeKeyBase(env, name, kind.ext);
+    if (!nb) {
+      await reader.cancel();
+      return KEY_TAKEN();
+    }
     id = nb.id;
     key = `${nb.base}.${kind.ext}`;
   }
@@ -148,11 +177,24 @@ export async function uploadPut(request: Request, env: Env, ctx: AdminCtx): Prom
         throw err;
       }
     })();
+    // A refused put (key taken meanwhile) may leave the pump stuck on a
+    // full pipe: stop both ends so it ends.
+    let taken = false;
+    const put = env.MEDIA_BUCKET.put(key, fls.readable, opts).then((obj) => {
+      if (!obj) {
+        taken = true;
+        reader.cancel().catch(() => {});
+        w.abort().catch(() => {});
+      }
+      return obj;
+    });
     try {
-      await Promise.all([env.MEDIA_BUCKET.put(key, fls.readable, opts), pump]);
+      await Promise.all([put, pump]);
     } catch {
+      if (taken) return KEY_TAKEN();
       return json({ error: "upload failed (size mismatch or storage error)" }, 400);
     }
+    if (taken) return KEY_TAKEN();
   } else {
     // No length announced: buffer, counting, never past the single-PUT cap.
     let total = head.length;
@@ -177,7 +219,7 @@ export async function uploadPut(request: Request, env: Env, ctx: AdminCtx): Prom
       buf.set(c, o);
       o += c.length;
     }
-    await env.MEDIA_BUCKET.put(key, buf, opts);
+    if (!(await env.MEDIA_BUCKET.put(key, buf, opts))) return KEY_TAKEN();
   }
 
   await audit(env, ctx.adminEmail, "upload.put", key, { size, type: kind.type });

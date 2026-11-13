@@ -269,7 +269,17 @@ describe("key collisions", () => {
       if (a) new Uint8Array(a.buffer, a.byteOffset, a.byteLength).fill(7);
       return a;
     });
-  it.fails("F-05 a random-id collision on single upload silently replaces the earlier object (no onlyIf guard)", async () => {
+  // The first `n` draws all give the same id, later ones are random again.
+  const sameRandomFor = (n: number) => {
+    const real = crypto.getRandomValues.bind(crypto);
+    let calls = 0;
+    return vi.spyOn(crypto, "getRandomValues").mockImplementation(<T extends ArrayBufferView | null>(a: T): T => {
+      if (++calls > n) return real(a as ArrayBufferView) as T;
+      if (a) new Uint8Array(a.buffer, a.byteOffset, a.byteLength).fill(7);
+      return a;
+    });
+  };
+  it("F-05 a random-id collision on single upload never replaces the earlier object", async () => {
     sameRandom();
     const first = cat(HEAD.jpg, "FIRST", new Uint8Array(40));
     const a = (await (await up(first, { "x-file-name": "cover.jpg" })).json()) as Up;
@@ -277,6 +287,48 @@ describe("key collisions", () => {
     // acceptable: a different key, or a refusal; never the same key over the first bytes
     if (r.status === 201) expect(((await r.json()) as Up).key).not.toBe(a.key);
     expect(await bytesOf(a.key)).toEqual(first);
+  });
+  it("F-05 one collision re-rolls the id: 201 on a fresh key, both bodies intact", async () => {
+    sameRandomFor(2); // the first upload's draw + the second upload's first draw
+    const first = cat(HEAD.jpg, "FIRST", new Uint8Array(40));
+    const second = cat(HEAD.jpg, "SECOND", new Uint8Array(40));
+    const a = (await (await up(first, { "x-file-name": "cover.jpg" })).json()) as Up;
+    const r = await up(second, { "x-file-name": "cover.jpg" });
+    expect(r.status).toBe(201);
+    const b = (await r.json()) as Up;
+    expect(b.key).not.toBe(a.key);
+    expect(b.key).toMatch(ADMIN_KEY_RE);
+    expect(b.id).toBe(b.key.split("/").pop()!.replace(/\.jpg$/, ""));
+    expect(await bytesOf(a.key)).toEqual(first);
+    expect(await bytesOf(b.key)).toEqual(second);
+  });
+  it("F-05 every re-roll colliding → 409, nothing stored, no audit, first bytes intact", async () => {
+    sameRandom();
+    const first = cat(HEAD.jpg, "FIRST", new Uint8Array(40));
+    const a = (await (await up(first, { "x-file-name": "cover.jpg" })).json()) as Up;
+    await refused(() => up(cat(HEAD.jpg, "SECOND", new Uint8Array(40)), { "x-file-name": "cover.jpg" }), 409);
+    await refused(() => up(stream([cat(HEAD.jpg, "THIRD", new Uint8Array(40))]), { "x-file-name": "cover.jpg" }), 409);
+    expect(await bytesOf(a.key)).toEqual(first);
+  });
+  it("F-05 the key filling between the check and the put (race) → 409 from the onlyIf guard, never an overwrite", async () => {
+    sameRandom();
+    const first = cat(HEAD.jpg, "FIRST", new Uint8Array(40));
+    const a = (await (await up(first, { "x-file-name": "cover.jpg" })).json()) as Up;
+    // the existence check sees a free key, as if the other upload landed just after it
+    vi.spyOn(env.MEDIA_BUCKET, "head").mockResolvedValue(null);
+    // with a Content-Length (streamed through FixedLengthStream) and without (buffered)
+    await refused(() => up(cat(HEAD.jpg, "SECOND", new Uint8Array(40)), { "x-file-name": "cover.jpg" }), 409);
+    await refused(() => up(stream([cat(HEAD.jpg, "THIRD", new Uint8Array(40))]), { "x-file-name": "cover.jpg" }), 409);
+    expect(await bytesOf(a.key)).toEqual(first);
+  });
+  it("a poster keeps its fixed key: a second poster for the same video replaces the first", async () => {
+    const v = (await (await up(cat(HEAD.mp4, new Uint8Array(64)), { "x-file-name": "clip.mp4" })).json()) as Up;
+    const p1 = (await (await up(cat(HEAD.png, "ONE", new Uint8Array(40)), { "x-poster-for": v.key })).json()) as Up;
+    const two = cat(HEAD.png, "TWO", new Uint8Array(40));
+    const r = await up(two, { "x-poster-for": v.key });
+    expect(r.status).toBe(201);
+    expect(((await r.json()) as Up).key).toBe(p1.key);
+    expect(await bytesOf(p1.key)).toEqual(two);
   });
   it.fails("F-05 a random-id collision on multipart create hands out a key that already holds a video", async () => {
     sameRandom();
