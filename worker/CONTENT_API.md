@@ -36,7 +36,7 @@ also return 403 (fail closed). Locally, `ADMIN_DEV_BYPASS=1` in `.dev.vars` work
   "slots": { "<slot id>": { "src"?, "poster"?, "preview"?, "alt"?: { "ar"?, "en"? } } },
   "gallery": [ { "id", "src"?, "poster"?, "cat"?, "sub"?, "ratio"?, "date"?, "alt"?: {…}, "client"?, "hidden"?: true, "sort"? } ],
   "rings": { "<service>": ["<item id>", …] },          // whole list, ring order
-  "clients": [ { "id", "name": { "ar", "en" } } ],
+  "clients": [ { "id", "name": { "ar", "en" }, "line"?: { "ar"?, "en"? }, "year"?, "url"? } ],
   "locks": {                         // DRAFT ONLY: every existing row's optimistic-lock rev
     "text": { "<key>": { "ar"?: 1, "en"?: 2 } }, "slots": { "<id>": 1 },
     "gallery": { "<id>": 1 }, "rings": { "<service>": 1 }, "clients": { "<id>": 1 }
@@ -165,7 +165,49 @@ that is both deleted and unpublished.
 - `published_json` is exactly `JSON.stringify(galleryItemFromRow(row))`, so an unchanged row reads the same in
   both states. A row with `state = 'deleted'` is a removal staged until publish. For an override, removing the row
   means going back to the default piece. Use `hidden` to take a default piece off the site.
-- Clients: `{id, name: {ar, en}}`, both names 1 to 80 characters. `published_json` is the same object.
+- Clients: `{id, name: {ar, en}, line?: {ar?, en?}, year?, url?}`, both names 1 to 80 characters. Migration
+  `0003_clients_details.sql` added the optional columns `line_ar`, `line_en` (one short line), `year` (INTEGER,
+  NULL or 1000-9999, a CHECK) and `url` (the client's https website, stored normalised). A NULL column is left out
+  of the object, and `line` is left out when both languages are NULL, in this key order: id, name, line, year,
+  url. So a client with no details is exactly `{id, name}`, as before 0003. `published_json` is the same object
+  (`JSON.stringify(clientFromRow(row))`; every client read selects `store.ts CLIENT_COLS`).
+- No client rows ship: no migration, `defaults.json` or runtime fixture creates one (tests/clients/guard.test.ts).
+  The boss creates clients in the admin after launch.
+
+## Clients API (worker/src/clients, F5)
+
+Admin only (Access), English UI. Every write: Origin must equal the request origin (else 403), then
+`validateClient`, then the write, then an `audit` row. Clients are drafts until publish, like everything else.
+
+- `GET /api/admin/clients` → `{clients: [AdminClient]}`, the ACTIVE rows only, ordered by `name_en` (case-insensitive),
+  then `id`. `AdminClient` = the snapshot client (`{id, name, line?, year?, url?}`) plus `rev` (the lock to send
+  back), `published` (a published copy exists), `changed` (the draft differs from the published copy; true when
+  never published) and `pieces` (active draft `gallery_items` with this `client_id`, hidden ones included).
+- `POST /api/admin/clients` `{name: {ar, en}, line?: {ar?, en?}, year?, url?}` → `201 {client: AdminClient}`. The
+  Worker makes the id: a slug of `name_en` (accents dropped, lower case, runs of anything else → `-`; `client`
+  when nothing Latin is left), `-`, and 4 random `[a-z0-9]`. So it matches `[a-z0-9-]`, is at most 40
+  characters, and never changes. A collision with any row (deleted ones too) draws a new suffix. A body carrying
+  `id` is a 400 (`field: "id"`). Audit `client.create`, target = the id.
+- `PUT /api/admin/clients/<id>` `{rev, name, line?, year?, url?}` → `200 {client}`. Replaces every detail with exactly
+  what is sent (a detail left out or blank becomes NULL), only on the ACTIVE row with that `rev`; `rev` + 1. A
+  missing or bad `rev` is a 400 (`field: "rev"`), a body `id` other than the path's a 400 (`field: "id"`). A stale
+  rev, an unknown or a deleted id: `409 {error, current}` (`current` = the AdminClient now, or `null`). Audit
+  `client.update`.
+- `DELETE /api/admin/clients/<id>?rev=<n>` → `200 {deleted: id}`. Stages the removal (`state = 'deleted'`, `rev` + 1;
+  publish takes it off the site) in ONE statement whose WHERE also requires that no ACTIVE draft `gallery_items`
+  row names the client, so an assignment cannot slip in between a check and the write. Hidden items count; deleted
+  ones do not. When that guard stops it: `409 {error: "in use", count, message: "7 pieces use this client"}`.
+  A stale rev, unknown or already deleted id: `409 {error, current}`. A missing or bad `rev`: 400. Audit
+  `client.delete`.
+- `POST /api/admin/gallery/assign` `{client: <id> | null, items: [{id, rev}]}` → `200 {items}` (the pieces as
+  `GET /api/admin/gallery` draws them, in the order sent). Bulk assignment (worker/src/gallery/assign.ts): 1 to 200
+  pieces get that client, or none with `null`. `rev` is the one the grid read (0 = a default with no row yet: it
+  gets a bare override row, id + `client_id`). A piece is any id the grid lists except an upload staged for
+  deletion. 400: `items` (not a list of 1 to 200), `items.N` (bad entry, duplicate, not a piece), `client` (not an
+  id or null, unknown, or deleted). ALL OR NOTHING: one D1 batch led by the audit row (`gallery.assign`, target =
+  the client id or NULL), whose CHECK fails, and rolls everything back, when any listed rev is stale or the client
+  stopped being active. A stale rev: `409 {error, stale: [ids], current: [items]}` and nothing written. A piece
+  that already has the client is only rev-checked; clearing a default with no row writes nothing.
 
 ## Validation (every write, server side)
 
@@ -180,6 +222,16 @@ that is both deleted and unpublished.
    (`aria-label` on the lightbox and the thumbs, renderServiceSections). The boot merge feeds published values into
    those tables, so these three characters are refused at the door instead of escaped at each sink. `'` and `&` are
    allowed: no sink is single-quoted, and an entity decodes to text. No default value contains them.
+   Clients (`validateClient`, C-02): `name.ar` and `name.en` required, 1 to 80 characters. The optional details
+   count as absent when missing, `null` or blank (`""` or spaces only), and are then left out of the stored object:
+   - `line.ar` / `line.en`: one line, at most 120 characters, no line break or control character, and no `<`, `>`
+     or `"` (same message as above). 400 `field: "line.<locale>"`; a `line` that is not an object: `field: "line"`.
+   - `year`: an integer 1000 to 9999, or a 4-digit string (`"2024"`, stored as the number 2024). Anything else:
+     400 `field: "year"`.
+   - `url`: must parse as a URL with protocol `https:` and no user name or password, at most 2048 characters. It is
+     stored as `new URL(u).href` (lower-case host, trailing `/`, `<`, `>` and `"` percent-encoded). `http:`,
+     `javascript:`, `data:`, a bare host or garbage: 400 `field: "url"`.
+   Other keys in a client body are ignored.
 2. Write with the rev the client read (`locks`) using `… WHERE rev = ?` and `rev = rev + 1`. Zero rows changed
    means a conflict: return 409 with the current row.
 3. Text and slot drafts reset with `draft = NULL` / `draft_json = NULL`. Gallery items, rings and clients reset or
@@ -202,6 +254,13 @@ published snapshot is not empty. An empty store, or a D1 read that fails, serves
   `\u`-escaped, so a value can never close the script.
 - A rewritten page carries `ETag: W/"<asset etag>-r<publish_rev>"` and answers `If-None-Match` itself. The asset's
   own 304 is never passed on for a rewritten page.
+- `/library?client=<id>` (C-14), when `<id>` is a client in the PUBLISHED snapshot (exact match, main.js's
+  `CLIENT_VIEW` lookup): `<title>`, `og:title`, `twitter:title` become `<name.ar> · <library title>` (the library's
+  published `meta.library.title` / `ogTitle`, else the default). The three descriptions become `line.ar`, or stay the
+  library's when the client has no Arabic line. `<link rel="canonical">` and `og:url` become
+  `https://aliphcreative.com/library?client=<id>`. The view has its own ETag (`W/"<asset etag>-r<rev>-c<id>"`) and
+  its own page-cache entry (cache.ts `pageKey(…, clientId)`). Any other `?client=` value (unknown, draft-only,
+  deleted, empty) is plain `/library`: the same bytes, ETag and cache key. An empty store still serves the asset.
 - Published media slots (render/slots.ts, P-06b) go into the same pass. `<page>.media.N` is the Nth
   `<img src="assets/media/…">`, counted the way gen-defaults counts. Its `src` becomes `poster` on a slot that has a
   preview, and `src` otherwise. `alt` becomes `alt.ar`, and the enclosing `<figure data-preview>` gets `preview`.
@@ -220,6 +279,11 @@ published snapshot is not empty. An empty store, or a D1 read that fails, serves
     `hidden` removes the row. Any other id is an upload, appended as `{f: id, c: cat, r: ratio ?? 1, d: date ?? null,
     src, poster?, v?, sub?, alt?, client?}`. Hidden uploads and uploads without `src` and `cat` are skipped.
   - Rings, slots and film frames are not merged here (no region reads them); the boot merge does them.
+  - Clients (C-15): `mergedTables` adds `T.CLIENTS` = the published clients (the merge itself has no clients
+    table). `@static:archive` then opens with `<nav class="acc-static acc-static-clients">`: the clients with at
+    least one MEDIA row naming them (hidden pieces are not in MEDIA), newest piece first, then name, each a link to
+    `/library?client=<id>` with its piece count and `line.ar`. No such client → nothing, so build_static (no
+    `CLIENTS` in main.js's tables) and a client-only snapshot leave the region byte-identical.
 
 ## Publish (publish.ts, cache.ts, P-09)
 

@@ -116,3 +116,38 @@ body.adm {
 .adm-move .adm-x { flex: 1 1 0; min-inline-size: 0; }
 .adm-toast { position: fixed; inset-block-end: 1.6rem; inset-inline: 1.6rem; margin: 0 auto; max-inline-size: 48rem; box-sizing: border-box;
   padding: 1rem 1.4rem; background: var(--ink); color: var(--cream); z-index: 10; }
+/* clients panel (C-07, C-08) */
+.adm-clients { margin-block: 1.6rem; }
+.adm-chead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.6rem 1.2rem; }
+.adm-chead h2 { margin: 0; font: 1.8rem/1.2 var(--font-display); }
+.adm-chead h2 span { color: var(--ink-mute); font-size: 1.4rem; }
+.adm-cform { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 0.2rem 1.2rem; margin-block: 1rem; padding: 1rem 1.2rem; border: 1px solid var(--ink-faint); background: var(--cream-warm); }
+.adm-cform .adm-cform-note, .adm-cform .adm-dact { grid-column: 1 / -1; margin-block: 0; }
+.adm-clients-list { margin-block-start: 0.8rem; }
+.adm-client { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; padding: 0.5rem 0.8rem; background: var(--cream-warm); border: 1px solid var(--ink-faint); }
+.adm-client:has(.adm-cform) { display: block; padding: 0; border: 0; background: none; }
+.adm-mono { flex: none; display: grid; place-items: center; inline-size: 3.2rem; block-size: 3.2rem; background: var(--ink); color: var(--cream); font: 1.8rem/1 var(--font-display); }
+.adm-cnames { display: flex; flex-direction: column; flex: 1 1 14rem; min-inline-size: 0; }
+.adm-cname-en, .adm-cname-ar { overflow-wrap: anywhere; }
+.adm-cname-ar { color: var(--ink-mute); }
+.adm-ccount { color: var(--ink-mute); white-space: nowrap; }
+.adm-cact { display: flex; gap: 0.4rem; }
+.adm-cempty { color: var(--ink-mute); margin: 0.8rem 0; }
+.adm-cnew { inline-size: min(48rem, 94vw); max-inline-size: 94vw; box-sizing: border-box; }
+.adm-cnew::backdrop { background: rgba(15, 24, 32, 0.45); }
+.adm-cnew h2 { margin: 0; font: 1.8rem/1.2 var(--font-display); }
+.adm-cnew :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* bulk assign (C-10) */
+.adm-seltools { display: flex; justify-content: flex-end; margin-block: 0 0.8rem; }
+.adm-tick { position: absolute; inset-block-start: 0.5rem; inset-inline-end: 0.5rem; display: grid; place-items: center; inline-size: 2.4rem; block-size: 2.4rem;
+  background: var(--cream); border: 2px solid var(--ink); color: var(--cream); font-size: 1.6rem; line-height: 1; }
+.adm-tile[data-picked="1"] .adm-tick { background: var(--ink); }
+.adm-tile[data-picked="1"] { outline: 3px solid var(--accent); outline-offset: -3px; }
+.adm-tile[data-pickable="0"] { cursor: default; }
+.adm-tile[data-pickable="0"] .adm-pic { opacity: 0.35; }
+.adm-assignbar { position: fixed; inset-block-end: 0; inset-inline: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; box-sizing: border-box;
+  padding: 1rem 1.6rem; background: var(--cream); border-block-start: 2px solid var(--ink); }
+.adm-assignbar[hidden] { display: none; }
+.adm-assignbar .adm-sel { flex: 1 1 16rem; max-inline-size: 28rem; }
+.adm-assignbar .adm-dmsg { flex: 1 1 100%; margin: 0; }
+#grid[data-selecting="1"] { padding-block-end: 14rem; } /* room for the fixed bar */

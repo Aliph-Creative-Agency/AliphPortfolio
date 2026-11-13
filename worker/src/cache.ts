@@ -129,10 +129,18 @@ async function matchSnapshot(origin: string, key: string): Promise<Snapshot | nu
 /* ── rendered pages ─────────────────────────────────────────────────── */
 
 /** The cache key of one rendered page, or null when the asset carries no etag
- *  (then a deploy could not be told apart, and the page is not cached). */
-export function pageKey(key: string | null, pathname: string, assetEtag: string | null): string | null {
+ *  (then a deploy could not be told apart, and the page is not cached).
+ *  `clientId`: the published client a /library?client= view shows, so each
+ *  client view is its own entry (null = the plain page's key). */
+export function pageKey(
+  key: string | null,
+  pathname: string,
+  assetEtag: string | null,
+  clientId: string | null = null,
+): string | null {
   if (!key || !assetEtag) return null;
-  return `page/${key}${pathname}?a=${encodeURIComponent(assetEtag)}`;
+  const c = clientId ? `&c=${encodeURIComponent(clientId)}` : "";
+  return `page/${key}${pathname}?a=${encodeURIComponent(assetEtag)}${c}`;
 }
 
 /** A cached render, with the response headers it was served with. */

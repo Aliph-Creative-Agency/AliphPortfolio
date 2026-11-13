@@ -23,13 +23,28 @@
   <button id="add-go" class="adm-btn" type="button" disabled>Upload</button>
 </section>
 <section id="rings" class="adm-rings" aria-label="Ring picks"></section>
+<section id="clients" class="adm-clients" aria-labelledby="clients-h">
+  <div class="adm-chead"><h2 id="clients-h">Clients <span id="clients-count"></span></h2><button id="clients-new" class="adm-btn" type="button" aria-expanded="false" aria-controls="clients-form">New client</button></div>
+  <div id="clients-form"></div>
+  <p id="clients-note" class="adm-dmsg" role="status"></p>
+  <p id="clients-empty" class="adm-cempty" hidden>No clients yet</p>
+  <ul id="clients-list" class="adm-clist adm-clients-list"></ul>
+</section>
 <section class="adm-clean" aria-labelledby="cleanup-h">
   <h2 id="cleanup-h">Unused files</h2>
   <p class="adm-sub">Replaced and deleted pieces leave their old files in storage. This lists the ones nothing on the site uses any more.</p>
   <div class="adm-dact"><button id="cleanup-find" class="adm-btn adm-btn-2" type="button">Clean up unused files</button><p id="cleanup-note" class="adm-dmsg" role="status"></p></div>
 </section>
+<div class="adm-seltools"><button id="select-toggle" class="adm-btn adm-btn-2" type="button" aria-pressed="false">Select pieces</button></div>
 <nav class="adm-tabs" id="tabs" role="tablist" aria-label="Category"></nav>
 <main id="grid" class="adm-main" tabindex="-1"></main>
+<div id="assign-bar" class="adm-assignbar" hidden>
+  <span id="assign-n">Assign to</span>
+  <select id="assign-client" class="adm-sel" aria-label="Client to assign"></select>
+  <button id="assign-go" class="adm-btn" type="button" disabled>Assign</button>
+  <button id="assign-clear" class="adm-btn adm-btn-2" type="button" disabled>Clear</button>
+  <p id="assign-note" class="adm-dmsg" role="status"></p>
+</div>
 <dialog id="drawer" class="adm-drawer" aria-labelledby="drawer-title">
   <header class="adm-dhead">
     <div><h2 id="drawer-title"></h2><p id="drawer-status" class="adm-sub"></p></div>
@@ -51,6 +66,10 @@
   <p id="confirm-text"></p>
   <div class="adm-dact"><button id="confirm-yes" class="adm-btn" type="button">OK</button><button id="confirm-no" class="adm-btn adm-btn-2" type="button">Cancel</button></div>
 </dialog>
+<dialog id="client-new" class="adm-confirm adm-cnew" aria-labelledby="client-new-h">
+  <h2 id="client-new-h">New client</h2>
+  <div id="client-new-form"></div>
+</dialog>
 <dialog id="cleanup-dlg" class="adm-drawer" aria-labelledby="cleanup-title">
   <header class="adm-dhead"><h2 id="cleanup-title">Unused files</h2><button id="cleanup-close" class="adm-x" type="button">Close</button></header>
   <p id="cleanup-sum" class="adm-dmsg"></p>
@@ -65,5 +84,7 @@
 <script type="module" src="/admin/gallery/rings.js"></script>
 <script type="module" src="/admin/gallery/order.js"></script>
 <script type="module" src="/admin/gallery/cleanup.js"></script>
+<script type="module" src="/admin/gallery/clients.js"></script>
+<script type="module" src="/admin/gallery/assign.js"></script>
 </body>
 </html>

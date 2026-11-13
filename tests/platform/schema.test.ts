@@ -35,6 +35,10 @@ const TABLES: Record<string, Col[]> = {
     ["created_at", "TEXT", 1, 0],
     ["updated_at", "TEXT", 1, 0],
     ["updated_by", "TEXT", 1, 0],
+    ["line_ar", "TEXT", 0, 0], // 0003
+    ["line_en", "TEXT", 0, 0], // 0003
+    ["year", "INTEGER", 0, 0], // 0003
+    ["url", "TEXT", 0, 0], // 0003
   ],
   gallery_items: [
     ["id", "TEXT", 1, 1],
@@ -178,6 +182,14 @@ describe("constraints", () => {
     await expect(
       db().prepare("UPDATE ring_picks SET state = 'reset' WHERE service = 'photo'").run(),
     ).rejects.toThrow(/CHECK/i);
+  });
+
+  it("clients: year is NULL or 4 digits (0003)", async () => {
+    await db().prepare("INSERT INTO clients (id, name_ar, name_en, year, updated_by) VALUES ('cy', 'ع', 'C', 2024, 'a@x')").run();
+    await db().prepare("UPDATE clients SET year = NULL WHERE id = 'cy'").run();
+    for (const bad of [999, 10000]) {
+      await expect(db().prepare("UPDATE clients SET year = ? WHERE id = 'cy'").bind(bad).run()).rejects.toThrow(/CHECK/i);
+    }
   });
 
   it("gallery_items: hidden is 0/1, state active/deleted, client must exist", async () => {

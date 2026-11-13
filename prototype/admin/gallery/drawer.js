@@ -13,6 +13,7 @@
 import { MediaError, kindOf } from "/admin/shared/media.js";
 import { state, render, fileName } from "./gallery.js";
 import { prepareAndUpload } from "./pipeline.js";
+import { clients, loadClients, newClientDialog } from "./clients.js";
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => {
@@ -24,6 +25,7 @@ const el = (tag, cls, text) => {
 
 let it = null; // the item being edited (a snapshot of state.items' entry)
 let busy = false;
+const NEW = "__new__";
 
 const dlg = () => $("drawer");
 const isUpload = () => it.kind === "upload";
@@ -82,8 +84,29 @@ function draw() {
   ar.id = "d-alt-ar"; ar.value = it.alt.ar || ""; ar.dir = "rtl"; ar.autocomplete = "off";
   const en = el("input", "adm-in");
   en.id = "d-alt-en"; en.value = it.alt.en || ""; en.autocomplete = "off";
+  const cl = el("select", "adm-sel");
+  cl.id = "d-client";
+  cl.append(new Option("No client", ""));
+  for (const c of clients) cl.append(new Option(c.name.en, c.id));
+  const own = it.own.client;
+  // A piece may still name a client that was deleted since: keep it visible, never drop it silently.
+  if (own && !clients.some((c) => c.id === own)) cl.append(new Option(`${own} (removed)`, own));
+  cl.append(new Option("New client…", NEW));
+  cl.value = own || "";
+  cl.dataset.prev = cl.value;
+  cl.addEventListener("change", async () => {
+    if (cl.value !== NEW) { cl.dataset.prev = cl.value; return; }
+    cl.value = cl.dataset.prev; // back to the old pick while the dialog is open (and if it is cancelled)
+    const made = await newClientDialog();
+    if (!made) return;
+    // Pick it the moment the dialog closes; the shared list refreshes after (a slow GET must not leave the old pick showing).
+    cl.insertBefore(new Option(made.name.en, made.id), cl.querySelector(`option[value="${NEW}"]`));
+    cl.value = made.id; cl.dataset.prev = made.id;
+    await loadClients();
+  });
   f.append(
     field("Sub-category", sub, "sub"),
+    field("Client", cl, "client"),
     field("Date", date, "date"),
     field("Ratio (width / height)", ratio, "ratio"),
     field("Alt text, Arabic", ar, "alt.ar"),
@@ -119,6 +142,9 @@ function body(over) {
   if (v("d-date") && (it.own.date !== undefined || isUpload() || v("d-date") !== (it.date || ""))) b.date = v("d-date");
   const r = v("d-ratio");
   if (r !== "" && (it.own.ratio !== undefined || isUpload() || Number(r) !== it.ratio)) b.ratio = Number(r);
+  // the row's own client column: set it, clear it, or leave a default piece's row alone
+  const pick = v("d-client");
+  if (pick) b.client = pick; else delete b.client;
   const alt = {};
   if (v("d-alt-ar")) alt.ar = v("d-alt-ar");
   if (v("d-alt-en")) alt.en = v("d-alt-en");
@@ -171,6 +197,7 @@ async function save(over) {
   if (!j) return;
   setBusy(false);
   adopt(j.item); draw();
+  loadClients(); // the Clients panel's piece counts
   flash(over.hidden === undefined ? "Saved (not published yet)." : over.hidden ? "Hidden (not published yet)." : "Unhidden (not published yet).", "ok");
 }
 

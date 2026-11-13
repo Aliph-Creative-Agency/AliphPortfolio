@@ -2469,6 +2469,29 @@ if (document.documentElement.dataset.editMode === "1") window.__aliphMerge = { f
 }
 /* ══ end admin content merge ══ */
 
+/* ══ clients ═══════════════════════════════════════════════════════════
+   The published clients, id → {id, name, line?, year?, url?}, read from the
+   same snapshot the merge block reads but kept OUT of that block: merge.mjs
+   is copied verbatim into it and knows nothing about clients (a piece only
+   carries the id, mediaRow copies it). Empty when nothing is published, so a
+   store with no clients behaves exactly as before. No prototype: `?client=constructor`
+   (or `__proto__`, `toString`) must read as an unknown id, not as Object's own keys. */
+const CLIENTS = Object.create(null);
+{
+  const el = document.getElementById("aliph-content");
+  let snap = null;
+  if (el) { try { snap = JSON.parse(el.textContent); } catch (e) { snap = null; } }
+  (snap && Array.isArray(snap.clients) ? snap.clients : []).forEach((c) => {
+    if (c && c.id && c.name) CLIENTS[c.id] = c;
+  });
+}
+/* `/library?client=<id>`: the archive filtered to one PUBLISHED client. An id the
+   published snapshot does not know is not an error, just the normal archive. */
+const CLIENT_VIEW = CLIENTS[new URLSearchParams(location.search).get("client")] || null;
+const clientOf = (m) => (m && m.client ? CLIENTS[m.client] || null : null);
+const escHTML = (t) => String(t).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+/* ══ end clients ══ */
+
 /* Which ring is showing. Read by nothing else today, but it is the one
    name for "the service being looked at" and the chat widget asked for it
    once already. */
@@ -4218,10 +4241,86 @@ let openCat = "all";
 const coverOf = (p) =>
   "assets/shots/" + p.profile.shots[0].replace(/-\d+$/, "-card") + ".webp";
 
+/* The Clients index above the archive: published clients with at least one
+   VISIBLE piece (MEDIA has already lost hidden and deleted rows, so counting
+   MEDIA is counting what the archive shows). None listed -> no block and no
+   markup at all, so a store without clients is today's page. Ordered by the
+   newest piece date (an undated piece counts as oldest), then by name. Rebuilt
+   with the archive on every language switch. */
+const CLIENT_T = {
+  clients: { ar: "العملاء", en: "Clients" },
+  piece1: { ar: "قطعة واحدة", en: "1 piece" },
+  pieces: { ar: "قطعة", en: "pieces" },
+  back: { ar: "العودة إلى الأرشيف", en: "Back to the archive" },
+  since: { ar: "منذ", en: "Since" },
+  visit: { ar: "الموقع", en: "Website" },
+  empty: { ar: "لا توجد أعمال لهذا العميل بعد.", en: "No work to show for this client yet." }
+};
+const piecesOf = (n) => (n === 1 ? CLIENT_T.piece1[lang] : num(n) + " " + CLIENT_T.pieces[lang]);
+function renderClientsIndex() {
+  const host = accRoot.closest("main");
+  if (!host) return;
+  document.querySelectorAll(".lib-clients, .lib-client").forEach((e) => e.remove());
+  const nm = (c) => c.name[lang] || c.name.en || c.name.ar;
+  /* A client's view swaps the index for the client's own header. Zero visible
+     pieces still gets the header, with a line saying so (the archive under it is empty). */
+  if (CLIENT_VIEW) {
+    const c = CLIENT_VIEW;
+    const n = MEDIA.filter((m) => m.client === c.id).length;
+    const back = lang === "ar" ? "→ " : "← ";
+    const sec = document.createElement("section");
+    sec.className = "lib-client";
+    sec.setAttribute("aria-label", nm(c));
+    sec.innerHTML = `
+      <a class="ch-back" href="/library">${back}${CLIENT_T.back[lang]}</a>
+      <span class="lc-mono lg" aria-hidden="true">${escHTML(Array.from(nm(c))[0] || "")}</span>
+      <h2 class="ch-name">${escHTML(nm(c))}</h2>
+      ${c.line && (c.line[lang] || "") ? `<p class="ch-line">${escHTML(c.line[lang])}</p>` : ""}
+      <div class="ch-meta">${c.year ? `<span>${CLIENT_T.since[lang]} ${num(c.year)}</span>` : ""}<span>${piecesOf(n)}</span>${c.url ? `<a href="${escHTML(c.url)}" target="_blank" rel="noopener">${CLIENT_T.visit[lang]} · ${escHTML(c.url.slice(8).replace(/[/]$/, ""))}</a>` : ""}</div>
+      ${n ? "" : `<p class="ch-empty">${CLIENT_T.empty[lang]}</p>`}`;
+    host.before(sec);
+    fitClientNames();
+    return;
+  }
+  const stat = {};
+  MEDIA.forEach((m) => {
+    if (!m.client || !CLIENTS[m.client]) return;
+    const s = stat[m.client] || (stat[m.client] = { n: 0, d: "" });
+    s.n++;
+    if ((m.d || "") > s.d) s.d = m.d || "";
+  });
+  const list = Object.keys(stat).map((id) => CLIENTS[id])
+    .sort((a, b) => stat[b.id].d.localeCompare(stat[a.id].d) || nm(a).localeCompare(nm(b)));
+  if (!list.length) return;
+  const sec = document.createElement("section");
+  sec.className = "lib-clients";
+  sec.setAttribute("aria-label", CLIENT_T.clients[lang]);
+  sec.innerHTML = `
+    <div class="lc-head"><h2>${CLIENT_T.clients[lang]}</h2><span>${num(list.length)}</span></div>
+    <ul class="lc-list">${list.map((c) => `
+      <li><a href="/library?client=${encodeURIComponent(c.id)}">
+        <span class="lc-mono" aria-hidden="true">${escHTML(Array.from(nm(c))[0] || "")}</span>
+        <span class="lc-name">${escHTML(nm(c))}</span>
+        ${c.line && (c.line[lang] || "") ? `<span class="lc-line">${escHTML(c.line[lang])}</span>` : ""}
+        <span class="lc-meta">${c.year ? `<span>${num(c.year)}</span>` : ""}<span>${piecesOf(stat[c.id].n)}</span><span class="lc-arrow" aria-hidden="true">${lang === "ar" ? "←" : "→"}</span></span>
+      </a></li>`).join("")}
+    </ul>`;
+  host.before(sec);
+  fitClientNames();
+}
+/* FIT THE TYPE: a client's name is at most two lines (floor 0.75). Re-run when
+   the width changes or the fonts arrive, both of which move the line breaks. */
+function fitClientNames() {
+  document.querySelectorAll(".lc-name, .ch-name").forEach((el) => fitLines(el, 2, 0.75));
+}
+window.addEventListener("resize", fitClientNames);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitClientNames);
+
 function renderLibrary() {
   if (!accRoot) return;
   accRoot.innerHTML = "";
   pending.clear();
+  renderClientsIndex();
 
   /* Undated sorts LAST, not to 1970. The nine design pieces carry no date at
      all, and an empty string compares below every real one — which would file
@@ -4293,9 +4392,11 @@ function renderLibrary() {
   };
 
   const rows = (catId) => {
+    /* a client's view keeps only that client's pieces; a software project has no client, so it drops out */
     const media = (catId === "all" ? MEDIA : MEDIA.filter((m) => m.c === catId))
+      .filter((m) => !CLIENT_VIEW || m.client === CLIENT_VIEW.id)
       .map((m) => ({ kind: "media", d: m.d, key: m.f, sort: m.sort, m }));
-    const projects = (catId === "all" || catId === "tech")
+    const projects = !CLIENT_VIEW && (catId === "all" || catId === "tech")
       ? PROJECTS.filter((p) => p.cat === "tech" && p.profile)
         .map((p) => ({
           kind: "project", d: p.date, key: p.en,
@@ -4348,7 +4449,13 @@ function renderLibrary() {
          overlay reads the picture that is on screen, and the picture on screen
          is now the thumbnail. */
       const full = m.v ? m.poster || `${R2}/poster/${m.p}` : m.src || `${R2}/img/${m.f}`;
-      const date = m.d ? `<figcaption><span class="t-date">${fmtDate(m.d)}</span></figcaption>` : "";
+      /* A piece naming a client the published snapshot does not know (a draft-only
+         client, or one deleted since) gets no caption: its markup is today's. */
+      const cl = clientOf(m);
+      const cname = cl ? cl.name[lang] || cl.name.en || cl.name.ar : "";
+      const date = m.d || cname
+        ? `<figcaption>${cname ? `<span class="t-client">${escHTML(cname)}</span>` : ""}${m.d ? `<span class="t-date">${fmtDate(m.d)}</span>` : ""}</figcaption>`
+        : "";
       /* ⚠️ EVERY tile answers the keyboard, not only the films. Until
          2026-08-26 the `role="button" tabindex="0"` rode along with
          `data-film`, so in a grid of 82 pieces the 13 reels could be opened
