@@ -2388,6 +2388,7 @@ function mediaRow(g, base) {
   if (g.sub !== undefined) m.sub = g.sub;
   if (g.alt !== undefined) m.alt = Object.assign({}, g.alt);
   if (g.client !== undefined) m.client = g.client;
+  if (g.sort !== undefined) m.sort = g.sort;
   return m;
 }
 
@@ -4226,8 +4227,14 @@ function renderLibrary() {
      all, and an empty string compares below every real one — which would file
      the newest work as the oldest. Ties break on filename so the order is
      stable between renders. */
-  const byNewest = (a, b) =>
-    (b.d || "").localeCompare(a.d || "") || (a.key || "").localeCompare(b.key || "");
+  /* The gallery manager's order (`sort`, CR-G2) comes first: two finite sorts ascend, one finite sort goes
+     before none, and with none the date/key order above stands. Defaults carry no `sort`, so nothing moves. */
+  const byNewest = (a, b) => {
+    const sa = Number.isFinite(a.sort), sb = Number.isFinite(b.sort);
+    if (sa && sb && a.sort !== b.sort) return a.sort - b.sort;
+    if (sa !== sb) return sa ? -1 : 1;
+    return (b.d || "").localeCompare(a.d || "") || (a.key || "").localeCompare(b.key || "");
+  };
 
   /* ⚠️ Two different kinds of thing share this run, and they are not
      interchangeable.
@@ -4287,7 +4294,7 @@ function renderLibrary() {
 
   const rows = (catId) => {
     const media = (catId === "all" ? MEDIA : MEDIA.filter((m) => m.c === catId))
-      .map((m) => ({ kind: "media", d: m.d, key: m.f, m }));
+      .map((m) => ({ kind: "media", d: m.d, key: m.f, sort: m.sort, m }));
     const projects = (catId === "all" || catId === "tech")
       ? PROJECTS.filter((p) => p.cat === "tech" && p.profile)
         .map((p) => ({
@@ -5205,8 +5212,16 @@ if (document.documentElement.dataset.editMode === "1") {
     sizeRateTab();
   }
 
+  /* Film frames (home.film.N) are built here, not in the markup: tag the FIRST group only, since buildFilm()
+     clones the group across the strip and every clone would otherwise claim the same slot. */
+  function tagFilm() {
+    const g = filmScroll && filmScroll.querySelector(".film-group");
+    if (!g) return;
+    g.querySelectorAll(":scope > .film-frame").forEach((fr) => fr.setAttribute("data-es", "home.film." + (+fr.dataset.frame + 1)));
+  }
+
   let tagTimer = null;
-  const later = () => { clearTimeout(tagTimer); tagTimer = setTimeout(tag, 150); };
+  const later = () => { clearTimeout(tagTimer); tagTimer = setTimeout(() => { tag(); tagFilm(); }, 150); };
   new MutationObserver(later).observe(document.body, { childList: true, subtree: true, characterData: true });
   window.aliphEdit = { tag, apply, read, refit, get lang() { return lang; } };
   later();

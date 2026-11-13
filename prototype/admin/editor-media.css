@@ -1,0 +1,33 @@
+/* Picture drawer (editor-media.js): same column family as the Page text / History panels
+   (.ed-panel in editor.css), plus the holder outline. px, not rem: the site's root is 150%. */
+
+html[data-edit-mode="1"] [data-es] { cursor: pointer; }
+html[data-edit-mode="1"] [data-es]:hover,
+html[data-edit-mode="1"] [data-es]:focus-visible,
+html[data-edit-mode="1"] [data-es].ed-es-active { outline: 2px solid #BB5C39; outline-offset: -2px; }
+
+.ed-media .ed-panel-head { align-items: center; gap: 8px; }
+.ed-media input:focus-visible, .ed-media button:focus-visible { outline: 2px solid #BB5C39; outline-offset: 2px; }
+.ed-media-body { display: flex; flex-direction: column; gap: 8px; }
+.ed-media-file { display: flex; gap: 10px; align-items: flex-start; }
+.ed-media-thumb { width: 96px; height: 96px; object-fit: cover; background: rgba(15, 24, 32, 0.08); border: 1px solid rgba(15, 24, 32, 0.25); border-radius: 3px; flex: none; }
+.ed-media-url { margin: 0; font: 12px/1.35 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; white-space: pre-line; min-width: 0; }
+.ed-media-field { font-size: 12px; margin-top: 4px; }
+.ed-media input[type="text"] { width: 100%; font: 16px/1.3 system-ui, "Segoe UI", sans-serif; padding: 6px 8px; border: 1px solid rgba(15, 24, 32, 0.45); border-radius: 3px; background: #fff; color: #0F1820; }
+.ed-media input[dir="rtl"] { text-align: right; }
+.ed-media-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.ed-media-actions .ed-reset, .ed-media-more .ed-reset { min-height: 32px; padding: 3px 12px; font-size: 13px; }
+.ed-reset:disabled { opacity: 0.45; cursor: default; }
+.ed-media-status:empty { display: none; }
+.ed-media-file-input[hidden] { display: none; }
+.ed-media-progress { height: 8px; border-radius: 4px; background: rgba(15, 24, 32, 0.15); overflow: hidden; }
+.ed-media-progress[hidden] { display: none; }
+.ed-media-progress > span { display: block; height: 100%; width: 0; background: #BB5C39; transition: width 0.15s linear; }
+.ed-media-uperr:empty { display: none; }
+.ed-media-uperr { color: #8a3f22; }
+.ed-media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; max-height: 320px; overflow: auto; }
+.ed-media-grid[hidden] { display: none; }
+.ed-media-grid .ed-hint { grid-column: 1 / -1; }
+.ed-pick { padding: 0; border: 1px solid rgba(15, 24, 32, 0.3); border-radius: 3px; background: #fff; cursor: pointer; aspect-ratio: 1; overflow: hidden; min-height: 44px; }
+.ed-pick:hover, .ed-pick:focus-visible { border-color: #BB5C39; outline: 2px solid #BB5C39; outline-offset: 1px; }
+.ed-pick img { width: 100%; height: 100%; object-fit: cover; display: block; }

@@ -92,6 +92,7 @@ function mediaRow(g, base) {
   if (g.sub !== undefined) m.sub = g.sub;
   if (g.alt !== undefined) m.alt = Object.assign({}, g.alt);
   if (g.client !== undefined) m.client = g.client;
+  if (g.sort !== undefined) m.sort = g.sort;
   return m;
 }
 

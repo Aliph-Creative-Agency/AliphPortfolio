@@ -9,6 +9,9 @@
 //   <base href="/">         first in <head>: the page lives under /admin/edit/
 //                           but its relative URLs (main.js, style.css,
 //                           assets/…) must resolve as on the public page
+//   data-es="<slot>"      on each <img src="assets/media/…"> that is a registry <page>.media.N holder (counted the way
+//                           render/slots.ts counts), data-es-preview="<slot>" on the figure[data-preview] around a
+//                           preview slot; main.js tags the film frames (home.film.N) once it has built them (E-15a)
 //   editor.css + editor-api.js + editor.js  before </body>
 // The blob main.js merges is the draft minus `locks` (renderText's blob()
 // strips them). Never cached: no cache.ts, `no-store`, and `noindex` in case
@@ -20,9 +23,15 @@ import { pageOf, renderText, type Page } from "../render/text";
 import { onSlots } from "../render/slots";
 import { onRegions } from "../render/regions";
 import { readSnapshot } from "../store";
+import registry from "../generated/registry.json";
 
 /** The public asset path behind each page. */
 const ASSET: Record<Page, string> = { home: "/", about: "/about", library: "/library" };
+
+const MEDIA_SLOTS = new Set((registry.slots as { id: string; kind: string }[]).filter((d) => d.kind === "media").map((d) => d.id));
+const PREVIEW_SLOTS = new Set(
+  (registry.slots as { id: string; kind: string; preview?: string }[]).filter((d) => d.kind === "media" && d.preview).map((d) => d.id),
+);
 
 /** Which page an /admin/edit… path is; null = not an edit page. */
 export function editPageOf(pathname: string): Page | null {
@@ -30,7 +39,7 @@ export function editPageOf(pathname: string): Page | null {
   return pageOf(pathname.slice("/admin/edit".length));
 }
 
-const TAIL = '<link rel="stylesheet" href="/admin/editor.css">\n<script src="/admin/editor-api.js" defer></script>\n<script src="/admin/editor.js" defer></script>\n';
+const TAIL = '<link rel="stylesheet" href="/admin/editor.css">\n<link rel="stylesheet" href="/admin/editor-media.css">\n<script src="/admin/editor-api.js" defer></script>\n<script src="/admin/editor.js" defer></script>\n<script src="/admin/editor-media.js" defer></script>\n';
 
 export async function editPage(request: Request, env: Env, url: URL, page: Page): Promise<Response> {
   if (request.method !== "GET") {
@@ -71,6 +80,21 @@ export async function editPage(request: Request, env: Env, url: URL, page: Page)
       },
     });
     rw.on("body", { element: (el) => void el.append(TAIL, { html: true }) });
+    /* before onSlots, so the img is seen as it was served (its original src); the count is slots.ts's own:
+       the Nth <img src="assets/media/…"> of the page, a figure[data-preview] holding the NEXT one */
+    let n = 0;
+    rw.on("figure[data-preview]", {
+      element(el) {
+        const id = `${page}.media.${n + 1}`;
+        if (PREVIEW_SLOTS.has(id)) el.setAttribute("data-es-preview", id);
+      },
+    });
+    rw.on('img[src^="assets/media/"]', {
+      element(el) {
+        const id = `${page}.media.${++n}`;
+        if (MEDIA_SLOTS.has(id)) el.setAttribute("data-es", id);
+      },
+    });
     onSlots(rw, snap, page);
     onRegions(rw, snap, page);
   });

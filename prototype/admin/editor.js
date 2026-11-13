@@ -230,16 +230,15 @@
      saving. It lists the changes per page in a dialog; Publish there POSTs the
      token that list came with, so a draft that moved meanwhile is a 409 and the
      list is shown again instead of publishing something unseen. Discard puts
-     the text (and picture) drafts back to the live values and reloads; gallery
-     changes are kept (they have their own reset). */
-  var lastChanges = null, changesTimer = 0, modal = null, toastTimer = 0;
+     every draft (text, pictures, gallery, rings, clients) back to the live state
+     and reloads. */
+  var lastChanges = null, changesTimer = 0, modal = null, toastTimer = 0, modalOpener = null;
   var PAGE_NAMES = { home: "Home", about: "About", library: "Library" };
-  function isTextual(c) { return c.section === "text" || c.section === "slots"; }
   function syncPublishBtns() {
     var all = lastChanges ? lastChanges.changes : [];
     var busy = pendingCount() > 0 || !!modal;
     publishBtn.disabled = busy || !all.length;
-    discardBtn.disabled = busy || !all.filter(isTextual).length;
+    discardBtn.disabled = busy || !all.length;
     publishBtn.textContent = all.length ? "Publish (" + all.length + ")" : "Publish";
   }
   function refreshChanges() {
@@ -255,14 +254,51 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.hidden = true; }, 5000);
   }
-  function describe(c) {
-    if (c.section === "slots") return "Picture " + c.id;
-    if (c.section === "rings") return "Ring order: " + c.id;
-    var label = c.id + (c.locales ? " (" + c.locales.join(" + ").toUpperCase() + ")" : "");
-    var v = c.locales && edit.read ? edit.read(c.id, c.locales[0]) : null;
-    if (typeof v === "string" && v) label += ": " + (v.length > 60 ? v.slice(0, 59) + "…" : v);
-    return label;
+  /* A change row reads "Page · Section · what": the registry's page and section for text (the first 40 characters of the
+     text when this page can read it), "About · Media · photo 3" for a picture, then Library · Gallery, Rings, Clients.
+     The raw key is never shown. Client names come from the draft (loadNames). */
+  var SECTION_TITLES = {
+    "nav-big": "Navigation", hero: "Hero", services: "Services", script: "Script", testiRotor: "Testimonials", contact: "Contact",
+    "contact-socials": "Contact", masthead: "Masthead", main: "Main", "sheet-head": "Header", page: "Page", "about-clips": "Clippings",
+    "ab-read": "About text", head: "Page title", "svc-static-item": "Services", "why-block": "Why Aliph",
+  };
+  function titleCase(w) { return String(w).replace(/[-_]+/g, " ").replace(/^./, function (m) { return m.toUpperCase(); }); }
+  var names = {};
+  function loadNames() {
+    return api.content().then(function (d) {
+      ((d && d.clients) || []).forEach(function (c) { names[c.id] = (c.name && (c.name.en || c.name.ar)) || c.id; });
+    }, function () {});
   }
+  function clip(v, n) { v = String(v).replace(/\s+/g, " ").trim(); return v.length > n ? v.slice(0, n - 1) + "…" : v; }
+  function slotWhat(id) {
+    var m = /\.(media|film)\.(\d+)$/.exec(id);
+    var e = null;
+    ((registry.slots) || []).forEach(function (x) { if (x.id === id) e = x; });
+    if (!m) return "picture";
+    if (m[1] === "film") return "film frame " + m[2];
+    return (e && e.preview ? "video " : "photo ") + m[2];
+  }
+  function rowLabel(c, withText) {
+    var parts;
+    if (c.section === "slots") {
+      parts = [PAGE_NAMES[c.page] || titleCase(c.page || "site"), "Media", slotWhat(c.id)];
+    } else if (c.section === "gallery") {
+      parts = ["Library", "Gallery", c.id];
+    } else if (c.section === "rings") {
+      parts = ["Rings", c.id];
+    } else if (c.section === "clients") {
+      parts = ["Clients", names[c.id] || c.id];
+    } else {
+      var e = entryOf(c.id);
+      parts = [PAGE_NAMES[c.page || (e && e.page)] || "Site", (e && (SECTION_TITLES[e.section] || titleCase(e.section))) || "Text"];
+      var loc = c.locales && c.locales.length ? c.locales[0] : null;
+      var v = withText && loc && edit.read ? edit.read(c.id, loc) : null;
+      if (typeof v === "string" && v.trim()) parts.push(clip(v, 40));
+      else if (c.locales) parts.push(c.locales.join(" + ").toUpperCase());
+    }
+    return parts.join(" · ");
+  }
+  function describe(c) { return rowLabel(c, true); }
   /* the changes per page, then one "Gallery: N changes" line */
   function changeList(changes) {
     var groups = {}, order = [], gallery = 0, nodes = [];
@@ -281,12 +317,18 @@
     return nodes;
   }
   function closeModal() {
+    var back = modalOpener;
+    modalOpener = null;
     if (modal) { modal.remove(); modal = null; }
     syncPublishBtns();
+    /* focus goes back to what opened the dialog (a button the save just disabled falls back to the bar) */
+    if (back && back.isConnected && !back.disabled) back.focus();
   }
   /* onConfirm(msg) resolves true to keep the dialog open (msg says why) */
   function openModal(title, body, confirmText, onConfirm) {
+    var opener = document.activeElement && document.activeElement !== document.body && !modal ? document.activeElement : modalOpener;
     closeModal();
+    modalOpener = opener;
     var ok = h("button", { type: "button", class: "is-primary", text: confirmText });
     var cancel = h("button", { type: "button", text: "Cancel" });
     var msg = h("p", { class: "ed-dialog-msg", role: "status" });
@@ -309,7 +351,8 @@
   /* settle the open popover and every pending save, then read the list */
   function settled() {
     if (cur) closePop(false);
-    return flushAll().then(function () { return api.changes(); }).then(function (c) {
+    return flushAll().then(function () { return Promise.all([api.changes(), loadNames()]); }).then(function (both) {
+      var c = both[0];
       lastChanges = c;
       syncPublishBtns();
       return c;
@@ -340,12 +383,10 @@
   }
   function startDiscard() {
     settled().then(function (c) {
-      var mine = c.changes.filter(isTextual);
+      var mine = c.changes;
       if (!mine.length) return;
-      var kept = c.changes.length - mine.length;
       var body = changeList(mine);
-      if (kept) body.push(h("p", { class: "ed-dialog-note", text: "Gallery changes are kept (" + kept + ")." }));
-      openModal("Discard " + mine.length + " unpublished text " + (mine.length === 1 ? "change" : "changes") + "? The live text comes back.", body, "Discard", function (msg) {
+      openModal("Discard " + mine.length + " unpublished " + (mine.length === 1 ? "change" : "changes") + "? The live site's content comes back.", body, "Discard", function (msg) {
         return api.discard(c.token).then(function (r) {
           if (r.status === 200) {
             try { localStorage.removeItem(BACKUP); } catch (_) {}
@@ -424,7 +465,7 @@
     panelVals[cur.key + "|" + loc] = value;
     if (cur.virtual) return; /* opened from the panel: the page shows it (if at all) through apply() */
     if (loc === edit.lang && !el.children.length && el.textContent !== value) el.textContent = value;
-    if (cur.rich) el.classList.add("ed-rich");
+    if (cur.rich && !cur.collapse) el.classList.add("ed-rich");
     if (loc === edit.lang) refit(el);
   }
 
@@ -467,10 +508,22 @@
   }
 
   function field(loc, label) {
-    var area = h("textarea", { rows: cur.rich ? "5" : "3", "data-loc": loc, "aria-label": label, dir: loc === "ar" ? "rtl" : "ltr", lang: loc });
+    var area = h("textarea", { rows: cur.rich && !cur.collapse ? "5" : "3", "data-loc": loc, "aria-label": label, dir: loc === "ar" ? "rtl" : "ltr", lang: loc });
     var count = h("span", { class: "ed-count" });
     cur.area[loc] = area;
     cur.count[loc] = count;
+    if (cur.collapse) {
+      /* the public element collapses whitespace: a line break typed here would show in the editor only */
+      area.addEventListener("keydown", function (e) { if (e.key === "Enter") e.preventDefault(); });
+      area.addEventListener("beforeinput", function (e) { if (e.inputType === "insertLineBreak" || e.inputType === "insertParagraph") e.preventDefault(); });
+      area.addEventListener("paste", function (e) {
+        var t = e.clipboardData && e.clipboardData.getData("text");
+        if (!t || !/[\r\n]/.test(t)) return;
+        e.preventDefault();
+        area.setRangeText(t.replace(/\s*[\r\n]+\s*/g, " "), area.selectionStart, area.selectionEnd, "end");
+        area.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
     area.addEventListener("input", function () {
       updateCount(loc);
       preview(loc, area.value);
@@ -511,7 +564,18 @@
     var key = panelKey || el.dataset.ek;
     var entry = entryOf(key);
     var locs = entry && entry.locales ? LOCALES.filter(function (l) { return entry.locales.indexOf(l) >= 0; }) : LOCALES;
-    cur = { el: el, key: key, locs: locs, virtual: !!panelKey, orig: {}, area: {}, count: {}, max: entry && entry.maxLength || 0, auto: el.hasAttribute("data-ek-auto"), rich: !!entry && entry.kind === "richline" };
+    cur = { el: el, key: key, locs: locs, virtual: !!panelKey, orig: {}, area: {}, count: {}, max: entry && entry.maxLength || 0, auto: el.hasAttribute("data-ek-auto"), rich: !!entry && entry.kind === "richline", collapse: false };
+    /* a richline keeps its line breaks only where the public element does: read what it computes to, not a key list */
+    if (cur.rich) {
+      var live = el.hasAttribute("data-ek") ? el : document.querySelector('[data-ek="' + key + '"]');
+      if (live) {
+        var had = live.classList.contains("ed-rich");
+        live.classList.remove("ed-rich");
+        var ws = getComputedStyle(live).whiteSpace;
+        cur.collapse = ws === "normal" || ws === "nowrap";
+        if (had && !cur.collapse) live.classList.add("ed-rich");
+      }
+    }
     locs.forEach(function (l) { cur.orig[l] = origOf(key, l, panelKey ? panelDraft : null); });
     pop.textContent = "";
     var cancel = h("button", { type: "button", text: "Cancel" });
@@ -525,7 +589,7 @@
       ]),
       locs.indexOf("ar") >= 0 ? field("ar", "Arabic") : null,
       locs.indexOf("en") >= 0 ? field("en", "English") : null,
-      h("p", { class: "ed-hint", text: (locs.length === 1 ? "Arabic only. " : "") + (cur.rich ? "Enter makes a line break. " : "") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
+      h("p", { class: "ed-hint", text: (locs.length === 1 ? "Arabic only. " : "") + (cur.rich ? (cur.collapse ? "This line has no line breaks on the page. " : "Enter makes a line break. ") : "") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
       h("div", { class: "ed-pop-actions" }, [cancel, done]),
     ].forEach(function (n) { if (n) pop.appendChild(n); });
     locs.forEach(function (l) { cur.area[l].value = cur.orig[l]; updateCount(l); });
@@ -570,7 +634,8 @@
   var panelList = h("div", { class: "ed-panel-list" });
   var panelFilter = h("input", { type: "search", placeholder: "Filter keys and text", "aria-label": "Filter page text" });
   var rows = {}; /* key -> { btn, val, entry } */
-  panel.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "Page text" }), h("span", { class: "ed-panel-page", text: PAGE })]));
+  var panelClose = h("button", { type: "button", class: "ed-close", "aria-label": "Close Page text", text: "×" });
+  panel.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "Page text" }), h("span", { class: "ed-panel-page", text: PAGE }), panelClose]));
   panel.appendChild(panelFilter);
   panel.appendChild(panelList);
 
@@ -655,21 +720,18 @@
      server. /admin/edit/?history opens the panel (the dashboard links there). */
   var hist = h("aside", { id: "ed-history", class: "ed-panel ed-history", "aria-label": "History", hidden: "" });
   var histList = h("div", { class: "ed-panel-list" });
-  hist.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "History" }), h("span", { class: "ed-panel-page", text: "published revisions" })]));
+  var histClose = h("button", { type: "button", class: "ed-close", "aria-label": "Close History", text: "×" });
+  hist.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "History" }), h("span", { class: "ed-panel-page", text: "published revisions" }), histClose]));
   hist.appendChild(h("p", { class: "ed-hint", text: "Restore copies a revision into the draft. Publish to make it live." }));
   hist.appendChild(histList);
-  var SECTION_NAMES = { slots: "Picture", gallery: "Gallery", rings: "Ring", clients: "Client" };
-  function changeLabel(c) {
-    if (c.section === "text") return c.id + (c.locales ? " (" + c.locales.join(" + ").toUpperCase() + ")" : "");
-    return (SECTION_NAMES[c.section] || c.section) + " " + c.id;
-  }
+    function changeLabel(c) { return rowLabel(c, false); }
   function when(iso) {
     var d = new Date(iso);
     return isNaN(d) ? iso : d.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
   }
   function revRow(r, live) {
     var n = r.changed.length;
-    var shown = r.changed.slice(0, 4).map(changeLabel).join(", ") + (n > 4 ? ", +" + (n - 4) + " more" : "");
+    var shown = r.changed.slice(0, 4).map(changeLabel).join("; ") + (n > 4 ? ", +" + (n - 4) + " more" : "");
     var btn = h("button", { type: "button", class: "ed-reset", "data-rev": String(r.id), text: "Restore" });
     btn.addEventListener("click", function () { startRestore(r); });
     return h("section", { class: "ed-rev", "data-rev": String(r.id) }, [
@@ -686,7 +748,7 @@
   function loadHistory() {
     histList.textContent = "";
     histList.appendChild(h("p", { class: "ed-hint", text: "Loading…" }));
-    api.revisions(50).then(function (list) {
+    loadNames().then(function () { return api.revisions(50); }).then(function (list) {
       histList.textContent = "";
       if (!list.length) histList.appendChild(h("p", { class: "ed-hint", text: "Nothing has been published yet." }));
       list.forEach(function (r, i) { histList.appendChild(revRow(r, i === 0)); });
@@ -707,6 +769,9 @@
     loadHistory();
   }
   histBtn.addEventListener("click", toggleHistory);
+  /* the close button and Esc shut a side panel and hand focus back to its bar button */
+  panelClose.addEventListener("click", function () { if (!panel.hidden) panelBtn.click(); panelBtn.focus(); });
+  histClose.addEventListener("click", function () { if (!hist.hidden) toggleHistory(); histBtn.focus(); });
   function startRestore(r) {
     settled().then(function (c) {
       var body = [h("p", { text: "This copies revision " + r.id + " into the draft. The live site does not change until you publish." })];
@@ -785,7 +850,10 @@
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && modal) { e.preventDefault(); closeModal(); return; }
-    if (e.key === "Escape" && cur) { e.preventDefault(); closePop(true); }
+    if (e.key === "Escape" && cur) { e.preventDefault(); closePop(true); return; }
+    /* then the side panels; the picture drawer (editor-media.js) answers its own Esc before this runs */
+    if (e.key === "Escape" && !panel.hidden) { e.preventDefault(); panelClose.click(); return; }
+    if (e.key === "Escape" && !hist.hidden) { e.preventDefault(); histClose.click(); }
   }, true);
 
   window.addEventListener("scroll", function () { if (cur) place(); else if (hovered) drawOutline(hovered, false); }, true);
@@ -821,4 +889,6 @@
     document.documentElement.style.setProperty("--ed-bar-h", bar.offsetHeight + "px");
   }).observe(bar);
   refreshChanges();
+  /* what editor-media.js (the picture drawer) needs from here */
+  window.aliphEditorUi = { refreshChanges: refreshChanges, toast: toast, setChip: setChip, bar: bar };
 })();

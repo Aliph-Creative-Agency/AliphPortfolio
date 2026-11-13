@@ -17,18 +17,17 @@
 //            its own read/write window. A discard that lands between the two
 //            leaves publish() an empty diff: it still records a revision, and
 //            `changed` comes back [] (nothing went live that was not live).
-// Discard copies published → draft for text_values and slot_values only
-// (rev + 1 on every row it touches, so stale saves 409); gallery, rings and
-// clients keep their drafts (ORCH BACKLOG: they have their own per-item reset).
+// Discard restores published → draft for every table (history.ts restoreStatements, fed the live snapshot), rev + 1
+// on every row it touches so stale saves 409. Rows with no live copy (a new upload, ring pick, client) become
+// state 'deleted'; publish purges those.
 
 import type { AdminCtx, Env } from "../index";
 import { PublishConflictError, publish } from "../publish";
 import { emptySnapshot, readDraftWith, readSnapshot, type Snapshot } from "../store";
 import { badRequest } from "../validate";
 import { diff, type Change } from "./diff";
+import { restoreStatements } from "./history";
 import { json, readJson } from "./http";
-
-const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
 
 /* Every draft row's identity + rev + updated_at, and the publish rev (the
    same shape publish.ts fingerprints; a save always bumps rev). */
@@ -123,11 +122,20 @@ export async function publishRoute(path: string, request: Request, env: Env, ctx
     return json({ rev: r.rev, publishedAt: r.publishedAt, changed: diff(r.snapshot, before) });
   }
 
-  // discard: text + slots only
-  const discarded = s.changes.filter((c) => c.section === "text" || c.section === "slots");
-  if (!discarded.length) return json({ discarded });
-  const detail = JSON.stringify({ text: discarded.filter((c) => c.section === "text").map((c) => c.id),
-    slots: discarded.filter((c) => c.section === "slots").map((c) => c.id) });
+  // discard: everything back to the live state (text, slots, gallery, rings, clients)
+  if (!s.changes.length) return json({ discarded: [] });
+  const discarded = s.changes;
+  const detail = JSON.stringify(
+    Object.fromEntries(
+      (["text", "slots", "gallery", "rings", "clients"] as const).map((k) => [
+        k,
+        discarded.filter((c) => c.section === k).map((c) => c.id),
+      ]),
+    ),
+  );
+  // restoreStatements(published snapshot) rebuilds every table from the live snapshot: rows absent from it
+  // (an unpublished upload, ring or client) become state deleted, which publish purges.
+  const { stmts } = restoreStatements(db, s.published, ctx.adminEmail);
   try {
     await db.batch([
       // first, so the guard sees the rows before this batch touches them
@@ -137,18 +145,7 @@ export async function publishRoute(path: string, request: Request, env: Env, ctx
            VALUES (?1, 'discard', 'draft', CASE WHEN (${FP_SQL}) = ?2 THEN ?3 ELSE 'stale' END)`,
         )
         .bind(ctx.adminEmail, s.fp, detail),
-      db
-        .prepare(
-          `UPDATE text_values SET draft = published, rev = rev + 1, updated_at = ${NOW}, updated_by = ?1
-           WHERE draft IS NOT published`,
-        )
-        .bind(ctx.adminEmail),
-      db
-        .prepare(
-          `UPDATE slot_values SET draft_json = published_json, rev = rev + 1, updated_at = ${NOW}, updated_by = ?1
-           WHERE draft_json IS NOT published_json`,
-        )
-        .bind(ctx.adminEmail),
+      ...stmts,
     ]);
   } catch (err) {
     if (/constraint failed/i.test(String((err as Error)?.message ?? err))) return stale("discard");

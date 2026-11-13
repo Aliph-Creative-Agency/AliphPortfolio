@@ -7,6 +7,7 @@ import { json, requireSameOrigin } from "./http";
 import registry from "../generated/registry.json";
 import { editPage, editPageOf } from "./editpage";
 import { textRoute } from "./text";
+import { slotRoute } from "./slot";
 import { publishRoute } from "./publish";
 import { historyRoute, isHistoryPath } from "./history";
 
@@ -30,6 +31,13 @@ export async function editorRoute(
     const bad = requireSameOrigin(request);
     if (bad) return bad;
     return textRoute(request, env, ctx);
+  }
+
+  // One media holder's draft: save, reset (E-14).
+  if (path === "/api/admin/slot") {
+    const bad = requireSameOrigin(request);
+    if (bad) return bad;
+    return slotRoute(request, env, url, ctx);
   }
 
   // What would go live, publish it, or throw the text/slot drafts away (E-06).

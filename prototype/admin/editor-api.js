@@ -52,6 +52,16 @@
     revisions: function (limit) { return getJson("/api/admin/revisions?limit=" + (limit || 50)); },
     /** POST: 200 {restored, skipped} = that revision copied into the draft, 404 unknown id. */
     restore: function (id) { return send("POST", {}, "/api/admin/revisions/" + encodeURIComponent(id) + "/restore"); },
+    /** PUT a slot override (value null resets). 200 {slot,value,rev}, 409 {error,current:{value,rev}}. */
+    saveSlot: function (slot, value, baseRev) { return send("PUT", { slot: slot, value: value, baseRev: baseRev }, "/api/admin/slot"); },
+    /** DELETE: the draft of this slot goes back to the markup default. */
+    resetSlot: function (slot, baseRev) {
+      return fetch("/api/admin/slot?slot=" + encodeURIComponent(slot) + "&baseRev=" + baseRev, {
+        method: "DELETE", credentials: "same-origin", headers: { accept: "application/json" },
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (body) { return { status: r.status, body: body }; });
+      });
+    },
     getJson: getJson,
   };
 })();
