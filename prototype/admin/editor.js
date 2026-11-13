@@ -232,7 +232,7 @@
      list is shown again instead of publishing something unseen. Discard puts
      every draft (text, pictures, gallery, rings, clients) back to the live state
      and reloads. */
-  var lastChanges = null, changesTimer = 0, modal = null, toastTimer = 0;
+  var lastChanges = null, changesTimer = 0, modal = null, toastTimer = 0, modalOpener = null;
   var PAGE_NAMES = { home: "Home", about: "About", library: "Library" };
   function syncPublishBtns() {
     var all = lastChanges ? lastChanges.changes : [];
@@ -280,12 +280,18 @@
     return nodes;
   }
   function closeModal() {
+    var back = modalOpener;
+    modalOpener = null;
     if (modal) { modal.remove(); modal = null; }
     syncPublishBtns();
+    /* focus goes back to what opened the dialog (a button the save just disabled falls back to the bar) */
+    if (back && back.isConnected && !back.disabled) back.focus();
   }
   /* onConfirm(msg) resolves true to keep the dialog open (msg says why) */
   function openModal(title, body, confirmText, onConfirm) {
+    var opener = document.activeElement && document.activeElement !== document.body && !modal ? document.activeElement : modalOpener;
     closeModal();
+    modalOpener = opener;
     var ok = h("button", { type: "button", class: "is-primary", text: confirmText });
     var cancel = h("button", { type: "button", text: "Cancel" });
     var msg = h("p", { class: "ed-dialog-msg", role: "status" });
@@ -590,7 +596,8 @@
   var panelList = h("div", { class: "ed-panel-list" });
   var panelFilter = h("input", { type: "search", placeholder: "Filter keys and text", "aria-label": "Filter page text" });
   var rows = {}; /* key -> { btn, val, entry } */
-  panel.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "Page text" }), h("span", { class: "ed-panel-page", text: PAGE })]));
+  var panelClose = h("button", { type: "button", class: "ed-close", "aria-label": "Close Page text", text: "×" });
+  panel.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "Page text" }), h("span", { class: "ed-panel-page", text: PAGE }), panelClose]));
   panel.appendChild(panelFilter);
   panel.appendChild(panelList);
 
@@ -675,7 +682,8 @@
      server. /admin/edit/?history opens the panel (the dashboard links there). */
   var hist = h("aside", { id: "ed-history", class: "ed-panel ed-history", "aria-label": "History", hidden: "" });
   var histList = h("div", { class: "ed-panel-list" });
-  hist.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "History" }), h("span", { class: "ed-panel-page", text: "published revisions" })]));
+  var histClose = h("button", { type: "button", class: "ed-close", "aria-label": "Close History", text: "×" });
+  hist.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "History" }), h("span", { class: "ed-panel-page", text: "published revisions" }), histClose]));
   hist.appendChild(h("p", { class: "ed-hint", text: "Restore copies a revision into the draft. Publish to make it live." }));
   hist.appendChild(histList);
   var SECTION_NAMES = { slots: "Picture", gallery: "Gallery", rings: "Ring", clients: "Client" };
@@ -727,6 +735,9 @@
     loadHistory();
   }
   histBtn.addEventListener("click", toggleHistory);
+  /* the close button and Esc shut a side panel and hand focus back to its bar button */
+  panelClose.addEventListener("click", function () { if (!panel.hidden) panelBtn.click(); panelBtn.focus(); });
+  histClose.addEventListener("click", function () { if (!hist.hidden) toggleHistory(); histBtn.focus(); });
   function startRestore(r) {
     settled().then(function (c) {
       var body = [h("p", { text: "This copies revision " + r.id + " into the draft. The live site does not change until you publish." })];
@@ -805,7 +816,10 @@
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && modal) { e.preventDefault(); closeModal(); return; }
-    if (e.key === "Escape" && cur) { e.preventDefault(); closePop(true); }
+    if (e.key === "Escape" && cur) { e.preventDefault(); closePop(true); return; }
+    /* then the side panels; the picture drawer (editor-media.js) answers its own Esc before this runs */
+    if (e.key === "Escape" && !panel.hidden) { e.preventDefault(); panelClose.click(); return; }
+    if (e.key === "Escape" && !hist.hidden) { e.preventDefault(); histClose.click(); }
   }, true);
 
   window.addEventListener("scroll", function () { if (cur) place(); else if (hovered) drawOutline(hovered, false); }, true);

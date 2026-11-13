@@ -7,11 +7,7 @@ html[data-edit-mode="1"] [data-es]:focus-visible,
 html[data-edit-mode="1"] [data-es].ed-es-active { outline: 2px solid #BB5C39; outline-offset: -2px; }
 
 .ed-media .ed-panel-head { align-items: center; gap: 8px; }
-.ed-close {
-  font: inherit; font-size: 20px; line-height: 1; cursor: pointer; width: 32px; height: 32px; padding: 0;
-  border: 1px solid rgba(15, 24, 32, 0.4); border-radius: 3px; background: #fff; color: #0F1820;
-}
-.ed-close:focus-visible, .ed-media input:focus-visible, .ed-media button:focus-visible { outline: 2px solid #BB5C39; outline-offset: 2px; }
+.ed-media input:focus-visible, .ed-media button:focus-visible { outline: 2px solid #BB5C39; outline-offset: 2px; }
 .ed-media-body { display: flex; flex-direction: column; gap: 8px; }
 .ed-media-file { display: flex; gap: 10px; align-items: flex-start; }
 .ed-media-thumb { width: 96px; height: 96px; object-fit: cover; background: rgba(15, 24, 32, 0.08); border: 1px solid rgba(15, 24, 32, 0.25); border-radius: 3px; flex: none; }
