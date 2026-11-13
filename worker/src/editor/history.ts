@@ -16,7 +16,8 @@
 //                state 'deleted' (a staged removal, as the gallery admin
 //                stages one). Clients go first: gallery_items.client_id
 //                references them, and a client the table never had is
-//                written as NULL rather than failing the batch.
+//                written as NULL rather than failing the batch. A client's
+//                line/year/url (0003) missing from the snapshot are NULL.
 //   audit        one 'restore' row, target 'rev:<id>'.
 // Only rows whose draft actually changes are written, and each of them gets
 // rev + 1, so a save still holding a pre-restore lock is a 409 and publish's
@@ -100,10 +101,15 @@ export function restoreStatements(db: D1Database, snap: Snapshot, by: string) {
     if (ok.ok && ok.value) slots.push([id, JSON.stringify(ok.value)]);
     else skipped.push(`slot:${id}`);
   }
-  const clients: [string, string, string][] = [];
+  // [id, name_ar, name_en, line_ar, line_en, year, url]: the clients columns. A detail the snapshot
+  // leaves out (every pre-0003 revision) is NULL, so restoring it clears a detail added since.
+  const clients: (string | number | null)[][] = [];
   for (const c of snap.clients ?? []) {
     const ok = validateClient(c);
-    if (ok.ok) clients.push([ok.value.id, ok.value.name.ar, ok.value.name.en]);
+    if (ok.ok) {
+      const v = ok.value;
+      clients.push([v.id, v.name.ar, v.name.en, v.line?.ar ?? null, v.line?.en ?? null, v.year ?? null, v.url ?? null]);
+    }
     else skipped.push(`client:${(c as { id?: unknown })?.id}`);
   }
   // [id, src, poster, cat, sub, ratio, date, alt_ar, alt_en, client_id, hidden, sort]: the gallery_items columns
@@ -136,6 +142,7 @@ export function restoreStatements(db: D1Database, snap: Snapshot, by: string) {
   const galleryJson = JSON.stringify(gallery);
   const ringsJson = JSON.stringify(rings);
   const col = (i: number) => `json_extract(value, '$[${i}]')`;
+  const CLIENT_COLS = ["name_ar", "name_en", "line_ar", "line_en", "year", "url"];
   const GALLERY_COLS = ["src", "poster", "cat", "sub", "ratio", "date", "alt_ar", "alt_en", "client_id", "hidden", "sort"];
 
   const stmts = [
@@ -176,11 +183,12 @@ export function restoreStatements(db: D1Database, snap: Snapshot, by: string) {
     // clients before gallery_items (client_id references them)
     db
       .prepare(
-        `INSERT INTO clients (id, name_ar, name_en, state, updated_by)
-         SELECT ${col(0)}, ${col(1)}, ${col(2)}, 'active', ?2 FROM json_each(?1) WHERE true
-         ON CONFLICT (id) DO UPDATE SET name_ar = excluded.name_ar, name_en = excluded.name_en, state = 'active',
+        `INSERT INTO clients (id, ${CLIENT_COLS.join(", ")}, state, updated_by)
+         SELECT ${col(0)}, ${col(1)}, ${col(2)}, ${col(3)}, ${col(4)}, ${col(5)}, ${col(6)}, 'active', ?2
+         FROM json_each(?1) WHERE true
+         ON CONFLICT (id) DO UPDATE SET ${CLIENT_COLS.map((c) => `${c} = excluded.${c}`).join(", ")}, state = 'active',
            rev = rev + 1, updated_at = ${NOW}, updated_by = ?2
-         WHERE clients.state IS NOT 'active' OR clients.name_ar IS NOT excluded.name_ar OR clients.name_en IS NOT excluded.name_en`,
+         WHERE clients.state IS NOT 'active' OR ${CLIENT_COLS.map((c) => `clients.${c} IS NOT excluded.${c}`).join(" OR ")}`,
       )
       .bind(clientsJson, by),
     db
