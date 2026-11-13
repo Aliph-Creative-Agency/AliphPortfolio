@@ -199,6 +199,20 @@ function draw() {
   }
 }
 
+/** The New client form in a modal of its own (the drawer's "New client…"): resolves the created client, or null on Cancel. */
+export function newClientDialog() {
+  return new Promise((resolve) => {
+    const d = $("client-new");
+    const slot = $("client-new-form");
+    let out = null;
+    const finish = (saved, client) => { out = saved ? client : null; d.close(); };
+    slot.replaceChildren(form(null, finish));
+    d.addEventListener("close", () => resolve(out), { once: true });
+    d.showModal();
+    slot.querySelector("input")?.focus();
+  });
+}
+
 /** Opens the New client form (the drawer's "New client…" uses this in C-09). */
 export function openNewClient() {
   adding = true; editing = null; say("");
