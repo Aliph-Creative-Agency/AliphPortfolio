@@ -187,6 +187,16 @@ that is both deleted and unpublished.
    (`aria-label` on the lightbox and the thumbs, renderServiceSections). The boot merge feeds published values into
    those tables, so these three characters are refused at the door instead of escaped at each sink. `'` and `&` are
    allowed: no sink is single-quoted, and an entity decodes to text. No default value contains them.
+   Clients (`validateClient`, C-02): `name.ar` and `name.en` required, 1 to 80 characters. The optional details
+   count as absent when missing, `null` or blank (`""` or spaces only), and are then left out of the stored object:
+   - `line.ar` / `line.en`: one line, at most 120 characters, no line break or control character, and no `<`, `>`
+     or `"` (same message as above). 400 `field: "line.<locale>"`; a `line` that is not an object: `field: "line"`.
+   - `year`: an integer 1000 to 9999, or a 4-digit string (`"2024"`, stored as the number 2024). Anything else:
+     400 `field: "year"`.
+   - `url`: must parse as a URL with protocol `https:` and no user name or password, at most 2048 characters. It is
+     stored as `new URL(u).href` (lower-case host, trailing `/`, `<`, `>` and `"` percent-encoded). `http:`,
+     `javascript:`, `data:`, a bare host or garbage: 400 `field: "url"`.
+   Other keys in a client body are ignored.
 2. Write with the rev the client read (`locks`) using `… WHERE rev = ?` and `rev = rev + 1`. Zero rows changed
    means a conflict: return 409 with the current row.
 3. Text and slot drafts reset with `draft = NULL` / `draft_json = NULL`. Gallery items, rings and clients reset or

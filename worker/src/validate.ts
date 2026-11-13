@@ -17,7 +17,7 @@
 
 import registry from "./generated/registry.json";
 import defaults from "./generated/defaults.json";
-import type { SlotValue, Pair, GalleryItem } from "./store";
+import type { SlotValue, Pair, GalleryItem, Client } from "./store";
 
 export type Invalid = { ok: false; error: string; field?: string };
 export type Valid<T> = { ok: true; value: T };
@@ -263,10 +263,22 @@ export function validateGalleryItem(v: unknown): Result<GalleryItem> {
 }
 
 export const CLIENT_NAME_MAX = 80;
+export const CLIENT_LINE_MAX = 120;
+export const CLIENT_URL_MAX = 2048;
 
-export function validateClient(v: unknown): Result<{ id: string; name: { ar: string; en: string } }> {
-  if (typeof v !== "object" || v === null) return bad("client must be an object", "client");
-  const c = v as { id?: unknown; name?: { ar?: unknown; en?: unknown } };
+/* "not given": the admin form sends "" for an empty field, a revision leaves
+   the key out, an API caller may send null */
+const blank = (x: unknown) => x === undefined || x === null || (typeof x === "string" && x.trim() === "");
+
+/** A client as it is stored (snapshot shape, CONTENT_API.md "Gallery and
+ *  clients"): names required; `line`, `year`, `url` optional and left out
+ *  when blank, so the result is exactly what clientFromRow reads back.
+ *  year: an integer 1000-9999, or a 4-digit string (stored as a number).
+ *  url: https only, stored as `new URL(u).href` (which percent-encodes
+ *  `<`, `>` and `"`). Keys other than these are ignored. */
+export function validateClient(v: unknown): Result<Client> {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) return bad("client must be an object", "client");
+  const c = v as { id?: unknown; name?: { ar?: unknown; en?: unknown }; line?: unknown; year?: unknown; url?: unknown };
   if (typeof c.id !== "string" || !ID_RE.test(c.id)) return bad("bad id", "id");
   for (const l of ["ar", "en"] as const) {
     const s = c.name?.[l];
@@ -274,5 +286,42 @@ export function validateClient(v: unknown): Result<{ id: string; name: { ar: str
     if (MARKUP.test(s)) return bad(MARKUP_ERROR, `name.${l}`);
     if (s.length > CLIENT_NAME_MAX) return bad(`longer than ${CLIENT_NAME_MAX} characters`, `name.${l}`);
   }
-  return good({ id: c.id, name: { ar: c.name!.ar as string, en: c.name!.en as string } });
+  const out: Client = { id: c.id, name: { ar: c.name!.ar as string, en: c.name!.en as string } };
+
+  if (!blank(c.line)) {
+    if (typeof c.line !== "object" || Array.isArray(c.line)) return bad("line must be {ar, en}", "line");
+    const src = c.line as { ar?: unknown; en?: unknown };
+    const line: Pair = {};
+    for (const l of ["ar", "en"] as const) {
+      const s = src[l];
+      if (blank(s)) continue;
+      if (typeof s !== "string") return bad("line must be text", `line.${l}`);
+      if (CONTROL_OR_NL.test(s)) return bad("one line, no line breaks", `line.${l}`);
+      if (MARKUP.test(s)) return bad(MARKUP_ERROR, `line.${l}`);
+      if (s.length > CLIENT_LINE_MAX) return bad(`longer than ${CLIENT_LINE_MAX} characters`, `line.${l}`);
+      line[l] = s;
+    }
+    if (line.ar !== undefined || line.en !== undefined) out.line = line;
+  }
+
+  if (!blank(c.year)) {
+    const y = typeof c.year === "string" && /^\d{4}$/.test(c.year.trim()) ? Number(c.year.trim()) : c.year;
+    if (typeof y !== "number" || !Number.isInteger(y) || y < 1000 || y > 9999) return bad("a 4-digit year", "year");
+    out.year = y;
+  }
+
+  if (!blank(c.url)) {
+    if (typeof c.url !== "string" || CONTROL_OR_NL.test(c.url)) return bad("not a web address", "url");
+    let u: URL;
+    try {
+      u = new URL(c.url.trim());
+    } catch {
+      return bad("not a web address", "url");
+    }
+    if (u.protocol !== "https:") return bad("the address must start with https://", "url");
+    if (u.username || u.password) return bad("no user name or password in the address", "url");
+    if (u.href.length > CLIENT_URL_MAX) return bad(`longer than ${CLIENT_URL_MAX} characters`, "url");
+    out.url = u.href;
+  }
+  return good(out);
 }
