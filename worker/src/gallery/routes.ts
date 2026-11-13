@@ -4,9 +4,11 @@
 //
 // Contract for every write route (worker/CONTENT_API.md "Validation"):
 // requireSameOrigin → validate.ts → rev-locked write → audit row.
+// (upload/cleanup has no row to lock: it re-reads the used set instead.)
 
 import type { AdminCtx, Env } from "../index";
 import { publish } from "../publish";
+import { cleanupPost, unusedGet } from "./cleanup";
 import { itemDelete, itemPut } from "./items";
 import { galleryRead } from "./read";
 import { ringPut, ringReset } from "./rings";
@@ -65,6 +67,8 @@ export async function galleryRoute(
   if (path === "/api/admin/upload/mpu/part" && method === "PUT") return mpuPart(request, env, url);
   if (path === "/api/admin/upload/mpu/complete" && method === "POST") return mpuComplete(request, env, url, ctx);
   if (path === "/api/admin/upload/mpu" && method === "DELETE") return mpuAbort(env, url);
+  if (path === "/api/admin/upload/unused" && method === "GET") return unusedGet(env);
+  if (path === "/api/admin/upload/cleanup" && method === "POST") return cleanupPost(request, env, ctx);
   if (path.startsWith("/api/admin/media/") && method === "GET") return mediaGet(env, url);
 
   return null;
