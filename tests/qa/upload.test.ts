@@ -397,7 +397,7 @@ describe("size: declared vs actual", () => {
   it("a request with Content-Length -5 can be built (F-07 precondition)", () => {
     expect(negative).not.toThrow();
   });
-  it.fails("F-07 Content-Length -5 on a sniffable body makes the Worker throw (500) instead of a 400", async () => {
+  it("F-07 Content-Length -5 on a sniffable body is a 400, not a Worker throw (500)", async () => {
     const before = await keys();
     let status = 0;
     try {

@@ -106,6 +106,10 @@ export async function uploadPut(request: Request, env: Env, ctx: AdminCtx): Prom
     await request.body?.cancel();
     return tooBig("file over 90 MB: use multipart");
   }
+  if (hasLen && (declared < 0 || !Number.isInteger(declared))) { // F-07: a negative length would throw in FixedLengthStream (500)
+    await request.body?.cancel();
+    return json({ error: "bad content-length" }, 400);
+  }
   if (!request.body) return json({ error: "empty body" }, 400);
 
   const name = request.headers.get("x-file-name") ?? "";
