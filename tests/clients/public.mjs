@@ -166,6 +166,42 @@ try {
     if (l === "en") await p.screenshot({ path: path.join(OUT, "index-en-390.png") });
     await p.close();
   }
+  /* --- C-13a the ?client= filter --- */
+  const dUp = ups[ups.length - 2]; // "d", visible, B's
+  const aUp = withC;
+  const lbOpen = (pg) => pg.locator(".lb:not([hidden])").count().then((n) => n > 0);
+  p = await look("en", `?client=${B.id}`);
+  const cats = await p.locator(".acc-panel").evaluateAll((els) => els.map((e) => e.dataset.cat));
+  check("known client: only the categories that hold its pieces remain", cats.length >= 1 && cats.length <= 2 && cats.includes("all") && !cats.includes("tech"), cats.join(","));
+  const counts = await p.locator(".acc-panel .panel-count").allTextContents();
+  check("panel counts are the client's visible pieces (2)", counts.every((c) => c.trim() === "2"), counts.join(","));
+  check("exactly B's 2 tiles in the open panel, no software projects", (await p.locator(".acc-panel.open .tile").count()) === 2 && (await p.locator(".tile.has-profile").count()) === 0);
+  check("no empty sub-section (every .lib-sub has a tile)", await p.locator(".lib-sub").evaluateAll((els) => els.every((e) => e.querySelector(".tile"))));
+  await p.close();
+
+  const plain = await look("en");
+  const plainDom = await plain.locator(".acc").evaluate((e) => e.outerHTML);
+  await plain.close();
+  p = await look("en", "?client=nope-0000");
+  check("unknown client id: the normal archive (same DOM), no error", (await p.locator(".acc").evaluate((e) => e.outerHTML)) === plainDom);
+  await p.close();
+
+  p = await look("en", `?client=${B.id}&open=${dUp.id}`);
+  await p.waitForFunction(() => document.querySelector(".lb") && !document.querySelector(".lb").hidden, null, { timeout: 4000 }).catch(() => {});
+  check("?client=B&open=<B piece> opens the lightbox", await lbOpen(p));
+  check("lightbox steps only through the view (1 / 2)", new RegExp("^[12] / 2$").test((await p.locator(".lb-count").textContent()).trim()), await p.locator(".lb-count").textContent());
+  const before = await p.locator(".lb-count").textContent();
+  await p.keyboard.press("ArrowRight");
+  const after = await p.locator(".lb-count").textContent();
+  check("ArrowRight moves within the view", before !== after && after.trim().endsWith("/ 2"), before + " -> " + after);
+  await p.keyboard.press("Escape");
+  check("Esc closes it", !(await lbOpen(p)));
+  await p.close();
+
+  p = await look("en", `?client=${B.id}&open=${aUp.id}`);
+  await p.waitForTimeout(900);
+  check("?open=<piece outside the view> opens nothing", !(await lbOpen(p)));
+  await p.close();
   void lone; void made;
 } finally {
   await clean();

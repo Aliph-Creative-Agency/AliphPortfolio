@@ -2484,6 +2484,9 @@ const CLIENTS = {};
     if (c && c.id && c.name) CLIENTS[c.id] = c;
   });
 }
+/* `/library?client=<id>`: the archive filtered to one PUBLISHED client. An id the
+   published snapshot does not know is not an error, just the normal archive. */
+const CLIENT_VIEW = CLIENTS[new URLSearchParams(location.search).get("client")] || null;
 const clientOf = (m) => (m && m.client ? CLIENTS[m.client] || null : null);
 const escHTML = (t) => String(t).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
 /* ══ end clients ══ */
@@ -4365,9 +4368,11 @@ function renderLibrary() {
   };
 
   const rows = (catId) => {
+    /* a client's view keeps only that client's pieces; a software project has no client, so it drops out */
     const media = (catId === "all" ? MEDIA : MEDIA.filter((m) => m.c === catId))
+      .filter((m) => !CLIENT_VIEW || m.client === CLIENT_VIEW.id)
       .map((m) => ({ kind: "media", d: m.d, key: m.f, sort: m.sort, m }));
-    const projects = (catId === "all" || catId === "tech")
+    const projects = !CLIENT_VIEW && (catId === "all" || catId === "tech")
       ? PROJECTS.filter((p) => p.cat === "tech" && p.profile)
         .map((p) => ({
           kind: "project", d: p.date, key: p.en,
