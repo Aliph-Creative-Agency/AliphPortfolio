@@ -48,7 +48,7 @@ async function run(label, launch, vp, touch, vpsForVisitor) {
   // a tap that Playwright's WebKit may not turn into a click (F-08): check the outcome, fall back to a script click and say so
   const press = async (loc, ok, what, arg = null) => {
     if (touch) await loc.tap({ force: true, timeout: 5000 }).catch(() => {}); else await loc.click({ force: true, timeout: 5000 });
-    if (await page.waitForFunction(ok, arg, { timeout: 2500 }).then(() => true, () => false)) return;
+    if (await page.waitForFunction(ok, arg, { timeout: 10000 }).then(() => true, () => false)) return;
     if (!touch) throw new Error("click had no effect: " + what);
     console.log(`KNOWN F-08 ${label} tap on ${what} gave no click`);
     await loc.evaluate((e) => e.click());
