@@ -88,3 +88,24 @@ html[data-edit-mode="1"] [data-ek] { cursor: text; }
 .ed-dialog p { margin: 0 0 8px; overflow-wrap: anywhere; }
 .ed-dialog-title { font-weight: 600; }
 .ed-dialog-theirs, .ed-dialog-mine { font-size: 13px; }
+
+/* "Page text" panel: a column on the physical right edge above the bar */
+.ed-panel {
+  position: fixed; z-index: 2147483150; top: 0; right: 0; bottom: 46px; width: min(340px, 100vw);
+  display: flex; flex-direction: column; gap: 8px; padding: 12px; overflow: hidden;
+  background: #F3F1E8; color: #0F1820; border-left: 1px solid #0F1820; box-sizing: border-box;
+  font: 400 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; direction: ltr; text-align: left;
+}
+.ed-panel[hidden] { display: none; }
+.ed-panel * { box-sizing: border-box; }
+.ed-panel-head { display: flex; justify-content: space-between; align-items: baseline; }
+.ed-panel-page { font-size: 12px; color: rgba(15, 24, 32, 0.68); }
+.ed-panel input[type="search"] { font: 16px/1.3 system-ui, sans-serif; padding: 6px 8px; border: 1px solid rgba(15, 24, 32, 0.45); border-radius: 3px; background: #fff; color: #0F1820; }
+.ed-panel-list { overflow: auto; flex: 1 1 auto; }
+.ed-panel-sec h3 { margin: 10px 0 4px; font: 600 12px/1.3 system-ui, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; color: rgba(15, 24, 32, 0.68); }
+.ed-row { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; background: #fff; border: 1px solid rgba(15, 24, 32, 0.25); border-radius: 3px; padding: 5px 8px; margin-bottom: 4px; min-height: 30px; }
+.ed-row[hidden], .ed-panel-sec[hidden] { display: none; }
+.ed-row:hover { border-color: #BB5C39; }
+.ed-row:focus-visible { outline: 2px solid #BB5C39; outline-offset: 2px; }
+.ed-row-key { display: block; font: 600 12px/1.3 ui-monospace, Consolas, monospace; }
+.ed-row-val { display: block; font-size: 13px; color: rgba(15, 24, 32, 0.75); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

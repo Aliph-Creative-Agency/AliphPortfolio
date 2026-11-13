@@ -57,10 +57,12 @@
     return a;
   });
   var chip = h("span", { class: "ed-chip", text: "Draft" });
+  var panelBtn = h("button", { type: "button", "aria-expanded": "false", "aria-controls": "ed-panel", text: "Page text" });
   var bar = h("div", { class: "ed-bar", role: "toolbar", "aria-label": "Page editor" }, [
     h("span", { class: "ed-brand", text: "Aliph editor" }),
     h("div", { class: "ed-pages" }, pageLinks),
     langBtn,
+    panelBtn,
     h("span", { class: "ed-spacer" }),
     chip,
     h("a", { href: "/admin/", text: "Dashboard" }),
@@ -272,6 +274,8 @@
       cur.el = el;
     }
     if (!el.hasAttribute("data-ek")) { el.setAttribute("data-ek", cur.key); if (cur.auto) el.setAttribute("data-ek-auto", ""); }
+    panelVals[cur.key + "|" + loc] = value;
+    if (cur.virtual) return; /* opened from the panel: the page shows it (if at all) through apply() */
     if (loc === edit.lang && !el.children.length && el.textContent !== value) el.textContent = value;
     if (cur.rich) el.classList.add("ed-rich");
     if (loc === edit.lang) refit(el);
@@ -291,6 +295,7 @@
 
   function place() {
     if (!cur || !cur.el.isConnected) return;
+    if (cur.virtual) { placeBesidePanel(); return; }
     var r = cur.el.getBoundingClientRect();
     var vw = window.innerWidth, vh = window.innerHeight;
     var pw = pop.offsetWidth, ph = pop.offsetHeight, bottomBar = bar.offsetHeight + 8;
@@ -301,6 +306,17 @@
     pop.style.top = top + "px";
     pop.style.left = left + "px";
     drawOutline(cur.el, true);
+  }
+
+  /* a popover opened from the panel sits beside it, not at an element */
+  function placeBesidePanel() {
+    var pr = panel.getBoundingClientRect();
+    var vw = window.innerWidth, pw = pop.offsetWidth;
+    var left = pr.left - pw - 10;
+    if (left < 8) left = Math.max(8, Math.min(vw - pw - 8, pr.left - 8));
+    pop.style.left = left + "px";
+    pop.style.top = Math.max(8, pr.top + 8) + "px";
+    outline.classList.remove("is-on", "is-active");
   }
 
   function field(loc, label) {
@@ -343,12 +359,13 @@
     updateCount(loc);
   }
 
-  function open(el) {
+  function open(el, panelKey) {
     if (cur) closePop(false);
-    var key = el.dataset.ek;
+    var key = panelKey || el.dataset.ek;
     var entry = entryOf(key);
-    cur = { el: el, key: key, orig: {}, area: {}, count: {}, max: entry && entry.maxLength || 0, auto: el.hasAttribute("data-ek-auto"), rich: !!entry && entry.kind === "richline" };
-    LOCALES.forEach(function (l) { cur.orig[l] = origOf(key, l, null); });
+    var locs = entry && entry.locales ? LOCALES.filter(function (l) { return entry.locales.indexOf(l) >= 0; }) : LOCALES;
+    cur = { el: el, key: key, locs: locs, virtual: !!panelKey, orig: {}, area: {}, count: {}, max: entry && entry.maxLength || 0, auto: el.hasAttribute("data-ek-auto"), rich: !!entry && entry.kind === "richline" };
+    locs.forEach(function (l) { cur.orig[l] = origOf(key, l, panelKey ? panelDraft : null); });
     pop.textContent = "";
     var cancel = h("button", { type: "button", text: "Cancel" });
     var done = h("button", { type: "button", class: "is-primary", text: "Done" });
@@ -359,32 +376,33 @@
         h("span", { class: "ed-pop-key", text: key }),
         h("span", { class: "ed-pop-sec", text: entry && entry.section || "" }),
       ]),
-      field("ar", "Arabic"),
-      field("en", "English"),
-      h("p", { class: "ed-hint", text: (cur.rich ? "Enter makes a line break. " : "") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
+      locs.indexOf("ar") >= 0 ? field("ar", "Arabic") : null,
+      locs.indexOf("en") >= 0 ? field("en", "English") : null,
+      h("p", { class: "ed-hint", text: (locs.length === 1 ? "Arabic only. " : "") + (cur.rich ? "Enter makes a line break. " : "") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
       h("div", { class: "ed-pop-actions" }, [cancel, done]),
-    ].forEach(function (n) { pop.appendChild(n); });
-    LOCALES.forEach(function (l) { cur.area[l].value = cur.orig[l]; updateCount(l); });
+    ].forEach(function (n) { if (n) pop.appendChild(n); });
+    locs.forEach(function (l) { cur.area[l].value = cur.orig[l]; updateCount(l); });
     pop.hidden = false;
     place();
     /* the draft may hold a newer value than the tables if someone saved since load */
     var mine = cur;
     api.content().then(function (draft) {
       if (cur !== mine) return;
-      LOCALES.forEach(function (l) {
+      mine.locs.forEach(function (l) {
         if (mine.area[l].value !== mine.orig[l]) return; /* already typing */
         var v = origOf(mine.key, l, draft);
         if (v !== mine.orig[l]) { mine.orig[l] = v; mine.area[l].value = v; updateCount(l); }
       });
     }).catch(function () {});
-    var first = cur.area[edit.lang === "en" ? "en" : "ar"];
+    var first = cur.area[edit.lang === "en" && cur.area.en ? "en" : locs[0]];
     first.focus();
     first.setSelectionRange(first.value.length, first.value.length);
   }
 
   function closePop(restore) {
     if (!cur) return;
-    if (restore) LOCALES.forEach(function (l) { preview(l, cur.orig[l]); });
+    if (restore) cur.locs.forEach(function (l) { preview(l, cur.orig[l]); });
+    if (cur.virtual) { var pk = cur.key; setTimeout(function () { refreshPanelRow(pk); }, 0); }
     pop.hidden = true;
     outline.classList.remove("is-on", "is-active");
     var el = cur.el;
@@ -392,6 +410,93 @@
     hovered = null;
     if (el.isConnected) edit.tag();
   }
+
+  /* ── "Page text" panel ──
+     Every registry key of this page that cannot be clicked on the page itself:
+     the <head> texts (title, description, share card; Arabic only), aria
+     labels, strings only the scripts show, and the nav links (a plain click
+     there navigates). Rows open the same popover and use the same autosave. */
+  var PAGE = (/^\/admin\/edit\/(about|library)\/?$/.exec(location.pathname) || [0, "home"])[1];
+  var panelDraft = null;
+  var panelVals = {}; /* "key|loc" -> value typed this session, wins over the fetched draft */
+  var panel = h("aside", { id: "ed-panel", class: "ed-panel", "aria-label": "Page text", hidden: "" });
+  var panelList = h("div", { class: "ed-panel-list" });
+  var panelFilter = h("input", { type: "search", placeholder: "Filter keys and text", "aria-label": "Filter page text" });
+  var rows = {}; /* key -> { btn, val, entry } */
+  panel.appendChild(h("div", { class: "ed-panel-head" }, [h("strong", { text: "Page text" }), h("span", { class: "ed-panel-page", text: PAGE })]));
+  panel.appendChild(panelFilter);
+  panel.appendChild(panelList);
+
+  /* true when the key has a node on the page that a plain click edits */
+  function clickable(key) {
+    var els = document.querySelectorAll('[data-ek="' + key + '"]');
+    for (var i = 0; i < els.length; i++) if (!els[i].closest("a[href]") && editable(els[i])) return true;
+    return false;
+  }
+  function rowText(e) {
+    var loc = e.locales && e.locales.indexOf("en") < 0 ? "ar" : (edit.lang === "en" ? "en" : "ar");
+    var v = origOf(e.key, loc, panelDraft);
+    if (typeof panelVals[e.key + "|" + loc] === "string") v = panelVals[e.key + "|" + loc];
+    if (cur && cur.key === e.key && cur.area[loc]) v = cur.area[loc].value;
+    return v;
+  }
+  function refreshPanelRow(key) {
+    var r = rows[key];
+    if (!r) return;
+    var v = rowText(r.entry);
+    r.val.textContent = v || "(default)";
+    r.btn.setAttribute("data-text", v.toLowerCase());
+  }
+  function buildPanel() {
+    panelList.textContent = "";
+    rows = {};
+    var all = registry.text.concat(registry.fields).filter(function (e) {
+      return e.pages && e.pages.indexOf(PAGE) >= 0 && !clickable(e.key);
+    });
+    var bySec = {};
+    all.forEach(function (e) { (bySec[e.section || "other"] = bySec[e.section || "other"] || []).push(e); });
+    Object.keys(bySec).forEach(function (sec) {
+      var grp = h("section", { class: "ed-panel-sec" }, [h("h3", { text: sec })]);
+      bySec[sec].forEach(function (e) {
+        var val = h("span", { class: "ed-row-val" });
+        var btn = h("button", { type: "button", class: "ed-row", "data-key": e.key }, [h("span", { class: "ed-row-key", text: e.key }), val]);
+        btn.addEventListener("click", function () { open(btn, e.key); });
+        rows[e.key] = { btn: btn, val: val, entry: e };
+        grp.appendChild(btn);
+        refreshPanelRow(e.key);
+      });
+      panelList.appendChild(grp);
+    });
+    if (!all.length) panelList.appendChild(h("p", { class: "ed-hint", text: "Every text of this page is editable on the page itself." }));
+    applyFilter();
+  }
+  function applyFilter() {
+    var q = panelFilter.value.trim().toLowerCase();
+    Array.prototype.forEach.call(panelList.querySelectorAll(".ed-panel-sec"), function (sec) {
+      var any = false;
+      Array.prototype.forEach.call(sec.querySelectorAll(".ed-row"), function (b) {
+        var hit = !q || b.getAttribute("data-key").toLowerCase().indexOf(q) >= 0 || (b.getAttribute("data-text") || "").indexOf(q) >= 0;
+        b.hidden = !hit;
+        if (hit) any = true;
+      });
+      sec.hidden = !any;
+    });
+  }
+  panelFilter.addEventListener("input", applyFilter);
+  panelBtn.addEventListener("click", function () {
+    if (!panel.hidden) {
+      if (cur && cur.virtual) closePop(false);
+      panel.hidden = true;
+      panelBtn.setAttribute("aria-expanded", "false");
+      return;
+    }
+    panel.hidden = false;
+    panelBtn.setAttribute("aria-expanded", "true");
+    api.registry().then(function (r) { registry = r; return api.content(); }).catch(function () { return null; }).then(function (d) {
+      panelDraft = d;
+      buildPanel();
+    });
+  });
 
   /* ── events ── */
   document.addEventListener("mouseover", function (e) {
@@ -468,5 +573,6 @@
 
   document.body.appendChild(outline);
   document.body.appendChild(pop);
+  document.body.appendChild(panel);
   document.body.appendChild(bar);
 })();
