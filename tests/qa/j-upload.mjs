@@ -231,9 +231,8 @@ async function run(label, launch, vp, touch) {
     const dm = await page.textContent("#ed-media .ed-media-uperr");
     msg("editor drawer: unreadable video hollow.mp4 (real ftyp header)", dm);
     check(`${label} editor drawer: unreadable video gives a message`, dm.length > 0);
-    if (/Use a JPEG, PNG or WebP picture/.test(dm)) {
-      console.log(`KNOWN F-10 ${label}: a video that cannot be read is told "Use a JPEG, PNG or WebP picture, or an MP4 or WebM film." (it already is an MP4; the advice is for pictures)`);
-    } else check(`${label} editor drawer: a video is not told to use a picture`, true);
+    // F-10 (fixed): a video that cannot be read is told so as a video, never "Use a JPEG, PNG or WebP picture"
+    check(`${label} editor drawer: a video is not told to use a picture`, !/picture/i.test(dm) && /video/i.test(dm), dm);
     await shot(page, `Q12-${label}-editor-unreadable-video`);
     await page.keyboard.press("Escape");
     await page.setViewportSize(vp).catch(() => {});
