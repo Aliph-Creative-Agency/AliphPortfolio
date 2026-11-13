@@ -22,6 +22,7 @@
   <ul id="add-rows" class="adm-rows"></ul>
   <button id="add-go" class="adm-btn" type="button" disabled>Upload</button>
 </section>
+<section id="rings" class="adm-rings" aria-label="Ring picks"></section>
 <nav class="adm-tabs" id="tabs" role="tablist" aria-label="Category"></nav>
 <main id="grid" class="adm-main" tabindex="-1"></main>
 <dialog id="drawer" class="adm-drawer" aria-labelledby="drawer-title">
@@ -35,6 +36,12 @@
   <div id="drawer-body" class="adm-dbody"></div>
   <div id="drawer-actions" class="adm-dact"></div>
 </dialog>
+<dialog id="picker" class="adm-drawer adm-picker" aria-labelledby="picker-title">
+  <header class="adm-dhead"><h2 id="picker-title"></h2><button id="picker-close" class="adm-x" type="button">Done</button></header>
+  <input id="picker-q" class="adm-search" type="search" placeholder="Search by file name" aria-label="Search by file name" autocomplete="off">
+  <p id="picker-count" class="adm-dmsg" role="status"></p>
+  <ul id="picker-list" class="adm-grid"></ul>
+</dialog>
 <dialog id="confirm" class="adm-confirm" aria-labelledby="confirm-text">
   <p id="confirm-text"></p>
   <div class="adm-dact"><button id="confirm-yes" class="adm-btn" type="button">OK</button><button id="confirm-no" class="adm-btn adm-btn-2" type="button">Cancel</button></div>
@@ -42,5 +49,6 @@
 <script type="module" src="/admin/gallery/gallery.js"></script>
 <script type="module" src="/admin/gallery/add.js"></script>
 <script type="module" src="/admin/gallery/drawer.js"></script>
+<script type="module" src="/admin/gallery/rings.js"></script>
 </body>
 </html>

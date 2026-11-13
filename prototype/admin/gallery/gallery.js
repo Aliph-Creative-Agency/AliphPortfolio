@@ -122,6 +122,7 @@ export function render() {
 
   const changed = state.items.filter((it) => it.changed).length;
   $("summary").textContent = `${state.items.length} items, ${changed} changed and not published`;
+  document.dispatchEvent(new Event("gallery:render"));
 }
 
 export async function load() {
