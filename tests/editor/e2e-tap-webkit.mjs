@@ -45,6 +45,20 @@ async function run(label, launch, vp, touch) {
         check(`${label} ${c.path} ${touch ? "tap" : "click"} ${kind} ${sel} opens the editor`, !why, why);
       }
     }
+    // a node re-rendered or tagged after load (richline re-render, apply(), main.js tagger) answers a tap too:
+    // a clone carries no listeners, and a plain span that only later gets data-ek
+    await ready(page, "/admin/edit/");
+    await page.evaluate(() => {
+      const el = document.querySelector('[data-ek="heroPara"]'); el.replaceWith(el.cloneNode(true));
+    });
+    await page.waitForTimeout(300);
+    let why = await press(page, '[data-ek="heroPara"]', touch, POP);
+    check(`${label} re-rendered [data-ek="heroPara"] opens the editor`, !why, why);
+    await ready(page, "/admin/edit/");
+    await page.evaluate(() => { const h = document.querySelector('[data-ek="hero2"]'); const k = h.getAttribute("data-ek"); h.removeAttribute("data-ek"); setTimeout(() => h.setAttribute("data-ek", k), 50); });
+    await page.waitForTimeout(300);
+    why = await press(page, '[data-ek="hero2"]', touch, POP);
+    check(`${label} late-tagged [data-ek="hero2"] opens the editor`, !why, why);
     check(`${label} no page errors`, !errs.length, errs.slice(0, 3).join(" | "));
   } finally { await browser.close(); }
 }

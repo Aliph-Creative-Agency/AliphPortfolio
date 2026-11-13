@@ -33,11 +33,10 @@ async function openPop(page, key, touch) {
   await page.evaluate((k) => { const e = document.querySelector(`[data-ek="${k}"]`); if (e) e.scrollIntoView({ block: "center" }); }, key);
   await click(page, `[data-ek="${key}"]`, touch);
   if (touch) {
-    // F-08: in WebKit-mobile a tap on a [data-ek] text fires touch events but no click (the editor listens on
-    // document only), so the popover never opens. Record it, then open it with a synthetic click to go on.
+    // F-08 (fixed): a tap on a [data-ek] text must open the popover in WebKit-mobile. A miss fails the run, then a
+    // synthetic click opens it so the rest of the journey still runs.
     const opened = await page.waitForSelector(".ed-pop:not([hidden])", { timeout: 1500 }).then(() => true, () => false);
-    if (opened) check(`${touch} tap on [data-ek=${key}] opens the popover`, true);
-    else console.log(`KNOWN F-08 ${touch} tap on [data-ek=${key}] gave no click, popover not opened`);
+    check(`${touch} tap on [data-ek=${key}] opens the popover (F-08)`, opened);
     if (!opened) await page.evaluate((k) => document.querySelector(`[data-ek="${k}"]`).click(), key);
   }
   await page.waitForSelector(".ed-pop:not([hidden])", { timeout: 5000 });

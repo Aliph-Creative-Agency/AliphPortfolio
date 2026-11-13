@@ -848,6 +848,26 @@
     }
   }, true);
 
+  /* A tap on a phone becomes a click only on a node that answers clicks
+     itself or through an ancestor element (iOS Safari / WebKit; the document
+     listener above does not count), so a tap on plain text never reached it.
+     Every [data-ek] node gets a no-op listener, nodes tagged or re-rendered
+     later too. The same function twice is one listener, so re-arming is free;
+     on desktop it changes nothing. */
+  function tapNoop() {}
+  function armTap(n) {
+    if (n.nodeType !== 1) return;
+    if (n.hasAttribute("data-ek")) n.addEventListener("click", tapNoop);
+    if (n.firstElementChild) n.querySelectorAll("[data-ek]").forEach(function (el) { el.addEventListener("click", tapNoop); });
+  }
+  armTap(document.body);
+  new MutationObserver(function (recs) {
+    recs.forEach(function (r) {
+      if (r.type === "attributes") armTap(r.target);
+      else r.addedNodes.forEach(armTap);
+    });
+  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-ek"] });
+
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && modal) { e.preventDefault(); closeModal(); return; }
     if (e.key === "Escape" && cur) { e.preventDefault(); closePop(true); return; }
