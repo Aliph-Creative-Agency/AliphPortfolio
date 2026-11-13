@@ -1,5 +1,5 @@
-// Live parity: serve the site assets-only (today's deployment shape) on 8831,
-// capture a set of URLs, stop it, serve the Worker build on 8831, capture the
+// Live parity: serve the site assets-only (today's deployment shape) on PORT (env PORT / INSPECTOR, default 8831 / 9231),
+// capture a set of URLs, stop it, serve the Worker build on the same port, capture the
 // same URLs and compare status / content-type / location / body bytes.
 //   node tests/platform/parity-live.mjs
 import { spawn, execSync } from "node:child_process";
@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const PORT = 8831, INSPECTOR = 9231;
+const PORT = Number(process.env.PORT) || 8831, INSPECTOR = Number(process.env.INSPECTOR) || 9231;
 const BASE = `http://127.0.0.1:${PORT}`;
 const URLS = ["/", "/about", "/about/", "/library", "/index.html", "/about.html", "/style.css", "/main.js",
   "/robots.txt", "/sitemap.xml", "/assets/fonts/29LTIdris-FlatBold.woff2", "/assets/img/Aliph-Icon.svg", "/nope"];
