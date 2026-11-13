@@ -24,8 +24,9 @@
 //  - SERVING: GET /api/admin/media/<key> sends the stored media type with
 //    nosniff for everything the Worker can store; odd paths are 404, never
 //    500, never a non-admin/ object. It trusts the stored content-type
-//    blindly (F-06: an out-of-band text/html object would render inline on
-//    the admin origin).
+//    only if it is one of the six media types, else octet-stream, always
+//    with a sandbox CSP (F-06: an out-of-band text/html object used to
+//    render inline on the admin origin).
 import { env } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { call, del, installAccess, post, uninstallAccess } from "../gallery/helpers";
@@ -592,7 +593,8 @@ describe("GET /api/admin/media/<key>", () => {
       expect(MEDIA_TYPES.has(ct as never), ct).toBe(true);
       expect(ct).not.toMatch(/html|svg|xml|javascript/);
       expect(g.headers.get("x-content-type-options")).toBe("nosniff");
-      expect(g.headers.get("content-disposition")).toBeNull();
+      expect(g.headers.get("content-disposition")).toMatch(/^inline; filename="[a-z0-9-]+\.[a-z0-9]+"$/); // F-06: inline, never attachment
+      expect(g.headers.get("content-security-policy")).toBe("sandbox");
       expect(g.headers.get("cache-control")).toBe("private, max-age=300");
       await g.body?.cancel();
     }
@@ -643,7 +645,7 @@ describe("GET /api/admin/media/<key>", () => {
   // Only reachable through an out-of-band bucket write (wrangler r2 object
   // put, the dashboard, an R2 token): the Worker itself never stores these.
   for (const [ct, body] of [["text/html", HTML], ["image/svg+xml", SVG]] as const) {
-    it.fails(`F-06 a stored ${ct} object under an admin/ key is served inline as ${ct} on the admin origin`, async () => {
+    it(`F-06 a stored ${ct} object under an admin/ key is not served as ${ct} (octet-stream, sandbox CSP, nosniff)`, async () => {
       const k = `admin/2026/01/abcdef-planted.${ct === "text/html" ? "jpg" : "png"}`;
       await env.MEDIA_BUCKET.put(k, cat(body), { httpMetadata: { contentType: ct } });
       const g = await call(`/api/admin/media/${k}`);
@@ -651,9 +653,27 @@ describe("GET /api/admin/media/<key>", () => {
       const disp = g.headers.get("content-disposition") ?? "";
       const csp = g.headers.get("content-security-policy") ?? "";
       await g.body?.cancel();
+      expect(g.status).toBe(200);
       // safe = an allow-listed media type, OR forced download, OR a sandbox CSP
       expect(MEDIA_TYPES.has(served as never) || /attachment/i.test(disp) || /sandbox/i.test(csp)).toBe(true);
+      // the fix does all of it: never the stored type, sandboxed, nosniff, inline
+      expect(served).toBe("application/octet-stream");
+      expect(csp).toMatch(/sandbox/);
+      expect(g.headers.get("x-content-type-options")).toBe("nosniff");
+      expect(disp).toMatch(/^inline/);
     });
   }
+
+  it("F-06 a real media object keeps its media type and gets the same hardening headers", async () => {
+    const k = "admin/2026/01/abcdef-real.jpg";
+    await env.MEDIA_BUCKET.put(k, JPEG, { httpMetadata: { contentType: "image/jpeg" } });
+    const g = await call(`/api/admin/media/${k}`);
+    expect(g.status).toBe(200);
+    expect(g.headers.get("content-type")).toBe("image/jpeg");
+    expect(g.headers.get("content-security-policy")).toMatch(/sandbox/);
+    expect(g.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(g.headers.get("content-disposition")).toMatch(/^inline/);
+    expect(new Uint8Array(await g.arrayBuffer())).toEqual(JPEG);
+  });
 });
 

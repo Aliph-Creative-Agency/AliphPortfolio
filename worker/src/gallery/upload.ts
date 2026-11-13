@@ -7,7 +7,7 @@
 
 import type { AdminCtx, Env } from "../index";
 import { json } from "./routes";
-import { SNIFF_BYTES, sniff, type Sniffed } from "./sniff";
+import { MEDIA_TYPES, SNIFF_BYTES, sniff, type Sniffed } from "./sniff";
 
 export const MEDIA_ORIGIN = "https://media.aliphcreative.com";
 export const SINGLE_MAX = 90 * 1024 * 1024;
@@ -241,11 +241,19 @@ export async function mediaGet(env: Env, url: URL): Promise<Response> {
   if (!ADMIN_KEY_RE.test(key)) return json({ error: "not found" }, 404);
   const obj = await env.MEDIA_BUCKET.get(key);
   if (!obj) return json({ error: "not found" }, 404);
+  // Only a stored type sniff() could have written is served as itself: an
+  // object put out of band (wrangler, dashboard, R2 token) with text/html or
+  // SVG would otherwise run as a page on the admin origin (F-06). The
+  // sandbox CSP + nosniff hold even if a bad type slips through; inline keeps
+  // <img>/<video> previews working.
+  const stored = obj.httpMetadata?.contentType ?? "";
   return new Response(obj.body, {
     headers: {
-      "content-type": obj.httpMetadata?.contentType ?? "application/octet-stream",
+      "content-type": MEDIA_TYPES.has(stored) ? stored : "application/octet-stream",
       "cache-control": "private, max-age=300",
       "x-content-type-options": "nosniff",
+      "content-security-policy": "sandbox",
+      "content-disposition": `inline; filename="${key.slice(key.lastIndexOf("/") + 1)}"`,
     },
   });
 }
