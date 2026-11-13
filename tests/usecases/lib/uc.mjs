@@ -45,7 +45,11 @@ export function snapshotState() {
 /** Run with the server STOPPED. Restores the baseline (creates it from the current state the first time). */
 export function resetState() {
   if (!existsSync(BASELINE)) { snapshotState(); return; }
-  rmSync(STATE, { recursive: true, force: true });
+  // workerd can hold the sqlite files for a few seconds after taskkill: retry the delete (EPERM) before giving up
+  for (let i = 0; ; i++) {
+    try { rmSync(STATE, { recursive: true, force: true }); break; }
+    catch (e) { if (i >= 20) throw e; Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000); }
+  }
   cpSync(BASELINE, STATE, { recursive: true });
 }
 
