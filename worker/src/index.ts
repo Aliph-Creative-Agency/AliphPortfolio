@@ -17,6 +17,7 @@ import { onSlots } from "./render/slots";
 import { onRegions } from "./render/regions";
 import { getPublished, matchPage, pageKey, putPage, type CacheEnv, type Published } from "./cache";
 import { isEmpty } from "./store";
+import { editorRoute } from "./editor/routes";
 
 export interface Env extends AccessEnv, CacheEnv {
   ASSETS: Fetcher;
@@ -119,6 +120,8 @@ async function servePage(request: Request, env: Env, ctx: ExecutionContext, url:
 }
 
 async function admin(request: Request, env: Env, url: URL, ctx: AdminCtx): Promise<Response> {
+  const ed = await editorRoute(request, env, url, ctx);
+  if (ed) return ed;
   if (url.pathname.startsWith("/api/")) {
     // Who the Worker thinks you are: the admin UI shows it, and it is the
     // cheapest end-to-end check that Access + the JWT check are wired.

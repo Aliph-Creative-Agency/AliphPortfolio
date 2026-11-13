@@ -1,0 +1,138 @@
+/* Edit-mode overlay. Everything here belongs to nodes marked data-editor-ui.
+   The site's root is 150%, so the overlay sizes in px, not rem. */
+
+html[data-edit-mode="1"] [data-ek] { cursor: text; }
+
+.ed-outline {
+  position: fixed; z-index: 2147483000; pointer-events: none; box-sizing: border-box;
+  border: 2px solid #BB5C39; background: rgba(187, 92, 57, 0.08); border-radius: 2px;
+  display: none;
+}
+.ed-outline.is-on { display: block; }
+.ed-outline.is-active { border-style: solid; background: rgba(187, 92, 57, 0.14); }
+
+.ed-bar, .ed-pop, .ed-pop * , .ed-bar * { box-sizing: border-box; }
+.ed-bar, .ed-pop {
+  font: 400 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0; text-transform: none; color: #0F1820; direction: ltr; text-align: left;
+}
+
+.ed-bar {
+  position: fixed; z-index: 2147483100; inset-inline: 0; bottom: 0;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 6px 12px; background: #0F1820; color: #E2E0D6;
+  border-top: 1px solid rgba(226, 224, 214, 0.25);
+}
+.ed-bar a, .ed-bar button {
+  font: inherit; color: inherit; background: none; cursor: pointer; text-decoration: none;
+  border: 1px solid rgba(226, 224, 214, 0.35); border-radius: 3px; padding: 4px 10px; min-height: 30px;
+  display: inline-flex; align-items: center;
+}
+.ed-bar a:hover, .ed-bar button:hover { background: rgba(226, 224, 214, 0.12); }
+.ed-bar a[aria-current="page"] { background: #E2E0D6; color: #0F1820; }
+.ed-bar :focus-visible, .ed-pop :focus-visible { outline: 2px solid #BB5C39; outline-offset: 2px; }
+.ed-brand { font-weight: 600; margin-inline-end: 4px; }
+.ed-pages { display: flex; gap: 6px; }
+.ed-spacer { flex: 1 1 auto; }
+.ed-chip { padding: 3px 10px; border-radius: 999px; background: rgba(226, 224, 214, 0.15); font-size: 12px; }
+
+.ed-pop {
+  position: fixed; z-index: 2147483200; width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 80px);
+  overflow: auto; background: #F3F1E8; border: 1px solid #0F1820; border-radius: 4px;
+  box-shadow: 0 10px 30px rgba(15, 24, 32, 0.3); padding: 12px;
+}
+.ed-pop[hidden] { display: none; }
+.ed-pop-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.ed-pop-key { font: 600 12px/1.3 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+.ed-pop-sec { font-size: 12px; color: rgba(15, 24, 32, 0.68); }
+.ed-field { display: block; margin-bottom: 10px; }
+.ed-field-top { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
+.ed-count.is-over { color: #A11; font-weight: 600; }
+.ed-field textarea {
+  width: 100%; min-height: 64px; resize: vertical; padding: 6px 8px; font: 16px/1.4 system-ui, "Segoe UI", sans-serif;
+  color: #0F1820; background: #fff; border: 1px solid rgba(15, 24, 32, 0.45); border-radius: 3px;
+}
+.ed-field textarea[dir="rtl"] { text-align: right; }
+.ed-pop-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.ed-pop-actions button {
+  font: inherit; cursor: pointer; padding: 5px 12px; min-height: 30px; border-radius: 3px;
+  border: 1px solid #0F1820; background: #fff; color: #0F1820;
+}
+.ed-pop-actions button.is-primary { background: #0F1820; color: #F3F1E8; }
+.ed-hint { font-size: 12px; color: rgba(15, 24, 32, 0.68); margin: 0 0 8px; }
+
+@media (max-width: 520px) {
+  .ed-bar { gap: 6px; padding: 5px 8px; }
+  .ed-brand { display: none; }
+}
+
+/* a richline shows its \n as a line break while it is being edited */
+.ed-rich { white-space: pre-line; }
+
+/* autosave status chip + conflict dialog + reset */
+.ed-chip[data-state="saving"] { background: rgba(226, 224, 214, 0.3); }
+.ed-chip[data-state="saved"] { background: rgba(120, 190, 140, 0.35); }
+.ed-chip[data-state="offline"], .ed-chip[data-state="error"] { background: rgba(214, 150, 70, 0.55); }
+.ed-chip[data-state="conflict"] { background: rgba(200, 70, 60, 0.7); }
+.ed-field-tools { display: inline-flex; align-items: center; gap: 8px; }
+.ed-reset {
+  font: inherit; font-size: 12px; cursor: pointer; padding: 1px 8px; min-height: 22px; border-radius: 3px;
+  border: 1px solid rgba(15, 24, 32, 0.4); background: transparent; color: #0F1820;
+}
+.ed-dialog {
+  position: fixed; z-index: 2147483260; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(440px, calc(100vw - 32px)); padding: 16px; border-radius: 6px;
+  background: #F3F1E8; color: #0F1820; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  font: 14px/1.45 system-ui, sans-serif; direction: ltr; text-align: start;
+}
+.ed-dialog p { margin: 0 0 8px; overflow-wrap: anywhere; }
+.ed-dialog-title { font-weight: 600; }
+.ed-dialog-theirs, .ed-dialog-mine { font-size: 13px; }
+
+/* "Page text" panel: a column on the physical right edge above the bar */
+.ed-panel {
+  position: fixed; z-index: 2147483150; top: 0; right: 0; bottom: var(--ed-bar-h, 46px); width: min(340px, 100vw);
+  display: flex; flex-direction: column; gap: 8px; padding: 12px; overflow: hidden;
+  background: #F3F1E8; color: #0F1820; border-left: 1px solid #0F1820; box-sizing: border-box;
+  font: 400 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; direction: ltr; text-align: left;
+}
+.ed-panel[hidden] { display: none; }
+.ed-panel * { box-sizing: border-box; }
+.ed-panel-head { display: flex; justify-content: space-between; align-items: baseline; }
+.ed-panel-page { font-size: 12px; color: rgba(15, 24, 32, 0.68); }
+.ed-panel input[type="search"] { font: 16px/1.3 system-ui, sans-serif; padding: 6px 8px; border: 1px solid rgba(15, 24, 32, 0.45); border-radius: 3px; background: #fff; color: #0F1820; }
+.ed-panel-list { overflow: auto; flex: 1 1 auto; }
+.ed-panel-sec h3 { margin: 10px 0 4px; font: 600 12px/1.3 system-ui, sans-serif; text-transform: uppercase; letter-spacing: 0.04em; color: rgba(15, 24, 32, 0.68); }
+.ed-row { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; background: #fff; border: 1px solid rgba(15, 24, 32, 0.25); border-radius: 3px; padding: 5px 8px; margin-bottom: 4px; min-height: 30px; }
+.ed-row[hidden], .ed-panel-sec[hidden] { display: none; }
+.ed-row:hover { border-color: #BB5C39; }
+.ed-row:focus-visible { outline: 2px solid #BB5C39; outline-offset: 2px; }
+.ed-row-key { display: block; font: 600 12px/1.3 ui-monospace, Consolas, monospace; }
+.ed-row-val { display: block; font-size: 13px; color: rgba(15, 24, 32, 0.75); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Publish / Discard (E-06b) */
+.ed-bar button:disabled { opacity: 0.45; cursor: default; background: transparent; }
+.ed-bar .ed-publish:not(:disabled) { background: #BB5C39; color: #F3F1E8; }
+/* dialogs and the toast sit above the bar, the side panels and the popover (a panel is full-width on a phone) */
+.ed-scrim { position: fixed; inset: 0; z-index: 2147483250; background: rgba(15, 24, 32, 0.4); }
+.ed-confirm { width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 96px); display: flex; flex-direction: column; }
+.ed-dialog-body { overflow: auto; flex: 1 1 auto; margin-bottom: 8px; }
+.ed-dialog-page { font-weight: 600; margin-top: 8px !important; }
+.ed-dialog-list { margin: 0 0 8px; padding-inline-start: 18px; font-size: 13px; }
+.ed-dialog-list li { overflow-wrap: anywhere; }
+.ed-dialog-note { font-size: 13px; color: #8a3f22; }
+.ed-dialog-msg:empty { display: none; }
+.ed-toast {
+  position: fixed; z-index: 2147483300; left: 50%; bottom: 60px; transform: translateX(-50%);
+  max-width: calc(100vw - 32px); padding: 8px 14px; border-radius: 4px; background: #0F1820; color: #F3F1E8;
+  font: 14px/1.4 system-ui, sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+.ed-toast[hidden] { display: none; }
+
+/* History panel (E-07c): the "Page text" column, one card per revision */
+.ed-rev { background: #fff; border: 1px solid rgba(15, 24, 32, 0.25); border-radius: 3px; padding: 6px 8px; margin-bottom: 6px; }
+.ed-rev p { margin: 2px 0 0; }
+.ed-rev-head { display: flex; align-items: center; gap: 8px; }
+.ed-rev-live { font-size: 11px; padding: 0 6px; border-radius: 3px; background: rgba(120, 190, 140, 0.45); }
+.ed-rev-meta { font-size: 12px; color: rgba(15, 24, 32, 0.68); overflow-wrap: anywhere; }
+.ed-rev-changes { font-size: 13px; overflow-wrap: anywhere; }

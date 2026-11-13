@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Aliph admin</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body class="admin">
+<header class="adm-bar">
+  <span class="adm-brand">Aliph admin</span>
+  <span class="adm-who" id="who" aria-live="polite">&nbsp;</span>
+</header>
+<main class="adm-main">
+  <h1>Edit the site</h1>
+  <p class="adm-lede">Open a page in edit mode and click any text. Changes save as a draft; nothing is live until you publish.</p>
+
+  <p class="adm-changes" id="changes" data-count="">Draft changes: <b id="changes-n">&ndash;</b></p>
+
+  <ul class="adm-links">
+    <li><a href="/admin/edit/"><b>Home</b><span>Edit text on the home page</span></a></li>
+    <li><a href="/admin/edit/about"><b>About</b><span>Edit text on the about page</span></a></li>
+    <li><a href="/admin/edit/library"><b>Library</b><span>Edit text on the library page</span></a></li>
+    <li><a href="/admin/gallery/"><b>Gallery</b><span>Pictures, films and the home ring</span></a></li>
+    <li><a href="/admin/edit/?history"><b>History</b><span>Published revisions; restore one into the draft</span></a></li>
+  </ul>
+</main>
+<script>
+(function () {
+  var who = document.getElementById("who");
+  fetch("/api/admin/whoami", { credentials: "same-origin" })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) { who.textContent = j && j.email ? "Signed in as " + j.email : ""; })
+    .catch(function () { who.textContent = ""; });
+  /* the draft-changes count: what Publish would make live (E-06b) */
+  var box = document.getElementById("changes"), n = document.getElementById("changes-n");
+  fetch("/api/admin/changes", { credentials: "same-origin" })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      if (!j || !j.changes) return;
+      var g = j.changes.filter(function (c) { return c.section === "gallery" || c.section === "clients"; }).length;
+      n.textContent = String(j.changes.length) + (g ? " (gallery " + g + ")" : "");
+      box.setAttribute("data-count", String(j.changes.length));
+    })
+    .catch(function () {});
+})();
+</script>
+</body>
+</html>
