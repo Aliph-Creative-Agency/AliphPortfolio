@@ -86,3 +86,17 @@ body.adm {
 .adm-ring-note[data-kind="error"] { color: var(--accent); }
 .adm-picker { inline-size: min(64rem, 100vw); }
 .adm-x:disabled { opacity: 0.4; cursor: default; }
+.adm-clean { margin-block: 1.6rem; }
+.adm-clean > h2 { margin: 0 0 0.4rem; font: 1.8rem/1.2 var(--font-display); }
+.adm-clean .adm-dact { align-items: center; margin-block-start: 0.8rem; }
+.adm-clean .adm-dmsg { margin: 0; flex: 1 1 16rem; }
+.adm-clist { list-style: none; margin: 0.8rem 0; padding: 0; display: grid; gap: 0.5rem; }
+.adm-crow { display: flex; align-items: center; gap: 0.8rem; padding: 0.4rem 0.6rem; background: var(--cream-warm); border: 1px solid var(--ink-faint); }
+.adm-crow input { flex: none; inline-size: 1.8rem; block-size: 1.8rem; accent-color: var(--ink); }
+.adm-clab { display: flex; flex: 1 1 auto; min-inline-size: 0; align-items: center; gap: 0.8rem; cursor: pointer; }
+.adm-ctxt { display: flex; flex-direction: column; min-inline-size: 0; flex: 1 1 auto; }
+.adm-ctxt .adm-pick-name { flex: none; }
+.adm-cmeta { color: var(--ink-mute); font-size: 1.2rem; }
+.adm-cwarn { color: var(--accent); font-size: 1.2rem; }
+.adm-cvid { display: grid; place-items: center; color: var(--ink-mute); font-size: 1.1rem; }
+.adm-dmsg[data-kind="ok"] { color: var(--ink); }
