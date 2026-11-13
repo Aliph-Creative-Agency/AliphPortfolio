@@ -24,7 +24,21 @@
 </section>
 <nav class="adm-tabs" id="tabs" role="tablist" aria-label="Category"></nav>
 <main id="grid" class="adm-main" tabindex="-1"></main>
+<dialog id="drawer" class="adm-drawer" aria-labelledby="drawer-title">
+  <header class="adm-dhead">
+    <div><h2 id="drawer-title"></h2><p id="drawer-status" class="adm-sub"></p></div>
+    <button id="drawer-close" class="adm-x" type="button">Close</button>
+  </header>
+  <p id="drawer-msg" class="adm-dmsg" role="status"></p>
+  <div id="drawer-body" class="adm-dbody"></div>
+  <div id="drawer-actions" class="adm-dact"></div>
+</dialog>
+<dialog id="confirm" class="adm-confirm" aria-labelledby="confirm-text">
+  <p id="confirm-text"></p>
+  <div class="adm-dact"><button id="confirm-yes" class="adm-btn" type="button">OK</button><button id="confirm-no" class="adm-btn adm-btn-2" type="button">Cancel</button></div>
+</dialog>
 <script type="module" src="/admin/gallery/gallery.js"></script>
 <script type="module" src="/admin/gallery/add.js"></script>
+<script type="module" src="/admin/gallery/drawer.js"></script>
 </body>
 </html>

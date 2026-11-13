@@ -37,6 +37,8 @@ export interface AdminItem {
   changed: boolean;
   /** optimistic lock: 0 = no row yet (send baseRev 0 to create) */
   rev: number;
+  /** the draft row's own columns (absent = NULL = "keep MEDIA's value"): PUT replaces the row, so a save sends these back */
+  own: { src?: string; poster?: string; cat?: string; ratio?: number; date?: string; client?: string; sort?: number };
 }
 
 export interface AdminRing {
@@ -58,6 +60,19 @@ function rowChanged(r: Row): boolean {
   if (r.state === "deleted") return r.published_json !== null;
   return r.published_json !== JSON.stringify(galleryItemFromRow(r));
 }
+
+const ownOf = (r: Row | undefined) => {
+  const o: AdminItem["own"] = {};
+  if (!r) return o;
+  if (r.src != null) o.src = r.src;
+  if (r.poster != null) o.poster = r.poster;
+  if (r.cat != null) o.cat = r.cat;
+  if (r.ratio != null) o.ratio = r.ratio;
+  if (r.date != null) o.date = r.date;
+  if (r.client_id != null) o.client = r.client_id;
+  if (r.sort != null) o.sort = r.sort;
+  return o;
+};
 
 const altOf = (r: Row | undefined) => {
   const a: { ar?: string; en?: string } = {};
@@ -93,6 +108,7 @@ function defaultItem(m: Media, row: Row | undefined): AdminItem {
     deleted: gone && rowChanged(row!),
     changed: row ? rowChanged(row) : false,
     rev: row?.rev ?? 0,
+    own: ownOf(r),
   };
   if (video) item.film = src ?? `${R2}/video/${m.f}`;
   return item;
@@ -116,6 +132,7 @@ function uploadItem(r: Row): AdminItem {
     deleted: r.state === "deleted",
     changed: rowChanged(r),
     rev: r.rev,
+    own: ownOf(r),
   };
   if (video && r.src) item.film = r.src;
   return item;
