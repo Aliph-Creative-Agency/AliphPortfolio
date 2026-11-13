@@ -35,3 +35,19 @@ body.adm {
 .adm-tile[data-hidden="1"] .adm-pic { opacity: 0.35; }
 .adm-tile[data-removed="1"] .adm-pic { opacity: 0.35; }
 .adm-tile[data-removed="1"] .adm-name { text-decoration: line-through; }
+.adm-add { margin-block: 1.2rem; }
+.adm-add h2 { margin: 0 0 0.8rem; font: 1.8rem/1.2 var(--font-display); }
+.adm-zone { border: 2px dashed var(--ink-faint); padding: 2rem 1.2rem; text-align: center; cursor: pointer; color: var(--ink-mute); }
+.adm-zone[data-over="1"] { border-color: var(--accent); color: var(--ink); }
+.adm-zone:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.adm-batch { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; margin-block: 0.8rem; }
+.adm-sel { font: inherit; color: inherit; background: var(--cream-warm); border: 1px solid var(--ink-faint); border-radius: 0; padding: 0.4rem 0.6rem; max-inline-size: 100%; }
+.adm-rows { list-style: none; margin: 0; padding: 0; }
+.adm-row { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; align-items: center; padding-block: 0.6rem; border-block-end: 1px solid var(--ink-faint); }
+.adm-rname { flex: 1 1 14rem; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; }
+.adm-prog { flex: 0 1 10rem; inline-size: 10rem; max-inline-size: 100%; }
+.adm-rmsg { flex: 1 1 14rem; color: var(--ink-mute); }
+.adm-row[data-status="error"] .adm-rmsg { color: var(--accent); }
+.adm-btn, .adm-x { font: inherit; color: var(--cream); background: var(--ink); border: 0; padding: 0.7rem 1.4rem; cursor: pointer; }
+.adm-btn:disabled { opacity: 0.4; cursor: default; }
+.adm-x { background: none; color: var(--ink); border: 1px solid var(--ink-faint); padding: 0.3rem 0.8rem; }

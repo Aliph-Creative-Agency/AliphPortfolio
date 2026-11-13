@@ -14,8 +14,17 @@
   <p class="adm-sub" id="summary" aria-live="polite">Loading…</p>
   <input id="search" class="adm-search" type="search" placeholder="Search by file name" aria-label="Search by file name" autocomplete="off">
 </header>
+<section class="adm-add" aria-labelledby="add-h">
+  <h2 id="add-h">Add files</h2>
+  <div id="add-zone" class="adm-zone" role="button" tabindex="0">Drop photos or videos here, or press to choose</div>
+  <input id="add-file" type="file" multiple accept="image/*,video/mp4,video/webm" hidden>
+  <div id="add-batch" class="adm-batch"></div>
+  <ul id="add-rows" class="adm-rows"></ul>
+  <button id="add-go" class="adm-btn" type="button" disabled>Upload</button>
+</section>
 <nav class="adm-tabs" id="tabs" role="tablist" aria-label="Category"></nav>
 <main id="grid" class="adm-main" tabindex="-1"></main>
 <script type="module" src="/admin/gallery/gallery.js"></script>
+<script type="module" src="/admin/gallery/add.js"></script>
 </body>
 </html>
