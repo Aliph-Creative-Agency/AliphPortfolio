@@ -102,3 +102,17 @@ body.adm {
 .adm-cwarn { color: var(--accent); font-size: 1.2rem; }
 .adm-cvid { display: grid; place-items: center; color: var(--ink-mute); font-size: 1.1rem; }
 .adm-dmsg[data-kind="ok"] { color: var(--ink); }
+/* G-06b: library order inside a sub (order.js) */
+.adm-run-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; margin-block: -0.4rem 1rem; }
+.adm-run-note { margin: 0; flex: 1 1 18rem; min-block-size: 1.4em; color: var(--ink-mute); }
+.adm-run-note[data-kind="error"] { color: var(--accent); }
+.adm-run-note[data-kind="ok"] { color: var(--ink); }
+.adm-run[data-reorder="1"] .adm-tile { cursor: grab; }
+.adm-run[data-reorder="1"] .adm-tile[data-fixed="1"] { cursor: default; }
+.adm-tile[data-moved="1"] { outline: 2px dashed var(--accent); outline-offset: -2px; }
+.adm-tile[data-moving="1"] { outline: 3px solid var(--accent); outline-offset: 2px; }
+.adm-tile[data-drag="1"] { opacity: 0.4; }
+.adm-move { display: flex; gap: 0.4rem; margin-block-start: 0.4rem; }
+.adm-move .adm-x { flex: 1 1 0; min-inline-size: 0; }
+.adm-toast { position: fixed; inset-block-end: 1.6rem; inset-inline: 1.6rem; margin: 0 auto; max-inline-size: 48rem; box-sizing: border-box;
+  padding: 1rem 1.4rem; background: var(--ink); color: var(--cream); z-index: 10; }

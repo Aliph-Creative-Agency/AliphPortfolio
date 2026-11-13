@@ -81,6 +81,12 @@ const altOf = (r: Row | undefined) => {
   return a;
 };
 
+/** A row on a default piece that only places it (G-06a: `sort` and nothing
+ *  else) leaves the piece itself as MEDIA has it: still kind "default" (no
+ *  "Revert to default" for it), with the row's rev and own.sort. */
+const changesPiece = (r: Row) =>
+  r.hidden === 1 || [r.src, r.poster, r.cat, r.sub, r.ratio, r.date, r.alt_ar, r.alt_en, r.client_id].some((v) => v != null);
+
 function defaultItem(m: Media, row: Row | undefined): AdminItem {
   const video = !!m.v;
   /* A deleted row on a default piece means "back to the default": the site
@@ -95,7 +101,7 @@ function defaultItem(m: Media, row: Row | undefined): AdminItem {
   const src = r?.src ?? undefined;
   const item: AdminItem = {
     id: m.f,
-    kind: r ? "override" : "default",
+    kind: r && changesPiece(r) ? "override" : "default",
     cat: r?.cat ?? m.c,
     sub: r?.sub ?? null,
     ratio: r?.ratio ?? m.r,

@@ -61,6 +61,11 @@ describe("POST /api/admin/gallery/order", () => {
     // a default with no row got a bare override: only id + sort, MEDIA keeps the rest
     const bare = want.find((e) => e.rev === 0)!;
     expect(byId.get(bare.id)).toMatchObject({ rev: 1, state: "active", hidden: 0, src: null, cat: null });
+    // …and the grid still reads it as the default piece (no "revert"), now placed
+    const shown = new Map(out.items.map((it) => [it.id, it]));
+    expect(shown.get(bare.id)).toMatchObject({ kind: "default", rev: 1, changed: true });
+    expect(shown.get(rev.id)).toMatchObject({ kind: "default", deleted: false });
+    expect(shown.get(hid.id)).toMatchObject({ kind: "override", hidden: true });
     // the hidden override stays hidden; the reverted one is back to the default piece (+ sort), not its old values
     expect(byId.get(hid.id)).toMatchObject({ hidden: 1, state: "active" });
     expect(byId.get(rev.id)).toMatchObject({ hidden: 0, src: null, state: "active" });

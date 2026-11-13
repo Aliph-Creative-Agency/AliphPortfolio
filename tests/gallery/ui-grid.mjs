@@ -69,6 +69,8 @@ check("deleted upload: struck + badge", (await dummyUp.getAttribute("data-remove
   && (await dummyUp.locator(".adm-name").evaluate((e) => getComputedStyle(e).textDecorationLine)) === "line-through"
   && (await dummyUp.locator(".adm-badge").allTextContents()).includes("deleted"));
 check("upload lives in the photos run", (await page.locator('.adm-run[data-run="photos"] .adm-tile[data-id="' + setup.uploadId + '"]').count()) === 1);
+// lazy image: a saved library order (G-06) can file the fresh upload far down the run
+await dummyUp.scrollIntoViewIfNeeded();
 await page.waitForTimeout(500);
 check("upload thumb fell back to /api/admin/media/", (await dummyUp.locator(".adm-pic").getAttribute("src")).includes("/api/admin/media/admin/"));
 check("video runs before photos", (await page.$$eval(".adm-run", (s) => s.map((x) => x.dataset.run))).join() === "videos,photos");
