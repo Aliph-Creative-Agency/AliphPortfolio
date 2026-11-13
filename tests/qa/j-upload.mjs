@@ -116,8 +116,8 @@ async function run(label, launch, vp, touch) {
     msg("fake.jpg, bytes are not a picture", rows[0].msg);
     check(`${label} fake.jpg: message is the unreadable sentence`, /could not be read/.test(rows[0].msg));
     check(`${label} fake.jpg wrote nothing`, (await api(page)).length === baseItems && (await tiles(page)) === base);
-    check(`${label} an error row has no Remove/Retry button`, rows[0].buttons === 0, `buttons=${rows[0].buttons}`);
-    console.log(`KNOWN F-09 ${label}: a failed row has no Remove or Retry button; the file has to be picked again and the dead row stays until reload`);
+    // F-09 (fixed): a failed row offers Retry and Remove (a finding fails the run)
+    check(`${label} an error row has Retry + Remove (F-09)`, rows[0].buttons === 2, `buttons=${rows[0].buttons}`);
     // a failed row does not block a later good file in the same batch list
     await stage(page, path.join(FIX, "photo-plain.jpg"));
     await go(page);
