@@ -4237,10 +4237,63 @@ let openCat = "all";
 const coverOf = (p) =>
   "assets/shots/" + p.profile.shots[0].replace(/-\d+$/, "-card") + ".webp";
 
+/* The Clients index above the archive: published clients with at least one
+   VISIBLE piece (MEDIA has already lost hidden and deleted rows, so counting
+   MEDIA is counting what the archive shows). None listed -> no block and no
+   markup at all, so a store without clients is today's page. Ordered by the
+   newest piece date (an undated piece counts as oldest), then by name. Rebuilt
+   with the archive on every language switch. */
+const CLIENT_T = {
+  clients: { ar: "العملاء", en: "Clients" },
+  piece1: { ar: "قطعة واحدة", en: "1 piece" },
+  pieces: { ar: "قطعة", en: "pieces" }
+};
+const piecesOf = (n) => (n === 1 ? CLIENT_T.piece1[lang] : num(n) + " " + CLIENT_T.pieces[lang]);
+function renderClientsIndex() {
+  const host = accRoot.closest("main");
+  if (!host) return;
+  const old = document.querySelector(".lib-clients");
+  if (old) old.remove();
+  const stat = {};
+  MEDIA.forEach((m) => {
+    if (!m.client || !CLIENTS[m.client]) return;
+    const s = stat[m.client] || (stat[m.client] = { n: 0, d: "" });
+    s.n++;
+    if ((m.d || "") > s.d) s.d = m.d || "";
+  });
+  const nm = (c) => c.name[lang] || c.name.en || c.name.ar;
+  const list = Object.keys(stat).map((id) => CLIENTS[id])
+    .sort((a, b) => stat[b.id].d.localeCompare(stat[a.id].d) || nm(a).localeCompare(nm(b)));
+  if (!list.length) return;
+  const sec = document.createElement("section");
+  sec.className = "lib-clients";
+  sec.setAttribute("aria-label", CLIENT_T.clients[lang]);
+  sec.innerHTML = `
+    <div class="lc-head"><h2>${CLIENT_T.clients[lang]}</h2><span>${num(list.length)}</span></div>
+    <ul class="lc-list">${list.map((c) => `
+      <li><a href="/library?client=${encodeURIComponent(c.id)}">
+        <span class="lc-mono" aria-hidden="true">${escHTML(Array.from(nm(c))[0] || "")}</span>
+        <span class="lc-name">${escHTML(nm(c))}</span>
+        ${c.line && (c.line[lang] || "") ? `<span class="lc-line">${escHTML(c.line[lang])}</span>` : ""}
+        <span class="lc-meta">${c.year ? `<span>${num(c.year)}</span>` : ""}<span>${piecesOf(stat[c.id].n)}</span><span class="lc-arrow" aria-hidden="true">${lang === "ar" ? "←" : "→"}</span></span>
+      </a></li>`).join("")}
+    </ul>`;
+  host.before(sec);
+  fitClientNames();
+}
+/* FIT THE TYPE: a client's name is at most two lines (floor 0.75). Re-run when
+   the width changes or the fonts arrive, both of which move the line breaks. */
+function fitClientNames() {
+  document.querySelectorAll(".lc-name").forEach((el) => fitLines(el, 2, 0.75));
+}
+window.addEventListener("resize", fitClientNames);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitClientNames);
+
 function renderLibrary() {
   if (!accRoot) return;
   accRoot.innerHTML = "";
   pending.clear();
+  renderClientsIndex();
 
   /* Undated sorts LAST, not to 1970. The nine design pieces carry no date at
      all, and an empty string compares below every real one — which would file

@@ -5686,3 +5686,29 @@ body.sheet-open { overflow: hidden; }
 
 /* clients */
 .tile figcaption .t-client { color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
+
+/* the Clients index above the archive: a printed index, one entry per client */
+.lib-clients { background: var(--cream); border-top: var(--hair); padding: 0.8rem var(--pad) 1.1rem; }
+.lc-head { display: flex; align-items: baseline; gap: 1rem; margin-block-end: 0.5rem; }
+.lc-head h2 { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; line-height: 1.3; margin: 0; }
+.lc-head span { font-size: 0.75rem; font-weight: 500; color: var(--ink-mute); }
+.lc-list { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 1.6rem; }
+.lc-list a {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.2rem 0.8rem; align-items: start;
+  padding: 0.7rem 0; border-bottom: var(--hair); color: var(--ink);
+}
+.lc-list a:hover .lc-name, .lc-list a:focus-visible .lc-name { color: var(--accent); }
+.lc-list a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lc-mono {
+  grid-row: span 3; display: inline-grid; place-items: center; flex: none;
+  inline-size: 2.2rem; block-size: 2.2rem; border: 1px solid var(--ink); background: var(--cream-warm);
+  font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; line-height: 1;
+}
+.lc-name {
+  font-family: var(--font-display); font-weight: 800; font-size: 1rem; line-height: 1.3; transition: color 0.3s;
+  overflow-wrap: anywhere;
+}
+.lc-line { font-size: 0.75rem; font-weight: 500; color: var(--ink-soft); line-height: 1.5; overflow-wrap: anywhere; }
+.lc-meta { font-size: 0.75rem; font-weight: 500; color: var(--ink-mute); font-variant-numeric: tabular-nums; display: flex; gap: 0.5rem; }
+.lc-arrow { margin-inline-start: auto; color: var(--ink); font-weight: 700; }
+@media (max-width: 900px) { .lc-list { grid-template-columns: minmax(0, 1fr); } }
