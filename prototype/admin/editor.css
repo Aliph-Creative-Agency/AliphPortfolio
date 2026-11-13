@@ -68,3 +68,23 @@ html[data-edit-mode="1"] [data-ek] { cursor: text; }
 
 /* a richline shows its \n as a line break while it is being edited */
 .ed-rich { white-space: pre-line; }
+
+/* autosave status chip + conflict dialog + reset */
+.ed-chip[data-state="saving"] { background: rgba(226, 224, 214, 0.3); }
+.ed-chip[data-state="saved"] { background: rgba(120, 190, 140, 0.35); }
+.ed-chip[data-state="offline"], .ed-chip[data-state="error"] { background: rgba(214, 150, 70, 0.55); }
+.ed-chip[data-state="conflict"] { background: rgba(200, 70, 60, 0.7); }
+.ed-field-tools { display: inline-flex; align-items: center; gap: 8px; }
+.ed-reset {
+  font: inherit; font-size: 12px; cursor: pointer; padding: 1px 8px; min-height: 22px; border-radius: 3px;
+  border: 1px solid rgba(15, 24, 32, 0.4); background: transparent; color: #0F1820;
+}
+.ed-dialog {
+  position: fixed; z-index: 2147483000; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(440px, calc(100vw - 32px)); padding: 16px; border-radius: 6px;
+  background: #F3F1E8; color: #0F1820; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  font: 14px/1.45 system-ui, sans-serif; direction: ltr; text-align: start;
+}
+.ed-dialog p { margin: 0 0 8px; overflow-wrap: anywhere; }
+.ed-dialog-title { font-weight: 600; }
+.ed-dialog-theirs, .ed-dialog-mine { font-size: 13px; }
