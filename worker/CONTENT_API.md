@@ -174,6 +174,21 @@ that is both deleted and unpublished.
 - No client rows ship: no migration, `defaults.json` or runtime fixture creates one (tests/clients/guard.test.ts).
   The boss creates clients in the admin after launch.
 
+## Clients API (worker/src/clients, F5)
+
+Admin only (Access), English UI. Every write: Origin must equal the request origin (else 403), then
+`validateClient`, then the write, then an `audit` row. Clients are drafts until publish, like everything else.
+
+- `GET /api/admin/clients` → `{clients: [AdminClient]}`, the ACTIVE rows only, ordered by `name_en` (case-insensitive),
+  then `id`. `AdminClient` = the snapshot client (`{id, name, line?, year?, url?}`) plus `rev` (the lock to send
+  back), `published` (a published copy exists), `changed` (the draft differs from the published copy; true when
+  never published) and `pieces` (active draft `gallery_items` with this `client_id`, hidden ones included).
+- `POST /api/admin/clients` `{name: {ar, en}, line?: {ar?, en?}, year?, url?}` → `201 {client: AdminClient}`. The
+  Worker makes the id: a slug of `name_en` (accents dropped, lower case, runs of anything else → `-`; `client`
+  when nothing Latin is left), `-`, and 4 random `[a-z0-9]`. So it matches `[a-z0-9-]`, is at most 40
+  characters, and never changes. A collision with any row (deleted ones too) draws a new suffix. A body carrying
+  `id` is a 400 (`field: "id"`). Audit `client.create`, target = the id.
+
 ## Validation (every write, server side)
 
 1. Run the input through `validate.ts`. On `{ok:false}`, return `badRequest(result)` (HTTP 400,

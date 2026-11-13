@@ -19,6 +19,7 @@ import { getPublished, matchPage, pageKey, putPage, type CacheEnv, type Publishe
 import { isEmpty } from "./store";
 import { editorRoute } from "./editor/routes";
 import { galleryRoute } from "./gallery/routes";
+import { clientsRoute } from "./clients/routes";
 
 export interface Env extends AccessEnv, CacheEnv {
   ASSETS: Fetcher;
@@ -129,6 +130,8 @@ async function admin(request: Request, env: Env, url: URL, ctx: AdminCtx): Promi
     if (url.pathname === "/api/admin/whoami" && request.method === "GET") return json({ email: ctx.adminEmail });
     // The draft snapshot the editor and gallery screens start from.
     if (url.pathname === "/api/admin/content" && request.method === "GET") return draftContent(env);
+    const c = await clientsRoute(request, env, url, ctx); // clients (worker/src/clients)
+    if (c) return c;
     const g = await galleryRoute(request, env, url, ctx); // uploads, gallery, rings (worker/src/gallery)
     if (g) return g;
     return json({ error: "not found" }, 404);
