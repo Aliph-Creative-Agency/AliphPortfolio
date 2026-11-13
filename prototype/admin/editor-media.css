@@ -23,3 +23,9 @@ html[data-edit-mode="1"] [data-es].ed-es-active { outline: 2px solid #BB5C39; ou
 .ed-media-actions .ed-reset, .ed-media-more .ed-reset { min-height: 32px; padding: 3px 12px; font-size: 13px; }
 .ed-reset:disabled { opacity: 0.45; cursor: default; }
 .ed-media-status:empty { display: none; }
+.ed-media-file-input[hidden] { display: none; }
+.ed-media-progress { height: 8px; border-radius: 4px; background: rgba(15, 24, 32, 0.15); overflow: hidden; }
+.ed-media-progress[hidden] { display: none; }
+.ed-media-progress > span { display: block; height: 100%; width: 0; background: #BB5C39; transition: width 0.15s linear; }
+.ed-media-uperr:empty { display: none; }
+.ed-media-uperr { color: #8a3f22; }

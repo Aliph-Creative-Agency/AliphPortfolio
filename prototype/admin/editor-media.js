@@ -168,8 +168,11 @@
   }
   function closeDrawer() {
     if (!cur) return;
+    if (op) op.ctl.abort();
     flush();
     var holder = cur.holder;
+    upMsg.textContent = "";
+    bar.hidden = true;
     cur.holder.classList.remove("ed-es-active");
     cur = null;
     drawer.hidden = true;
@@ -283,6 +286,105 @@
     ui.refreshChanges();
   }
 
+  /* ── upload new ──
+     Image slot: prepareImage (WebP, 2000 px) + upload -> {src}. Preview slot:
+     a video -> upload the film, preparePoster + upload with posterFor ->
+     {preview, poster}; an image picked for a preview slot replaces the poster
+     only. shared/media.js is the gallery team's module, imported as it is. */
+  var mediaMod = null;
+  function media() {
+    if (!mediaMod) mediaMod = import("/admin/shared/media.js").catch(function (e) { mediaMod = null; throw e; });
+    return mediaMod;
+  }
+  var pickInput = h("input", { type: "file", class: "ed-media-file-input", hidden: "", "aria-label": "Choose a file" });
+  var uploadBtn = h("button", { type: "button", class: "ed-reset", text: "Upload new" });
+  var cancelBtn = h("button", { type: "button", class: "ed-reset", text: "Cancel", hidden: "" });
+  var bar = h("div", { class: "ed-media-progress", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": "0", hidden: "" }, [h("span")]);
+  var upMsg = h("p", { class: "ed-hint ed-media-uperr", role: "alert" });
+  var more = body.querySelector(".ed-media-more");
+  more.appendChild(h("div", { class: "ed-media-actions" }, [uploadBtn, cancelBtn]));
+  more.appendChild(pickInput);
+  more.appendChild(bar);
+  more.appendChild(upMsg);
+
+  var op = null; /* { ctl: AbortController, c } while an upload runs */
+  function setProgress(pct) {
+    pct = Math.max(0, Math.min(100, Math.round(pct)));
+    bar.hidden = false;
+    bar.setAttribute("aria-valuenow", String(pct));
+    bar.firstChild.style.width = pct + "%";
+  }
+  function busyUi(on) {
+    uploadBtn.disabled = on;
+    resetBtn.disabled = on || !(cur && cur.value);
+    cancelBtn.hidden = !on;
+    if (!on) setTimeout(function () { if (!op) bar.hidden = true; }, 1200);
+  }
+  function mediaMessage(e) {
+    var code = e && e.code;
+    if (code === "aborted") return "Cancelled.";
+    if (code === "unreadable") return "That file could not be read. Use a JPEG, PNG or WebP picture, or an MP4 or WebM film.";
+    if (code === "unsupported") return "That file type is not supported (JPEG, PNG, WebP, AVIF, MP4, WebM).";
+    if (code === "toolarge") return "That file is too large.";
+    return "The upload did not finish: " + ((e && e.message) || "network error") + ". Try again.";
+  }
+  /* write a patch into the draft row right now (no debounce) and show it */
+  function commit(c, patch) {
+    var v = wanted(c) || {};
+    Object.keys(patch).forEach(function (k) { v[k] = patch[k]; });
+    clearTimeout(c.timer);
+    c.value = v;
+    preview(c);
+    if (cur === c) paint();
+    return save(c);
+  }
+  function startUpload(file) {
+    var c = cur;
+    if (!c || op) return;
+    upMsg.textContent = "";
+    var preview_ = isPreviewSlot(c);
+    media().then(function (M) {
+      var kind = M.kindOf(file);
+      if (!kind) throw new M.MediaError("unreadable", "unreadable");
+      if (kind === "video" && !preview_) { upMsg.textContent = "This is a picture slot. Choose a JPEG, PNG or WebP picture."; return; }
+      var ctl = new AbortController();
+      op = { ctl: ctl, c: c };
+      busyUi(true);
+      setProgress(0);
+      say("Uploading…");
+      var run;
+      if (kind === "image") {
+        run = M.prepareImage(file).then(function (img) {
+          if (ctl.signal.aborted) throw new M.MediaError("aborted", "cancelled");
+          return M.upload(img.blob, file.name, { signal: ctl.signal, onProgress: function (p) { setProgress(100 * (p.loaded / (p.total || 1))); } });
+        }).then(function (r) { return preview_ ? { poster: r.url } : { src: r.url }; });
+      } else {
+        var film;
+        run = M.upload(file, file.name, { signal: ctl.signal, onProgress: function (p) { setProgress(88 * (p.loaded / (p.total || 1))); } }).then(function (r) {
+          film = r;
+          return M.preparePoster(file);
+        }).then(function (poster) {
+          if (ctl.signal.aborted) throw new M.MediaError("aborted", "cancelled");
+          return M.upload(poster.blob, file.name, { signal: ctl.signal, posterFor: film.key, onProgress: function (p) { setProgress(88 + 12 * (p.loaded / (p.total || 1))); } });
+        }).then(function (pr) { return { preview: film.url, poster: pr.url }; });
+      }
+      return run.then(function (patch) {
+        setProgress(100);
+        return commit(c, patch).then(function () { if (cur === c) say("Uploaded. Saved to the draft."); });
+      });
+    }).catch(function (e) {
+      upMsg.textContent = mediaMessage(e);
+      if (cur === c) say("");
+    }).then(function () { op = null; busyUi(false); });
+  }
+  uploadBtn.addEventListener("click", function () {
+    pickInput.value = "";
+    pickInput.setAttribute("accept", cur && isPreviewSlot(cur) ? "video/mp4,video/webm,image/*" : "image/*");
+    pickInput.click();
+  });
+  pickInput.addEventListener("change", function () { if (pickInput.files && pickInput.files[0]) startUpload(pickInput.files[0]); });
+  cancelBtn.addEventListener("click", function () { if (op) op.ctl.abort(); });
+
   /* ── events ── */
   function holderOf(t) {
     if (!t || !t.closest) return null;
@@ -318,5 +420,5 @@
   /* the page's own pointer handlers (hover preview, strip drag) are left alone; only the click is taken */
   window.addEventListener("beforeunload", flush);
 
-  window.aliphEditorMedia = { open: openDrawer, close: closeDrawer, more: body.querySelector(".ed-media-more") };
+  window.aliphEditorMedia = { open: openDrawer, close: closeDrawer, more: more, commit: function (patch) { return cur ? commit(cur, patch) : null; } };
 })();
