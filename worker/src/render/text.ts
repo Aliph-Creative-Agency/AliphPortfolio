@@ -23,9 +23,17 @@
 // so it gets its own validator, W/"<asset etag>-r<publish rev>". A publish
 // changes it; the asset's own 304 is never passed through for a rewritten
 // page (the browser would keep the old copy).
+//
+// /library?client=<id> (C-14): when <id> is a PUBLISHED client, the head is
+// that client's: <title> and og/twitter titles "<name.ar> · <library title>",
+// description/og/twitter descriptions from line.ar (else the library's),
+// canonical + og:url the client view's own URL. The view is its own page for
+// caches too: the ETag and the page-cache key carry the id. Any other value
+// (unknown, draft-only, deleted) is plain /library: same bytes, ETag and key.
 
 import registry from "../generated/registry.json";
-import type { Snapshot } from "../store";
+import defaults from "../generated/defaults.json";
+import type { Client, Snapshot } from "../store";
 
 export type Page = "home" | "about" | "library";
 
@@ -68,11 +76,42 @@ function headOf(s: Snapshot, page: Page) {
   return { title, description, ogTitle: ar("ogTitle") ?? title, ogDescription: ar("ogDescription") ?? description };
 }
 
+/** The published client a URL views: /library?client=<id> naming a client
+ *  in the published snapshot (the same lookup as main.js's CLIENT_VIEW).
+ *  null for every other page, id or URL. */
+export function clientOf(page: Page, url: URL, s: Snapshot): Client | null {
+  if (page !== "library") return null;
+  const id = url.searchParams.get("client");
+  return (id && s.clients.find((c) => c.id === id)) || null;
+}
+
+/** The client view's canonical URL (the site's own, whatever host served it). */
+export const clientUrl = (id: string) => `https://aliphcreative.com/library?client=${encodeURIComponent(id)}`;
+
+/** The client view's head: its name before the library's (published or
+ *  default) titles, its Arabic line in place of the descriptions when it has one. */
+function clientHead(s: Snapshot, c: Client) {
+  const ar = (f: string) => s.text[`meta.library.${f}`]?.ar;
+  const lib = defaults.META.library;
+  const title = ar("title") ?? lib.title.ar;
+  const ogTitle = ar("ogTitle") ?? ar("title") ?? lib.ogTitle.ar;
+  const line = c.line?.ar;
+  const description = line ?? ar("description");
+  return {
+    title: `${c.name.ar} · ${title}`,
+    description,
+    ogTitle: `${c.name.ar} · ${ogTitle}`,
+    ogDescription: line ?? ar("ogDescription") ?? description,
+  };
+}
+
 const stripWeak = (etag: string) => etag.replace(/^W\//, "").replace(/^"|"$/g, "");
 
-/** The rewritten page's validator: tied to both the asset and the publish. */
-export function pageEtag(assetEtag: string | null, rev: number): string {
-  return `W/"${assetEtag ? stripWeak(assetEtag) : "page"}-r${rev}"`;
+/** The rewritten page's validator: tied to both the asset and the publish,
+ *  and to the client a /library?client= view shows (null = none). */
+export function pageEtag(assetEtag: string | null, rev: number, clientId: string | null = null): string {
+  const c = clientId ? `-c${encodeURIComponent(clientId)}` : "";
+  return `W/"${assetEtag ? stripWeak(assetEtag) : "page"}-r${rev}${c}"`;
 }
 
 /** RFC 9110 weak comparison against one of our validators. */
@@ -88,9 +127,15 @@ export function etagMatches(ifNoneMatch: string | null, etag: string): boolean {
 /** Rewrite a 200 text/html asset response with the published snapshot. The
  *  caller has checked that the snapshot is non-empty. `more` adds further
  *  handlers to the same single pass (render/slots.ts). */
-export function renderText(res: Response, s: Snapshot, page: Page, more?: (rw: HTMLRewriter) => void): Response {
+export function renderText(
+  res: Response,
+  s: Snapshot,
+  page: Page,
+  more?: (rw: HTMLRewriter) => void,
+  client: Client | null = null,
+): Response {
   const arOf = (key: string | null) => (key && I18N_KEYS.has(key) ? s.text[key]?.ar : undefined);
-  const head = headOf(s, page);
+  const head = client ? clientHead(s, client) : headOf(s, page);
   const rw = new HTMLRewriter();
   more?.(rw);
 
@@ -123,6 +168,11 @@ export function renderText(res: Response, s: Snapshot, page: Page, more?: (rw: H
   meta('meta[name="twitter:title"]', head.ogTitle);
   meta('meta[property="og:description"]', head.ogDescription);
   meta('meta[name="twitter:description"]', head.ogDescription);
+  if (client) {
+    const href = escapeAttr(clientUrl(client.id));
+    rw.on('head > link[rel="canonical"]', { element: (el) => void el.setAttribute("href", href) });
+    rw.on('meta[property="og:url"]', { element: (el) => void el.setAttribute("content", href) });
+  }
 
   /* the boot-merge blob, once, before the first main.js script */
   const json = `<script type="application/json" id="aliph-content">${blob(s)}</script>\n`;

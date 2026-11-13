@@ -254,6 +254,13 @@ published snapshot is not empty. An empty store, or a D1 read that fails, serves
   `\u`-escaped, so a value can never close the script.
 - A rewritten page carries `ETag: W/"<asset etag>-r<publish_rev>"` and answers `If-None-Match` itself. The asset's
   own 304 is never passed on for a rewritten page.
+- `/library?client=<id>` (C-14), when `<id>` is a client in the PUBLISHED snapshot (exact match, main.js's
+  `CLIENT_VIEW` lookup): `<title>`, `og:title`, `twitter:title` become `<name.ar> · <library title>` (the library's
+  published `meta.library.title` / `ogTitle`, else the default). The three descriptions become `line.ar`, or stay the
+  library's when the client has no Arabic line. `<link rel="canonical">` and `og:url` become
+  `https://aliphcreative.com/library?client=<id>`. The view has its own ETag (`W/"<asset etag>-r<rev>-c<id>"`) and
+  its own page-cache entry (cache.ts `pageKey(…, clientId)`). Any other `?client=` value (unknown, draft-only,
+  deleted, empty) is plain `/library`: the same bytes, ETag and cache key. An empty store still serves the asset.
 - Published media slots (render/slots.ts, P-06b) go into the same pass. `<page>.media.N` is the Nth
   `<img src="assets/media/…">`, counted the way gen-defaults counts. Its `src` becomes `poster` on a slot that has a
   preview, and `src` otherwise. `alt` becomes `alt.ar`, and the enclosing `<figure data-preview>` gets `preview`.

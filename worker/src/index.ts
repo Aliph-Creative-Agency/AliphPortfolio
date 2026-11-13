@@ -12,7 +12,7 @@
 
 import { isAdminPath, verifyAccess, type AccessEnv } from "./auth";
 import { contentRoute, draftContent } from "./api/content";
-import { etagMatches, pageEtag, pageOf, renderText, type Page } from "./render/text";
+import { clientOf, etagMatches, pageEtag, pageOf, renderText, type Page } from "./render/text";
 import { onSlots } from "./render/slots";
 import { onRegions } from "./render/regions";
 import { getPublished, matchPage, pageKey, putPage, type CacheEnv, type Published } from "./cache";
@@ -92,7 +92,10 @@ async function servePage(request: Request, env: Env, ctx: ExecutionContext, url:
   const res = await env.ASSETS.fetch(plain);
   if (res.status !== 200 || !(res.headers.get("content-type") ?? "").startsWith("text/html")) return res;
 
-  const etag = pageEtag(res.headers.get("etag"), snap.rev);
+  // /library?client=<published id> is its own page (head, ETag, cache key);
+  // any other ?client= value is plain /library.
+  const client = clientOf(page, url, snap);
+  const etag = pageEtag(res.headers.get("etag"), snap.rev, client?.id ?? null);
   const headers = new Headers(res.headers);
   headers.set("etag", etag);
   headers.delete("last-modified");
@@ -103,7 +106,7 @@ async function servePage(request: Request, env: Env, ctx: ExecutionContext, url:
     return new Response(null, { status: 304, headers });
   }
 
-  const key = pageKey(pub.key, url.pathname, res.headers.get("etag"));
+  const key = pageKey(pub.key, url.pathname, res.headers.get("etag"), client?.id ?? null);
   if (key) {
     const hit = await matchPage(url.origin, key);
     if (hit) {
@@ -114,7 +117,7 @@ async function servePage(request: Request, env: Env, ctx: ExecutionContext, url:
   const out = renderText(new Response(res.body, { status: 200, headers }), snap, page, (rw) => {
     onSlots(rw, snap, page);
     onRegions(rw, snap, page);
-  });
+  }, client);
   if (!key) return out;
   // Stored after the response has gone out, from a tee of the same stream.
   ctx.waitUntil(putPage(url.origin, key, out.clone()));
