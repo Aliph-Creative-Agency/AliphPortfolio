@@ -7,6 +7,7 @@
 // (upload/cleanup has no row to lock: it re-reads the used set instead.)
 
 import type { AdminCtx, Env } from "../index";
+import { assignPost } from "./assign";
 import { cleanupPost, unusedGet } from "./cleanup";
 import { itemDelete, itemPut } from "./items";
 import { orderPost } from "./order";
@@ -50,6 +51,7 @@ export async function galleryRoute(
 
   if (path === "/api/admin/gallery" && method === "GET") return galleryRead(env);
   if (path === "/api/admin/gallery/order" && method === "POST") return orderPost(request, env, ctx);
+  if (path === "/api/admin/gallery/assign" && method === "POST") return assignPost(request, env, ctx);
   if (path.startsWith("/api/admin/gallery/") && method === "PUT") return itemPut(request, env, path, ctx);
   if (path.startsWith("/api/admin/gallery/") && method === "DELETE") return itemDelete(env, path, url, ctx);
   if (path.startsWith("/api/admin/rings/") && method === "PUT") return ringPut(request, env, path, ctx);

@@ -199,6 +199,15 @@ Admin only (Access), English UI. Every write: Origin must equal the request orig
   ones do not. When that guard stops it: `409 {error: "in use", count, message: "7 pieces use this client"}`.
   A stale rev, unknown or already deleted id: `409 {error, current}`. A missing or bad `rev`: 400. Audit
   `client.delete`.
+- `POST /api/admin/gallery/assign` `{client: <id> | null, items: [{id, rev}]}` → `200 {items}` (the pieces as
+  `GET /api/admin/gallery` draws them, in the order sent). Bulk assignment (worker/src/gallery/assign.ts): 1 to 200
+  pieces get that client, or none with `null`. `rev` is the one the grid read (0 = a default with no row yet: it
+  gets a bare override row, id + `client_id`). A piece is any id the grid lists except an upload staged for
+  deletion. 400: `items` (not a list of 1 to 200), `items.N` (bad entry, duplicate, not a piece), `client` (not an
+  id or null, unknown, or deleted). ALL OR NOTHING: one D1 batch led by the audit row (`gallery.assign`, target =
+  the client id or NULL), whose CHECK fails, and rolls everything back, when any listed rev is stale or the client
+  stopped being active. A stale rev: `409 {error, stale: [ids], current: [items]}` and nothing written. A piece
+  that already has the client is only rev-checked; clearing a default with no row writes nothing.
 
 ## Validation (every write, server side)
 
