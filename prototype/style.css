@@ -5765,3 +5765,12 @@ body.sheet-open { overflow: hidden; }
 @media (max-width: 640px) {
   .tb-biz { opacity: 0.65; }
 }
+
+/* F-16: on a phone and a tablet the clippings are one column and a photo clipping shrink-wraps its picture,
+   whose width is a percentage of that shrink-wrap: nothing to resolve it against until the picture's own size
+   is known, part-way through its download (on a slow line the quote under the first one jumped ~140px).
+   The clipping now states the width it ends up at anyway: the picture's own width (--w on the figure in
+   about.html) plus its mat (2 x 0.8rem padding + 2 x 1px hair), capped by the column. */
+@media (max-width: 900px) {
+  .clip-photo[style*="--w"] { width: min(100%, calc(var(--w) + 1.6rem + 2px)); }
+}
