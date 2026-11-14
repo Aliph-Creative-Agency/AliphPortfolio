@@ -93,6 +93,8 @@
 
   /* U-03 / U-24: "Draft" until something is saved in this visit, then "Saved" (texts and pictures alike) */
   var savedAny = false;
+  /* U-67: offline, a text is kept in this browser (backupWrite) and sent when the connection is back */
+  var OFFLINE = "Offline: kept in this browser, saved when you are back online";
   function setChip(state, text) {
     if (state === "saved" && text === "Saved") savedAny = true;
     chipState = state;
@@ -176,7 +178,7 @@
       refreshChip();
     }, function () {
       s.busy = false;
-      setChip("offline", "Offline");
+      setChip("offline", OFFLINE);
       s.timer = setTimeout(function () { flush(s); }, RETRY_MS);
     });
   }
@@ -184,7 +186,7 @@
     return Promise.all(Object.keys(st).map(function (id) { return flush(st[id]); }));
   }
   window.addEventListener("online", function () { if (chipState === "offline") setChip("saving", "Saving…"); flushAll(); });
-  window.addEventListener("offline", function () { if (pendingCount()) setChip("offline", "Offline"); });
+  window.addEventListener("offline", function () { if (pendingCount()) setChip("offline", OFFLINE); });
 
   /* ── conflict dialog ── */
   function showConflict(s, cur) {
@@ -556,7 +558,7 @@
       if (r.status === 200) { sl.saved = sl.value; try { localStorage.removeItem(BACKUP); } catch (_) {} backupWrite(); location.reload(); }
       else if (r.status === 409) showConflict(sl, r.body.current || { value: null, rev: 0 });
       else setChip("error", "Not reset: " + ((r.body && r.body.error) || r.status));
-    }, function () { setChip("offline", "Offline"); });
+    }, function () { setChip("offline", OFFLINE); });
   }
   function syncOpenFields(key, loc, value) {
     if (!cur || cur.key !== key || !cur.area[loc]) return;

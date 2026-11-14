@@ -230,7 +230,7 @@ async function run(cfg) {
       quote("editor chip after back online", on);
       c.ok(on === "Saved", `chip "${on}" after going back online`);
       c.ok((await ta.inputValue()) === typed, "textarea lost the typed text");
-      c.known("U-67", !/Retrying/.test(off.chip) && /Offline/.test(off.chip), `chip reads "${off.chip}" for a typed-but-unsaved edit while offline: it does not say the typed text is only kept in this page until the network is back (close the tab now and it is lost)`);
+      c.known("U-67", !/Retrying/.test(off.chip) && /Offline/.test(off.chip) && /kept|saved/i.test(off.chip), `chip reads "${off.chip}" for a typed-but-unsaved edit while offline: it does not say the typed text is only kept in this page until the network is back (close the tab now and it is lost)`);
       const dj = await draft();
       c.ok(dj.includes(typed.replace(/"/g, '\\"')) , "typed text not in the draft after going online");
     });

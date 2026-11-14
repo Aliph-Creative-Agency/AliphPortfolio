@@ -260,8 +260,9 @@
     }, function () {
       c.busy = false;
       c.dirty = true;
-      ui.setChip("offline", "Offline");
-      if (cur === c) say("Offline. Will retry.");
+      /* U-67: a picture change is not backed up in the browser: say to keep the page open */
+      ui.setChip("offline", "Offline: keep this page open, it saves when you are back online");
+      if (cur === c) say("Offline. Keep this page open: it saves when the connection is back.");
       c.timer = setTimeout(function () { save(c); }, 8000);
     });
   }
