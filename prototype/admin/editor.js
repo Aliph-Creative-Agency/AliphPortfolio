@@ -520,8 +520,9 @@
     var count = h("span", { class: "ed-count" });
     cur.area[loc] = area;
     cur.count[loc] = count;
-    if (cur.collapse) {
-      /* the public element collapses whitespace: a line break typed here would show in the editor only */
+    if (cur.collapse || !cur.rich) {
+      /* the public element collapses whitespace: a line break typed here would show in the editor only.
+         U-14: a one-line text (not a richline) is refused with a line break by the server: never let one in */
       area.addEventListener("keydown", function (e) { if (e.key === "Enter") e.preventDefault(); });
       area.addEventListener("beforeinput", function (e) { if (e.inputType === "insertLineBreak" || e.inputType === "insertParagraph") e.preventDefault(); });
       area.addEventListener("paste", function (e) {
@@ -598,7 +599,7 @@
       ]),
       locs.indexOf("ar") >= 0 ? field("ar", "Arabic") : null,
       locs.indexOf("en") >= 0 ? field("en", "English") : null,
-      h("p", { class: "ed-hint", text: (locs.length === 1 ? "Arabic only. " : "") + (cur.rich ? (cur.collapse ? "This line has no line breaks on the page. " : "Enter makes a line break. ") : "") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
+      h("p", { class: "ed-hint", text: (locs.length === 1 ? "Arabic only. " : "") + (cur.rich ? (cur.collapse ? "This line has no line breaks on the page. " : "Enter makes a line break. ") : "This text has no line breaks: Enter does nothing here. ") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
       h("div", { class: "ed-pop-actions" }, [cancel, done]),
     ].forEach(function (n) { if (n) pop.appendChild(n); });
     locs.forEach(function (l) { cur.area[l].value = cur.orig[l]; updateCount(l); });
