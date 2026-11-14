@@ -151,3 +151,10 @@ body.adm {
 .adm-assignbar .adm-sel { flex: 1 1 16rem; max-inline-size: 28rem; }
 .adm-assignbar .adm-dmsg { flex: 1 1 100%; margin: 0; }
 #grid[data-selecting="1"] { padding-block-end: 14rem; } /* room for the fixed bar */
+/* top bar: way back to the dashboard and editors, draft state, Publish (U-04) */
+.adm-topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; padding-block: 0.8rem; border-block-end: 2px solid var(--ink); }
+.adm-topbar a { display: inline-flex; align-items: center; min-block-size: 4.4rem; padding-inline: 0.8rem; color: var(--ink); }
+.adm-topbar .adm-spacer { flex: 1 1 0; }
+.adm-pubstate { color: var(--ink-mute); }
+.adm-pub { min-block-size: 4.4rem; min-inline-size: 4.4rem; }
+.adm-confirm .adm-btn { min-block-size: 4.4rem; }
