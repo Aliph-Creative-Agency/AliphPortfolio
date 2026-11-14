@@ -91,7 +91,10 @@
   var chipState = "saved";
   var conflicts = [];     /* conflict dialogs waiting */
 
+  /* U-03 / U-24: "Draft" until something is saved in this visit, then "Saved" (texts and pictures alike) */
+  var savedAny = false;
   function setChip(state, text) {
+    if (state === "saved" && text === "Saved") savedAny = true;
     chipState = state;
     chip.textContent = text;
     chip.setAttribute("data-state", state);
@@ -122,7 +125,7 @@
   function refreshChip() {
     if (conflicts.length) return setChip("conflict", "Conflict");
     if (chipState === "error" || chipState === "offline") return;
-    setChip(pendingCount() ? "saving" : "saved", pendingCount() ? "Saving…" : "Saved");
+    setChip(pendingCount() ? "saving" : "saved", pendingCount() ? "Saving…" : savedAny ? "Saved" : "Draft");
     syncPublishBtns();
     if (!pendingCount()) refreshChanges();
   }
@@ -155,6 +158,7 @@
       if (r.status === 200) {
         s.saved = sent;
         s.rev = r.body.rev;
+        savedAny = true;
         if (chipState === "error" || chipState === "offline") chipState = "saving";
       } else if (r.status === 409) {
         s.rev = r.body.current ? r.body.current.rev : 0;

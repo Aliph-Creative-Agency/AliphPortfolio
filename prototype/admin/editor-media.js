@@ -242,7 +242,7 @@
       c.busy = false;
       if (res.status === 200) {
         c.rev = res.body.rev;
-        ui.setChip("saved", "Draft");
+        ui.setChip("saved", "Saved");
         ui.refreshChanges();
         if (cur === c && !c.dirty) say("Saved.");
       } else if (res.status === 409) {
