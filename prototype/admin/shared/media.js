@@ -50,6 +50,59 @@ export class MediaError extends Error {
   }
 }
 
+/* The limits the Worker enforces (worker/src/gallery/upload.ts IMAGE_MAX / VIDEO_MAX). A picture is made
+   smaller here before it is sent, so in practice only a film can be over its limit. */
+export const LIMITS = { image: 25 * 1024 * 1024, video: 300 * 1024 * 1024 };
+export const ACCEPTED = "a JPEG, PNG, WebP or AVIF picture, or an MP4 or WebM film";
+
+/** A film over 300 MB, told before anything is read or sent (U-65): MediaError("toolarge") or null. */
+export function checkSize(file, kind) {
+  return kind === "video" && file.size > LIMITS.video ? new MediaError("toolarge", "video over 300 MB") : null;
+}
+
+export const NETWORK_FAILURE = "The upload stopped: the connection dropped. Check the Wi-Fi or network and try again.";
+
+/**
+ * A dropped or missing connection, told by its kind and never by its wording (each browser words a failed fetch
+ * its own way: "Failed to fetch", "Load failed", "NetworkError when attempting to fetch resource."):
+ *   - the browser says it is offline (navigator.onLine === false): whatever step failed, a file read included;
+ *   - a fetch rejected: fetch rejects with a TypeError for a network failure;
+ *   - an XHR error / timeout event, or an abort nobody asked for (xhr() marks those `transport`).
+ * @param {unknown} e
+ */
+export function isNetworkFailure(e) {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return true;
+  if (e instanceof TypeError) return true;
+  const x = /** @type {any} */ (e);
+  return !!x && (x.transport === true || x.cause instanceof TypeError);
+}
+
+/**
+ * The one wording for an upload problem, in the gallery's Add files and the editor's picture drawer
+ * (U-62, U-63, U-65): what went wrong and what to do, never the browser's own words.
+ * @param {unknown} e  a MediaError (or any error)
+ * @param {"image"|"video"|null} [kind]  what the file was taken for
+ */
+export function explain(e, kind) {
+  const code = e instanceof MediaError || (e && typeof e === "object" && "code" in e) ? /** @type {any} */ (e).code : null;
+  if (code === "aborted") return "Cancelled.";
+  if (isNetworkFailure(e)) return NETWORK_FAILURE;
+  switch (code) {
+    case "unsupported": return `That file type is not accepted. Use ${ACCEPTED}.`;
+    case "unreadable":
+      if (kind === "video") return "This film could not be read. Export it again as an MP4 (H.264) or WebM film.";
+      if (kind === "image") return "This picture could not be read. Save it again as a JPEG, PNG or WebP picture.";
+      return `This file could not be read. Use ${ACCEPTED}.`;
+    case "toolarge":
+      if (kind === "video") return "That film is over 300 MB, the most the site takes. Export it smaller (for example at 1080p) and try again.";
+      if (kind === "image") return "That picture is over 25 MB even after it was made smaller. Save it smaller and try again.";
+      return "That file is too large: films up to 300 MB, pictures up to 25 MB.";
+    case "network": // the server answered with an error (a dropped connection is caught above)
+      return `The upload did not finish (${/** @type {any} */ (e).message}). Try again.`;
+    default: return (e && /** @type {any} */ (e).message) || "The upload did not finish. Try again.";
+  }
+}
+
 export const MAX_SIDE = 2000;
 export const WEBP_QUALITY = 0.82;
 export const JPEG_QUALITY = 0.85;
@@ -266,8 +319,11 @@ function xhr(method, url, body, headers, onUpload, signal) {
       try { parsed = JSON.parse(x.responseText); } catch { /* not JSON */ }
       resolve({ status: x.status, body: parsed });
     };
-    x.onerror = () => { end(); reject(new MediaError("network", "network error during upload")); };
-    x.onabort = () => { end(); reject(new MediaError("aborted", "upload cancelled")); };
+    // a transport failure is marked by its kind (event), not by any browser's message: see isNetworkFailure
+    const dropped = () => Object.assign(new MediaError("network", "the connection failed"), { transport: true });
+    x.onerror = () => { end(); reject(dropped()); };
+    x.ontimeout = () => { end(); reject(dropped()); };
+    x.onabort = () => { end(); reject(signal?.aborted ? new MediaError("aborted", "upload cancelled") : dropped()); };
     x.send(body);
   });
 }

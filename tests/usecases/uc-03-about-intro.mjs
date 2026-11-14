@@ -87,18 +87,19 @@ async function run(cfg) {
       await look(page, c, cfg, ".ed-pop", "U-02");
     });
 
-    await S(3, "type-P3", "Enter accepted, then: either saved with breaks shown, or a clear 'Not saved' message; never silent", async (c) => {
+    await S(3, "type-P3", "Enter accepted and saved with breaks shown, or (U-14 fix) Enter refused in this one-line text and the text saved; never silent", async (c) => {
       await typeP3();
       await saved();
       const v = await ta().inputValue();
-      c.ok(v === P3V, `textarea holds ${v.split("\n").length} lines, ${v.length} chars (expected 3 lines, ${P3V.length})`);
+      const refused = v === P3.join(""); // U-14: a one-line text takes no Enter, so the paragraphs run on
+      c.ok(v === P3V || refused, `textarea holds ${v.split("\n").length} lines, ${v.length} chars (expected 3 lines, ${P3V.length}, or one line when Enter is refused)`);
       const m = await measure(page);
       const chip = await page.locator(".ed-chip").textContent();
       const srv = await serverHas(page, "نبدأ كل مشروع");
       c.note(`chip "${chip}", server has the text: ${srv}, live lead: white-space ${m.ws}, br ${m.br}, ~${m.lines} lines, publish "${await page.locator(".ed-publish").textContent()}"`);
       c.ok(chip === "Saved" || /^Not saved/.test(chip), `chip "${chip}" says nothing clear about the save`);
       const shown = m.br >= 2 || /pre/.test(m.ws) || m.p >= 3;
-      c.known("U-14", srv && shown, `the box takes Enter and the page previews the text (as one run-on block), but the save is refused: chip "${chip}", server has it: ${srv}; the hint never warned that this field has no line breaks`);
+      c.known("U-14", (srv && shown) || (refused && chip === "Saved"), `the box takes Enter and the page previews the text (as one run-on block), but the save is refused: chip "${chip}", server has it: ${srv}; the hint never warned that this field has no line breaks`);
       const cr = await rect(page, ".ed-chip"), pr = await rect(page, ".ed-pop");
       const lr = await rect(page, LEAD);
       c.known("U-18", !(overlaps(pr, lr) && pr.y > lr.y + 40 && pr.y < lr.bottom - 40), `A2 the popover sits on top of the paragraph being edited (popover y ${Math.round(pr.y)}-${Math.round(pr.bottom)}, paragraph y ${Math.round(lr.y)}-${Math.round(lr.bottom)}): the lower lines of the text cannot be read while typing`);

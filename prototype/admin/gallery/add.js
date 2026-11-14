@@ -7,7 +7,7 @@
 // batch carries on; a failed row offers Retry (back to ready, run again) and
 // Remove (F-09). A wrong-type row only offers Remove: a retry cannot help it. Cat is required, sub optional; both set once for the batch
 // and editable per row until the row is uploading.
-import { MediaError, kindOf } from "/admin/shared/media.js";
+import { MediaError, kindOf, checkSize, explain } from "/admin/shared/media.js";
 import { prepareAndUpload } from "./pipeline.js";
 import { state, load } from "./gallery.js";
 
@@ -21,15 +21,10 @@ const el = (tag, cls, text) => {
 const CATS = [["design", "Design"], ["photo", "Photo"]];
 const rows = []; // {file, kind, cat, sub, status, msg, pct, node}
 let busy = false;
+let at = null; // U-38: {i, n} while a batch runs, for "Uploading i of n…"
 
-const WHY = {
-  unreadable: "This file could not be read (is it a format the browser decodes?).",
-  unsupported: "That file type is not accepted.",
-  toolarge: "That file is too large.",
-  network: "The network failed; try again.",
-  aborted: "Cancelled.",
-};
-const problem = (e) => (e instanceof MediaError ? WHY[e.code] || e.message : e?.message || "Upload failed.");
+// U-62 / U-63 / U-65: the same wording as the editor's picture drawer (shared/media.js explain)
+const problem = (e, kind) => explain(e, kind);
 
 function subOptions(sel, cat, value) {
   sel.textContent = "";
@@ -62,8 +57,10 @@ function drawRow(r) {
   bar.value = r.pct || 0;
   const msg = el("span", "adm-rmsg", r.msg || (r.kind === "video" ? "video" : "image"));
   msg.setAttribute("role", r.status === "error" ? "alert" : "status");
-  n.append(name, cat, sub, bar, msg);
-  if (r.status === "error" && r.kind) n.append(button("Retry", () => retry(r)));
+  // U-60: a refused or failed row keeps only its name, the reason and Retry / Remove (Retry brings the selects back)
+  if (r.status === "error") n.append(name, msg);
+  else n.append(name, cat, sub, bar, msg);
+  if (r.status === "error" && r.kind && !r.final) n.append(button("Retry", () => retry(r)));
   if (r.status === "ready" || r.status === "error") {
     n.append(button("Remove", () => { rows.splice(rows.indexOf(r), 1); n.remove(); summary(); }));
   }
@@ -78,14 +75,16 @@ function button(text, onclick) {
 function summary() {
   const ready = rows.filter((r) => r.status === "ready").length;
   $("add-go").disabled = busy || !ready;
-  $("add-go").textContent = ready ? `Upload ${ready} file(s)` : "Upload";
+  $("add-go").textContent = busy && at ? `Uploading ${at.i} of ${at.n}…` : ready ? `Upload ${ready} file(s)` : "Upload";
 }
 
 export function stage(files) {
   for (const file of files) {
     const kind = kindOf(file);
     const r = { file, kind, cat: $("add-cat").value, sub: $("add-sub").value, status: "ready", pct: 0, node: el("li", "adm-row") };
-    if (!kind) { r.status = "error"; r.msg = WHY.unsupported; }
+    const big = kind && checkSize(file, kind);
+    if (!kind) { r.status = "error"; r.msg = problem(new MediaError("unsupported", "unsupported"), null); }
+    else if (big) { r.status = "error"; r.final = true; r.msg = problem(big, kind); } // a retry cannot make it smaller
     rows.push(r);
     $("add-rows").append(r.node);
     drawRow(r);
@@ -107,6 +106,8 @@ async function put(id, body) {
 
 async function run(r) {
   r.status = "uploading"; r.msg = "Preparing…"; drawRow(r);
+  // U-38: keep the row that is working in view (on a phone the list runs off the screen)
+  r.node.scrollIntoView({ block: "nearest", behavior: "instant" });
   try {
     const out = await prepareAndUpload(r.file, r.kind, {
       onStage: (m) => { r.msg = m; drawRow(r); },
@@ -116,7 +117,7 @@ async function run(r) {
     await put(id, { ...fields, cat: r.cat, sub: r.sub || null });
     r.status = "done"; r.pct = 100; r.msg = "Added (not published yet)";
   } catch (e) {
-    r.status = "error"; r.msg = problem(e);
+    r.status = "error"; r.msg = problem(e, r.kind);
   }
   drawRow(r);
 }
@@ -124,9 +125,9 @@ async function run(r) {
 /** Runs `list` one by one, then refreshes the grid. A failed refresh (the
  *  network dropped) leaves the grid as it was instead of an unhandled error. */
 async function runAll(list) {
-  busy = true; summary();
-  for (const r of list) await run(r);
-  busy = false; summary();
+  busy = true;
+  for (let i = 0; i < list.length; i++) { at = { i: i + 1, n: list.length }; summary(); await run(list[i]); }
+  busy = false; at = null; summary();
   await load().catch(() => {});
 }
 const go = () => runAll(rows.filter((x) => x.status === "ready"));

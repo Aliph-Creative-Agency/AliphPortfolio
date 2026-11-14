@@ -91,7 +91,12 @@
   var chipState = "saved";
   var conflicts = [];     /* conflict dialogs waiting */
 
+  /* U-03 / U-24: "Draft" until something is saved in this visit, then "Saved" (texts and pictures alike) */
+  var savedAny = false;
+  /* U-67: offline, a text is kept in this browser (backupWrite) and sent when the connection is back */
+  var OFFLINE = "Offline: kept in this browser, saved when you are back online";
   function setChip(state, text) {
+    if (state === "saved" && text === "Saved") savedAny = true;
     chipState = state;
     chip.textContent = text;
     chip.setAttribute("data-state", state);
@@ -122,7 +127,7 @@
   function refreshChip() {
     if (conflicts.length) return setChip("conflict", "Conflict");
     if (chipState === "error" || chipState === "offline") return;
-    setChip(pendingCount() ? "saving" : "saved", pendingCount() ? "Saving…" : "Saved");
+    setChip(pendingCount() ? "saving" : "saved", pendingCount() ? "Saving…" : savedAny ? "Saved" : "Draft");
     syncPublishBtns();
     if (!pendingCount()) refreshChanges();
   }
@@ -155,6 +160,7 @@
       if (r.status === 200) {
         s.saved = sent;
         s.rev = r.body.rev;
+        savedAny = true;
         if (chipState === "error" || chipState === "offline") chipState = "saving";
       } else if (r.status === 409) {
         s.rev = r.body.current ? r.body.current.rev : 0;
@@ -172,7 +178,7 @@
       refreshChip();
     }, function () {
       s.busy = false;
-      setChip("offline", "Offline");
+      setChip("offline", OFFLINE);
       s.timer = setTimeout(function () { flush(s); }, RETRY_MS);
     });
   }
@@ -180,7 +186,7 @@
     return Promise.all(Object.keys(st).map(function (id) { return flush(st[id]); }));
   }
   window.addEventListener("online", function () { if (chipState === "offline") setChip("saving", "Saving…"); flushAll(); });
-  window.addEventListener("offline", function () { if (pendingCount()) setChip("offline", "Offline"); });
+  window.addEventListener("offline", function () { if (pendingCount()) setChip("offline", OFFLINE); });
 
   /* ── conflict dialog ── */
   function showConflict(s, cur) {
@@ -514,8 +520,9 @@
     var count = h("span", { class: "ed-count" });
     cur.area[loc] = area;
     cur.count[loc] = count;
-    if (cur.collapse) {
-      /* the public element collapses whitespace: a line break typed here would show in the editor only */
+    if (cur.collapse || !cur.rich) {
+      /* the public element collapses whitespace: a line break typed here would show in the editor only.
+         U-14: a one-line text (not a richline) is refused with a line break by the server: never let one in */
       area.addEventListener("keydown", function (e) { if (e.key === "Enter") e.preventDefault(); });
       area.addEventListener("beforeinput", function (e) { if (e.inputType === "insertLineBreak" || e.inputType === "insertParagraph") e.preventDefault(); });
       area.addEventListener("paste", function (e) {
@@ -552,7 +559,7 @@
       if (r.status === 200) { sl.saved = sl.value; try { localStorage.removeItem(BACKUP); } catch (_) {} backupWrite(); location.reload(); }
       else if (r.status === 409) showConflict(sl, r.body.current || { value: null, rev: 0 });
       else setChip("error", "Not reset: " + ((r.body && r.body.error) || r.status));
-    }, function () { setChip("offline", "Offline"); });
+    }, function () { setChip("offline", OFFLINE); });
   }
   function syncOpenFields(key, loc, value) {
     if (!cur || cur.key !== key || !cur.area[loc]) return;
@@ -586,12 +593,13 @@
     done.addEventListener("click", function () { closePop(false); });
     [
       h("div", { class: "ed-pop-head" }, [
-        h("span", { class: "ed-pop-key", text: key }),
-        h("span", { class: "ed-pop-sec", text: entry && entry.section || "" }),
+        /* U-05: where the text is, in words ("Hero", "Home"), not the registry key */
+        h("span", { class: "ed-pop-key", text: (entry && (SECTION_TITLES[entry.section] || titleCase(entry.section))) || "Text" }),
+        h("span", { class: "ed-pop-sec", text: (entry && PAGE_NAMES[entry.page]) || "Site" }),
       ]),
       locs.indexOf("ar") >= 0 ? field("ar", "Arabic") : null,
       locs.indexOf("en") >= 0 ? field("en", "English") : null,
-      h("p", { class: "ed-hint", text: (locs.length === 1 ? "Arabic only. " : "") + (cur.rich ? (cur.collapse ? "This line has no line breaks on the page. " : "Enter makes a line break. ") : "") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
+      h("p", { class: "ed-hint", text: (locs.length === 1 ? "Arabic only. " : "") + (cur.rich ? (cur.collapse ? "This line has no line breaks on the page. " : "Enter makes a line break. ") : "This text has no line breaks: Enter does nothing here. ") + "Saved as a draft while you type. Esc puts back the text from when you opened this." }),
       h("div", { class: "ed-pop-actions" }, [cancel, done]),
     ].forEach(function (n) { if (n) pop.appendChild(n); });
     locs.forEach(function (l) { cur.area[l].value = cur.orig[l]; updateCount(l); });

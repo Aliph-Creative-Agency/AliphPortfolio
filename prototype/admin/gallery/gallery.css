@@ -202,3 +202,6 @@ body.adm {
 @media (max-width: 520px) {
   .adm-run[data-reorder="1"] .adm-run-note { min-block-size: calc(3 * 1.45em); }
 }
+/* U-60: a refused or failed upload row is marked as such, not only by the colour of its message */
+.adm-row[data-status="error"] { border-inline-start: 3px solid var(--accent); padding-inline-start: 0.8rem; background: rgba(187, 92, 57, 0.08); }
+.adm-row[data-status="error"] .adm-rmsg { font-weight: 600; }

@@ -112,9 +112,9 @@ async function run(cfg) {
       await page.waitForFunction(() => (document.querySelector("#ed-media .ed-media-uperr")?.textContent || "").trim() || /Saved/.test(document.querySelector("#ed-media .ed-media-status")?.textContent || ""), null, { timeout: 12000 }).catch(() => {});
       const d = await page.evaluate(() => ({ err: document.querySelector("#ed-media .ed-media-uperr")?.textContent.trim(), status: document.querySelector("#ed-media .ed-media-status")?.textContent.trim(), up: [...document.querySelectorAll("#ed-media button")].find((b) => b.textContent.trim() === "Upload new")?.disabled }));
       quote("editor Upload new + doc.pdf", d);
-      c.ok(!!d.err && /not supported|could not be read/i.test(d.err), `message ${JSON.stringify(d)}`);
+      c.ok(!!d.err && /not supported|not accepted|could not be read/i.test(d.err), `message ${JSON.stringify(d)}`);
       c.ok(d.up === false, "Upload new stays locked after the refusal");
-      c.known("U-63", false, `the editor says "${d.err}" while the gallery says "That file type is not accepted." for the same file: two wordings, only one lists the accepted formats`);
+      c.known("U-63", /^That file type is not accepted\. Use a JPEG/.test(d.err || ""), `the editor says "${d.err}" while the gallery says "That file type is not accepted." for the same file: two wordings, only one lists the accepted formats`);
       await lookA(page, { touch: cfg.touch, scope: "#ed-media" });
       await page.screenshot({ path: path.join(ORCH, "shots", UC, cfg.name, "03a-pdf-message.png"), scale: "css" }).catch(() => {});
       await tapOrClick(page, "#ed-media .ed-close", cfg); await page.waitForTimeout(500);
@@ -230,7 +230,7 @@ async function run(cfg) {
       quote("editor chip after back online", on);
       c.ok(on === "Saved", `chip "${on}" after going back online`);
       c.ok((await ta.inputValue()) === typed, "textarea lost the typed text");
-      c.known("U-67", !/Retrying/.test(off.chip) && /Offline/.test(off.chip), `chip reads "${off.chip}" for a typed-but-unsaved edit while offline: it does not say the typed text is only kept in this page until the network is back (close the tab now and it is lost)`);
+      c.known("U-67", !/Retrying/.test(off.chip) && /Offline/.test(off.chip) && /kept|saved/i.test(off.chip), `chip reads "${off.chip}" for a typed-but-unsaved edit while offline: it does not say the typed text is only kept in this page until the network is back (close the tab now and it is lost)`);
       const dj = await draft();
       c.ok(dj.includes(typed.replace(/"/g, '\\"')) , "typed text not in the draft after going online");
     });
