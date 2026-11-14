@@ -191,3 +191,9 @@ body.adm {
 @media (pointer: coarse), (max-width: 520px) {
   .adm-tick { inline-size: 4.4rem; block-size: 4.4rem; font-size: 2.4rem; }
 }
+/* U-47: on the phone a client row gives the names the whole first line (beside the monogram);
+   the piece count and Edit / Delete go on the line under them */
+@media (max-width: 520px) {
+  .adm-cnames { flex: 1 1 calc(100% - 4.2rem); }
+  .adm-cact { margin-inline-start: auto; }
+}
