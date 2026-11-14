@@ -5730,3 +5730,7 @@ body.sheet-open { overflow: hidden; }
   .ch-name { font-size: 1.2rem; }
   .lib-client .lc-mono.lg { inline-size: 2rem; block-size: 2rem; font-size: 1.1rem; }
 }
+
+/* F-13: a sideways finger move on the lightbox is a swipe between pieces (main.js), not a browser pan;
+   up/down and pinch stay the browser's */
+.lb-body { touch-action: pan-y pinch-zoom; }

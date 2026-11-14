@@ -3557,6 +3557,25 @@ const lightbox = (() => {
       if (e.target.closest(".lb-prev")) return step(-1);
       if (e.target.closest(".lb-next")) return step(1);
     });
+
+    /* F-13: a finger swipes between pieces like the arrows step. A mostly
+       sideways move of 40px or more counts; an up/down drag or a small wobble
+       does not. "Next" is the way the page reads, the same rule as the arrow
+       keys: finger right-to-left in English, left-to-right in Arabic. The
+       browser leaves sideways moves to this (`touch-action` in style.css). */
+    let swipeAt = null;
+    root.addEventListener("pointerdown", (e) => {
+      swipeAt = e.pointerType !== "mouse" && e.isPrimary && !e.target.closest("button")
+        ? { x: e.clientX, y: e.clientY } : null;
+    });
+    root.addEventListener("pointercancel", () => { swipeAt = null; });
+    root.addEventListener("pointerup", (e) => {
+      if (!swipeAt || e.pointerType === "mouse") return;
+      const dx = e.clientX - swipeAt.x, dy = e.clientY - swipeAt.y;
+      swipeAt = null;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      step((dx < 0) !== (document.documentElement.dir === "rtl") ? 1 : -1);
+    });
   }
 
   /* What should the overlay show for this tile? A film tile names its file on
