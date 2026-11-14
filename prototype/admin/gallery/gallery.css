@@ -187,3 +187,7 @@ body.adm {
   .adm-pick > .adm-x { order: 2; flex: 1 1 0; }
   .adm-pick-name { flex: 1 1 0; }
 }
+/* U-44: on a touch screen the select tick looks as big as the target it stands for */
+@media (pointer: coarse), (max-width: 520px) {
+  .adm-tick { inline-size: 4.4rem; block-size: 4.4rem; font-size: 2.4rem; }
+}
