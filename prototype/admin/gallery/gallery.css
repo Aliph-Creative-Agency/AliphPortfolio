@@ -158,3 +158,9 @@ body.adm {
 .adm-pubstate { color: var(--ink-mute); }
 .adm-pub { min-block-size: 4.4rem; min-inline-size: 4.4rem; }
 .adm-confirm .adm-btn { min-block-size: 4.4rem; }
+/* U-02: on a touch screen every control is at least 44 px each way (the iPhone guideline) */
+@media (pointer: coarse), (max-width: 520px) {
+  .adm-btn, .adm-x, .adm-tab, .adm-topbar a { min-block-size: 4.4rem; min-inline-size: 4.4rem; }
+  .adm-sel, .adm-search, .adm-in, .adm-drawer .adm-search { min-block-size: 4.4rem; }
+  .adm-topbar a { justify-content: center; }
+}

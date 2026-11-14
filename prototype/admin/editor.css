@@ -143,3 +143,11 @@ html[data-edit-mode="1"] [data-ek] { cursor: text; }
 .ed-rev-live { font-size: 11px; padding: 0 6px; border-radius: 3px; background: rgba(120, 190, 140, 0.45); }
 .ed-rev-meta { font-size: 12px; color: rgba(15, 24, 32, 0.68); overflow-wrap: anywhere; }
 .ed-rev-changes { font-size: 13px; overflow-wrap: anywhere; }
+
+/* U-02: on a touch screen every control is at least 44 px each way (the iPhone guideline) */
+@media (pointer: coarse), (max-width: 520px) {
+  .ed-bar a, .ed-bar button, .ed-pop-actions button, .ed-reset { min-height: 44px; min-width: 44px; justify-content: center; }
+  .ed-close { width: 44px; height: 44px; }
+  .ed-row { min-height: 44px; }
+  .ed-panel input[type="search"] { min-height: 44px; }
+}

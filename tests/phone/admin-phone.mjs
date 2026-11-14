@@ -120,7 +120,13 @@ async function editor(context, L) {
 
   // U-17: the popover stays on screen when its text is scrolled far out of view
   await ready("/admin/edit/about");
-  const far = page.locator("[data-ek]").locator("visible=true").last();
+  // the last visible text that can still scroll to the middle of the screen (not the footer under the bar)
+  await page.evaluate(() => {
+    const end = document.documentElement.scrollHeight - innerHeight;
+    const all = [...document.querySelectorAll("[data-ek]")].filter((e) => { const b = e.getBoundingClientRect(); return b.width && b.height && b.top + scrollY - innerHeight / 2 < end; });
+    all[all.length - 1].setAttribute("data-phone-far", "1");
+  });
+  const far = page.locator("[data-phone-far]");
   await far.evaluate((e) => e.scrollIntoView({ block: "center" }));
   await sleep(300);
   await far.tap();
