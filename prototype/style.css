@@ -5740,3 +5740,16 @@ body.sheet-open { overflow: hidden; }
 .lib-client.ch-below .lc-mono { grid-row: auto; }
 .lib-client.ch-below .ch-name, .lib-client.ch-below .ch-line,
 .lib-client.ch-below .ch-meta, .lib-client.ch-below .ch-empty { grid-column: 1 / -1; }
+
+/* U-48: a tile's client caption gets the tile's width (the date sits beside a short name and goes under a
+   long one), breaks between words, not inside them, and stops at two lines; the client's own header
+   (/library?client=) carries the full name */
+.tile figcaption:has(.t-client) { flex-wrap: wrap; row-gap: 0; }
+.tile figcaption .t-client {
+  flex: 1 1 auto;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
