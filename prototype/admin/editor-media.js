@@ -36,6 +36,14 @@
       el.setAttribute("data-es-ready", "");
       el.setAttribute("tabindex", "0");
       el.setAttribute("aria-haspopup", "dialog");
+      /* a tab stop needs a name: a reel picture (alt="") or an unnamed figure would be read
+         as a bare "image"; name it after the slot, like the drawer title (F-17). A holder
+         that already has an alt or a label keeps it. */
+      var named = el.tagName === "IMG" ? (el.getAttribute("alt") || "").trim()
+        : (el.textContent || "").trim() || el.querySelector("img[alt]:not([alt=\"\"])");
+      if (!named && !(el.getAttribute("aria-label") || "").trim() && !el.hasAttribute("aria-labelledby")) {
+        el.setAttribute("aria-label", (el.closest("figure[data-preview]") ? "Edit video " : "Edit picture ") + el.getAttribute("data-es"));
+      }
     });
   }
   tagHolders();
