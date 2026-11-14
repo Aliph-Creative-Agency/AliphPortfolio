@@ -170,3 +170,6 @@ html[data-edit-mode="1"] [data-ek] { cursor: text; }
 
 /* U-11: the toast sits above the bar, however many rows the bar has (--ed-bar-h is kept by editor.js) */
 .ed-toast { bottom: calc(var(--ed-bar-h, 46px) + 12px); }
+
+/* U-17: the popover is never taller than the room above the bar (editor.js keeps it on screen) */
+.ed-pop { max-height: calc(100vh - var(--ed-bar-h, 46px) - 24px); }
