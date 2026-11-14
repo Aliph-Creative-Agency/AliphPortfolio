@@ -56,7 +56,9 @@ function drawRow(r) {
   bar.value = r.pct || 0;
   const msg = el("span", "adm-rmsg", r.msg || (r.kind === "video" ? "video" : "image"));
   msg.setAttribute("role", r.status === "error" ? "alert" : "status");
-  n.append(name, cat, sub, bar, msg);
+  // U-60: a refused or failed row keeps only its name, the reason and Retry / Remove (Retry brings the selects back)
+  if (r.status === "error") n.append(name, msg);
+  else n.append(name, cat, sub, bar, msg);
   if (r.status === "error" && r.kind && !r.final) n.append(button("Retry", () => retry(r)));
   if (r.status === "ready" || r.status === "error") {
     n.append(button("Remove", () => { rows.splice(rows.indexOf(r), 1); n.remove(); summary(); }));
