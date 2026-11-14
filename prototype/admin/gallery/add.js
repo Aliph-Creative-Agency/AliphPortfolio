@@ -21,6 +21,7 @@ const el = (tag, cls, text) => {
 const CATS = [["design", "Design"], ["photo", "Photo"]];
 const rows = []; // {file, kind, cat, sub, status, msg, pct, node}
 let busy = false;
+let at = null; // U-38: {i, n} while a batch runs, for "Uploading i of n…"
 
 // U-62 / U-63 / U-65: the same wording as the editor's picture drawer (shared/media.js explain)
 const problem = (e, kind) => explain(e, kind);
@@ -74,7 +75,7 @@ function button(text, onclick) {
 function summary() {
   const ready = rows.filter((r) => r.status === "ready").length;
   $("add-go").disabled = busy || !ready;
-  $("add-go").textContent = ready ? `Upload ${ready} file(s)` : "Upload";
+  $("add-go").textContent = busy && at ? `Uploading ${at.i} of ${at.n}…` : ready ? `Upload ${ready} file(s)` : "Upload";
 }
 
 export function stage(files) {
@@ -105,6 +106,8 @@ async function put(id, body) {
 
 async function run(r) {
   r.status = "uploading"; r.msg = "Preparing…"; drawRow(r);
+  // U-38: keep the row that is working in view (on a phone the list runs off the screen)
+  r.node.scrollIntoView({ block: "nearest", behavior: "instant" });
   try {
     const out = await prepareAndUpload(r.file, r.kind, {
       onStage: (m) => { r.msg = m; drawRow(r); },
@@ -122,9 +125,9 @@ async function run(r) {
 /** Runs `list` one by one, then refreshes the grid. A failed refresh (the
  *  network dropped) leaves the grid as it was instead of an unhandled error. */
 async function runAll(list) {
-  busy = true; summary();
-  for (const r of list) await run(r);
-  busy = false; summary();
+  busy = true;
+  for (let i = 0; i < list.length; i++) { at = { i: i + 1, n: list.length }; summary(); await run(list[i]); }
+  busy = false; at = null; summary();
   await load().catch(() => {});
 }
 const go = () => runAll(rows.filter((x) => x.status === "ready"));

@@ -219,7 +219,7 @@ async function phoneProgress(ctx) {
   await page.locator("#add-file").setInputFiles(files);
   await page.locator("#add-go").tap();
   const seen = [];
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 80; i++) {
     const s = await page.evaluate(() => {
       const row = document.querySelector('#add-rows .adm-row[data-status="uploading"]');
       if (!row) return null;
@@ -227,11 +227,12 @@ async function phoneProgress(ctx) {
       return { btn: document.getElementById("add-go").textContent.trim(), rowIn: b.top >= 0 && b.bottom <= innerHeight, btnIn: go.top >= 0 && go.bottom <= innerHeight };
     });
     if (s) seen.push(s);
-    if (seen.length >= 3) break;
+    else if (seen.length) break; // the batch is over
     await sleep(250);
   }
-  check(`${L} U-38 the Upload button counts "n of 6" while the batch runs`, seen.length > 0 && seen.every((s) => /\b\d of 6\b/.test(s.btn)), JSON.stringify(seen.map((s) => s.btn)));
-  check(`${L} U-38 the row being uploaded is on screen`, seen.length > 0 && seen.every((s) => s.rowIn), JSON.stringify(seen));
+  const counts = [...new Set(seen.map((s) => s.btn))];
+  check(`${L} U-38 the Upload button counts "n of 6" while the batch runs, and the count moves on`, seen.length > 0 && seen.every((s) => /\b\d of 6\b/.test(s.btn)) && counts.length >= 3, JSON.stringify(counts));
+  check(`${L} U-38 the row being uploaded is on screen`, seen.length > 0 && seen.every((s) => s.rowIn), `${seen.filter((s) => !s.rowIn).length} of ${seen.length} samples off screen`);
   await page.waitForFunction(() => !document.querySelector('#add-rows .adm-row[data-status="uploading"]'), null, { timeout: 20000 }).catch(() => {});
   await page.close();
 }
