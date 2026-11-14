@@ -807,7 +807,10 @@ function buildFilm() {
        is the shopping list for the real titles.
        NOT lazy: the strip is cloned across several viewport widths and
        travels continuously, so a deferred frame pops in mid-scroll. */
-    fig.innerHTML = `<img src="${fr.src || HOLDER}" alt="" decoding="async">`;
+    /* U-23: a published alt text names the frame (the media labeller then
+       leaves it its own name instead of "Open image, 1 of 4") */
+    const alt = fr.alt ? fr.alt[lang] || fr.alt.en || fr.alt.ar || "" : "";
+    fig.innerHTML = `<img src="${fr.src || HOLDER}" alt="${escHTML(alt)}" decoding="async">`;
     group.appendChild(fig);
   });
   filmScroll.appendChild(group);
@@ -2432,6 +2435,8 @@ if (mergeSnap) {
     const v = mergeSnap.slots[id];
     const frame = hit && FILM_FRAMES[+hit[1] - 1];
     if (frame && v && v.src) frame.src = v.src;
+    /* U-23: the frame's alt text, which buildFilm() writes in the page's language */
+    if (frame && v && v.alt) frame.alt = v.alt;
   });
 
   /* A ring's picks are item ids (CONTENT_API "Rings"). Resolved the way the

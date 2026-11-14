@@ -162,6 +162,8 @@ async function clientView(ctx, lang, width) {
 /* ── U-23 home film frame ── */
 async function home(ctx, lang) {
   const page = await ctx.newPage();
+  const errs = [];
+  page.on("pageerror", (e) => errs.push(e.message));
   await load(page, "/", lang);
   const f = await page.evaluate(() => {
     const fr = document.querySelector(".film-group:not([aria-hidden]) .film-frame[data-frame='0']") || document.querySelector(".film-frame[data-frame='0']");
@@ -185,6 +187,7 @@ async function home(ctx, lang) {
     }).filter((x) => x !== null);
   });
   check(`${L} ${lang} F-19 the testimonial business line is at least 4.5:1`, tb.length > 0 && tb.every((r) => r >= 4.5), JSON.stringify(tb));
+  check(`${L} ${lang} home: no page errors`, !errs.length, errs.join(" | "));
   await page.close();
 }
 
