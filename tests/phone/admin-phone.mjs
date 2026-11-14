@@ -151,9 +151,10 @@ async function gallery(context, L) {
   await ready();
   check(`${L} gallery has no sideways scroll`, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 
-  // U-08: the first pictures are on the first screen
-  const g = await page.evaluate(() => ({ top: document.querySelector("#grid .adm-tile").getBoundingClientRect().top + scrollY, vh: innerHeight }));
-  check(`${L} U-08 the first picture starts on the first screen`, g.top < g.vh, `tile top ${Math.round(g.top)} in ${g.vh}`);
+  // U-08: the category tabs and the start of the picture grid are on the first screen (it was 3 screens down)
+  const g = await page.evaluate(() => ({ tabs: document.getElementById("tabs").getBoundingClientRect().bottom + scrollY,
+    grid: document.getElementById("grid").getBoundingClientRect().top + scrollY, vh: innerHeight }));
+  check(`${L} U-08 the tabs and the picture grid start on the first screen`, g.tabs <= g.vh && g.grid < g.vh, `tabs end ${Math.round(g.tabs)}, grid ${Math.round(g.grid)} in ${g.vh}`);
 
   // U-58: a ring opened on the phone: every pick row the same height, its three buttons on one line
   const ring = '.adm-ring-box[data-service="photo"]';

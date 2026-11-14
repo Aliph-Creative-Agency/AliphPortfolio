@@ -202,10 +202,14 @@ function build() {
   const host = $("rings");
   host.textContent = "";
   host.append(el("h2", "", "Ring picks"));
+  // U-08: on a phone each ring folds to its title and state line, so the pictures are not buried under ~2000 px
+  // of picks; a wider screen opens them as before
+  const phone = window.matchMedia("(max-width: 520px)").matches;
   for (const [s, label] of SERVICES) {
-    const box = el("section", "adm-ring-box");
+    const box = el("details", "adm-ring-box");
     box.dataset.service = s;
-    const head = el("div", "adm-ring-head");
+    box.open = !phone;
+    const head = el("summary", "adm-ring-head");
     head.append(el("h3", "", label), el("span", "adm-ring-sub"));
     const bar = el("div", "adm-dact");
     for (const [act, text, cls] of [["add", "Add from gallery…", "adm-btn adm-btn-2"], ["save", "Save ring", "adm-btn"], ["discard", "Discard edits", "adm-btn adm-btn-2"], ["reset", "Reset to default", "adm-btn adm-btn-2"]]) {
