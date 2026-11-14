@@ -4330,7 +4330,20 @@ function renderClientsIndex() {
 /* FIT THE TYPE: a client's name is at most two lines (floor 0.75). Re-run when
    the width changes or the fonts arrive, both of which move the line breaks. */
 function fitClientNames() {
-  document.querySelectorAll(".lc-name, .ch-name").forEach((el) => fitLines(el, 2, 0.75));
+  document.querySelectorAll(".lc-name").forEach((el) => fitLines(el, 2, 0.75));
+  /* F-11: the header's name beside the monogram. If even 75% leaves it on a
+     third line (a long name on a phone), it moves under the monogram to the
+     full width and is fitted again: the layout gives, the floor does not
+     (the `.rt-below` move, HANDOFF "FIT THE TYPE"). */
+  const ch = document.querySelector(".lib-client .ch-name");
+  if (!ch) return;
+  const sec = ch.closest(".lib-client");
+  sec.classList.remove("ch-below");
+  fitLines(ch, 2, 0.75);
+  const lh = parseFloat(getComputedStyle(ch).lineHeight) || parseFloat(getComputedStyle(ch).fontSize) * 1.3;
+  if (ch.scrollHeight <= 2 * lh + 1) return;
+  sec.classList.add("ch-below");
+  fitLines(ch, 2, 0.75);
 }
 window.addEventListener("resize", fitClientNames);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitClientNames);

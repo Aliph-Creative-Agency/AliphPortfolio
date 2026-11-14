@@ -5734,3 +5734,9 @@ body.sheet-open { overflow: hidden; }
 /* F-13: a sideways finger move on the lightbox is a swipe between pieces (main.js), not a browser pan;
    up/down and pinch stay the browser's */
 .lb-body { touch-action: pan-y pinch-zoom; }
+
+/* F-11: a client name that needs a third line even at 75% (main.js fitClientNames adds .ch-below) takes the
+   full width under the monogram, with the line and meta under it */
+.lib-client.ch-below .lc-mono { grid-row: auto; }
+.lib-client.ch-below .ch-name, .lib-client.ch-below .ch-line,
+.lib-client.ch-below .ch-meta, .lib-client.ch-below .ch-empty { grid-column: 1 / -1; }
