@@ -158,3 +158,47 @@ body.adm {
 .adm-pubstate { color: var(--ink-mute); }
 .adm-pub { min-block-size: 4.4rem; min-inline-size: 4.4rem; }
 .adm-confirm .adm-btn { min-block-size: 4.4rem; }
+/* U-02: on a touch screen every control is at least 44 px each way (the iPhone guideline) */
+@media (pointer: coarse), (max-width: 520px) {
+  .adm-btn, .adm-x, .adm-tab, .adm-topbar a { min-block-size: 4.4rem; min-inline-size: 4.4rem; }
+  .adm-sel, .adm-search, .adm-in, .adm-drawer .adm-search { min-block-size: 4.4rem; }
+  .adm-topbar a { justify-content: center; }
+}
+/* U-08: a ring folds to its summary line (title + state) on the phone; the marker shows open / closed */
+.adm-ring-head { cursor: pointer; list-style: none; min-block-size: 4.4rem; align-items: center; }
+.adm-ring-head::-webkit-details-marker { display: none; }
+.adm-ring-head::before { content: "\25B8"; color: var(--ink-mute); }
+.adm-ring-box[open] > .adm-ring-head::before { content: "\25BE"; }
+.adm-ring-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.adm-ring-box:not([open]) { padding-block: 0; }
+/* the housekeeping "Unused files" panel goes under the pictures on the phone (DOM order unchanged) */
+@media (max-width: 520px) {
+  body.adm { display: flex; flex-direction: column; }
+  .adm-clean { order: 1; }
+  .adm-add, .adm-rings, .adm-clients, .adm-clean { margin-block: 0.8rem; } /* flex margins do not collapse */
+}
+/* U-52: style.css's `* { margin: 0 }` drops the browser's centring of a modal dialog; put it back for the
+   small boxes (confirm, Publish, New client). The side drawers keep their own margins. */
+.adm-confirm { margin: auto; max-block-size: calc(100dvh - 3.2rem); overflow: auto; box-sizing: border-box; }
+/* U-58: on the phone a ring pick is two even rows: picture, number and name; then Earlier / Later / Remove
+   side by side. The ::before is the line break (flex order 1, full width). */
+@media (max-width: 520px) {
+  .adm-pick::before { content: ""; order: 1; flex: 0 0 100%; block-size: 0; }
+  .adm-pick > .adm-x { order: 2; flex: 1 1 0; }
+  .adm-pick-name { flex: 1 1 0; }
+}
+/* U-44: on a touch screen the select tick looks as big as the target it stands for */
+@media (pointer: coarse), (max-width: 520px) {
+  .adm-tick { inline-size: 4.4rem; block-size: 4.4rem; font-size: 2.4rem; }
+}
+/* U-47: on the phone a client row gives the names the whole first line (beside the monogram);
+   the piece count and Edit / Delete go on the line under them */
+@media (max-width: 520px) {
+  .adm-cnames { flex: 1 1 calc(100% - 4.2rem); }
+  .adm-cact { margin-inline-start: auto; }
+}
+/* U-41: during a reorder on the phone the note keeps room for three lines, so swapping the hint for the
+   one-line position note does not move the grid under the boss's finger */
+@media (max-width: 520px) {
+  .adm-run[data-reorder="1"] .adm-run-note { min-block-size: calc(3 * 1.45em); }
+}

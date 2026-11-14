@@ -24,6 +24,8 @@ const gallery = async (page) => {
   // style.css has `scroll-behavior: smooth`: a drag whose target is off screen scrolls while the pointer is down and drops on the
   // wrong tile (grown local DB = a long grid). A person's drag auto-scrolls instantly under the pointer, so scroll instantly here.
   await page.addStyleTag({ content: "html { scroll-behavior: auto !important; }" });
+  // U-08: on the phone the ring panels load folded; this journey is about the picks, not the fold
+  await page.evaluate(() => document.querySelectorAll("details.adm-ring-box:not([open])").forEach((d) => { d.open = true; }));
 };
 const publish = (page) => page.evaluate(async () => {
   const c = await (await fetch("/api/admin/changes")).json();

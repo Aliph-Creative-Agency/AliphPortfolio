@@ -254,9 +254,14 @@ async function run(cfg) {
 
     const ringBox = '.adm-ring-box[data-service="photo"]';
     const ringNames = () => page.evaluate((b) => [...document.querySelectorAll(`${b} .adm-pick .adm-pick-name`)].map((x) => x.textContent), ringBox);
+    // U-08: on the phone a ring loads folded to its summary line; open it the way the boss does
+    const openRing = async () => {
+      await page.locator(ringBox).scrollIntoViewIfNeeded();
+      if (await page.locator(`${ringBox}:not([open])`).count()) await tapOrClick(page, `${ringBox} > summary`, cfg);
+    };
 
     await S(5, "ring-add-photo-5", "Photo ring: Add from gallery, search photo-5, tile Add, Done: photo-5 is last in the ring list, sub line says 'unsaved edits'", async (c) => {
-      await page.locator(ringBox).scrollIntoViewIfNeeded();
+      await openRing();
       const before = await ringNames();
       c.note(`ring before (${before.length}): ${before.join(", ")}`);
       await tapOrClick(page, `${ringBox} [data-act="add"]`, cfg);
@@ -277,7 +282,7 @@ async function run(cfg) {
       c.ok(after.length === before.length + 1 && after.at(-1) === newIds["photo-5"], `ring last "${after.at(-1)}", count ${after.length}`);
       c.ok(/unsaved edits/.test(sub), `sub line "${sub}"`);
       c.known("U-35", !/^[a-z0-9]{6}-/.test(after.at(-1)), `the ring lists the piece as "${after.at(-1)}" (random prefix)`);
-      await page.locator(ringBox).scrollIntoViewIfNeeded();
+      await openRing();
     });
 
     await S(6, "ring-photo-5-first-save", "photo-5 moved to first (edge: Alt+ArrowUp; phone: Earlier taps); Save ring: 'Saved (not published yet).'; Reset to default enabled", async (c) => {
@@ -307,7 +312,7 @@ async function run(cfg) {
 
     await S(7, "reload-ring", "reload: the Photo ring list starts with photo-5, the other picks keep their order", async (c) => {
       await open(); await photoTab();
-      await page.locator(ringBox).scrollIntoViewIfNeeded();
+      await openRing();
       const names = await ringNames();
       c.note(`ring after reload (${names.length}): ${names.join(", ")}`);
       c.ok(names[0] === newIds["photo-5"], `first pick "${names[0]}"`);

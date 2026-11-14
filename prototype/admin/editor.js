@@ -490,6 +490,8 @@
     var top = r.bottom + 10;
     if (top + ph > vh - bottomBar) top = r.top - ph - 10;
     if (top < 8) top = Math.max(8, vh - bottomBar - ph);
+    /* U-17: a text scrolled (or grown) far out of view must not take the popover with it */
+    top = Math.min(top, Math.max(8, vh - bottomBar - ph));
     var left = Math.min(Math.max(8, r.left), Math.max(8, vw - pw - 8));
     pop.style.top = top + "px";
     pop.style.left = left + "px";

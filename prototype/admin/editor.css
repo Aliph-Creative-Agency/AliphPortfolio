@@ -143,3 +143,33 @@ html[data-edit-mode="1"] [data-ek] { cursor: text; }
 .ed-rev-live { font-size: 11px; padding: 0 6px; border-radius: 3px; background: rgba(120, 190, 140, 0.45); }
 .ed-rev-meta { font-size: 12px; color: rgba(15, 24, 32, 0.68); overflow-wrap: anywhere; }
 .ed-rev-changes { font-size: 13px; overflow-wrap: anywhere; }
+
+/* U-02: on a touch screen every control is at least 44 px each way (the iPhone guideline) */
+@media (pointer: coarse), (max-width: 520px) {
+  .ed-bar a, .ed-bar button, .ed-pop-actions button, .ed-reset { min-height: 44px; min-width: 44px; justify-content: center; }
+  .ed-close { width: 44px; height: 44px; }
+  .ed-row { min-height: 44px; }
+  .ed-panel input[type="search"] { min-height: 44px; }
+}
+
+/* U-12: on a phone the bar is two fixed rows, so it does not grow when the chip or the Publish count changes:
+   row 1 the pages, the language and Dashboard; row 2 Page text, History, the chip, Discard and Publish.
+   The spacer becomes the line break; the chip takes what is left of row 2 and wraps inside it. */
+@media (max-width: 520px) {
+  .ed-bar { gap: 0 4px; padding: 4px 8px; font-size: 13px; }
+  .ed-bar a, .ed-bar button { padding: 4px 8px; }
+  .ed-pages { gap: 4px; }
+  .ed-bar > a { order: 1; margin-inline-start: auto; }
+  .ed-spacer { order: 2; flex: 0 0 100%; height: 4px; }
+  .ed-bar > button[aria-controls] { order: 3; }
+  .ed-chip, .ed-discard, .ed-publish { order: 4; }
+  .ed-chip { flex: 1 1 0; min-width: 0; padding: 2px 6px; font-size: 11px; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
+  /* a "Not saved: ..." message is too long for that slot: it gets its own line on top, readable */
+  .ed-chip[data-state="error"] { order: -1; flex: 0 0 100%; margin-bottom: 4px; padding: 4px 8px; font-size: 12px; text-align: start; border-radius: 3px; }
+}
+
+/* U-11: the toast sits above the bar, however many rows the bar has (--ed-bar-h is kept by editor.js) */
+.ed-toast { bottom: calc(var(--ed-bar-h, 46px) + 12px); }
+
+/* U-17: the popover is never taller than the room above the bar (editor.js keeps it on screen) */
+.ed-pop { max-height: calc(100vh - var(--ed-bar-h, 46px) - 24px); }

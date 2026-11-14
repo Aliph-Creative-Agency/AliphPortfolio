@@ -303,6 +303,8 @@ async function run(cfg) {
 
     await S(13, "ring-photo-5", "Photo ring: tap Add from gallery, tap the search, type photo-5, tap the tile, tap Done, tap Save: photo-5 in the ring", async (c) => {
       await page.waitForTimeout(300);
+      // U-08: the ring loads folded to its summary line on the phone
+      if (await page.locator(`${ringBox}:not([open])`).count()) await tap(`${ringBox} > summary`, "Photo ring: open");
       await tap(`${ringBox} [data-act="add"]`, "Photo ring: Add from gallery");
       await page.waitForSelector("#picker[open]", { timeout: 4000 });
       await tap("#picker-q", "Picker: search"); await page.keyboard.type("photo-5", { delay: 25 }); await page.waitForTimeout(500);
