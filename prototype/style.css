@@ -5753,3 +5753,9 @@ body.sheet-open { overflow: hidden; }
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
+
+/* U-49: on a phone a closed /library section is its title row only. Its body is in the flow here (stacked
+   accordion) and kept its 74vh while invisible, so a closed section was ~713px of blank under its title. */
+@media (max-width: 900px) {
+  .acc-panel:not(.open) .panel-body { height: 0; }
+}
