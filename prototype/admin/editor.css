@@ -151,3 +151,19 @@ html[data-edit-mode="1"] [data-ek] { cursor: text; }
   .ed-row { min-height: 44px; }
   .ed-panel input[type="search"] { min-height: 44px; }
 }
+
+/* U-12: on a phone the bar is two fixed rows, so it does not grow when the chip or the Publish count changes:
+   row 1 the pages, the language and Dashboard; row 2 Page text, History, the chip, Discard and Publish.
+   The spacer becomes the line break; the chip takes what is left of row 2 and wraps inside it. */
+@media (max-width: 520px) {
+  .ed-bar { gap: 0 4px; padding: 4px 8px; font-size: 13px; }
+  .ed-bar a, .ed-bar button { padding: 4px 8px; }
+  .ed-pages { gap: 4px; }
+  .ed-bar > a { order: 1; margin-inline-start: auto; }
+  .ed-spacer { order: 2; flex: 0 0 100%; height: 4px; }
+  .ed-bar > button[aria-controls] { order: 3; }
+  .ed-chip, .ed-discard, .ed-publish { order: 4; }
+  .ed-chip { flex: 1 1 0; min-width: 0; padding: 2px 6px; font-size: 11px; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
+  /* a "Not saved: ..." message is too long for that slot: it gets its own line on top, readable */
+  .ed-chip[data-state="error"] { order: -1; flex: 0 0 100%; margin-bottom: 4px; padding: 4px 8px; font-size: 12px; text-align: start; border-radius: 3px; }
+}
