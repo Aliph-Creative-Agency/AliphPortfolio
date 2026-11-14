@@ -4496,11 +4496,17 @@ function renderLibrary() {
          the foot of the lightbox module is what activates them; it asks only
          that the node match OPENS, which every tile here does. */
       const label = m.v ? I18N.mPlay[lang] : I18N.mOpen[lang];
-      const named = ` role="button" tabindex="0" aria-label="${label}${m.d ? SEP() + fmtDate(m.d) : ""}"`;
+      /* U-40: the alt text the boss wrote for a piece (published with it) is the
+         picture's alt AND part of the tile's name, since an aria-label on the
+         tile hides the picture's own alt from a screen reader. The page's
+         language first, the other one rather than nothing. The lightbox reads
+         the tile picture's alt, so it follows. */
+      const alt = m.alt ? m.alt[lang] || m.alt.en || m.alt.ar || "" : "";
+      const named = ` role="button" tabindex="0" aria-label="${label}${alt ? SEP() + escHTML(alt) : ""}${m.d ? SEP() + fmtDate(m.d) : ""}"`;
       return `
       <figure class="tile${m.v ? " is-film" : ""}"${m.v ? ` data-film="${m.src || m.f}"` : ""}${named}>
         <div class="tile-img" style="aspect-ratio:${m.r}">
-          <img src="${src}" data-full="${full}" alt="" loading="lazy" decoding="async">
+          <img src="${src}" data-full="${full}" alt="${escHTML(alt)}" loading="lazy" decoding="async">
           ${m.v ? '<span class="tile-play" aria-hidden="true"></span>' : ""}
         </div>
         ${date}
