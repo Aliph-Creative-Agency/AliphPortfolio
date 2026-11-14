@@ -118,7 +118,8 @@ html[data-edit-mode="1"] [data-ek] { cursor: text; }
 
 /* Publish / Discard (E-06b) */
 .ed-bar button:disabled { opacity: 0.45; cursor: default; background: transparent; }
-.ed-bar .ed-publish:not(:disabled) { background: #BB5C39; color: #F3F1E8; }
+/* F-18: one step darker than the #BB5C39 accent (same hue) so the label reads 4.58:1 (AA), was 3.95 */
+.ed-bar .ed-publish:not(:disabled) { background: #AB5434; color: #F3F1E8; }
 /* dialogs and the toast sit above the bar, the side panels and the popover (a panel is full-width on a phone) */
 .ed-scrim { position: fixed; inset: 0; z-index: 2147483250; background: rgba(15, 24, 32, 0.4); }
 .ed-confirm { width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 96px); display: flex; flex-direction: column; }

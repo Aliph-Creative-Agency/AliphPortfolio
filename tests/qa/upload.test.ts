@@ -12,7 +12,8 @@
 //    slug; every stored key matches ADMIN_KEY_RE and nothing appears outside
 //    admin/. x-poster-for that is not an admin/ video key is a 400.
 //  - COLLISIONS: same-named uploads get distinct keys; a forced RNG collision
-//    is F-05 (silent overwrite, no onlyIf guard).
+//    re-rolls the id, and a key that stays taken (or fills in a race) is a
+//    409, never an overwrite (F-05, fixed). A poster keeps its fixed key.
 //  - SIZE: a declared Content-Length that disagrees with the body is a 400
 //    with nothing stored; a streamed body over the image cap is a 413;
 //    multipart reports the size R2 counted, never the claimed one, and an
@@ -23,8 +24,9 @@
 //  - SERVING: GET /api/admin/media/<key> sends the stored media type with
 //    nosniff for everything the Worker can store; odd paths are 404, never
 //    500, never a non-admin/ object. It trusts the stored content-type
-//    blindly (F-06: an out-of-band text/html object would render inline on
-//    the admin origin).
+//    only if it is one of the six media types, else octet-stream, always
+//    with a sandbox CSP (F-06: an out-of-band text/html object used to
+//    render inline on the admin origin).
 import { env } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { call, del, installAccess, post, uninstallAccess } from "../gallery/helpers";
@@ -269,7 +271,17 @@ describe("key collisions", () => {
       if (a) new Uint8Array(a.buffer, a.byteOffset, a.byteLength).fill(7);
       return a;
     });
-  it.fails("F-05 a random-id collision on single upload silently replaces the earlier object (no onlyIf guard)", async () => {
+  // The first `n` draws all give the same id, later ones are random again.
+  const sameRandomFor = (n: number) => {
+    const real = crypto.getRandomValues.bind(crypto);
+    let calls = 0;
+    return vi.spyOn(crypto, "getRandomValues").mockImplementation(<T extends ArrayBufferView | null>(a: T): T => {
+      if (++calls > n) return real(a as ArrayBufferView) as T;
+      if (a) new Uint8Array(a.buffer, a.byteOffset, a.byteLength).fill(7);
+      return a;
+    });
+  };
+  it("F-05 a random-id collision on single upload never replaces the earlier object", async () => {
     sameRandom();
     const first = cat(HEAD.jpg, "FIRST", new Uint8Array(40));
     const a = (await (await up(first, { "x-file-name": "cover.jpg" })).json()) as Up;
@@ -278,13 +290,68 @@ describe("key collisions", () => {
     if (r.status === 201) expect(((await r.json()) as Up).key).not.toBe(a.key);
     expect(await bytesOf(a.key)).toEqual(first);
   });
-  it.fails("F-05 a random-id collision on multipart create hands out a key that already holds a video", async () => {
+  it("F-05 one collision re-rolls the id: 201 on a fresh key, both bodies intact", async () => {
+    sameRandomFor(2); // the first upload's draw + the second upload's first draw
+    const first = cat(HEAD.jpg, "FIRST", new Uint8Array(40));
+    const second = cat(HEAD.jpg, "SECOND", new Uint8Array(40));
+    const a = (await (await up(first, { "x-file-name": "cover.jpg" })).json()) as Up;
+    const r = await up(second, { "x-file-name": "cover.jpg" });
+    expect(r.status).toBe(201);
+    const b = (await r.json()) as Up;
+    expect(b.key).not.toBe(a.key);
+    expect(b.key).toMatch(ADMIN_KEY_RE);
+    expect(b.id).toBe(b.key.split("/").pop()!.replace(/\.jpg$/, ""));
+    expect(await bytesOf(a.key)).toEqual(first);
+    expect(await bytesOf(b.key)).toEqual(second);
+  });
+  it("F-05 every re-roll colliding → 409, nothing stored, no audit, first bytes intact", async () => {
+    sameRandom();
+    const first = cat(HEAD.jpg, "FIRST", new Uint8Array(40));
+    const a = (await (await up(first, { "x-file-name": "cover.jpg" })).json()) as Up;
+    await refused(() => up(cat(HEAD.jpg, "SECOND", new Uint8Array(40)), { "x-file-name": "cover.jpg" }), 409);
+    await refused(() => up(stream([cat(HEAD.jpg, "THIRD", new Uint8Array(40))]), { "x-file-name": "cover.jpg" }), 409);
+    expect(await bytesOf(a.key)).toEqual(first);
+  });
+  it("F-05 the key filling between the check and the put (race) → 409 from the onlyIf guard, never an overwrite", async () => {
+    sameRandom();
+    const first = cat(HEAD.jpg, "FIRST", new Uint8Array(40));
+    const a = (await (await up(first, { "x-file-name": "cover.jpg" })).json()) as Up;
+    // the existence check sees a free key, as if the other upload landed just after it
+    vi.spyOn(env.MEDIA_BUCKET, "head").mockResolvedValue(null);
+    // with a Content-Length (streamed through FixedLengthStream) and without (buffered)
+    await refused(() => up(cat(HEAD.jpg, "SECOND", new Uint8Array(40)), { "x-file-name": "cover.jpg" }), 409);
+    await refused(() => up(stream([cat(HEAD.jpg, "THIRD", new Uint8Array(40))]), { "x-file-name": "cover.jpg" }), 409);
+    expect(await bytesOf(a.key)).toEqual(first);
+  });
+  it("a poster keeps its fixed key: a second poster for the same video replaces the first", async () => {
+    const v = (await (await up(cat(HEAD.mp4, new Uint8Array(64)), { "x-file-name": "clip.mp4" })).json()) as Up;
+    const p1 = (await (await up(cat(HEAD.png, "ONE", new Uint8Array(40)), { "x-poster-for": v.key })).json()) as Up;
+    const two = cat(HEAD.png, "TWO", new Uint8Array(40));
+    const r = await up(two, { "x-poster-for": v.key });
+    expect(r.status).toBe(201);
+    expect(((await r.json()) as Up).key).toBe(p1.key);
+    expect(await bytesOf(p1.key)).toEqual(two);
+  });
+  it("F-05 a random-id collision on multipart create never hands out a key that already holds a video", async () => {
     sameRandom();
     const v = (await (await up(cat(HEAD.mp4, "FIRST", new Uint8Array(40)), { "x-file-name": "reel.mp4" })).json()) as Up;
-    const c = (await (await post("/api/admin/upload/mpu", { name: "reel.mp4", type: "video/mp4", size: 100 })).json()) as {
-      key: string;
-    };
+    const r = await post("/api/admin/upload/mpu", { name: "reel.mp4", type: "video/mp4", size: 100 });
+    // every draw collides here: a refusal, never the video's key
+    expect(r.status).toBe(409);
+    expect(((await r.json()) as Partial<Mpu>).key).toBeUndefined();
+  });
+  it("F-05 one collision on multipart create re-rolls: 201 on a fresh key, the video intact", async () => {
+    sameRandomFor(2); // the single upload's draw + create's first draw
+    const first = cat(HEAD.mp4, "FIRST", new Uint8Array(40));
+    const v = (await (await up(first, { "x-file-name": "reel.mp4" })).json()) as Up;
+    const r = await post("/api/admin/upload/mpu", { name: "reel.mp4", type: "video/mp4", size: 100 });
+    expect(r.status).toBe(201);
+    const c = (await r.json()) as Mpu;
     expect(c.key).not.toBe(v.key);
+    expect(c.key).toMatch(ADMIN_KEY_RE);
+    expect(c.id).toBe(c.key.split("/").pop()!.replace(/\.mp4$/, ""));
+    await del(`/api/admin/upload/mpu?key=${encodeURIComponent(c.key)}&uploadId=${encodeURIComponent(c.uploadId)}`);
+    expect(await bytesOf(v.key)).toEqual(first);
   });
 });
 
@@ -331,7 +398,7 @@ describe("size: declared vs actual", () => {
   it("a request with Content-Length -5 can be built (F-07 precondition)", () => {
     expect(negative).not.toThrow();
   });
-  it.fails("F-07 Content-Length -5 on a sniffable body makes the Worker throw (500) instead of a 400", async () => {
+  it("F-07 Content-Length -5 on a sniffable body is a 400, not a Worker throw (500)", async () => {
     const before = await keys();
     let status = 0;
     try {
@@ -374,6 +441,21 @@ const complete = (c: { key: string; uploadId: string }, parts: unknown) =>
 const MP4_BODY = cat(HEAD.mp4, "x".repeat(500));
 
 describe("multipart abuse", () => {
+  it("F-05 an object landing on the upload's key before complete → 409, upload aborted, that object intact", async () => {
+    const c = await create();
+    const p1 = (await (await part(c, 1, MP4_BODY)).json()) as { partNumber: number; etag: string };
+    const other = cat(HEAD.mp4, "OTHER", new Uint8Array(40));
+    await env.MEDIA_BUCKET.put(c.key, other); // a racing writer took the key after create's check
+    const audits = await uploadAudits();
+    const r = await complete(c, [p1]);
+    expect(r.status).toBe(409);
+    expect(await bytesOf(c.key)).toEqual(other);
+    expect(await uploadAudits()).toBe(audits);
+    // the upload is gone: a second complete cannot assemble it either
+    expect((await complete(c, [p1])).status).not.toBe(201);
+    expect(await bytesOf(c.key)).toEqual(other);
+  });
+
   it("part numbers outside 1..60 → 400/413, nothing uploaded", async () => {
     const c = await create();
     for (const n of ["0", "-1", "1.5", "abc", "", "NaN", "Infinity", "-Infinity", "1e9", "61", "9007199254740993"]) {
@@ -460,6 +542,7 @@ describe("multipart abuse", () => {
         complete: async () => ({ size: VIDEO_MAX + 1, httpMetadata: { contentType: "video/mp4" } }),
         abort: async () => {},
       }),
+      head: async () => null, // the key is still free (F-05 check before complete)
       delete: async (k: string) => void deleted.push(k),
     } as unknown as R2Bucket;
     const r = await call("/api/admin/upload/mpu/complete", {
@@ -510,7 +593,8 @@ describe("GET /api/admin/media/<key>", () => {
       expect(MEDIA_TYPES.has(ct as never), ct).toBe(true);
       expect(ct).not.toMatch(/html|svg|xml|javascript/);
       expect(g.headers.get("x-content-type-options")).toBe("nosniff");
-      expect(g.headers.get("content-disposition")).toBeNull();
+      expect(g.headers.get("content-disposition")).toMatch(/^inline; filename="[a-z0-9-]+\.[a-z0-9]+"$/); // F-06: inline, never attachment
+      expect(g.headers.get("content-security-policy")).toBe("sandbox");
       expect(g.headers.get("cache-control")).toBe("private, max-age=300");
       await g.body?.cancel();
     }
@@ -561,7 +645,7 @@ describe("GET /api/admin/media/<key>", () => {
   // Only reachable through an out-of-band bucket write (wrangler r2 object
   // put, the dashboard, an R2 token): the Worker itself never stores these.
   for (const [ct, body] of [["text/html", HTML], ["image/svg+xml", SVG]] as const) {
-    it.fails(`F-06 a stored ${ct} object under an admin/ key is served inline as ${ct} on the admin origin`, async () => {
+    it(`F-06 a stored ${ct} object under an admin/ key is not served as ${ct} (octet-stream, sandbox CSP, nosniff)`, async () => {
       const k = `admin/2026/01/abcdef-planted.${ct === "text/html" ? "jpg" : "png"}`;
       await env.MEDIA_BUCKET.put(k, cat(body), { httpMetadata: { contentType: ct } });
       const g = await call(`/api/admin/media/${k}`);
@@ -569,9 +653,27 @@ describe("GET /api/admin/media/<key>", () => {
       const disp = g.headers.get("content-disposition") ?? "";
       const csp = g.headers.get("content-security-policy") ?? "";
       await g.body?.cancel();
+      expect(g.status).toBe(200);
       // safe = an allow-listed media type, OR forced download, OR a sandbox CSP
       expect(MEDIA_TYPES.has(served as never) || /attachment/i.test(disp) || /sandbox/i.test(csp)).toBe(true);
+      // the fix does all of it: never the stored type, sandboxed, nosniff, inline
+      expect(served).toBe("application/octet-stream");
+      expect(csp).toMatch(/sandbox/);
+      expect(g.headers.get("x-content-type-options")).toBe("nosniff");
+      expect(disp).toMatch(/^inline/);
     });
   }
+
+  it("F-06 a real media object keeps its media type and gets the same hardening headers", async () => {
+    const k = "admin/2026/01/abcdef-real.jpg";
+    await env.MEDIA_BUCKET.put(k, JPEG, { httpMetadata: { contentType: "image/jpeg" } });
+    const g = await call(`/api/admin/media/${k}`);
+    expect(g.status).toBe(200);
+    expect(g.headers.get("content-type")).toBe("image/jpeg");
+    expect(g.headers.get("content-security-policy")).toMatch(/sandbox/);
+    expect(g.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(g.headers.get("content-disposition")).toMatch(/^inline/);
+    expect(new Uint8Array(await g.arrayBuffer())).toEqual(JPEG);
+  });
 });
 

@@ -36,6 +36,14 @@
       el.setAttribute("data-es-ready", "");
       el.setAttribute("tabindex", "0");
       el.setAttribute("aria-haspopup", "dialog");
+      /* a tab stop needs a name: a reel picture (alt="") or an unnamed figure would be read
+         as a bare "image"; name it after the slot, like the drawer title (F-17). A holder
+         that already has an alt or a label keeps it. */
+      var named = el.tagName === "IMG" ? (el.getAttribute("alt") || "").trim()
+        : (el.textContent || "").trim() || el.querySelector("img[alt]:not([alt=\"\"])");
+      if (!named && !(el.getAttribute("aria-label") || "").trim() && !el.hasAttribute("aria-labelledby")) {
+        el.setAttribute("aria-label", (el.closest("figure[data-preview]") ? "Edit video " : "Edit picture ") + el.getAttribute("data-es"));
+      }
     });
   }
   tagHolders();
@@ -324,9 +332,13 @@
     cancelBtn.hidden = !on;
     if (!on) setTimeout(function () { if (!op) bar.hidden = true; }, 1200);
   }
-  function mediaMessage(e) {
+  /* kind = what the file was taken for ("image" | "video" | null): an unreadable
+     film is told about films, not pictures (F-10) */
+  function mediaMessage(e, kind) {
     var code = e && e.code;
     if (code === "aborted") return "Cancelled.";
+    if (code === "unreadable" && kind === "video") return "This video could not be read. Try exporting it again as an MP4 (H.264) or WebM film.";
+    if (code === "unreadable" && kind === "image") return "This picture could not be read. Try saving it again as a JPEG, PNG or WebP.";
     if (code === "unreadable") return "That file could not be read. Use a JPEG, PNG or WebP picture, or an MP4 or WebM film.";
     if (code === "unsupported") return "That file type is not supported (JPEG, PNG, WebP, AVIF, MP4, WebM).";
     if (code === "toolarge") return "That file is too large.";
@@ -347,8 +359,9 @@
     if (!c || op) return;
     upMsg.textContent = "";
     var preview_ = isPreviewSlot(c);
+    var kind = null;
     media().then(function (M) {
-      var kind = M.kindOf(file);
+      kind = M.kindOf(file);
       if (!kind) throw new M.MediaError("unreadable", "unreadable");
       if (kind === "video" && !preview_) { upMsg.textContent = "This is a picture slot. Choose a JPEG, PNG or WebP picture."; return; }
       var ctl = new AbortController();
@@ -377,7 +390,7 @@
         return commit(c, patch).then(function () { if (cur === c) say("Uploaded. Saved to the draft."); });
       });
     }).catch(function (e) {
-      upMsg.textContent = mediaMessage(e);
+      upMsg.textContent = mediaMessage(e, kind);
       if (cur === c) say("");
     }).then(function () { op = null; busyUi(false); });
   }

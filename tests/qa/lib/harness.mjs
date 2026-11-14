@@ -9,7 +9,7 @@ import { chromium, webkit, devices } from "playwright-core";
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 export const ORCH = "D:/Personal/Projects/aliph-portfolio/.orchestration/teams/qa";
 export const EDGE = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe";
-export const PORT = 8881, INSPECTOR = 9281;
+export const PORT = Number(process.env.PORT) || 8881, INSPECTOR = Number(process.env.INSPECTOR) || 9281;
 export const ORIGIN = `http://127.0.0.1:${PORT}`;
 export const VIEWPORTS = { phone: { width: 390, height: 844 }, desktop: { width: 1440, height: 900 } };
 export const WEBKIT = path.join(process.env.LOCALAPPDATA || "", "ms-playwright/webkit-2359/Playwright.exe");
@@ -54,7 +54,7 @@ export async function webkit_(viewport = VIEWPORTS.phone, ctxOpts = {}) {
 export { webkit_ as webkit };
 
 export function shot(page, name) {
-  const dir = path.join(ORCH, "shots");
+  const dir = process.env.QA_SHOTS || path.join(ORCH, "shots");
   mkdirSync(dir, { recursive: true });
   const file = path.join(dir, name.endsWith(".png") ? name : name + ".png");
   return page.screenshot({ path: file }).then(() => file);

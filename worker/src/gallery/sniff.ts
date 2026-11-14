@@ -15,6 +15,12 @@ const AVIF_BRANDS = new Set(["avif", "avis"]);
 const ascii = (b: Uint8Array, from: number, to: number) => String.fromCharCode(...b.subarray(from, to));
 const at = (b: Uint8Array, off: number, sig: number[]) => sig.every((v, i) => b[off + i] === v);
 
+/** The only content-types sniff() ever stores; the admin media route serves
+ *  anything else as octet-stream (F-06). */
+export const MEDIA_TYPES: ReadonlySet<string> = new Set([
+  "image/jpeg", "image/png", "image/webp", "image/avif", "video/mp4", "video/webm",
+]);
+
 /** Bytes needed to decide (an ftyp box header is 12 bytes). */
 export const SNIFF_BYTES = 12;
 

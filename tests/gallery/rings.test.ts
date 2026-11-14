@@ -3,7 +3,7 @@ import { env } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import defaults from "../../worker/src/generated/defaults.json";
 import { publish } from "../../worker/src/publish";
-import { ADMIN, call, del, installAccess, put, uninstallAccess } from "./helpers";
+import { ADMIN, auditFloor, call, del, installAccess, put, uninstallAccess } from "./helpers";
 
 beforeEach(installAccess);
 afterEach(uninstallAccess);
@@ -34,7 +34,7 @@ describe("PUT /api/admin/rings/:service", () => {
     expect(r.status).toBe(200);
     expect((await body(r)).ring).toEqual({ ids, isDefault: false, rev: 1, changed: true });
     expect(await draftRing()).toMatchObject({ ids, rev: 1 });
-    const a = await env.DB.prepare("SELECT actor, target FROM audit WHERE action = 'ring.save'").all();
+    const a = await env.DB.prepare("SELECT actor, target FROM audit WHERE action = 'ring.save' AND id > ?").bind(auditFloor).all();
     expect(a.results).toEqual([{ actor: ADMIN, target: "photo" }]);
 
     const stale = await put("/api/admin/rings/photo", { ids: [PHOTO[1]], baseRev: 0 });
@@ -85,7 +85,7 @@ describe("DELETE /api/admin/rings/:service (reset to default)", () => {
     const r = await body(await del("/api/admin/rings/photo?baseRev=1"));
     expect(r.ring).toEqual({ ids: DEFAULT_PHOTO, isDefault: true, rev: 2, changed: false });
     expect(await draftRing()).toMatchObject({ ids: DEFAULT_PHOTO, isDefault: true });
-    const a = await env.DB.prepare("SELECT target FROM audit WHERE action = 'ring.reset'").all();
+    const a = await env.DB.prepare("SELECT target FROM audit WHERE action = 'ring.reset' AND id > ?").bind(auditFloor).all();
     expect(a.results).toEqual([{ target: "photo" }]);
   });
 });

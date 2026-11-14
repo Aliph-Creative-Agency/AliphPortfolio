@@ -1,7 +1,7 @@
 // Q-18: before-JS, slow-3G and CLS on the visitor pages (/, /about, /library) in Edge.
 //   node tests/qa/v-perf.mjs      (local wrangler dev on 8881; ONLY=nojs|slow; PAGES=/,/about to narrow)
 // A) JavaScript disabled, 390 + 1440: HTTP 200, readable text in the static HTML, <h1> visible, and whether anything (the load curtain)
-//    sits on top of the content (elementFromPoint at 5 points). KNOWN F-15 if the curtain covers the page for good.
+//    sits on top of the content (elementFromPoint at 5 points). F-15 (fixed): the run fails if the curtain covers the page for good.
 // B) CDP "Slow 3G" (500 kbit/s down, 400 kbit/s up, 400 ms RTT): CLS (PerformanceObserver layout-shift, no recent input) < 0.1 for the whole
 //    load, curtain lifts (display:none), no console errors, no failed same-origin requests. Numbers are printed per page/viewport.
 import { startDev, stopDev, EDGE, VIEWPORTS, ORIGIN, shot, check, done } from "./lib/harness.mjs";
@@ -44,8 +44,7 @@ async function noJs() {
         check(`${tag} <h1> present and visible (${JSON.stringify(d.h1)})`, !!d.h1 && d.h1vis);
         check(`${tag} no sideways scroll (${d.sw} <= ${d.iw})`, d.sw <= d.iw);
         const hidden = d.curtain && d.curtain.display !== "none" && +d.curtain.opacity > 0.5;
-        if (d.covered > 0 || hidden) KNOWN("F-15", `${tag} the load curtain (#curtain, ${JSON.stringify(d.curtain)}) covers ${d.covered}/5 probe points with JavaScript off, so the page is unreadable until JS lifts it`);
-        else check(`${tag} nothing covers the content (curtain ${JSON.stringify(d.curtain)})`, true);
+        check(`${tag} nothing covers the content with JavaScript off (F-15; curtain ${JSON.stringify(d.curtain)}, covers ${d.covered}/5)`, !(d.covered > 0 || hidden));
         await shot(page, `Q18-nojs-${vname}-${url === "/" ? "home" : url.slice(1)}`);
         TABLE.push(`nojs ${vname} ${url}: text ${d.text}, h1 ${d.h1vis}, curtain covers ${d.covered}/5`);
       }

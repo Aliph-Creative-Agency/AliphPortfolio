@@ -9,11 +9,15 @@
 //
 // R2 wants every part except the last >= 5 MiB and all parts equal-sized;
 // it enforces that at complete (a 400 here). Keys are only ever admin/ ones.
+// A key never replaces an object (F-05): create hands out only a free key
+// (re-rolled like a single upload), and complete refuses (409, upload
+// aborted) when something landed on it meanwhile. complete() takes no onlyIf,
+// so that last check narrows the race to the two calls; it cannot close it.
 
 import type { AdminCtx, Env } from "../index";
 import { json } from "./routes";
 import { sniff, SNIFF_BYTES } from "./sniff";
-import { audit, CACHE, MEDIA_ORIGIN, newKeyBase, VIDEO_KEY_RE, VIDEO_MAX } from "./upload";
+import { audit, CACHE, freeKeyBase, KEY_TAKEN, MEDIA_ORIGIN, VIDEO_KEY_RE, VIDEO_MAX } from "./upload";
 
 const TYPES: Record<string, "mp4" | "webm"> = { "video/mp4": "mp4", "video/webm": "webm" };
 /** A part is buffered in memory; the browser sends 10 MiB parts. */
@@ -49,7 +53,9 @@ export async function mpuCreate(request: Request, env: Env): Promise<Response> {
   if (!ext) return json({ error: "type must be video/mp4 or video/webm" }, 400);
   if (typeof b.size !== "number" || !Number.isInteger(b.size) || b.size <= 0) return json({ error: "bad size" }, 400);
   if (b.size > VIDEO_MAX) return json({ error: "video over 300 MB" }, 413);
-  const { id, base } = newKeyBase(typeof b.name === "string" ? b.name : "");
+  const nb = await freeKeyBase(env, typeof b.name === "string" ? b.name : "", ext);
+  if (!nb) return KEY_TAKEN();
+  const { id, base } = nb;
   const key = `${base}.${ext}`;
   const mpu = await env.MEDIA_BUCKET.createMultipartUpload(key, {
     httpMetadata: { contentType: b.type as string, cacheControl: CACHE },
@@ -106,6 +112,10 @@ export async function mpuComplete(request: Request, env: Env, url: URL, ctx: Adm
   list.sort((a, b) => a.partNumber - b.partNumber);
   if (list.some((p, i) => p.partNumber !== i + 1)) return json({ error: "parts must be 1..n, each once" }, 400);
   const mpu = env.MEDIA_BUCKET.resumeMultipartUpload(ku.key, ku.uploadId);
+  if (await env.MEDIA_BUCKET.head(ku.key)) {
+    await mpu.abort().catch(() => {});
+    return KEY_TAKEN();
+  }
   let obj: R2Object;
   try {
     obj = await mpu.complete(list);

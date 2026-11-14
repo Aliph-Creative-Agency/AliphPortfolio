@@ -3,7 +3,7 @@ import { env } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import defaults from "../../worker/src/generated/defaults.json";
 import { publish } from "../../worker/src/publish";
-import { ADMIN, call, del, installAccess, put, uninstallAccess } from "./helpers";
+import { ADMIN, auditFloor, call, del, installAccess, put, uninstallAccess } from "./helpers";
 
 beforeEach(installAccess);
 afterEach(uninstallAccess);
@@ -18,7 +18,7 @@ interface Item { id: string; kind: string; cat: string; sub: string | null; hidd
 const body = async (r: Response) => (await r.json()) as { item: Item; current: Item | null; error: string; field?: string };
 const pic = (id: string) => ({ src: `${R2}/${id}.webp`, cat: "photo", ratio: 1.5, date: "2026-11-02" });
 const audits = async (action: string) =>
-  (await env.DB.prepare("SELECT actor, target, detail FROM audit WHERE action = ?").bind(action).all()).results as {
+  (await env.DB.prepare("SELECT actor, target, detail FROM audit WHERE action = ? AND id > ?").bind(action, auditFloor).all()).results as {
     actor: string; target: string; detail: string;
   }[];
 

@@ -4,7 +4,8 @@
 //   video: preparePoster -> upload (the film) -> upload (poster, posterFor =
 //          the film's key) -> PUT item {src: film, poster, ...}
 // One file failing (unreadable / 415 / 413 / network) marks its row and the
-// batch carries on. Cat is required, sub optional; both set once for the batch
+// batch carries on; a failed row offers Retry (back to ready, run again) and
+// Remove (F-09). A wrong-type row only offers Remove: a retry cannot help it. Cat is required, sub optional; both set once for the batch
 // and editable per row until the row is uploading.
 import { MediaError, kindOf } from "/admin/shared/media.js";
 import { prepareAndUpload } from "./pipeline.js";
@@ -62,12 +63,16 @@ function drawRow(r) {
   const msg = el("span", "adm-rmsg", r.msg || (r.kind === "video" ? "video" : "image"));
   msg.setAttribute("role", r.status === "error" ? "alert" : "status");
   n.append(name, cat, sub, bar, msg);
-  if (r.status === "ready") {
-    const x = el("button", "adm-x", "Remove");
-    x.type = "button";
-    x.addEventListener("click", () => { rows.splice(rows.indexOf(r), 1); n.remove(); summary(); });
-    n.append(x);
+  if (r.status === "error" && r.kind) n.append(button("Retry", () => retry(r)));
+  if (r.status === "ready" || r.status === "error") {
+    n.append(button("Remove", () => { rows.splice(rows.indexOf(r), 1); n.remove(); summary(); }));
   }
+}
+function button(text, onclick) {
+  const b = el("button", "adm-x", text);
+  b.type = "button";
+  b.addEventListener("click", onclick);
+  return b;
 }
 
 function summary() {
@@ -116,11 +121,22 @@ async function run(r) {
   drawRow(r);
 }
 
-async function go() {
+/** Runs `list` one by one, then refreshes the grid. A failed refresh (the
+ *  network dropped) leaves the grid as it was instead of an unhandled error. */
+async function runAll(list) {
   busy = true; summary();
-  for (const r of rows.filter((x) => x.status === "ready")) await run(r);
+  for (const r of list) await run(r);
   busy = false; summary();
-  await load();
+  await load().catch(() => {});
+}
+const go = () => runAll(rows.filter((x) => x.status === "ready"));
+
+/** Retry one failed row: back to ready, then run it alone (while a batch is
+ *  running it just waits as ready for the next Upload). */
+function retry(r) {
+  r.status = "ready"; r.msg = ""; r.pct = 0; drawRow(r);
+  if (busy) summary();
+  else runAll([r]);
 }
 
 function init() {

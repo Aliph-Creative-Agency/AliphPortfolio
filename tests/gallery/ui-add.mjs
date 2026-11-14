@@ -25,7 +25,7 @@ async function library() {
   const a = html.indexOf("<!-- @static:archive -->"), b = html.indexOf("<!-- @/static:archive -->");
   const arch = html.slice(a, b);
   const m = arch.match(/data-cat="photo">\s*<h2>[^<]*<span class="acc-static-count">([^<]+)<\/span>/);
-  return { rest: (html.slice(0, a) + html.slice(b)).replace(/<script type="application\/json" id="aliph-content">[\s\S]*?<\/script>/, ""), photo: Number(m[1].replace(/./g, (d) => String(AR.indexOf(d)))) };
+  return { rest: (html.slice(0, a) + html.slice(b)).replace(/<script type="application\/json" id="aliph-content">[\s\S]*?<\/script>\n?/, ""), photo: Number(m[1].replace(/./g, (d) => String(AR.indexOf(d)))) };
 }
 await publishDraft(ctx.request, ORIGIN);
 const before = await library();
@@ -48,6 +48,39 @@ await page.waitForFunction(() => !document.querySelector('.adm-row[data-status="
 const status = await page.$$eval(".adm-row", (r) => r.map((x) => [x.querySelector(".adm-rname").textContent, x.dataset.status]));
 check("4 done, 1 error (batch not stopped)", status.filter((s) => s[1] === "done").length === 4 && status.filter((s) => s[1] === "error").length === 1, JSON.stringify(status.map((s) => s[1])));
 check("the broken file explains itself", /could not be read/.test(await page.locator('.adm-row[data-status="error"] .adm-rmsg').textContent()));
+
+// F-09: a failed row offers Retry + Remove. Retry puts it back to ready and
+// runs it again (the bytes are still broken, so it fails again); Remove drops
+// it and leaves nothing that blocks the next file.
+const errRow = page.locator('.adm-row[data-status="error"]');
+const btn = (row, t) => row.locator("button", { hasText: new RegExp(`^${t}$`) });
+const hasRetry = (await btn(errRow, "Retry").count()) === 1, hasRemove = (await btn(errRow, "Remove").count()) === 1;
+check("F-09 the failed row offers Retry and Remove", hasRetry && hasRemove, `retry=${hasRetry} remove=${hasRemove}`);
+if (hasRetry && hasRemove) {
+  await page.evaluate(() => {
+    window.__st = [];
+    // records are batched: the value each status change replaced is in oldValue
+    new MutationObserver((m) => m.forEach((x) => window.__st.push(x.oldValue))).observe(document.getElementById("add-rows"), { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ["data-status"] });
+  });
+  await btn(errRow, "Retry").click();
+  await page.waitForFunction(() => window.__st.includes("uploading") && !document.querySelector('.adm-row[data-status="uploading"], .adm-row[data-status="ready"]'), null, { timeout: 30000 });
+  const st = await page.evaluate(() => window.__st);
+  check("F-09 Retry sets the row back to ready and runs it again", st[0] === "error" && st.includes("ready") && st.includes("uploading") && (await errRow.count()) === 1, st.join(","));
+  check("F-09 the retried row fails again with the same sentence, 4 done rows untouched", (await page.locator('.adm-row[data-status="done"]').count()) === 4 && /could not be read/.test(await errRow.locator(".adm-rmsg").textContent()));
+  await btn(errRow, "Remove").click();
+  check("F-09 Remove drops the failed row", (await page.locator(".adm-row").count()) === 4 && (await errRow.count()) === 0);
+  check("F-09 nothing ready: Upload disabled and plain", (await page.isDisabled("#add-go")) && (await page.locator("#add-go").textContent()) === "Upload");
+  // a wrong type cannot succeed on a retry: Remove only
+  await page.setInputFiles("#add-file", { name: `doc-${run}.pdf`, mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.7") });
+  const pdf = page.locator('.adm-row[data-status="error"]');
+  check("F-09 a wrong-type row offers Remove, no Retry", (await btn(pdf, "Remove").count()) === 1 && (await btn(pdf, "Retry").count()) === 0);
+  await btn(pdf, "Remove").click();
+  // the next good file is not blocked by anything left over
+  await page.setInputFiles("#add-file", { name: `late-${run}.jpg`, mimeType: "image/jpeg", buffer: jpg });
+  check("F-09 a new file after the removals enables Upload", !(await page.isDisabled("#add-go")) && /1/.test(await page.locator("#add-go").textContent()));
+  await btn(page.locator('.adm-row[data-status="ready"]'), "Remove").click();
+  check("F-09 rows back to the 4 done ones", (await page.locator(".adm-row").count()) === 4);
+}
 
 // The API: 4 new upload items, marked changed; WebP images, mp4 + poster.
 await page.waitForTimeout(300);

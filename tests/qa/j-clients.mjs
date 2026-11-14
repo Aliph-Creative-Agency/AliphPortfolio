@@ -45,12 +45,21 @@ async function run(label, launch, vp, touch, vpsForVisitor) {
   const visitor = await context.newPage();
   const vw = watch(visitor);
 
-  // a tap that Playwright's WebKit may not turn into a click (F-08): check the outcome, fall back to a script click and say so
+  // a tap must turn into a click (F-08, fixed): a miss fails the run, then a script click lets the journey go on.
+  // Tap where a person would: the fixed assign bar covers the bottom of the phone screen in select mode, and a
+  // tile scrolled just into view sat under it, so the tap went to the bar's <select> (that was the "F-08" here).
+  const covered = (l) => l.evaluate((e) => { const r = e.getBoundingClientRect(); return !e.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); });
   const press = async (loc, ok, what, arg = null) => {
+    if (touch && (await covered(loc))) {
+      await loc.evaluate((e) => e.scrollIntoView({ block: "center" }));
+      let still = true; // the page scrolls smoothly: wait for it to settle
+      for (let i = 0; i < 20 && still; i++) { await page.waitForTimeout(150); still = await covered(loc); }
+      check(`${label} ${what} is not covered where it is tapped`, !still);
+    }
     if (touch) await loc.tap({ force: true, timeout: 5000 }).catch(() => {}); else await loc.click({ force: true, timeout: 5000 });
     if (await page.waitForFunction(ok, arg, { timeout: 10000 }).then(() => true, () => false)) return;
     if (!touch) throw new Error("click had no effect: " + what);
-    console.log(`KNOWN F-08 ${label} tap on ${what} gave no click`);
+    check(`${label} tap on ${what} gives a click (F-08)`, false, "fell back to a script click");
     await loc.evaluate((e) => e.click());
     await page.waitForFunction(ok, arg, { timeout: 5000 });
   };

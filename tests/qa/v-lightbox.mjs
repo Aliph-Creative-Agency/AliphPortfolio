@@ -198,7 +198,6 @@ async function deepLinks(label, launch, vp, lang, ctxOpts) {
       s = await lbState(page);
       const d = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: innerWidth, qa: window.__qa || 0, panels: document.querySelectorAll(".acc-panel").length, scripts: document.scripts.length }));
       const newErrs = t.errs.slice(e0);
-      if (newErrs.length && newErrs.every((x) => /not a valid selector/.test(x))) { KNOWN("F-14", `${tag} ?open=${name}: openFromQuery() builds img[src$=\"/" + wantOpen + "\"] without CSS.escape (main.js:5129) and throws on a quote: ${newErrs[0].slice(0, 160)}`); t.errs.length = e0; }
       check(`${tag} ?open=${name}: HTTP ${resp.status()}, no overlay, no error, no injected script, no sideways scroll`, resp.status() === 200 && !s.shown && t.errs.length === e0 && d.qa === 0 && d.sw <= d.iw && d.panels > 0 && d.scripts === base.scripts, `${t.errs.slice(e0).join(" | ").slice(0, 200)} sw=${d.sw}/${d.iw} shown=${s.shown}`);
     }
     // odd ?client= ids = normal archive

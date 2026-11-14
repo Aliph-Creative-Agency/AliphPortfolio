@@ -123,7 +123,7 @@ describe("publish(db, by)", () => {
   it("two concurrent publishes → two revisions, revs increasing by one", async () => {
     await draftText("heroPara", "أ");
     const [a, b] = await Promise.all([publish(db(), "info@aliphcreative.com"), publish(db(), BY)]);
-    expect([a.rev, b.rev].sort()).toEqual([base + 1, base + 2]);
+    expect([a.rev, b.rev].sort((x, y) => x - y)).toEqual([base + 1, base + 2]);
     const revs = await db().prepare("SELECT id FROM revisions WHERE id > ? ORDER BY id").bind(base).all<{ id: number }>();
     expect(revs.results.map((x) => x.id)).toEqual([base + 1, base + 2]);
     expect(await one("SELECT v FROM meta WHERE k = 'publish_rev'")).toEqual({ v: String(base + 2) });

@@ -1,7 +1,7 @@
 // C-04: GET /api/admin/clients + POST /api/admin/clients.
 import { env } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ADMIN, call, del, installAccess, post, put, uninstallAccess } from "../gallery/helpers";
+import { ADMIN, auditFloor, call, del, installAccess, post, put, uninstallAccess } from "../gallery/helpers";
 import { slugOf } from "../../worker/src/clients/write";
 
 const db = () => env.DB;
@@ -84,7 +84,7 @@ describe("POST /api/admin/clients", () => {
     expect(await list()).toEqual([client]);
     const row = await db().prepare("SELECT updated_by, state, published_json FROM clients WHERE id = ?").bind(client.id).first();
     expect(row).toEqual({ updated_by: ADMIN, state: "active", published_json: null });
-    const a = await db().prepare("SELECT actor, action, target FROM audit WHERE action = 'client.create' ORDER BY id DESC").first();
+    const a = await db().prepare("SELECT actor, action, target FROM audit WHERE action = 'client.create' AND id > ? ORDER BY id DESC").bind(auditFloor).first();
     expect(a).toEqual({ actor: ADMIN, action: "client.create", target: client.id });
   });
 
@@ -167,7 +167,7 @@ const items = async (client: string, n: number, state = "active") => {
   }
 };
 const auditOf = (action: string) =>
-  db().prepare("SELECT actor, target FROM audit WHERE action = ? ORDER BY id DESC").bind(action).first();
+  db().prepare("SELECT actor, target FROM audit WHERE action = ? AND id > ? ORDER BY id DESC").bind(action, auditFloor).first();
 
 describe("PUT /api/admin/clients/:id", () => {
   it("replaces every field on the rev you read, bumps rev, audit client.update", async () => {
