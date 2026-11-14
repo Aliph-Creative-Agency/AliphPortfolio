@@ -37,3 +37,7 @@ html[data-edit-mode="1"] [data-es].ed-es-active { outline: 2px solid #BB5C39; ou
   .ed-media-actions .ed-reset, .ed-media-more .ed-reset { min-height: 44px; }
   .ed-media input[type="text"] { min-height: 44px; }
 }
+
+/* U-30: the scroll area is exactly as wide as its fields, so it clipped the sides of their focus ring;
+   4 px of room inside, the same 4 px taken back outside so nothing moves */
+.ed-media .ed-media-body { padding: 4px; margin: -4px; }

@@ -116,6 +116,21 @@ async function editor(context, L) {
   small = await smallTargets(page, "#ed-media");
   check(`${L} U-02 picture drawer targets >= 44 px`, !small.length, small.join(", "));
   check(`${L} picture drawer fits the screen`, !(await fits(page, "#ed-media")), await fits(page, "#ed-media"));
+  // U-30: the focus ring of the Alt text field is not cut off by the drawer's scroll area
+  const clipped = await page.evaluate(() => {
+    const a = document.querySelector('#ed-media input[type="text"]');
+    a.focus();
+    const cs = getComputedStyle(a), grow = parseFloat(cs.outlineWidth) + parseFloat(cs.outlineOffset), r = a.getBoundingClientRect();
+    const ring = { l: r.left - grow, r: r.right + grow, t: r.top - grow, b: r.bottom + grow }, bad = [];
+    for (let e = a.parentElement; e && e !== document.body; e = e.parentElement) {
+      const s = getComputedStyle(e);
+      if (s.overflowX === "visible" && s.overflowY === "visible") continue;
+      const q = e.getBoundingClientRect(), box = { l: q.left + parseFloat(s.borderLeftWidth), r: q.right - parseFloat(s.borderRightWidth) };
+      if (ring.l < box.l - 0.5 || ring.r > box.r + 0.5) bad.push(`${e.className}: ring ${Math.round(ring.l)}-${Math.round(ring.r)} in ${Math.round(box.l)}-${Math.round(box.r)}`);
+    }
+    return bad.join("; ");
+  });
+  check(`${L} U-30 the Alt text focus ring is not cut off at the sides`, !clipped, clipped);
   await page.evaluate(() => window.aliphEditorMedia && window.aliphEditorMedia.close());
 
   // U-17: the popover stays on screen when its text is scrolled far out of view
