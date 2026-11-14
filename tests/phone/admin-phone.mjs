@@ -225,11 +225,14 @@ async function gallery(context, L) {
   await run.locator('[data-act="reorder"]').tap();
   await page.waitForSelector('#grid .adm-run[data-reorder="1"] .adm-move');
   const tileTop = () => page.evaluate(() => document.querySelector('#grid .adm-run[data-reorder="1"] .adm-tile').getBoundingClientRect().top + scrollY);
-  const y0 = await tileTop();
+  const noteH = () => page.evaluate(() => document.querySelector('#grid .adm-run[data-reorder="1"] .adm-run-note').getBoundingClientRect().height);
+  const [y0, n0] = [await tileTop(), await noteH()];
   await page.locator('#grid .adm-run[data-reorder="1"] .adm-move button', { hasText: "Earlier" }).nth(1).tap();
   await sleep(200);
-  const y1 = await tileTop();
+  const [y1, n1] = [await tileTop(), await noteH()];
   check(`${L} U-41 the first Earlier tap does not move the grid`, Math.abs(y1 - y0) < 1, `${Math.round(y0)} -> ${Math.round(y1)}`);
+  // the note itself keeps its height (hint -> one-line position), so a hint of 3 lines cannot shift the page either
+  check(`${L} U-41 the reorder note keeps its height`, Math.abs(n1 - n0) < 1, `${Math.round(n0)} -> ${Math.round(n1)} px`);
   small = await smallTargets(page, '#grid .adm-run[data-reorder="1"]');
   check(`${L} U-02 reorder buttons >= 44 px`, !small.length, small.slice(0, 6).join(", "));
   await page.locator('[data-act="cancel-order"]').tap();

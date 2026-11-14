@@ -197,3 +197,8 @@ body.adm {
   .adm-cnames { flex: 1 1 calc(100% - 4.2rem); }
   .adm-cact { margin-inline-start: auto; }
 }
+/* U-41: during a reorder on the phone the note keeps room for three lines, so swapping the hint for the
+   one-line position note does not move the grid under the boss's finger */
+@media (max-width: 520px) {
+  .adm-run[data-reorder="1"] .adm-run-note { min-block-size: calc(3 * 1.45em); }
+}
