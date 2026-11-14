@@ -177,3 +177,6 @@ body.adm {
   .adm-clean { order: 1; }
   .adm-add, .adm-rings, .adm-clients, .adm-clean { margin-block: 0.8rem; } /* flex margins do not collapse */
 }
+/* U-52: style.css's `* { margin: 0 }` drops the browser's centring of a modal dialog; put it back for the
+   small boxes (confirm, Publish, New client). The side drawers keep their own margins. */
+.adm-confirm { margin: auto; max-block-size: calc(100dvh - 3.2rem); overflow: auto; box-sizing: border-box; }
