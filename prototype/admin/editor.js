@@ -586,8 +586,9 @@
     done.addEventListener("click", function () { closePop(false); });
     [
       h("div", { class: "ed-pop-head" }, [
-        h("span", { class: "ed-pop-key", text: key }),
-        h("span", { class: "ed-pop-sec", text: entry && entry.section || "" }),
+        /* U-05: where the text is, in words ("Hero", "Home"), not the registry key */
+        h("span", { class: "ed-pop-key", text: (entry && (SECTION_TITLES[entry.section] || titleCase(entry.section))) || "Text" }),
+        h("span", { class: "ed-pop-sec", text: (entry && PAGE_NAMES[entry.page]) || "Site" }),
       ]),
       locs.indexOf("ar") >= 0 ? field("ar", "Arabic") : null,
       locs.indexOf("en") >= 0 ? field("en", "English") : null,
