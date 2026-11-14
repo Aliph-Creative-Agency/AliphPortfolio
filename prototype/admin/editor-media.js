@@ -46,11 +46,15 @@
       }
     });
   }
+  /* iOS Safari fires click only on nodes that answer clicks: arm every film frame, copies included */
+  function tapNoop() {}
+  function armFilm() { document.querySelectorAll(".film-frame").forEach(function (f) { f.addEventListener("click", tapNoop); }); }
   tagHolders();
+  armFilm();
   var tagTimer = 0;
   new MutationObserver(function () {
     clearTimeout(tagTimer);
-    tagTimer = setTimeout(tagHolders, 200);
+    tagTimer = setTimeout(function () { tagHolders(); armFilm(); }, 200);
   }).observe(document.body, { childList: true, subtree: true });
 
   /* the <img> a holder shows (the holder is the img itself, or a figure around one) */
@@ -111,6 +115,12 @@
   function eachHolder(c, fn) {
     var all = document.querySelectorAll('[data-es="' + c.id + '"]');
     for (var i = 0; i < all.length; i++) fn(all[i]);
+    /* the film strip's loop copies carry no data-es (only the first group is tagged): same frame index = same slot */
+    var fm = /^home\.film\.(\d+)$/.exec(c.id);
+    if (fm) {
+      var cl = document.querySelectorAll('.film-frame[data-frame="' + (+fm[1] - 1) + '"]:not([data-es])');
+      for (var j = 0; j < cl.length; j++) fn(cl[j]);
+    }
   }
   function preview(c) {
     var u = shownUrl(c);
@@ -462,6 +472,11 @@
     if (own) return own;
     /* a play button or caption layered over the picture belongs to the same frame */
     var frame = t.closest("figure, .holder, .film-frame, [data-es-preview]");
+    /* a loop copy of a film frame stands for the source frame with the same index (the tagged first group) */
+    var cf = t.closest(".film-frame[data-frame]");
+    if (cf && !cf.hasAttribute("data-es")) {
+      return document.querySelector('.film-frame[data-es="home.film.' + (+cf.getAttribute("data-frame") + 1) + '"]');
+    }
     return frame ? frame.querySelector("[data-es]") : null;
   }
   /* window + capture: before editor.js's document listener and before every handler the page has */

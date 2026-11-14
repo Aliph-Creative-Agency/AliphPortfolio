@@ -9,6 +9,20 @@
 <link rel="stylesheet" href="/admin/gallery/gallery.css">
 </head>
 <body class="adm">
+<nav class="adm-topbar" aria-label="Admin">
+  <a href="/admin/">Dashboard</a>
+  <a href="/admin/edit/">Home</a>
+  <a href="/admin/edit/about">About</a>
+  <a href="/admin/edit/library">Library</a>
+  <span class="adm-spacer"></span>
+  <span id="pub-state" class="adm-pubstate" role="status" aria-live="polite">Draft changes: &ndash;</span>
+  <button id="pub-btn" class="adm-btn adm-pub" type="button" disabled>Publish</button>
+</nav>
+<dialog id="pub-dlg" class="adm-confirm" aria-labelledby="pub-text">
+  <p id="pub-text"></p>
+  <p id="pub-msg" class="adm-dmsg" role="status"></p>
+  <div class="adm-dact"><button id="pub-yes" class="adm-btn" type="button">Publish</button><button id="pub-no" class="adm-btn adm-btn-2" type="button">Cancel</button></div>
+</dialog>
 <header class="adm-head">
   <h1>Gallery</h1>
   <p class="adm-sub" id="summary" aria-live="polite">Loading…</p>
@@ -78,6 +92,8 @@
   <p id="cleanup-msg" class="adm-dmsg" role="status"></p>
   <div class="adm-dact"><button id="cleanup-go" class="adm-btn" type="button">Delete</button></div>
 </dialog>
+<script src="/admin/editor-api.js"></script>
+<script type="module" src="/admin/gallery/bar.js"></script>
 <script type="module" src="/admin/gallery/gallery.js"></script>
 <script type="module" src="/admin/gallery/add.js"></script>
 <script type="module" src="/admin/gallery/drawer.js"></script>
