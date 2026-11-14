@@ -870,6 +870,17 @@
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && modal) { e.preventDefault(); closeModal(); return; }
+    /* the confirm dialog is aria-modal: Tab and Shift+Tab cycle its enabled buttons and never
+       reach the page behind (F-20); while both are disabled ("Working…") focus rests on the dialog */
+    if (e.key === "Tab" && modal) {
+      var box = modal.querySelector(".ed-dialog");
+      var stops = [].slice.call(box.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex=\"-1\"])")).filter(function (n) { return !n.disabled; });
+      var at = stops.indexOf(document.activeElement);
+      e.preventDefault();
+      if (!stops.length) { box.setAttribute("tabindex", "-1"); box.focus(); return; }
+      stops[at < 0 ? (e.shiftKey ? stops.length - 1 : 0) : (at + (e.shiftKey ? stops.length - 1 : 1)) % stops.length].focus();
+      return;
+    }
     if (e.key === "Escape" && cur) { e.preventDefault(); closePop(true); return; }
     /* then the side panels; the picture drawer (editor-media.js) answers its own Esc before this runs */
     if (e.key === "Escape" && !panel.hidden) { e.preventDefault(); panelClose.click(); return; }

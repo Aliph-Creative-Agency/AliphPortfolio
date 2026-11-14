@@ -128,8 +128,8 @@ async function editorDialog(page, tag) {
     check(`${tag} focus moves into the confirm dialog`, st.inside);
     let leaked = 0; const took = [];
     for (let i = 0; i < 12; i++) { await page.keyboard.press("Tab"); const r = await page.evaluate(() => { const d = document.querySelector('.ed-dialog[role="dialog"]'); const a = document.activeElement; return { ok: !!d && d.contains(a), who: a ? a.tagName.toLowerCase() + (a.className && typeof a.className === "string" ? "." + a.className.split(" ")[0] : "") : "" }; }); if (!r.ok) { leaked++; if (took.length < 4) took.push(r.who); } }
-    if (leaked) KNOWN("F-20", `${tag} the Discard confirm dialog (role=dialog aria-modal=true, editor.js:335) does not trap Tab: ${leaked} of 12 presses put focus outside it, on ${took.join(", ")}`);
-    else check(`${tag} 12 Tab presses never leave the confirm dialog`, true);
+    // F-20 (fixed): a leak fails the run
+    check(`${tag} 12 Tab presses never leave the confirm dialog`, !leaked, leaked ? `${leaked} of 12 leaked, on ${took.join(", ")}` : "");
     await page.keyboard.press("Escape"); await page.waitForTimeout(500);
     const closed = await page.evaluate(() => !document.querySelector('.ed-dialog[role="dialog"]'));
     check(`${tag} Esc closes the confirm dialog`, closed);
