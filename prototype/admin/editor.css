@@ -167,3 +167,6 @@ html[data-edit-mode="1"] [data-ek] { cursor: text; }
   /* a "Not saved: ..." message is too long for that slot: it gets its own line on top, readable */
   .ed-chip[data-state="error"] { order: -1; flex: 0 0 100%; margin-bottom: 4px; padding: 4px 8px; font-size: 12px; text-align: start; border-radius: 3px; }
 }
+
+/* U-11: the toast sits above the bar, however many rows the bar has (--ed-bar-h is kept by editor.js) */
+.ed-toast { bottom: calc(var(--ed-bar-h, 46px) + 12px); }
