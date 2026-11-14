@@ -348,7 +348,9 @@
   /* U-63: the gallery's wording (shared/media.js explain), so one problem reads the same on both screens */
   function mediaMessage(e, kind) {
     if (mediaLoaded) return mediaLoaded.explain(e, kind);
-    return "The upload did not finish: " + ((e && e.message) || "network error") + ". Try again.";
+    /* the module itself did not load: offline, or its fetch failed (a TypeError); same sentence as NETWORK_FAILURE */
+    if (navigator.onLine === false || e instanceof TypeError) return "The upload stopped: the connection dropped. Check the Wi-Fi or network and try again.";
+    return "The upload did not finish. Try again.";
   }
   /* write a patch into the draft row right now (no debounce) and show it */
   function commit(c, patch) {

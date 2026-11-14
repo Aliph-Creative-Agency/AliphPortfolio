@@ -7,6 +7,8 @@
 // Writes to the LOCAL D1/R2 only; items it created are deleted again at the end of each run.
 import path from "node:path";
 import fs from "node:fs";
+// the app's own network sentence (shared/media.js), so the check never depends on a browser's failed-fetch wording
+const networkSentence = (page) => page.evaluate(async () => (await import("/admin/shared/media.js")).NETWORK_FAILURE);
 import { startDev, stopDev, edge, webkit, VIEWPORTS, ORIGIN, ORCH, ROOT, shot, watch, check, done } from "./lib/harness.mjs";
 
 const FIX = path.join(ROOT, "tests/gallery/fixtures");
@@ -158,7 +160,7 @@ async function run(label, launch, vp, touch) {
     await waitRow(page, 0);
     rows = await rowsOf(page);
     msg("connection dropped during the upload", rows[0].msg);
-    check(`${label} dropped upload: error row with a clear network message`, rows[0].status === "error" && rows[0].msg === "The network failed; try again.", JSON.stringify(rows[0]));
+    check(`${label} dropped upload: error row with a clear network message`, rows[0].status === "error" && rows[0].msg === (await networkSentence(page)), JSON.stringify(rows[0]));
     check(`${label} dropped upload: busy state ended (Upload shows its idle label, nothing ready)`, (await page.textContent("#add-go")).trim() === "Upload" && (await page.isDisabled("#add-go")));
     check(`${label} dropped upload: no orphan tile, no item row`, (await tiles(page)) === baseA && (await api(page)).length === baseAI, `${await tiles(page)} tiles, ${(await api(page)).length} items`);
     check(`${label} dropped upload: the request was really attempted (${hits})`, hits >= 1);
@@ -197,7 +199,7 @@ async function run(label, launch, vp, touch) {
       await waitRow(page, 0);
       rows = await rowsOf(page);
       msg("video: film stored, poster request dropped", rows[0].msg);
-      check(`${label} failed poster: error row with the network message`, rows[0].status === "error" && rows[0].msg === "The network failed; try again.", JSON.stringify(rows[0]));
+      check(`${label} failed poster: error row with the network message`, rows[0].status === "error" && rows[0].msg === (await networkSentence(page)), JSON.stringify(rows[0]));
       check(`${label} failed poster: no orphan tile, no item`, (await tiles(page)) === baseC && (await api(page)).length === baseCI);
       const un = await page.evaluate(async () => (await (await fetch("/api/admin/upload/unused")).json()));
       // the Unused-files list only shows files older than 24 h (cleanup.ts MIN_AGE_MS), so the fresh orphan film is not listed yet

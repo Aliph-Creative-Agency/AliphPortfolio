@@ -41,6 +41,9 @@ async function context(phone) {
 }
 const L = label;
 const chip = (page) => page.evaluate(() => document.querySelector(".ed-chip").textContent.trim());
+/** The app's own network sentence (shared/media.js NETWORK_FAILURE): what every network check compares with,
+ *  so no check depends on how a browser words a failed fetch. Call it while online. */
+const networkSentence = (page) => page.evaluate(async () => (await import("/admin/shared/media.js")).NETWORK_FAILURE);
 
 /* ── dashboard ── */
 async function dashboard(ctx) {
@@ -113,6 +116,14 @@ async function editor(ctx) {
   await sleep(500);
   const edVid = (await page.locator("#ed-media .ed-media-uperr").textContent()).trim();
   check(`${L} U-27 a film on a picture slot is told where films go`, /picture/i.test(edVid) && /Video|reel/i.test(edVid), JSON.stringify(edVid));
+  // the picture panel offline: the network sentence, whichever step the browser fails at (nothing reaches the server)
+  const NET = await networkSentence(page);
+  await ctx.setOffline(true);
+  await page.locator("#ed-media .ed-media-file-input").setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: PNG });
+  await page.waitForFunction((v) => (document.querySelector("#ed-media .ed-media-uperr").textContent || "").trim() && document.querySelector("#ed-media .ed-media-uperr").textContent.trim() !== v, edVid, { timeout: 15000 }).catch(() => {});
+  const edNet = (await page.locator("#ed-media .ed-media-uperr").textContent()).trim();
+  await ctx.setOffline(false);
+  check(`${L} picture panel: an upload offline gets the network sentence`, edNet === NET, JSON.stringify(edNet));
   await page.evaluate(() => window.aliphEditorMedia && window.aliphEditorMedia.close());
   await page.unroute("**/api/admin/slot**");
 
@@ -189,7 +200,26 @@ async function gallery(ctx, edPdf) {
   check(`${L} U-63 Replace file says the same as Add files for the same file`, rep === fake, `drawer ${JSON.stringify(rep)} / add ${JSON.stringify(fake)}`);
   await page.locator("#drawer-close").click();
 
-  // U-68: an upload that fails because the network is gone leaves no uncaught error
+  // a network failure is told by its kind, not its wording: each browser's failed-fetch text, an XHR transport
+  // failure, and (offline) a file that could not be prepared all give the one network sentence
+  const NET = await networkSentence(page);
+  const kinds = await page.evaluate(async () => {
+    const m = await import("/admin/shared/media.js");
+    const errs = { chromium: new TypeError("Failed to fetch"), webkit: new TypeError("Load failed"),
+      firefox: new TypeError("NetworkError when attempting to fetch resource."), xhr: Object.assign(new m.MediaError("network", "x"), { transport: true }) };
+    const out = {};
+    for (const [k, e] of Object.entries(errs)) out[k] = m.explain(e, "image");
+    out.server = m.explain(new m.MediaError("network", "upload failed (500)"), "image");
+    return out;
+  });
+  check(`${L} network failures are classified by kind, whatever the browser's wording`,
+    ["chromium", "webkit", "firefox", "xhr"].every((k) => kinds[k] === NET) && kinds.server !== NET, JSON.stringify(kinds));
+  await ctx.setOffline(true);
+  const offRead = await page.evaluate(async () => { const m = await import("/admin/shared/media.js"); return m.explain(new m.MediaError("unreadable", "x"), "image"); });
+  await ctx.setOffline(false);
+  check(`${L} offline, a picture that could not be prepared gets the network sentence (the WebKit path)`, offRead === NET, JSON.stringify(offRead));
+
+  // U-68: an upload that fails because the network is gone leaves no uncaught error, and says so
   await page.locator("#add-file").setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: PNG });
   await ctx.setOffline(true);
   await page.locator("#add-go").click();
@@ -198,8 +228,19 @@ async function gallery(ctx, edPdf) {
   const net = await rowMsg(0);
   await ctx.setOffline(false);
   check(`${L} U-68 a failed upload leaves no uncaught error`, !errors.length, errors.join(" | "));
-  check(`${L} a network failure says to check the connection`, /connection|network|Wi-?Fi/i.test(net), JSON.stringify(net));
+  check(`${L} Add files: an upload offline gets the network sentence`, net === NET, JSON.stringify(net));
   await clear();
+
+  // Replace file offline (nothing reaches the server)
+  await page.locator("#grid .adm-tile").first().click();
+  await page.waitForSelector("#drawer[open]");
+  await ctx.setOffline(true);
+  await page.locator("#d-file").setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: PNG });
+  await page.waitForFunction(() => document.getElementById("drawer-msg").dataset.kind === "error", null, { timeout: 15000 }).catch(() => {});
+  const repNet = (await page.locator("#drawer-msg").innerText()).trim();
+  await ctx.setOffline(false);
+  check(`${L} Replace file: an upload offline gets the network sentence`, repNet === NET, JSON.stringify(repNet));
+  await page.locator("#drawer-close").click();
   await page.close();
 }
 
