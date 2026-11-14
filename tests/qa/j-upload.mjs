@@ -7,9 +7,9 @@
 // Writes to the LOCAL D1/R2 only; items it created are deleted again at the end of each run.
 import path from "node:path";
 import fs from "node:fs";
+import { startDev, stopDev, edge, webkit, VIEWPORTS, ORIGIN, ORCH, ROOT, shot, watch, check, done } from "./lib/harness.mjs";
 // the app's own network sentence (shared/media.js), so the check never depends on a browser's failed-fetch wording
 const networkSentence = (page) => page.evaluate(async () => (await import("/admin/shared/media.js")).NETWORK_FAILURE);
-import { startDev, stopDev, edge, webkit, VIEWPORTS, ORIGIN, ORCH, ROOT, shot, watch, check, done } from "./lib/harness.mjs";
 
 const FIX = path.join(ROOT, "tests/gallery/fixtures");
 const RUNS = path.join(ORCH, "runs");
