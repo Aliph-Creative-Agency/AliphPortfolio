@@ -91,6 +91,16 @@ export const FINDINGS = [
     shot: "UC-05b/webkit/02-move-8-first.png", cause: "prototype/admin/gallery/order.js:126-139 (.adm-run-note text swapped, height not reserved)" }),
   f({ id: "U-42", bucket: "COSMETIC", title: "On /library (Photo panel) the big sub-section name 'صور' / 'Photos' is drawn on top of the first picture of its run (it covers the top of the new photo-8 and its corner marker) instead of sitting above the grid; same on desktop and phone", uc: "UC-05b", steps: "09", configs: "edge, webkit",
     shot: "UC-05b/webkit/09-pub-library-ar.png", cause: "not traced (looked at the shots only; sub-title overlay vs .lib-grid in prototype/style.css)", verify: "PLAUSIBLE: seen in shots after scrolling the sub-section to the top of the screen" }),
+  f({ id: "U-43", bucket: "SOON", title: "An empty New client form flags only the Arabic name (small lowercase 'name is required'); the English name, first and also required, gets no error and no focus", uc: "UC-06a", steps: "03", configs: "edge, webkit",
+    shot: "UC-06a/edge/03-add-empty.png", cause: "prototype/admin/gallery/clients.js:112-117 (shows the one field the server names; worker returns a single field error, English name is checked after Arabic)" }),
+  f({ id: "U-44", bucket: "COSMETIC", title: "Select mode: the tick box on each tile is 24x24 px on the phone (the whole tile does tick, so tapping works; the box only looks small)", uc: "UC-06a", steps: "05", configs: "webkit",
+    shot: "UC-06a/webkit/05-select-mode.png", cause: "prototype/admin/gallery/gallery.css .adm-tick (24px); decorate() in assign.js:76", verify: "real iPhone" }),
+  f({ id: "U-45", bucket: "SOON", title: "After assigning pieces to a client the tiles show nothing about it (tile label is 'name, Reels, changed'); the boss has to open every drawer to see who a piece belongs to", uc: "UC-06a", steps: "07, 08", configs: "edge, webkit",
+    shot: "UC-06a/edge/08-done-and-drawer.png", cause: "prototype/admin/gallery/gallery.js tile markup has no client field (grepped gallery.js/assign.js)" }),
+  f({ id: "U-46", bucket: "SOON", title: "The Publish modal after creating a client and assigning 4 pieces says only 'Publish 5 changes to the live site? Gallery: 5 changes': the client and the assignments are not named (same family as U-39)", uc: "UC-06a", steps: "10", configs: "edge, webkit",
+    shot: "UC-06a/edge/10a-modal.png", cause: "prototype/admin/editor.js:304-312 (changeList folds sections gallery and clients into one 'Gallery: N changes' line)" }),
+  f({ id: "U-47", bucket: "COSMETIC", title: "Phone Clients row: the two names share a ~140 px column, the Arabic name wraps to 3 lines in small type under a wrapped English name (row grows tall, Edit/Delete only 35 px high)", uc: "UC-06a", steps: "04", configs: "webkit",
+    shot: "UC-06a/webkit/04-fill-c1.png", cause: "prototype/admin/gallery/gallery.css .adm-client / .adm-cnames (not traced further)" }),
 ];
 
 export const bucketCounts = () => {
