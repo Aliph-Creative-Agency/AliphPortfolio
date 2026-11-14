@@ -7,7 +7,7 @@
 // batch carries on; a failed row offers Retry (back to ready, run again) and
 // Remove (F-09). A wrong-type row only offers Remove: a retry cannot help it. Cat is required, sub optional; both set once for the batch
 // and editable per row until the row is uploading.
-import { MediaError, kindOf } from "/admin/shared/media.js";
+import { MediaError, kindOf, checkSize, explain } from "/admin/shared/media.js";
 import { prepareAndUpload } from "./pipeline.js";
 import { state, load } from "./gallery.js";
 
@@ -22,14 +22,8 @@ const CATS = [["design", "Design"], ["photo", "Photo"]];
 const rows = []; // {file, kind, cat, sub, status, msg, pct, node}
 let busy = false;
 
-const WHY = {
-  unreadable: "This file could not be read (is it a format the browser decodes?).",
-  unsupported: "That file type is not accepted.",
-  toolarge: "That file is too large.",
-  network: "The network failed; try again.",
-  aborted: "Cancelled.",
-};
-const problem = (e) => (e instanceof MediaError ? WHY[e.code] || e.message : e?.message || "Upload failed.");
+// U-62 / U-63 / U-65: the same wording as the editor's picture drawer (shared/media.js explain)
+const problem = (e, kind) => explain(e, kind);
 
 function subOptions(sel, cat, value) {
   sel.textContent = "";
@@ -63,7 +57,7 @@ function drawRow(r) {
   const msg = el("span", "adm-rmsg", r.msg || (r.kind === "video" ? "video" : "image"));
   msg.setAttribute("role", r.status === "error" ? "alert" : "status");
   n.append(name, cat, sub, bar, msg);
-  if (r.status === "error" && r.kind) n.append(button("Retry", () => retry(r)));
+  if (r.status === "error" && r.kind && !r.final) n.append(button("Retry", () => retry(r)));
   if (r.status === "ready" || r.status === "error") {
     n.append(button("Remove", () => { rows.splice(rows.indexOf(r), 1); n.remove(); summary(); }));
   }
@@ -85,7 +79,9 @@ export function stage(files) {
   for (const file of files) {
     const kind = kindOf(file);
     const r = { file, kind, cat: $("add-cat").value, sub: $("add-sub").value, status: "ready", pct: 0, node: el("li", "adm-row") };
-    if (!kind) { r.status = "error"; r.msg = WHY.unsupported; }
+    const big = kind && checkSize(file, kind);
+    if (!kind) { r.status = "error"; r.msg = problem(new MediaError("unsupported", "unsupported"), null); }
+    else if (big) { r.status = "error"; r.final = true; r.msg = problem(big, kind); } // a retry cannot make it smaller
     rows.push(r);
     $("add-rows").append(r.node);
     drawRow(r);
@@ -116,7 +112,7 @@ async function run(r) {
     await put(id, { ...fields, cat: r.cat, sub: r.sub || null });
     r.status = "done"; r.pct = 100; r.msg = "Added (not published yet)";
   } catch (e) {
-    r.status = "error"; r.msg = problem(e);
+    r.status = "error"; r.msg = problem(e, r.kind);
   }
   drawRow(r);
 }

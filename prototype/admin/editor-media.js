@@ -313,9 +313,9 @@
      a video -> upload the film, preparePoster + upload with posterFor ->
      {preview, poster}; an image picked for a preview slot replaces the poster
      only. shared/media.js is the gallery team's module, imported as it is. */
-  var mediaMod = null;
+  var mediaMod = null, mediaLoaded = null;
   function media() {
-    if (!mediaMod) mediaMod = import("/admin/shared/media.js").catch(function (e) { mediaMod = null; throw e; });
+    if (!mediaMod) mediaMod = import("/admin/shared/media.js").then(function (m) { mediaLoaded = m; return m; }, function (e) { mediaMod = null; throw e; });
     return mediaMod;
   }
   var pickInput = h("input", { type: "file", class: "ed-media-file-input", hidden: "", "aria-label": "Choose a file" });
@@ -345,14 +345,9 @@
   }
   /* kind = what the file was taken for ("image" | "video" | null): an unreadable
      film is told about films, not pictures (F-10) */
+  /* U-63: the gallery's wording (shared/media.js explain), so one problem reads the same on both screens */
   function mediaMessage(e, kind) {
-    var code = e && e.code;
-    if (code === "aborted") return "Cancelled.";
-    if (code === "unreadable" && kind === "video") return "This video could not be read. Try exporting it again as an MP4 (H.264) or WebM film.";
-    if (code === "unreadable" && kind === "image") return "This picture could not be read. Try saving it again as a JPEG, PNG or WebP.";
-    if (code === "unreadable") return "That file could not be read. Use a JPEG, PNG or WebP picture, or an MP4 or WebM film.";
-    if (code === "unsupported") return "That file type is not supported (JPEG, PNG, WebP, AVIF, MP4, WebM).";
-    if (code === "toolarge") return "That file is too large.";
+    if (mediaLoaded) return mediaLoaded.explain(e, kind);
     return "The upload did not finish: " + ((e && e.message) || "network error") + ". Try again.";
   }
   /* write a patch into the draft row right now (no debounce) and show it */
@@ -373,8 +368,11 @@
     var kind = null;
     media().then(function (M) {
       kind = M.kindOf(file);
-      if (!kind) throw new M.MediaError("unreadable", "unreadable");
-      if (kind === "video" && !preview_) { upMsg.textContent = "This is a picture slot. Choose a JPEG, PNG or WebP picture."; return; }
+      if (!kind) throw new M.MediaError("unsupported", "unsupported");
+      /* U-27: say where a film CAN go */
+      if (kind === "video" && !preview_) { upMsg.textContent = "This frame takes a picture (JPEG, PNG, WebP or AVIF). A film goes in a frame whose drawer is titled Video: on Home, the reels further down the page."; return; }
+      var big = M.checkSize(file, kind);
+      if (big) throw big;
       var ctl = new AbortController();
       op = { ctl: ctl, c: c };
       busyUi(true);

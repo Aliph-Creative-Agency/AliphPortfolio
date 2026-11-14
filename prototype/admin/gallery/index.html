@@ -30,7 +30,8 @@
 </header>
 <section class="adm-add" aria-labelledby="add-h">
   <h2 id="add-h">Add files</h2>
-  <div id="add-zone" class="adm-zone" role="button" tabindex="0">Drop photos or videos here, or press to choose</div>
+  <div id="add-zone" class="adm-zone" role="button" tabindex="0" aria-describedby="add-limits">Drop photos or videos here, or press to choose</div>
+  <p id="add-limits" class="adm-sub adm-limits">Pictures: JPEG, PNG, WebP or AVIF. Films: MP4 or WebM, up to 300 MB.</p>
   <input id="add-file" type="file" multiple accept="image/*,video/mp4,video/webm" hidden>
   <div id="add-batch" class="adm-batch"></div>
   <ul id="add-rows" class="adm-rows"></ul>

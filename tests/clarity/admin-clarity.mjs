@@ -180,6 +180,15 @@ async function gallery(ctx, edPdf) {
   check(`${L} U-62 a text file named .jpg says what to use, not "the browser"`, FORMATS.test(fake) && !/browser/i.test(fake), JSON.stringify(fake));
   await clear();
 
+  // U-63: the piece drawer's Replace file says the same for the same file (it fails while preparing: no upload)
+  await page.locator("#grid .adm-tile").first().click();
+  await page.waitForSelector("#drawer[open]");
+  await page.locator("#d-file").setInputFiles(FAKE_JPG);
+  await page.waitForFunction(() => document.getElementById("drawer-msg").dataset.kind === "error", null, { timeout: 15000 }).catch(() => {});
+  const rep = (await page.locator("#drawer-msg").innerText()).trim();
+  check(`${L} U-63 Replace file says the same as Add files for the same file`, rep === fake, `drawer ${JSON.stringify(rep)} / add ${JSON.stringify(fake)}`);
+  await page.locator("#drawer-close").click();
+
   // U-68: an upload that fails because the network is gone leaves no uncaught error
   await page.locator("#add-file").setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: PNG });
   await ctx.setOffline(true);

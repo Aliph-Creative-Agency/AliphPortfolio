@@ -10,7 +10,7 @@
 // Server answers: 200 {item}; 400 {error, field} shown on that field; 409
 // {error, current} -> "changed elsewhere", the form refills with the current
 // values and the new rev.
-import { MediaError, kindOf } from "/admin/shared/media.js";
+import { kindOf, checkSize, explain } from "/admin/shared/media.js";
 import { state, render, fileName } from "./gallery.js";
 import { prepareAndUpload } from "./pipeline.js";
 import { clients, loadClients, newClientDialog } from "./clients.js";
@@ -205,7 +205,9 @@ async function save(over) {
  *  The old file stays in R2 until the clean-up. Typed edits in the form are saved with it. */
 async function replace(file) {
   const kind = kindOf(file);
-  if (!kind || (kind === "video") !== it.video) return flash(it.video ? "This item is a video: choose an mp4 or webm film." : "This item is a picture: choose an image.", "error");
+  if (!kind || (kind === "video") !== it.video) return flash(it.video ? "This piece is a film: choose an MP4 or WebM film." : "This piece is a picture: choose a JPEG, PNG, WebP or AVIF picture.", "error");
+  const big = checkSize(file, kind);
+  if (big) return flash(explain(big, kind), "error");
   const prog = $("drawer-prog");
   prog.hidden = false; prog.value = 0;
   setBusy(true);
@@ -214,7 +216,7 @@ async function replace(file) {
     out = await prepareAndUpload(file, kind, { onStage: (m) => flash(m, ""), onProgress: (p) => { prog.value = p; } });
   } catch (e) {
     prog.hidden = true; setBusy(false);
-    return flash(e instanceof MediaError ? (e.code === "unreadable" ? "That file could not be read." : e.message) : e?.message || "Upload failed.", "error");
+    return flash(explain(e, kind), "error"); // U-63: the same wording as Add files and the editor
   }
   prog.hidden = true; setBusy(false);
   const b = body({});

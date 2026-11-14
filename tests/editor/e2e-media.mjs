@@ -168,9 +168,9 @@ await p.setInputFiles("#ed-media .ed-media-file-input", path.join(FIX, "clip.mp4
 await p.waitForFunction(() => document.querySelector("#ed-media .ed-media-uperr").textContent !== "");
 d = await draft();
 ok("video into an image slot: message, no row", d.slots["about.media.1"] === undefined, await p.textContent("#ed-media .ed-media-uperr"));
-// a file that is not media: unreadable message
+// a file that is not media: refused, naming what is accepted (U-62 / U-63 wording)
 await p.setInputFiles("#ed-media .ed-media-file-input", { name: "x.txt", mimeType: "text/plain", buffer: Buffer.from("hello") });
-await p.waitForFunction(() => /could not be read/.test(document.querySelector("#ed-media .ed-media-uperr").textContent));
+await p.waitForFunction(() => /not accepted\. Use a JPEG/.test(document.querySelector("#ed-media .ed-media-uperr").textContent));
 ok("non-media file: readable error shown", true);
 
 // Cancel: abort an upload midway (slow the route so the bar is still running)
