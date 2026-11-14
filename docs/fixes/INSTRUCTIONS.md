@@ -62,5 +62,20 @@ code, especially **U-07 (Arabic font without dots in the test browser)**: do NOT
 - Output lines of `typecheck`, `check:site`, `npm test`.
 - Any change to public pages, exactly.
 
-The screenshot paths in REQUIRED-FIXES.md point to Obaida's PC and are not in the repo; use the "Where" and "Likely
-cause" lines instead.
+## Material in the repo for this round
+- `docs/fixes/REQUIRED-FIXES.md`: every open item with where it happens and the likely cause (file:line).
+- `docs/fixes/shots/`: the screenshot for each item (path given on the item's "Screenshot" line, small JPEGs).
+- `tests/usecases/`: the QA scripts that found them (`uc-NN-*.mjs`, one per use case) and the findings registry
+  `tests/usecases/lib/findings.mjs` (same ids). Re-run the matching script to reproduce an item and to prove the fix;
+  they take `PORT=<your wrangler dev port>`.
+- U-21 (film copies keep the old picture) may already be fixed by the U-20 change: check it before you code anything.
+
+## The repo is PUBLIC
+Everything you commit is visible to anyone, forever (removing a file later does not remove it from git history).
+Never commit secrets, real email addresses, live database exports or screenshots of the live admin. Do not write
+attack details or weaknesses in commit messages, PRs or docs: describe a fix as "harden X", not "X could be abused by Y".
+
+## When everything is completely done (last PR)
+After every batch is merged into `admin-dashboard` and Obaida has confirmed, open one final PR that removes
+`docs/fixes/` (this file, REQUIRED-FIXES.md and shots/). Keep `tests/usecases/` and any tests you added: they are the
+regression checks for these fixes.
