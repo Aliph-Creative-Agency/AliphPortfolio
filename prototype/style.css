@@ -5759,3 +5759,9 @@ body.sheet-open { overflow: hidden; }
 @media (max-width: 900px) {
   .acc-panel:not(.open) .panel-body { height: 0; }
 }
+
+/* F-19: the testimonial business line on a phone read 4.41:1 at 0.62 (under the 4.5:1 for small text);
+   one step darker, still a quieter line than the name */
+@media (max-width: 640px) {
+  .tb-biz { opacity: 0.65; }
+}
