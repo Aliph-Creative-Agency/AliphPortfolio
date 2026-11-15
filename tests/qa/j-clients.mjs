@@ -136,14 +136,14 @@ async function run(label, launch, vp, touch, vpsForVisitor) {
     check(`${label} Clients panel count now "6 pieces"`, true);
     await press(page.locator("#select-toggle"), () => document.querySelector("#grid").dataset.selecting === "0", "Done selecting");
 
-    // ---- 5. delete-guard on the used client
+    // ---- 5. Delete on the used client: the confirm says 6 pieces use it and will show no client (Delete would take
+    //         it off them and delete it: ?unassign=1). This journey still needs the client, so it presses Cancel.
     await page.locator(`.adm-client[data-id="${client.id}"]`).scrollIntoViewIfNeeded();
     await press(page.locator(`.adm-client[data-id="${client.id}"] button:has-text("Delete")`), () => document.querySelector("#confirm").open, "client Delete");
-    check(`${label} Delete asks first (confirm names the client)`, /^Delete .* It leaves the site when you publish\.$/.test(await page.textContent("#confirm-text")));
-    await press(page.locator("#confirm-yes"), () => /use this client|in use|piece/i.test(document.getElementById("clients-note").textContent) && !document.querySelector("#confirm").open, "confirm Delete");
-    const gm = await page.textContent("#clients-note");
-    check(`${label} guard refuses with a message ("${gm}")`, /6/.test(gm) && (await page.getAttribute("#clients-note", "data-kind")) === "error", gm);
-    check(`${label} the client is still there after the refusal`, (await apiClients(page)).some((c) => c.id === client.id));
+    const ct = await page.textContent("#confirm-text");
+    check(`${label} Delete asks first, naming the client and its 6 pieces ("${ct}")`, /^Delete .*\? 6 pieces use this client; they will show no client\. Both leave the site when you publish\.$/.test(ct), ct);
+    await press(page.locator("#confirm-no"), () => !document.querySelector("#confirm").open, "Cancel the delete");
+    check(`${label} the client and its 6 pieces are still there after Cancel`, (await apiClients(page)).some((c) => c.id === client.id && c.pieces === 6));
     const raw = await page.evaluate(async (c) => { const x = (await (await fetch("/api/admin/clients")).json()).clients.find((k) => k.id === c.id); const r = await fetch(`/api/admin/clients/${c.id}?rev=${x.rev}`, { method: "DELETE" }); return { s: r.status, b: await r.json() }; }, client);
     check(`${label} raw DELETE of a used client: 409 "in use" with a count`, raw.s === 409 && raw.b.error === "in use" && raw.b.count === 6, JSON.stringify(raw));
 

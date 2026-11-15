@@ -272,3 +272,72 @@ describe("DELETE /api/admin/clients/:id?rev=", () => {
     expect((await call("/api/admin/clients/a/b")).status).toBe(404);
   });
 });
+
+/* Delete a client that pieces use: ?unassign=1 takes it off them first, in the same transaction. */
+describe("DELETE /api/admin/clients/:id?rev=&unassign=1", () => {
+  const piece = (id: string) =>
+    db().prepare("SELECT client_id, rev, src, cat, state FROM gallery_items WHERE id = ?").bind(id).first<{ client_id: string | null; rev: number; src: string; cat: string; state: string }>();
+  const auditDetail = () =>
+    db().prepare("SELECT actor, target, detail FROM audit WHERE action = 'client.delete' AND id > ? ORDER BY id DESC").bind(auditFloor).first<{ actor: string; target: string; detail: string }>();
+
+  it("takes the client off its 3 active pieces, then deletes it: 200 {deleted, unassigned: 3}, one audit row naming them", async () => {
+    const c = await made("Busy");
+    await items(c.id, 3);
+    await items(c.id, 1, "deleted");
+    const other = await made("Other");
+    await items(other.id, 2);
+    const r = await del(`/api/admin/clients/${c.id}?rev=${c.rev}&unassign=1`);
+    expect(r.status).toBe(200);
+    expect(await r.json()).toEqual({ deleted: c.id, unassigned: 3 });
+    expect(await db().prepare("SELECT state, rev FROM clients WHERE id = ?").bind(c.id).first()).toEqual({ state: "deleted", rev: 2 });
+    for (let i = 0; i < 3; i++) {
+      // client cleared, rev bumped, every other column kept
+      expect(await piece(`${c.id}-active-${i}`)).toEqual({ client_id: null, rev: 2, src: `https://media.aliphcreative.com/${i}.webp`, cat: "photo", state: "active" });
+    }
+    // a deleted row and another client's pieces are not touched
+    expect(await piece(`${c.id}-deleted-0`)).toMatchObject({ client_id: c.id, rev: 1 });
+    expect(await piece(`${other.id}-active-0`)).toMatchObject({ client_id: other.id, rev: 1 });
+    const a = await auditDetail();
+    expect(a).toMatchObject({ actor: ADMIN, target: c.id });
+    expect(JSON.parse(a!.detail)).toEqual({ rev: 1, unassigned: [0, 1, 2].map((i) => `${c.id}-active-${i}`) });
+    expect(await list()).toMatchObject([{ id: other.id, pieces: 2 }]);
+  });
+
+  it("a stale rev → the stale 409 with current; no piece loses its client, no audit row", async () => {
+    const c = await made("Stale");
+    await items(c.id, 2);
+    await put(`/api/admin/clients/${c.id}`, { rev: 1, name: { ar: "ع", en: "Stale!" } });
+    const r = await del(`/api/admin/clients/${c.id}?rev=1&unassign=1`);
+    expect(r.status).toBe(409);
+    const b = (await r.json()) as { error: string; current: AdminClient };
+    expect(b.error).toBe("changed elsewhere; reload");
+    expect(b.current).toMatchObject({ id: c.id, rev: 2, pieces: 2 });
+    expect(await piece(`${c.id}-active-0`)).toMatchObject({ client_id: c.id, rev: 1 });
+    expect(await auditDetail()).toBeNull();
+    // already deleted → stale 409, current null
+    expect((await del(`/api/admin/clients/${c.id}?rev=2&unassign=1`)).status).toBe(200);
+    const again = await del(`/api/admin/clients/${c.id}?rev=3&unassign=1`);
+    expect(again.status).toBe(409);
+    expect(((await again.json()) as { current: null }).current).toBeNull();
+  });
+
+  it("an unused client → 200 {deleted, unassigned: 0}", async () => {
+    const c = await made("Unused");
+    const r = await del(`/api/admin/clients/${c.id}?rev=1&unassign=1`);
+    expect(r.status).toBe(200);
+    expect(await r.json()).toEqual({ deleted: c.id, unassigned: 0 });
+  });
+
+  it("unassign other than 1 → 400; cross-origin → 403; nothing written", async () => {
+    const c = await made("Odd");
+    await items(c.id, 1);
+    for (const q of ["unassign=0", "unassign=yes", "unassign="]) {
+      const r = await del(`/api/admin/clients/${c.id}?rev=1&${q}`);
+      expect(r.status, q).toBe(400);
+      expect(((await r.json()) as { field: string }).field).toBe("unassign");
+    }
+    expect((await del(`/api/admin/clients/${c.id}?rev=1&unassign=1`, { origin: "https://evil.example" })).status).toBe(403);
+    expect(await piece(`${c.id}-active-0`)).toMatchObject({ client_id: c.id, rev: 1 });
+    expect(await list()).toMatchObject([{ id: c.id, rev: 1, pieces: 1 }]);
+  });
+});

@@ -115,9 +115,10 @@ try {
   check("count shows 2 pieces", (await row(`Acme Elsewhere ${run}`).textContent()).includes("2 pieces"));
   await row(`Acme Elsewhere ${run}`).locator("button", { hasText: "Delete" }).click();
   await page.waitForSelector("#confirm[open]");
-  await page.click("#confirm-yes");
-  await page.waitForFunction(() => /use this client/.test(document.getElementById("clients-note").textContent));
-  check("delete of a used client shows the count and deletes nothing", /2 pieces use this client/.test(await page.textContent("#clients-note")) && (await list()).some((c) => c.id === mine.id));
+  // Delete would take the client off its 2 pieces and delete it (?unassign=1); the confirm says so. Cancel here.
+  check("delete of a used client: the confirm says 2 pieces use it and will show no client", /2 pieces use this client; they will show no client/.test(await page.textContent("#confirm-text")));
+  await page.click("#confirm-no");
+  check("Cancel deletes nothing", (await list()).some((c) => c.id === mine.id));
 
   // Clean up: remove the pieces, then both clients through the UI confirm.
   for (const u of up) {

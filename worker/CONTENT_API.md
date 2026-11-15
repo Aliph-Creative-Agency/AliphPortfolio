@@ -199,6 +199,13 @@ Admin only (Access), English UI. Every write: Origin must equal the request orig
   ones do not. When that guard stops it: `409 {error: "in use", count, message: "7 pieces use this client"}`.
   A stale rev, unknown or already deleted id: `409 {error, current}`. A missing or bad `rev`: 400. Audit
   `client.delete`.
+- `DELETE /api/admin/clients/<id>?rev=<n>&unassign=1` → `200 {deleted: id, unassigned: count}`. The gallery's
+  Delete: a client that pieces use is taken off them, then deleted, ALL OR NOTHING in one D1 batch. Every ACTIVE
+  draft piece naming it gets `client_id = NULL` and `rev` + 1 (every other column kept; deleted rows are left
+  alone), then the client is staged as deleted with the same guard as above. One audit row `client.delete`
+  `{rev, unassigned: [ids]}`, written first: unless the client is active at that `rev` it fails and the whole
+  batch rolls back (`409 {error, current}`, nothing written). `unassign` other than `1`: 400 (`field:
+  "unassign"`). Without `unassign` the call is the one above and still refuses a used client.
 - `POST /api/admin/gallery/assign` `{client: <id> | null, items: [{id, rev}]}` → `200 {items}` (the pieces as
   `GET /api/admin/gallery` draws them, in the order sent). Bulk assignment (worker/src/gallery/assign.ts): 1 to 200
   pieces get that client, or none with `null`. `rev` is the one the grid read (0 = a default with no row yet: it

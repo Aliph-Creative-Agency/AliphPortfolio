@@ -238,7 +238,7 @@ async function run(label, launch, vp, touch) {
     msg("editor drawer: unreadable video hollow.mp4 (real ftyp header)", dm);
     check(`${label} editor drawer: unreadable video gives a message`, dm.length > 0);
     // F-10 (fixed): a video that cannot be read is told so as a video, never "Use a JPEG, PNG or WebP picture"
-    check(`${label} editor drawer: a video is not told to use a picture`, !/picture/i.test(dm) && /video/i.test(dm), dm);
+    check(`${label} editor drawer: a video is not told to use a picture`, !/picture/i.test(dm) && /video|film/i.test(dm), dm); // shared wording says "film" (explain(), batch 2)
     await shot(page, `Q12-${label}-editor-unreadable-video`);
     await page.keyboard.press("Escape");
     await page.setViewportSize(vp).catch(() => {});
