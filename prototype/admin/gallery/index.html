@@ -37,7 +37,6 @@
   <ul id="add-rows" class="adm-rows"></ul>
   <button id="add-go" class="adm-btn" type="button" disabled>Upload</button>
 </section>
-<section id="rings" class="adm-rings" aria-label="Ring picks"></section>
 <section id="clients" class="adm-clients" aria-labelledby="clients-h">
   <div class="adm-chead"><h2 id="clients-h">Clients <span id="clients-count"></span></h2><button id="clients-new" class="adm-btn" type="button" aria-expanded="false" aria-controls="clients-form">New client</button></div>
   <div id="clients-form"></div>
@@ -45,14 +44,15 @@
   <p id="clients-empty" class="adm-cempty" hidden>No clients yet</p>
   <ul id="clients-list" class="adm-clist adm-clients-list"></ul>
 </section>
+<div class="adm-seltools"><button id="select-toggle" class="adm-btn adm-btn-2" type="button" aria-pressed="false">Select pieces</button></div>
+<nav class="adm-tabs" id="tabs" role="tablist" aria-label="Category"></nav>
+<main id="grid" class="adm-main" tabindex="-1"></main>
+<section id="rings" class="adm-rings" aria-label="Ring picks"></section>
 <section class="adm-clean" aria-labelledby="cleanup-h">
   <h2 id="cleanup-h">Unused files</h2>
   <p class="adm-sub">Replaced and deleted pieces leave their old files in storage. This lists the ones nothing on the site uses any more.</p>
   <div class="adm-dact"><button id="cleanup-find" class="adm-btn adm-btn-2" type="button">Clean up unused files</button><p id="cleanup-note" class="adm-dmsg" role="status"></p></div>
 </section>
-<div class="adm-seltools"><button id="select-toggle" class="adm-btn adm-btn-2" type="button" aria-pressed="false">Select pieces</button></div>
-<nav class="adm-tabs" id="tabs" role="tablist" aria-label="Category"></nav>
-<main id="grid" class="adm-main" tabindex="-1"></main>
 <div id="assign-bar" class="adm-assignbar" hidden>
   <span id="assign-n">Assign to</span>
   <select id="assign-client" class="adm-sel" aria-label="Client to assign"></select>
