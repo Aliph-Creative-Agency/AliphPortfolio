@@ -100,6 +100,18 @@ export async function clientCreate(request: Request, env: Env, ctx: AdminCtx): P
 // item names the client, so an assignment cannot slip in between a check and
 // the write. 0 rows: 409 {error: "in use", count} when that guard stopped it,
 // else the stale-rev 409. Audit 'client.delete'.
+//
+//   DELETE /api/admin/clients/:id?rev=n&unassign=1    → 200 {deleted: id, unassigned: count}
+//
+// The gallery's Delete: a client that pieces use is taken off them and then
+// deleted, ALL OR NOTHING in one D1 batch (the order.ts / assign.ts way). The
+// first statement is the audit row 'client.delete' {rev, unassigned: [ids]};
+// its detail turns into the non-JSON 'stale' (failing audit's json_valid CHECK
+// and rolling the batch back) unless the client is active at that rev. Then
+// every ACTIVE draft piece naming it gets client_id NULL and rev + 1 (every
+// other column kept; a deleted row is left alone, as the guard above ignores
+// it), and the client is staged as deleted with the same guard as above,
+// which now holds. Stale or gone: the stale 409, nothing written.
 
 const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
 const CLIENT_PATH = /^\/api\/admin\/clients\/([^/]+)$/;
@@ -147,6 +159,9 @@ export async function clientDelete(env: Env, id: string, url: URL, ctx: AdminCtx
   const raw = url.searchParams.get("rev");
   const rev = raw !== null && /^\d{1,15}$/.test(raw) ? Number(raw) : NaN;
   if (!isRev(rev)) return badRequest({ ok: false, error: "rev must be the rev you read", field: "rev" });
+  const unassign = url.searchParams.get("unassign");
+  if (unassign !== null && unassign !== "1") return badRequest({ ok: false, error: "unassign must be 1", field: "unassign" });
+  if (unassign === "1") return deleteUnassigning(env, id, rev, ctx);
 
   const res = await env.DB.prepare(
     `UPDATE clients SET state = 'deleted', rev = rev + 1, updated_at = ${NOW}, updated_by = ?3
@@ -166,4 +181,41 @@ export async function clientDelete(env: Env, id: string, url: URL, ctx: AdminCtx
   }
   await audit(env, ctx.adminEmail, "client.delete", id, { rev });
   return json({ deleted: id });
+}
+
+/** DELETE …&unassign=1: off its pieces, then deleted, in one transaction (see the note above clientDelete). */
+async function deleteUnassigning(env: Env, id: string, rev: number, ctx: AdminCtx): Promise<Response> {
+  const db = env.DB;
+  let results: D1Result[];
+  try {
+    results = await db.batch([
+      db
+        .prepare(
+          `INSERT INTO audit (actor, action, target, detail)
+           VALUES (?1, 'client.delete', ?2, CASE
+             WHEN EXISTS (SELECT 1 FROM clients WHERE id = ?2 AND rev = ?3 AND state = 'active')
+             THEN (SELECT json_object('rev', ?3, 'unassigned', json_group_array(id))
+                   FROM (SELECT id FROM gallery_items WHERE client_id = ?2 AND state = 'active' ORDER BY id))
+             ELSE 'stale' END)`,
+        )
+        .bind(ctx.adminEmail, id, rev),
+      db
+        .prepare(
+          `UPDATE gallery_items SET client_id = NULL, rev = rev + 1, updated_at = ${NOW}, updated_by = ?2
+           WHERE client_id = ?1 AND state = 'active'`,
+        )
+        .bind(id, ctx.adminEmail),
+      db
+        .prepare(
+          `UPDATE clients SET state = 'deleted', rev = rev + 1, updated_at = ${NOW}, updated_by = ?3
+           WHERE id = ?1 AND rev = ?2 AND state = 'active'
+             AND NOT EXISTS (SELECT 1 FROM gallery_items WHERE client_id = ?1 AND state = 'active')`,
+        )
+        .bind(id, rev, ctx.adminEmail),
+    ]);
+  } catch (err) {
+    if (!/constraint failed/i.test(String((err as Error)?.message ?? err))) throw err;
+    return stale(env, id);
+  }
+  return json({ deleted: id, unassigned: results[1].meta.changes ?? 0 });
 }
