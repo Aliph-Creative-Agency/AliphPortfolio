@@ -471,6 +471,9 @@
     if (t.closest("[data-editor-ui]")) return null;
     var own = t.closest("[data-es]");
     if (own) return own;
+    /* a caption that is editable text in its own right (the About clippings' cap1..cap3) is the text
+       editor's: editor.js opens its popover. Only a click on the picture opens the picture drawer. */
+    if (t.closest("[data-ek]")) return null;
     /* a play button or caption layered over the picture belongs to the same frame */
     var frame = t.closest("figure, .holder, .film-frame, [data-es-preview]");
     /* a loop copy of a film frame stands for the source frame with the same index (the tagged first group) */
