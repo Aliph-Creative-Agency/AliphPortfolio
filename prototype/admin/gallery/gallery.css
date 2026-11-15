@@ -199,3 +199,9 @@ body.adm {
 /* U-60: a refused or failed upload row is marked as such, not only by the colour of its message */
 .adm-row[data-status="error"] { border-inline-start: 3px solid var(--accent); padding-inline-start: 0.8rem; background: rgba(187, 92, 57, 0.08); }
 .adm-row[data-status="error"] .adm-rmsg { font-weight: 600; }
+/* On a PC the gallery read too small (14px body, 12px tile labels in the site's book face). From 1024px up
+   the root goes from 10px to 12.5px: every size above is in rem, so type, buttons, tiles and spacing all grow
+   by a quarter together (body 17.5px, labels 15px). A phone keeps 1rem = 10px. */
+@media (min-width: 1024px) {
+  html { font-size: 78.125%; }
+}
