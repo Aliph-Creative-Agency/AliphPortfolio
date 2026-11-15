@@ -807,7 +807,10 @@ function buildFilm() {
        is the shopping list for the real titles.
        NOT lazy: the strip is cloned across several viewport widths and
        travels continuously, so a deferred frame pops in mid-scroll. */
-    fig.innerHTML = `<img src="${fr.src || HOLDER}" alt="" decoding="async">`;
+    /* U-23: a published alt text names the frame (the media labeller then
+       leaves it its own name instead of "Open image, 1 of 4") */
+    const alt = fr.alt ? fr.alt[lang] || fr.alt.en || fr.alt.ar || "" : "";
+    fig.innerHTML = `<img src="${fr.src || HOLDER}" alt="${escHTML(alt)}" decoding="async">`;
     group.appendChild(fig);
   });
   filmScroll.appendChild(group);
@@ -2432,6 +2435,8 @@ if (mergeSnap) {
     const v = mergeSnap.slots[id];
     const frame = hit && FILM_FRAMES[+hit[1] - 1];
     if (frame && v && v.src) frame.src = v.src;
+    /* U-23: the frame's alt text, which buildFilm() writes in the page's language */
+    if (frame && v && v.alt) frame.alt = v.alt;
   });
 
   /* A ring's picks are item ids (CONTENT_API "Rings"). Resolved the way the
@@ -3557,6 +3562,25 @@ const lightbox = (() => {
       if (e.target.closest(".lb-prev")) return step(-1);
       if (e.target.closest(".lb-next")) return step(1);
     });
+
+    /* F-13: a finger swipes between pieces like the arrows step. A mostly
+       sideways move of 40px or more counts; an up/down drag or a small wobble
+       does not. "Next" is the way the page reads, the same rule as the arrow
+       keys: finger right-to-left in English, left-to-right in Arabic. The
+       browser leaves sideways moves to this (`touch-action` in style.css). */
+    let swipeAt = null;
+    root.addEventListener("pointerdown", (e) => {
+      swipeAt = e.pointerType !== "mouse" && e.isPrimary && !e.target.closest("button")
+        ? { x: e.clientX, y: e.clientY } : null;
+    });
+    root.addEventListener("pointercancel", () => { swipeAt = null; });
+    root.addEventListener("pointerup", (e) => {
+      if (!swipeAt || e.pointerType === "mouse") return;
+      const dx = e.clientX - swipeAt.x, dy = e.clientY - swipeAt.y;
+      swipeAt = null;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      step((dx < 0) !== (document.documentElement.dir === "rtl") ? 1 : -1);
+    });
   }
 
   /* What should the overlay show for this tile? A film tile names its file on
@@ -4311,7 +4335,20 @@ function renderClientsIndex() {
 /* FIT THE TYPE: a client's name is at most two lines (floor 0.75). Re-run when
    the width changes or the fonts arrive, both of which move the line breaks. */
 function fitClientNames() {
-  document.querySelectorAll(".lc-name, .ch-name").forEach((el) => fitLines(el, 2, 0.75));
+  document.querySelectorAll(".lc-name").forEach((el) => fitLines(el, 2, 0.75));
+  /* F-11: the header's name beside the monogram. If even 75% leaves it on a
+     third line (a long name on a phone), it moves under the monogram to the
+     full width and is fitted again: the layout gives, the floor does not
+     (the `.rt-below` move, HANDOFF "FIT THE TYPE"). */
+  const ch = document.querySelector(".lib-client .ch-name");
+  if (!ch) return;
+  const sec = ch.closest(".lib-client");
+  sec.classList.remove("ch-below");
+  fitLines(ch, 2, 0.75);
+  const lh = parseFloat(getComputedStyle(ch).lineHeight) || parseFloat(getComputedStyle(ch).fontSize) * 1.3;
+  if (ch.scrollHeight <= 2 * lh + 1) return;
+  sec.classList.add("ch-below");
+  fitLines(ch, 2, 0.75);
 }
 window.addEventListener("resize", fitClientNames);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitClientNames);
@@ -4464,11 +4501,17 @@ function renderLibrary() {
          the foot of the lightbox module is what activates them; it asks only
          that the node match OPENS, which every tile here does. */
       const label = m.v ? I18N.mPlay[lang] : I18N.mOpen[lang];
-      const named = ` role="button" tabindex="0" aria-label="${label}${m.d ? SEP() + fmtDate(m.d) : ""}"`;
+      /* U-40: the alt text the boss wrote for a piece (published with it) is the
+         picture's alt AND part of the tile's name, since an aria-label on the
+         tile hides the picture's own alt from a screen reader. The page's
+         language first, the other one rather than nothing. The lightbox reads
+         the tile picture's alt, so it follows. */
+      const alt = m.alt ? m.alt[lang] || m.alt.en || m.alt.ar || "" : "";
+      const named = ` role="button" tabindex="0" aria-label="${label}${alt ? SEP() + escHTML(alt) : ""}${m.d ? SEP() + fmtDate(m.d) : ""}"`;
       return `
       <figure class="tile${m.v ? " is-film" : ""}"${m.v ? ` data-film="${m.src || m.f}"` : ""}${named}>
         <div class="tile-img" style="aspect-ratio:${m.r}">
-          <img src="${src}" data-full="${full}" alt="" loading="lazy" decoding="async">
+          <img src="${src}" data-full="${full}" alt="${escHTML(alt)}" loading="lazy" decoding="async">
           ${m.v ? '<span class="tile-play" aria-hidden="true"></span>' : ""}
         </div>
         ${date}

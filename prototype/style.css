@@ -5730,3 +5730,47 @@ body.sheet-open { overflow: hidden; }
   .ch-name { font-size: 1.2rem; }
   .lib-client .lc-mono.lg { inline-size: 2rem; block-size: 2rem; font-size: 1.1rem; }
 }
+
+/* F-13: a sideways finger move on the lightbox is a swipe between pieces (main.js), not a browser pan;
+   up/down and pinch stay the browser's */
+.lb-body { touch-action: pan-y pinch-zoom; }
+
+/* F-11: a client name that needs a third line even at 75% (main.js fitClientNames adds .ch-below) takes the
+   full width under the monogram, with the line and meta under it */
+.lib-client.ch-below .lc-mono { grid-row: auto; }
+.lib-client.ch-below .ch-name, .lib-client.ch-below .ch-line,
+.lib-client.ch-below .ch-meta, .lib-client.ch-below .ch-empty { grid-column: 1 / -1; }
+
+/* U-48: a tile's client caption gets the tile's width (the date sits beside a short name and goes under a
+   long one), breaks between words, not inside them, and stops at two lines; the client's own header
+   (/library?client=) carries the full name */
+.tile figcaption:has(.t-client) { flex-wrap: wrap; row-gap: 0; }
+.tile figcaption .t-client {
+  flex: 1 1 auto;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* U-49: on a phone a closed /library section is its title row only. Its body is in the flow here (stacked
+   accordion) and kept its 74vh while invisible, so a closed section was ~713px of blank under its title. */
+@media (max-width: 900px) {
+  .acc-panel:not(.open) .panel-body { height: 0; }
+}
+
+/* F-19: the testimonial business line on a phone read 4.41:1 at 0.62 (under the 4.5:1 for small text);
+   one step darker, still a quieter line than the name */
+@media (max-width: 640px) {
+  .tb-biz { opacity: 0.65; }
+}
+
+/* F-16: on a phone and a tablet the clippings are one column and a photo clipping shrink-wraps its picture,
+   whose width is a percentage of that shrink-wrap: nothing to resolve it against until the picture's own size
+   is known, part-way through its download (on a slow line the quote under the first one jumped ~140px).
+   The clipping now states the width it ends up at anyway: the picture's own width (--w on the figure in
+   about.html) plus its mat (2 x 0.8rem padding + 2 x 1px hair), capped by the column. */
+@media (max-width: 900px) {
+  .clip-photo[style*="--w"] { width: min(100%, calc(var(--w) + 1.6rem + 2px)); }
+}

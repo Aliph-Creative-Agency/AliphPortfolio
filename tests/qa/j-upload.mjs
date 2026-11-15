@@ -10,6 +10,11 @@ import fs from "node:fs";
 import { startDev, stopDev, edge, webkit, VIEWPORTS, ORIGIN, ORCH, ROOT, shot, watch, check, done } from "./lib/harness.mjs";
 // the app's own network sentence (shared/media.js), so the check never depends on a browser's failed-fetch wording
 const networkSentence = (page) => page.evaluate(async () => (await import("/admin/shared/media.js")).NETWORK_FAILURE);
+// any other sentence the app shows for an upload problem (shared/media.js explain), for a MediaError code and file kind
+const sentence = (page, code, kind) => page.evaluate(async ([code, kind]) => {
+  const m = await import("/admin/shared/media.js");
+  return m.explain(new m.MediaError(code, code), kind);
+}, [code, kind]);
 
 const FIX = path.join(ROOT, "tests/gallery/fixtures");
 const RUNS = path.join(ORCH, "runs");
@@ -102,7 +107,8 @@ async function run(label, launch, vp, touch) {
       check(`${label} wrong type ${wrong[i][0]} (${wrong[i][1] || "no type"}) refused at staging`, rows[i].status === "error", JSON.stringify(rows[i]));
       msg(`wrong type ${wrong[i][0]}`, rows[i].msg);
     }
-    check(`${label} all wrong-type messages say the same clear sentence`, rows.every((r) => r.msg === "That file type is not accepted."), [...new Set(rows.map((r) => r.msg))].join(" | "));
+    const notAccepted = await sentence(page, "unsupported", null); // U-62: names what IS accepted
+    check(`${label} all wrong-type messages say the same clear sentence`, rows.every((r) => r.msg === notAccepted), [...new Set(rows.map((r) => r.msg))].join(" | "));
     check(`${label} Upload stays disabled (nothing ready)`, await page.isDisabled("#add-go"));
     check(`${label} wrong types: no request to /api/admin/upload, no tile, no item`, uploads.length === 0 && (await tiles(page)) === base && (await api(page)).length === baseItems);
     // the same name but a lying extension: an image extension on non-image bytes passes staging, the browser cannot decode it
@@ -127,21 +133,19 @@ async function run(label, launch, vp, touch) {
     rows = await rowsOf(page);
     check(`${label} a good file after a failed one still uploads (rows: ${rows.map((r) => r.status).join(",")})`, rows[1].status === "done");
 
-    // 4. over the cap: a real mp4 (moov first) padded with zeros to 301 MiB, so it decodes and reaches the Worker
+    // 4. over the cap: a real mp4 (moov first) padded with zeros to 301 MiB. U-65: it is refused at once when it is
+    //    chosen, naming the 300 MB limit; nothing is read or sent, so nothing waits for an upload here
     if (!touch) {
       await gallery(page);
       const baseBig = (await api(page)).length;
       uploads.length = 0;
-      const t = Date.now();
       await stage(page, BIG);
       rows = await rowsOf(page);
-      check(`${label} 301 MiB file staged as a ready video row`, rows[0].status === "ready" && rows[0].msg === "video", JSON.stringify(rows[0]));
-      await go(page);
-      await waitRow(page, 0, 120000);
-      rows = await rowsOf(page);
       msg("301 MiB video", rows[0].msg);
-      console.log(`     301 MiB attempt took ${Date.now() - t} ms, requests: ${uploads.length}`);
-      check(`${label} 301 MiB video refused with the too-large sentence`, rows[0].status === "error" && rows[0].msg === "That file is too large.", JSON.stringify(rows[0]));
+      const tooBig = await sentence(page, "toolarge", "video");
+      check(`${label} 301 MiB video refused at staging with the 300 MB sentence (U-65)`, rows[0].status === "error" && rows[0].msg === tooBig && /300 MB/.test(rows[0].msg), JSON.stringify(rows[0]));
+      check(`${label} 301 MiB: only Remove offered (a retry cannot make it smaller)`, rows[0].buttons === 1, `buttons=${rows[0].buttons}`);
+      check(`${label} 301 MiB: Upload stays disabled, no request to /api/admin/upload`, (await page.isDisabled("#add-go")) && uploads.length === 0, `requests ${uploads.length}`);
       check(`${label} 301 MiB: no item written, no tile`, (await api(page)).length === baseBig);
       const un = await page.evaluate(async () => (await (await fetch("/api/admin/upload/unused")).json()));
       check(`${label} 301 MiB: nothing left half-uploaded in storage (no multipart object)`, !JSON.stringify(un).includes("q12-big"), JSON.stringify(un).slice(0, 160));

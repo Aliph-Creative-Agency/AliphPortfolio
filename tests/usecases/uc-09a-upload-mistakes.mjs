@@ -1,8 +1,8 @@
 // UC-09a upload mistakes: wrong file types, a 310 MB film, the network dropping mid-upload (CASES.md UC-09a).
 // node tests/usecases/uc-09a-upload-mistakes.mjs [--only edge|webkit]
 // Every message the boss is shown is quoted into runs/UC-09a-<cfg>-messages.json (and printed as "note MSG").
-// ENV LIMIT (webkit): the Playwright WebKit build here cannot decode a blob: video, so the 310 MB film ends "could not be read"
-// at once in WebKit; the size/multipart behaviour is judged from Edge only. Real iPhone Safari: verify by hand.
+// The 310 MB film is refused when it is chosen, by its size, before anything is read or sent (U-65), so step 04 is the
+// same in Edge and WebKit (the WebKit build here cannot decode a blob: video, which no longer matters for it).
 import fs from "node:fs";
 import path from "node:path";
 import { startDev, stopDev, resetState, configs, ORIGIN, ORCH, step, startRun, tapOrClick, setLang, check, done } from "./lib/uc.mjs";
@@ -120,39 +120,29 @@ async function run(cfg) {
       await tapOrClick(page, "#ed-media .ed-close", cfg); await page.waitForTimeout(500);
     });
 
-    await S(4, "big-video", "gallery: 310 MB film -> Upload: accepted with moving progress and finishes, or refused at once naming the limit", async (c) => {
+    await S(4, "big-video", "gallery: a 310 MB film is refused at once when it is chosen, naming the 300 MB limit; nothing is sent (U-65)", async (c) => {
       await open();
       await page.locator("#add-cat").selectOption("photo"); await page.waitForTimeout(300);
       big = bigVideo();
       c.note(`big file ${big} ${Math.round(fs.statSync(big).size / 1048576)} MB`);
+      const sent = [];
+      const onReq = (r) => { if (r.url().includes("/api/admin/upload") && r.method() === "POST") sent.push(r.url()); };
+      page.on("request", onReq);
       const t0 = Date.now();
       await stage(big);
-      const staged = await rowsNow();
-      c.note("staged " + JSON.stringify(staged.map((r) => [r.name, r.status, r.msg])));
-      await tapOrClick(page, "#add-go", cfg);
-      const seen = [];
-      let firstEnd = null;
-      for (let i = 0; i < 120; i++) {
-        await page.waitForTimeout(2000);
-        const s = await page.evaluate(() => { const r = document.querySelector("#add-rows .adm-row"); return r && { st: r.dataset.status, msg: r.querySelector(".adm-rmsg").textContent, pct: r.querySelector("progress")?.value }; });
-        if (s) { if (!seen.length || JSON.stringify(seen[seen.length - 1][1]) !== JSON.stringify(s)) seen.push([Math.round((Date.now() - t0) / 1000), s]); }
-        if (s && (s.st === "done" || s.st === "error")) { firstEnd = Math.round((Date.now() - t0) / 1000); break; }
-        if (i === 4 && s && s.st === "uploading") { fs.mkdirSync(path.join(ORCH, "shots", UC, cfg.name), { recursive: true }); await page.screenshot({ path: path.join(ORCH, "shots", UC, cfg.name, "04a-mid-big-upload.png"), scale: "css" }); }
-      }
-      c.note("progress timeline (s, state) " + JSON.stringify(seen.slice(0, 14)));
       const end = (await rowsNow())[0];
-      quote(`310 MB film (${firstEnd}s after choosing)`, { status: end && end.status, msg: end && end.msg, timeline: seen.slice(0, 14) });
-      c.ok(!!end && (end.status === "done" || end.status === "error"), `never settled after 240 s: ${JSON.stringify(end)}`);
-      const pcts = seen.map((x) => x[1].pct).filter((p) => typeof p === "number");
-      const moving = new Set(pcts).size > 2;
-      if (end && end.status === "done") {
-        c.known("U-64", moving, `a 310 MB upload shows a bar that does not move: progress values seen ${JSON.stringify([...new Set(pcts)].slice(0, 8))}`);
-        quote("310 MB result", "accepted and finished; the app states no size limit anywhere before the upload");
-      } else if (end) {
-        c.note(`refused/failed after ${firstEnd}s with "${end.msg}"`);
-        if (cfg.name === "webkit") c.note("ENV LIMIT: WebKit here cannot decode video, the row fails on the poster before any bytes are sent");
-        else c.known("U-65", firstEnd <= 15 && /\d+ ?MB/i.test(end.msg), `the 310 MB film was refused after ${firstEnd}s (server 413 "video over 300 MB" on POST /api/admin/upload/mpu) but the boss reads "${end.msg}": the 300 MB limit is not named and nothing on the page states it beforehand`);
-      }
+      const ms = Date.now() - t0;
+      // the app's own sentence for a film over the limit (shared/media.js explain), not a copied string
+      const tooBig = await page.evaluate(async () => { const m = await import("/admin/shared/media.js"); return m.explain(new m.MediaError("toolarge", "toolarge"), "video"); });
+      const goDisabled = await page.isDisabled("#add-go");
+      await page.waitForTimeout(1500); // give a wrong flow time to start a request
+      page.off("request", onReq);
+      quote(`310 MB film (${ms} ms after choosing)`, { status: end && end.status, msg: end && end.msg, btns: end && end.btns });
+      c.ok(!!end && end.status === "error", `the 310 MB film was not refused at staging: ${JSON.stringify(end)}`);
+      c.ok(!!end && end.msg === tooBig && /300 MB/.test(end.msg), `message ${JSON.stringify(end && end.msg)}, expected the app's 300 MB sentence ${JSON.stringify(tooBig)}`);
+      c.ok(!!end && end.btns.length === 1 && end.btns[0] === "Remove", `buttons ${JSON.stringify(end && end.btns)} (a retry cannot make it smaller: Remove only)`);
+      c.ok(goDisabled && sent.length === 0, `Upload disabled ${goDisabled}, requests to /api/admin/upload ${sent.length}`);
+      c.known("U-65", !!end && end.status === "error" && /300 MB/.test(end.msg) && sent.length === 0, `the 310 MB film was not refused at once naming the limit: ${JSON.stringify(end)}`);
       await lookA(page, { touch: cfg.touch, scope: "#add-rows" });
       if (big) rmBig(big);
       c.ok(!fs.existsSync(big), "temp big file not deleted");
