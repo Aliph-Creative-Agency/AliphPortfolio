@@ -173,3 +173,12 @@ html[data-edit-mode="1"] [data-ek] { cursor: text; }
 
 /* U-17: the popover is never taller than the room above the bar (editor.js keeps it on screen) */
 .ed-pop { max-height: calc(100vh - var(--ed-bar-h, 46px) - 24px); }
+
+/* On a PC the editor's own chrome (bar, popover, side panels, dialogs, toast) is 16px instead of 14px, and its
+   12px labels 13px. The page being edited is not touched. A phone keeps the sizes above. */
+@media (min-width: 1024px) {
+  .ed-bar, .ed-pop, .ed-panel, .ed-dialog, .ed-toast { font-size: 16px; }
+  .ed-chip, .ed-pop-sec, .ed-field-top, .ed-hint, .ed-reset, .ed-panel-page, .ed-row-key, .ed-rev-meta, .ed-rev-live { font-size: 13px; }
+  .ed-dialog-list, .ed-dialog-note, .ed-row-val, .ed-rev-changes, .ed-dialog-theirs, .ed-dialog-mine { font-size: 14px; }
+  .ed-panel-sec h3 { font-size: 13px; }
+}

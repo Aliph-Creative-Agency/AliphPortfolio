@@ -41,3 +41,9 @@ html[data-edit-mode="1"] [data-es].ed-es-active { outline: 2px solid #BB5C39; ou
 /* U-30: the scroll area is exactly as wide as its fields, so it clipped the sides of their focus ring;
    4 px of room inside, the same 4 px taken back outside so nothing moves */
 .ed-media .ed-media-body { padding: 4px; margin: -4px; }
+
+/* On a PC: one step bigger, with editor.css's desktop sizes */
+@media (min-width: 1024px) {
+  .ed-media-actions .ed-reset, .ed-media-more .ed-reset { font-size: 14px; }
+  .ed-media-field, .ed-media-url { font-size: 13px; }
+}

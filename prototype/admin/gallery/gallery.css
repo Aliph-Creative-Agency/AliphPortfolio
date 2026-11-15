@@ -171,12 +171,6 @@ body.adm {
 .adm-ring-box[open] > .adm-ring-head::before { content: "\25BE"; }
 .adm-ring-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .adm-ring-box:not([open]) { padding-block: 0; }
-/* the housekeeping "Unused files" panel goes under the pictures on the phone (DOM order unchanged) */
-@media (max-width: 520px) {
-  body.adm { display: flex; flex-direction: column; }
-  .adm-clean { order: 1; }
-  .adm-add, .adm-rings, .adm-clients, .adm-clean { margin-block: 0.8rem; } /* flex margins do not collapse */
-}
 /* U-52: style.css's `* { margin: 0 }` drops the browser's centring of a modal dialog; put it back for the
    small boxes (confirm, Publish, New client). The side drawers keep their own margins. */
 .adm-confirm { margin: auto; max-block-size: calc(100dvh - 3.2rem); overflow: auto; box-sizing: border-box; }
@@ -205,3 +199,9 @@ body.adm {
 /* U-60: a refused or failed upload row is marked as such, not only by the colour of its message */
 .adm-row[data-status="error"] { border-inline-start: 3px solid var(--accent); padding-inline-start: 0.8rem; background: rgba(187, 92, 57, 0.08); }
 .adm-row[data-status="error"] .adm-rmsg { font-weight: 600; }
+/* On a PC the gallery read too small (14px body, 12px tile labels in the site's book face). From 1024px up
+   the root goes from 10px to 12.5px: every size above is in rem, so type, buttons, tiles and spacing all grow
+   by a quarter together (body 17.5px, labels 15px). A phone keeps 1rem = 10px. */
+@media (min-width: 1024px) {
+  html { font-size: 78.125%; }
+}
