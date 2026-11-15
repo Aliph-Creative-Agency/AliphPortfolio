@@ -3,10 +3,13 @@
 //   List    GET    /api/admin/clients            -> {clients: [{id, name, line?, year?, url?, rev, published, changed, pieces}]}
 //   Create  POST   /api/admin/clients            {name:{ar,en}, line?, year?, url?} -> 201 {client}; 400 {error, field}
 //   Edit    PUT    /api/admin/clients/:id        {rev, ...}  -> 200 {client}; 409 {error, current|null}
-//   Delete  DELETE /api/admin/clients/:id?rev=n  -> 200; 409 {error:"in use", count, message} or stale
+//   Delete  DELETE /api/admin/clients/:id?rev=n&unassign=1 -> 200 {deleted, unassigned}: the client is taken
+//           off its pieces and deleted in one go (the confirm says how many pieces); 409 stale
 // The panel never creates a client by itself: an empty store shows "No clients yet".
 // Other modules listen for the "clients:changed" event on document, or import
 // `clients`, `loadClients` and `openNewClient` from here.
+
+import { load } from "./gallery.js";
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => {
@@ -123,12 +126,26 @@ function form(c, onDone) {
   return f;
 }
 
+const piecesText = (n) => (n === 1 ? "1 piece" : `${n} pieces`);
+
+/** Delete a client. Pieces that use it are not a reason to refuse: the confirm says how many, and the server
+ *  takes the client off them and deletes it in one go (?unassign=1). */
 async function removeClient(c) {
-  const ok = await confirmBox(`Delete ${c.name.en || c.name.ar}? It leaves the site when you publish.`, "Delete");
+  const name = c.name.en || c.name.ar;
+  const n = c.pieces || 0;
+  const ok = await confirmBox(n
+    ? `Delete ${name}? ${n === 1 ? "1 piece uses" : `${n} pieces use`} this client; ${n === 1 ? "it" : "they"} will show no client. Both leave the site when you publish.`
+    : `Delete ${name}? It leaves the site when you publish.`, "Delete");
   if (!ok) return;
-  const r = await call("DELETE", `/api/admin/clients/${encodeURIComponent(c.id)}?rev=${c.rev}`);
-  if (r.ok) { await loadClients(); say(`Deleted ${c.name.en || c.name.ar} (not published yet).`, "ok"); return; }
-  if (r.status === 409 && r.body.error === "in use") { say(r.body.message || `${r.body.count} pieces use this client`, "error"); return; }
+  const r = await call("DELETE", `/api/admin/clients/${encodeURIComponent(c.id)}?rev=${c.rev}&unassign=1`);
+  if (r.ok) {
+    const u = r.body.unassigned || 0;
+    await loadClients();
+    say(`Deleted ${name}${u ? ` and took it off ${piecesText(u)}` : ""} (not published yet).`, "ok");
+    // the pieces' revs changed: the grid (and an open drawer) read them again before the next edit
+    if (u) await load().catch(() => {});
+    return;
+  }
   if (r.status === 409) { await loadClients(); say("That client changed elsewhere. It now shows the current details; try again.", "error"); return; }
   say(r.body.error || `The server refused it (${r.status}).`, "error");
 }
